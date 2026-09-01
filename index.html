@@ -2725,7 +2725,7 @@ function renderCrono(){
           ${it.desc?`<div class="ev-desc">${esc(it.desc)}</div>`:''}
         </div>
         <div class="ev-act">
-          <button class="ev-check ${it.feito?'ok':''}" ${canToggle?'':'disabled style="opacity:.3"'} onclick="toggleCronoItem('${it.kind}','${it.id}')" title="Marcar concluído">
+          <button class="ev-check ${it.feito?'ok':''}" ${canToggle?'':'disabled style="opacity:.3"'} onclick="toggleCronoItem('${it.kind}','${it.id}')" title="Marcar como concluído / reabrir">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
           </button>
           ${canDel?`<button class="mini-x" onclick="openCronoManage('${it.kind}','${it.id}')" title="Editar ou excluir" aria-label="Editar ou excluir">⋯</button>`:''}
@@ -2802,15 +2802,29 @@ async function toggleCronoItem(kind,id){
   if(kind==='grupo'){
     if(!isAdmin){toast('Só o coordenador altera eventos do grupo.');return}
     const ev=state.schedule.find(x=>x.id===id); if(!ev)return;
-    await FB().updateDoc(FB().doc(window.db,'rede_schedule',id),{feito:!ev.feito});
+    const novoEstado=!ev.feito;
+    const msg=novoEstado
+      ? 'Marcar este evento como concluído? Ele continuará visível na seção “Concluído”.'
+      : 'Reabrir este evento e voltar para o cronograma ativo?';
+    if(!confirm(msg))return;
+    if(novoEstado){ const cb=$('#cFeitos'); if(cb) cb.checked=true; }
+    await FB().updateDoc(FB().doc(window.db,'rede_schedule',id),{feito:novoEstado});
+    toast(novoEstado?'Evento marcado como concluído.':'Evento reaberto.');
   }else{
     const [mid,idxS]=id.split('::'); const idx=+idxS;
     if(!canEditMember(mid)){toast('Sem permissão.');return}
     const m=memberById(mid); if(!m)return;
     const prazos=JSON.parse(JSON.stringify(m.prazos||[]));
     if(!prazos[idx])return;
-    prazos[idx].feito=!prazos[idx].feito;
+    const novoEstado=!prazos[idx].feito;
+    const msg=novoEstado
+      ? 'Marcar este prazo como concluído? Ele continuará visível na seção “Concluído”.'
+      : 'Reabrir este prazo e voltar para o cronograma ativo?';
+    if(!confirm(msg))return;
+    prazos[idx].feito=novoEstado;
+    if(novoEstado){ const cb=$('#cFeitos'); if(cb) cb.checked=true; }
     await fbSetMember(mid,{prazos});
+    toast(novoEstado?'Prazo marcado como concluído.':'Prazo reaberto.');
   }
 }
 async function deleteCronoItem(kind,id){
