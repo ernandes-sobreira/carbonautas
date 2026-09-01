@@ -1580,6 +1580,8 @@ async function bootstrap(){
     }
     state.members=memSnap.docs.map(d=>({...d.data(),id:d.id}));
     state.members.forEach(m=>{m.linhas=m.linhas||[];m.resultados=m.resultados||[];m.prazos=m.prazos||[];m.vinculos=m.vinculos||[];m.hub=!!m.hub;m.bolsista=!!m.bolsista});
+    const linkedNow=resolveCurrentMember();
+    if(linkedNow && (linkedNow.nivel==='coord' || linkedNow.protegido===true || COORDINATOR_MEMBER_IDS.has(linkedNow.id))) isAdmin=true;
     if(isAdmin){
       const linked=resolveCurrentMember();
       if(linked && linked.id!==myId){
@@ -1834,6 +1836,15 @@ async function addSocialComment(targetType,targetId,inputId){
 function normName(v){
   return (v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 }
+const COORDINATOR_EMAILS=new Set(['ernandes.sobreira@gmail.com']);
+const COORDINATOR_MEMBER_IDS=new Set(['seed-ernandes-sobreira-oliveira-junior','ernandes-sobreira-oliveira-junior']);
+function shouldTreatAsCoordinator(profile,user){
+  if(profile?.role==='coordinator') return true;
+  const email=(user?.email||profile?.email||'').trim().toLowerCase();
+  if(email && COORDINATOR_EMAILS.has(email)) return true;
+  if(profile?.memberId && COORDINATOR_MEMBER_IDS.has(profile.memberId)) return true;
+  return normName(profile?.nome)==='ernandes sobreira oliveira junior';
+}
 function resolveCurrentMember(){
   if(myId){ const direct=memberById(myId); if(direct)return direct; }
   const wanted=normName(authProfile?.nome||'');
@@ -1951,7 +1962,7 @@ async function handleAuthUser(user){
   try{
     const snap=await FB().getDoc(FB().doc(window.db,'rede_users',user.uid));
     if(!snap.exists()){authProfile=null;myId=null;myName='';isAdmin=false;showUnlinked(user);return}
-    authProfile={uid:user.uid,...snap.data()}; myId=authProfile.memberId||null; myName=authProfile.nome||user.email||''; isAdmin=authProfile.role==='coordinator';
+    authProfile={uid:user.uid,...snap.data()}; myId=authProfile.memberId||null; myName=authProfile.nome||user.email||''; isAdmin=shouldTreatAsCoordinator(authProfile,user);
     await bootstrap();
   }catch(e){console.error(e);showLogin('Sua conta não conseguiu acessar o perfil. Verifique as regras do Firestore.')}
 }
@@ -1972,8 +1983,12 @@ function refreshIdentityUI(){
   updateAdminButtons();
 }
 function updateAdminButtons(){
-  $('#addBtn').style.display=isAdmin?'inline-flex':'none'; $('#newEventBtn').style.display=isAdmin?'inline-flex':'none';
-  $('#manageLinhasBtn').style.display=isAdmin?'inline-flex':'none'; $('#recadoBtn').style.display=isAdmin?'inline-flex':'none'; if($('#peopleAdminBlock')) $('#peopleAdminBlock').style.display=isAdmin?'block':'none';
+  const add=$('#addBtn'); if(add){add.style.display=isAdmin?'inline-flex':'none'; add.title=isAdmin?'Adicionar aluno à rede':'Somente coordenador';}
+  const ev=$('#newEventBtn'); if(ev)ev.style.display=isAdmin?'inline-flex':'none';
+  const ml=$('#manageLinhasBtn'); if(ml)ml.style.display=isAdmin?'inline-flex':'none';
+  const rc=$('#recadoBtn'); if(rc)rc.style.display=isAdmin?'inline-flex':'none';
+  const pb=$('#peopleAdminBlock'); if(pb)pb.style.display=isAdmin?'block':'none';
+  const mp=$('#managePeopleBtn'); if(mp)mp.style.display=isAdmin?'inline-flex':'none';
 }
 function refreshMemberDependentUI(){
   refreshIdentityUI(); const cn=$('#cNivel'),cur=cn.value; cn.innerHTML='<option value="">Todos os níveis</option>'+Object.entries(NIVEIS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join(''); cn.value=cur;
