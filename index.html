@@ -763,7 +763,7 @@
     </button>
     <button class="btn primary" id="addBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      <span class="bl">Pessoas da rede</span>
+      <span class="bl">+ Adicionar aluno</span>
     </button>
   </div>
 
@@ -773,9 +773,9 @@
     <div class="main">
       <aside class="side" id="side">
         <div class="block" id="peopleAdminBlock" style="display:none">
-          <h3>Pessoas da rede</h3>
-          <button class="btn primary" id="managePeopleBtn" style="width:100%;justify-content:center;margin-bottom:8px">Gerenciar pessoas</button>
-          <div class="hint">Adicionar, editar, retirar e ajustar vínculos.</div>
+          <h3>Administração da rede</h3>
+          <button class="btn primary" id="managePeopleBtn" style="width:100%;justify-content:center;margin-bottom:8px">Gerenciar alunos</button>
+          <div class="hint">Somente o coordenador pode adicionar ou excluir pessoas.</div>
         </div>
         <div class="block">
           <h3>Nível <span class="hint" style="text-transform:none;letter-spacing:0">(clique para ver só um)</span></h3>
@@ -976,7 +976,7 @@
 <!-- PEOPLE MANAGER -->
 <div class="overlay" id="peopleOverlay">
   <div class="modal" style="max-width:820px">
-    <div class="modal-h"><h2>Gerenciar pessoas da rede</h2><div class="spacer"></div><button class="btn" id="peopleDedupeBtn">Verificar duplicados</button><button class="btn primary" id="peopleAddBtn">+ Adicionar pessoa</button><button class="btn ghost" data-close="peopleOverlay">Fechar</button></div>
+    <div class="modal-h"><h2>Gerenciar alunos da rede</h2><div class="spacer"></div><button class="btn" id="peopleDedupeBtn">Verificar duplicados</button><button class="btn primary" id="peopleAddBtn">+ Adicionar aluno</button><button class="btn ghost" data-close="peopleOverlay">Fechar</button></div>
     <div class="modal-b">
       <div class="fg"><label>Buscar</label><input id="peopleSearch" placeholder="Nome, programa ou situação"></div>
       <div class="people-list" id="peopleList"></div>
@@ -1082,7 +1082,7 @@
       <div class="fg full"><label>Notas</label><textarea id="mNotas" placeholder="Observações internas"></textarea></div>
     </div>
     <div class="modal-f">
-      <button class="btn danger" id="deleteMember" style="margin-right:auto;display:none">Descadastrar</button>
+      <button class="btn danger" id="deleteMember" style="margin-right:auto;display:none">Excluir aluno</button>
       <button class="btn" data-close="memberOverlay">Cancelar</button>
       <button class="btn primary" id="saveMember">Salvar</button>
     </div>
@@ -2389,7 +2389,7 @@ function openMember(id){
   if(!id && !isAdmin){ toast('Só o coordenador pode cadastrar novos membros.'); return; }
   editingId=id||null;
   const m = id? state.members.find(x=>x.id===id): null;
-  $('#memberTitle').textContent = m? 'Editar membro':'Novo membro';
+  $('#memberTitle').textContent = m? 'Editar aluno':'Novo aluno';
   $('#deleteMember').style.display = (m && isAdmin && !m.protegido)? 'inline-flex':'none';
   $('#selfEditNote').style.display = (m && isMe(id) && !isAdmin) ? 'block':'none';
   $('#mNome').value=m?m.nome:''; $('#mNivel').value=m?m.nivel:'doutorado';
@@ -2519,19 +2519,19 @@ async function saveMember(){
   try{
     if(editingId){ await fbSetMember(editingId,data); }
     else { const id=uid(); await fbSetMember(id,{id,...data,createdAt:FB().serverTimestamp()}); }
-    closeOverlay('memberOverlay'); toast(editingId?'Membro atualizado.':'Membro cadastrado.');
+    closeOverlay('memberOverlay'); toast(editingId?'Aluno atualizado.':'Aluno cadastrado.');
   }catch(e){ console.error(e); toast('Erro ao salvar. Verifique a conexão.'); }
 }
 async function deleteMember(){
   if(!editingId || !isAdmin)return;
   const m=memberById(editingId);
   if(m && m.protegido){ toast('O perfil do coordenador não pode ser removido por aqui.'); return; }
-  if(!confirm('Descadastrar este membro? A ação não pode ser desfeita.'))return;
+  if(!confirm('Excluir este aluno da rede? O perfil e o vínculo de acesso serão removidos. Esta ação não pode ser desfeita.'))return;
   try{
     const idToDelete=editingId, f=FB(), linked=(state.users||[]).filter(u=>u.memberId===idToDelete);
     const batch=f.writeBatch(window.db); batch.delete(f.doc(window.db,'rede_members',idToDelete)); batch.delete(f.doc(window.db,'rede_member_claims',idToDelete)); linked.forEach(u=>batch.delete(f.doc(window.db,'rede_users',u.uid))); await batch.commit();
     closeOverlay('memberOverlay'); if(selectedId===idToDelete)closeDetail();
-    toast('Membro removido e acesso desvinculado.');
+    toast('Aluno excluído da rede e acesso desvinculado.');
   }catch(e){ console.error(e); toast('Erro ao remover.'); }
 }
 
@@ -2540,13 +2540,13 @@ function renderPeopleManager(){
   if(!isAdmin || !$('#peopleList')) return;
   const q=($('#peopleSearch')?.value||'').trim().toLowerCase();
   const items=[...state.members].filter(m=>!q || [m.nome,m.programa,m.status,m.origem].some(v=>(v||'').toLowerCase().includes(q))).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
-  $('#peopleList').innerHTML=items.map(m=>{const nv=NIVEIS[m.nivel]||{color:'#607d8b',short:m.nivel||''};return `<div class="people-row"><div class="p-av" style="background:${nv.color}">${m.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m.nome)}</div><div><div class="p-name">${esc(m.nome)}</div><div class="p-meta">${esc(nv.short)}${m.programa?' · '+esc(m.programa):''}${m.status==='egresso'?' · Egresso':''}${m.bolsista?' · 🎓 Bolsista':''}</div></div><div class="p-actions"><button type="button" class="btn" onclick="editPersonFromManager('${m.id}')">Editar / vínculos</button>${!m.protegido?`<button type="button" class="btn danger" onclick="removePersonFromManager('${m.id}')">Retirar</button>`:''}</div></div>`}).join('') || '<div class="crono-empty">Nenhuma pessoa encontrada.</div>';
+  $('#peopleList').innerHTML=items.map(m=>{const nv=NIVEIS[m.nivel]||{color:'#607d8b',short:m.nivel||''};return `<div class="people-row"><div class="p-av" style="background:${nv.color}">${m.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m.nome)}</div><div><div class="p-name">${esc(m.nome)}</div><div class="p-meta">${esc(nv.short)}${m.programa?' · '+esc(m.programa):''}${m.status==='egresso'?' · Egresso':''}${m.bolsista?' · 🎓 Bolsista':''}</div></div><div class="p-actions"><button type="button" class="btn" onclick="editPersonFromManager('${m.id}')">Editar / vínculos</button>${!m.protegido?`<button type="button" class="btn danger" onclick="removePersonFromManager('${m.id}')">Excluir aluno</button>`:''}</div></div>`}).join('') || '<div class="crono-empty">Nenhuma pessoa encontrada.</div>';
 }
 function openPeopleManager(){if(!isAdmin)return;renderPeopleManager();openOverlay('peopleOverlay')}
 function editPersonFromManager(id){closeOverlay('peopleOverlay');openMember(id)}
 async function removePersonFromManager(id){
   if(!isAdmin)return; const m=memberById(id); if(!m||m.protegido)return;
-  if(!confirm(`Retirar ${m.nome} da rede? O acesso dele à plataforma também será desvinculado.`))return;
+  if(!confirm(`Excluir ${m.nome} da rede? O perfil e o vínculo de acesso também serão removidos.`))return;
   try{
     const f=FB(), linked=(state.users||[]).filter(u=>u.memberId===id);
     const batch=f.writeBatch(window.db);
@@ -2554,7 +2554,7 @@ async function removePersonFromManager(id){
     batch.delete(f.doc(window.db,'rede_member_claims',id));
     linked.forEach(u=>batch.delete(f.doc(window.db,'rede_users',u.uid)));
     await batch.commit();
-    toast('Pessoa retirada da rede.'); renderPeopleManager();
+    toast('Aluno excluído da rede.'); renderPeopleManager();
   }catch(e){console.error(e);toast(e?.code==='permission-denied'?'Permissão negada pelas regras do Firestore.':'Erro ao retirar pessoa.')}
 }
 
@@ -3331,7 +3331,7 @@ $('#unlinkedLogoutBtn').onclick=doLogout;
 $('#linkAccessBtn').onclick=linkExistingAccess;
 $('#dedupeBtn').onclick=dedupeMembers;
 
-$('#addBtn').onclick=openPeopleManager;
+$('#addBtn').onclick=()=>openMember(null);
 if($('#managePeopleBtn')) $('#managePeopleBtn').onclick=openPeopleManager;
 if($('#peopleAddBtn')) $('#peopleAddBtn').onclick=()=>{closeOverlay('peopleOverlay');openMember(null)};
 if($('#peopleSearch')) $('#peopleSearch').oninput=renderPeopleManager;
