@@ -3,11 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carbonautas · LIPAN LEFA CELBE</title>
+<title>Carbonautas · LIPAN LEFA CELBE · v7</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mammoth@1.10.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   :root{
     --petrol:#0E5C63; --petrol-d:#0a464c; --agua:#1E88C7; --cerrado:#2E9E5B;
@@ -217,6 +219,15 @@
   .nb .d{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
   .nb .via{margin-left:auto;font-size:10.5px;color:var(--ink-3)}
   .dactions{display:flex;gap:8px;padding:16px 22px}
+  .scholar-box{border:1px solid #8DD8E6;background:linear-gradient(135deg,#E9FBFF,#F5F0FF);border-radius:14px;padding:13px;margin-top:4px}
+  .scholar-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--ink-2)}
+  .scholar-head b{font-size:13px;color:#073B4C}.scholar-head .remain{margin-left:auto;font-family:'Space Grotesk';font-weight:700;color:#6C2BD9}
+  .scholar-bar{height:13px;border-radius:999px;background:#DCE8EF;overflow:hidden;margin:10px 0 6px;border:1px solid #BFD1DB}
+  .scholar-bar span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#00A6A6,#316BFF,#9A3DFF);min-width:0}
+  .scholar-foot{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;color:var(--ink-3)}
+  .repo-summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.repo-count{font-family:'Space Grotesk';font-size:22px;font-weight:700;color:#1434A4}
+  .repo-list{display:flex;flex-direction:column;gap:8px}.repo-item{display:flex;gap:10px;align-items:center;border:1px solid #C8D7E4;background:#fff;border-radius:12px;padding:10px 11px}
+  .repo-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#EAF2FF;font-size:17px;flex:0 0 auto}.repo-main{min-width:0;flex:1}.repo-title{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.repo-meta{font-size:11px;color:var(--ink-3);margin-top:2px}.repo-actions{display:flex;gap:5px;flex-wrap:wrap}.repo-empty{padding:24px;text-align:center;color:var(--ink-3);border:1px dashed #BFCED8;border-radius:12px;background:#F8FBFD}
 
   /* ===== Cronograma ===== */
   .crono-scroll{flex:1;overflow-y:auto}
@@ -414,6 +425,35 @@
   @media(max-width:560px){.feed-side{grid-template-columns:1fr}}
   .ph-social{display:flex;gap:3px;align-items:center;border-top:1px solid var(--line-2);padding:6px 8px}.ph-social button{border:0;background:transparent;border-radius:8px;padding:6px 8px;font-size:11.5px;color:var(--ink-2)}.ph-social button.on{background:#eef6fb;color:#1670b7}
   .lb-social{width:min(700px,92vw);margin-top:10px;background:rgba(255,255,255,.08);border-radius:12px;padding:10px;color:#fff}.lb-social .comment-b{background:rgba(255,255,255,.10)}.lb-social .comment-form input{background:rgba(255,255,255,.95)}
+
+  /* Mural social unificado */
+  .mural-flex{max-width:920px}
+  .mural-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 4px;border-bottom:1px solid var(--line);background:var(--white)}
+  .mural-publish{background:#FF3D6E;border-color:#FF3D6E;color:#fff;font-weight:800;box-shadow:0 5px 18px rgba(255,61,110,.18)}
+  .mural-publish:hover{background:#E91E63;border-color:#E91E63}
+  .mural-msgs{gap:10px}
+  .mural-post{width:100%;margin:2px 0 8px;border-left:6px solid var(--indigo)}
+  .mural-chat-card{display:flex;gap:10px;width:min(86%,720px);padding:4px}
+  .mural-chat-card .mav{width:34px;height:34px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700;overflow:hidden;background:var(--ink-3)}
+  .mural-chat-card .mav img{width:100%;height:100%;object-fit:cover}
+  .mural-chat-card .del{opacity:.35;transition:.12s;border:0;background:transparent;color:var(--ink-3);font-size:13px;cursor:pointer;align-self:center}
+  .mural-chat-card:hover .del{opacity:1}.mural-chat-card .del:hover{color:var(--red)}
+  .mural-chat-card.mine{align-self:flex-end;flex-direction:row-reverse}
+  .mural-chat-card .msg-b{flex:1;min-width:0}
+  .mural-chat-card.mine .msg-head{justify-content:flex-end}
+  .mural-chat-card.mine .msg-txt{background:var(--petrol);border-color:var(--petrol);color:#f0fbfa;border-radius:14px 4px 14px 14px}
+  .mural-chat-card .social-bar{border:0;padding:4px 2px 0}
+  .mural-chat-card.mine .social-bar{justify-content:flex-end}
+  .mural-chat-card .comments{border:0;padding:6px 0 0}
+  .mural-chat-card.mine .comments{text-align:left}
+
+  /* Visualizador local de documentos */
+  .file-preview-modal .modal-b{overflow:auto;background:#EEF3F8}
+  .docx-preview{max-width:900px;margin:22px auto;background:#fff;padding:42px 54px;min-height:680px;box-shadow:0 2px 18px rgba(16,38,44,.12);color:#111;line-height:1.55}
+  .docx-preview img{max-width:100%;height:auto}.docx-preview table{border-collapse:collapse;max-width:100%}.docx-preview td,.docx-preview th{border:1px solid #bbb;padding:5px 7px}
+  .excel-preview{padding:16px}.excel-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;position:sticky;top:0;background:#EEF3F8;padding:8px 0;z-index:2}.excel-tabs button{border:1px solid #7C3AED;background:#fff;color:#5521B5;border-radius:9px;padding:7px 11px;font-weight:700}.excel-tabs button.on{background:#7C3AED;color:#fff}
+  .excel-sheet{overflow:auto;background:#fff;border:1px solid #cfd8df;border-radius:12px;padding:12px}.excel-sheet table{border-collapse:collapse;font-size:12px;white-space:nowrap}.excel-sheet td,.excel-sheet th{border:1px solid #c8d0d8;padding:5px 8px;max-width:360px;overflow:hidden;text-overflow:ellipsis}.excel-sheet tr:first-child{font-weight:700;background:#EDE9FE}
+  .preview-loading{height:100%;display:grid;place-items:center;font-weight:700;color:var(--ink-2)}
 
   /* Modal */
   .overlay{position:fixed;inset:0;background:rgba(16,38,44,.34);backdrop-filter:blur(2px);z-index:50;display:none;align-items:flex-start;justify-content:center;padding:34px 16px;overflow-y:auto}
@@ -639,10 +679,6 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-7"/></svg>
         <span class="tl">Acompanhamento</span>
       </button>
-      <button class="tab" data-view="feed">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8" cy="10" r="2"/><path d="M12 9h5M12 13h5M7 16h10"/></svg>
-        <span class="tl">Feed</span>
-      </button>
       <button class="tab" data-view="mural">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
         <span class="tl">Mural</span><span class="badge" id="muralBadge" style="display:none"></span>
@@ -653,7 +689,7 @@
       </button>
       <button class="tab" data-view="pubs">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
-        <span class="tl">Publicações</span>
+        <span class="tl">Repositório</span>
       </button>
     </nav>
 
@@ -675,7 +711,7 @@
     </button>
     <button class="btn primary" id="addBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      <span class="bl">Adicionar pessoa</span>
+      <span class="bl">Pessoas da rede</span>
     </button>
   </div>
 
@@ -820,6 +856,10 @@
           </button>
         </div>
       </div>
+      <div class="mural-tools">
+        <button class="btn mural-publish" id="muralPostBtn" type="button">＋ Publicar ação, link, foto ou arquivo</button>
+        <span class="hint">O mural reúne conversa, ações, eventos, resultados e arquivos do projeto.</span>
+      </div>
       <div class="mural-msgs" id="muralMsgs"><div class="mural-empty">Nenhuma mensagem ainda. Comece a conversa do grupo.</div></div>
       <div class="composer">
         <button class="who" id="whoBtn" title="Trocar identidade"><span class="d" id="whoDot"></span><span id="whoName">visitante</span></button>
@@ -858,8 +898,8 @@
       <div class="crono-wrap">
         <div class="view-head">
           <div>
-            <h2>Publicações</h2>
-            <div class="sub">Notas técnicas, artigos, resumos, plataformas e outros produtos do grupo.</div>
+            <h2>Repositório geral</h2>
+            <div class="sub">Documentos, projetos, apresentações, relatórios, planilhas, artigos e outros produtos de todos os Carbonautas.</div>
           </div>
           <div class="spacer"></div>
           <button class="btn primary" id="addPubBtn">
@@ -881,7 +921,7 @@
 <!-- PEOPLE MANAGER -->
 <div class="overlay" id="peopleOverlay">
   <div class="modal" style="max-width:820px">
-    <div class="modal-h"><h2>Gerenciar pessoas da rede</h2><div class="spacer"></div><button class="btn primary" id="peopleAddBtn">+ Adicionar pessoa</button><button class="btn ghost" data-close="peopleOverlay">Fechar</button></div>
+    <div class="modal-h"><h2>Gerenciar pessoas da rede</h2><div class="spacer"></div><button class="btn" id="peopleDedupeBtn">Verificar duplicados</button><button class="btn primary" id="peopleAddBtn">+ Adicionar pessoa</button><button class="btn ghost" data-close="peopleOverlay">Fechar</button></div>
     <div class="modal-b">
       <div class="fg"><label>Buscar</label><input id="peopleSearch" placeholder="Nome, programa ou situação"></div>
       <div class="people-list" id="peopleList"></div>
@@ -946,6 +986,10 @@
         <div class="fg"><label>Situação</label>
           <select id="mStatus"><option value="ativo">Ativo</option><option value="egresso">Egresso</option></select>
         </div>
+        <div class="fg"><label>Bolsa</label><label class="toggle" style="padding:9px 0;justify-content:flex-start"><input type="checkbox" id="mBolsista"> É bolsista atualmente / neste vínculo</label></div>
+        <div class="fg bolsa-field"><label>Modalidade / agência</label><input id="mBolsaModalidade" placeholder="Ex.: PIBIC/CNPq, FAPEMAT, CAPES"></div>
+        <div class="fg bolsa-field"><label>Início da bolsa</label><input type="date" id="mBolsaInicio"></div>
+        <div class="fg bolsa-field"><label>Fim previsto da bolsa</label><input type="date" id="mBolsaFim"></div>
         <div class="fg"><label>Origem ou instituição parceira</label><input id="mOrigem" placeholder="Ex.: Holanda, Radboud"></div>
         <div class="fg"><label>Telefone (para recado direto)</label><input id="mTelefone" placeholder="Ex.: 5565999998888"></div>
       </div>
@@ -986,6 +1030,18 @@
       <button class="btn danger" id="deleteMember" style="margin-right:auto;display:none">Descadastrar</button>
       <button class="btn" data-close="memberOverlay">Cancelar</button>
       <button class="btn primary" id="saveMember">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMBER REPOSITORY MODAL -->
+<div class="overlay" id="repoOverlay">
+  <div class="modal" style="max-width:820px">
+    <div class="modal-h"><h2 id="repoTitle">Repositório</h2><div class="spacer"></div><button class="btn primary" id="repoAddBtn" style="display:none">+ Adicionar documento</button><button class="btn ghost" data-close="repoOverlay">Fechar</button></div>
+    <div class="modal-b">
+      <div id="repoScholar"></div>
+      <div class="repo-summary" style="margin:4px 0 16px"><span class="repo-count" id="repoCount">0</span><span class="hint">itens vinculados a esta pessoa</span></div>
+      <div class="repo-list" id="repoList"></div>
     </div>
   </div>
 </div>
@@ -1127,7 +1183,7 @@
 
 <!-- FEED POST MODAL -->
 <div class="overlay" id="postOverlay"><div class="modal" style="max-width:560px">
-  <div class="modal-h"><h2>Publicar no feed</h2><div class="spacer"></div><button class="btn ghost" data-close="postOverlay">Fechar</button></div>
+  <div class="modal-h"><h2>Publicar no mural</h2><div class="spacer"></div><button class="btn ghost" data-close="postOverlay">Fechar</button></div>
   <div class="modal-b">
     <div class="fg"><label>Tipo de atualização</label><select id="postKind"><option value="atualizacao">Atualização</option><option value="projeto">Projeto</option><option value="acao">Ação</option><option value="resultado">Resultado</option><option value="evento">Evento/apresentação</option><option value="foto">Foto</option><option value="arquivo">Arquivo</option></select></div>
     <div class="fg"><label>Título (opcional)</label><input id="postTitle" placeholder="Ex.: Coleta de campo concluída"></div>
@@ -1141,7 +1197,7 @@
 <!-- PUBLICATION MODAL -->
 <div class="overlay" id="pubOverlay">
   <div class="modal" style="max-width:480px">
-    <div class="modal-h"><h2>Adicionar publicação</h2><div class="spacer"></div><button class="btn ghost" data-close="pubOverlay">Fechar</button></div>
+    <div class="modal-h"><h2>Adicionar documento ao repositório</h2><div class="spacer"></div><button class="btn ghost" data-close="pubOverlay">Fechar</button></div>
     <div class="modal-b">
       <div class="fg" id="pubAutorRow"><label>Autor(a)</label><select id="pubAutor"></select></div>
       <div class="fg"><label>Categoria</label>
@@ -1371,6 +1427,44 @@ function fmtDate(d){
   if(!d)return ''; const [y,m,day]=String(d).split('-').map(Number);
   if(!y||!m||!day)return d; return new Date(Date.UTC(y,m-1,day)).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'});
 }
+function scholarshipInfo(m){
+  if(!m?.bolsista) return null;
+  const parse=d=>{if(!d)return null;const [y,mo,da]=String(d).split('-').map(Number);return y&&mo&&da?new Date(y,mo-1,da):null};
+  const start=parse(m.bolsaInicio), end=parse(m.bolsaFim), now=new Date(); now.setHours(0,0,0,0);
+  if(!start||!end) return {progress:0,label:'Período da bolsa incompleto',remaining:'informe início e fim',start,end};
+  start.setHours(0,0,0,0); end.setHours(0,0,0,0);
+  const total=Math.max(1,Math.round((end-start)/86400000));
+  const elapsed=Math.round((now-start)/86400000);
+  const remaining=Math.round((end-now)/86400000);
+  const progress=Math.max(0,Math.min(100,Math.round((elapsed/total)*100)));
+  const human=days=>{const d=Math.abs(days);const months=Math.floor(d/30);const rem=d%30;return months?`${months} ${months===1?'mês':'meses'}${rem?' e '+rem+' dias':''}`:`${d} ${d===1?'dia':'dias'}`};
+  let label='Bolsa em andamento', remLabel=human(remaining)+' restantes';
+  if(now<start){label='Bolsa ainda não iniciada';remLabel=human(elapsed)+' para começar'}
+  if(now>end){label='Bolsa encerrada';remLabel=human(remaining)+' desde o término'}
+  return {progress,label,remaining:remLabel,start,end,daysRemaining:remaining};
+}
+function scholarshipHTML(m,compact=false){
+  const si=scholarshipInfo(m); if(!si)return '';
+  const modal=m.bolsaModalidade?esc(m.bolsaModalidade):'Bolsa';
+  return `<div class="scholar-box"><div class="scholar-head"><b>🎓 ${modal}</b><span>${esc(si.label)}</span><span class="remain">${esc(si.remaining)}</span></div><div class="scholar-bar"><span style="width:${si.progress}%"></span></div><div class="scholar-foot"><span>${m.bolsaInicio?'Início '+fmtDate(m.bolsaInicio):'Início não informado'}</span><span>${si.progress}% do período</span><span>${m.bolsaFim?'Fim '+fmtDate(m.bolsaFim):'Fim não informado'}</span></div></div>`;
+}
+function memberRepositoryItems(memberId){
+  const out=[];
+  state.publicacoes.filter(p=>p.memberId===memberId).forEach(p=>out.push({source:'publicacao',id:p.id,title:p.titulo||p.fileName||'Documento',kind:(CATEGORIAS[p.categoria]?.label||p.categoriaOutro||p.categoria||'Publicação'),url:p.url||'',fileName:p.fileName||'',isFile:p.tipo==='arquivo',ts:p.ts}));
+  state.activities.filter(a=>a.ownerId===memberId && (a.fileUrl||a.externalUrl)).forEach(a=>out.push({source:'atividade',id:a.id,title:a.title||'Registro de acompanhamento',kind:ACTIVITY_TYPES[a.type]||a.type||'Acompanhamento',url:a.fileUrl||a.externalUrl||'',fileName:a.fileName||'',isFile:!!a.fileUrl,ts:a.updatedAt||a.createdAt}));
+  const m=memberById(memberId); (m?.resultados||[]).forEach((r,i)=>{if(r.url)out.push({source:'resultado',id:'r'+i,title:r.titulo||'Resultado / produto',kind:'Resultado / produto',url:r.url,fileName:'',isFile:false,ts:null})});
+  return out.sort((a,b)=>{const ta=a.ts?.toMillis?a.ts.toMillis():0,tb=b.ts?.toMillis?b.ts.toMillis():0;return tb-ta});
+}
+let repoMemberId=null;
+function openMemberRepository(memberId){repoMemberId=memberId;renderMemberRepository();openOverlay('repoOverlay')}
+function renderMemberRepository(){
+  const m=memberById(repoMemberId); if(!m||!$('#repoList'))return;
+  $('#repoTitle').textContent='Repositório · '+m.nome;
+  $('#repoScholar').innerHTML=scholarshipHTML(m);
+  const list=memberRepositoryItems(m.id); $('#repoCount').textContent=list.length;
+  const canAdd=isAdmin||isMe(m.id); $('#repoAddBtn').style.display=canAdd?'inline-flex':'none';
+  $('#repoList').innerHTML=list.length?list.map(it=>{const icon=it.isFile?'📄':'🔗';const action=it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Visualizar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;return `<div class="repo-item"><div class="repo-icon">${icon}</div><div class="repo-main"><div class="repo-title">${esc(it.title)}</div><div class="repo-meta">${esc(it.kind)}</div></div><div class="repo-actions">${action}</div></div>`}).join(''):'<div class="repo-empty">Ainda não há documentos ou links registrados para esta pessoa.</div>';
+}
 function fmtTime(ts){
   if(!ts) return '';
   const d=new Date(ts), now=new Date();
@@ -1386,6 +1480,7 @@ function dayLabel(ts){
   return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
 }
 function memberById(id){return state.members.find(m=>m.id===id)}
+function memberForAuthor(id,name=''){const direct=memberById(id);const same=state.members.filter(m=>name&&m.nome===name);if(direct?.foto)return direct;return same.find(m=>m.foto)||direct||same[0]||null}
 
 /* ============ FIREBASE LAYER ============ */
 let dbReady = false;
@@ -1423,7 +1518,7 @@ async function bootstrap(){
       for(const [nome,motivo] of Object.entries(SEED_HUBS)){const m=byName[nome]; if(m&&m.hub===undefined) await f.setDoc(f.doc(window.db,'rede_members',m.id),{hub:true,hubMotivo:motivo},{merge:true});}
     }
     state.members=memSnap.docs.map(d=>({...d.data(),id:d.id}));
-    state.members.forEach(m=>{m.linhas=m.linhas||[];m.resultados=m.resultados||[];m.prazos=m.prazos||[];m.vinculos=m.vinculos||[];m.hub=!!m.hub});
+    state.members.forEach(m=>{m.linhas=m.linhas||[];m.resultados=m.resultados||[];m.prazos=m.prazos||[];m.vinculos=m.vinculos||[];m.hub=!!m.hub;m.bolsista=!!m.bolsista});
     const setRef=f.doc(window.db,'rede_settings','app'), setSnap=await f.getDoc(setRef);
     if(setSnap.exists()){
       state.settings={...state.settings,...setSnap.data()};
@@ -1463,7 +1558,7 @@ function subscribeAll(){
   // MEMBERS
   subscriptions.push(f.onSnapshot(f.collection(window.db,'rede_members'),snap=>{
     state.members=snap.docs.map(d=>({...d.data(),id:d.id}));
-    state.members.forEach(m=>{m.linhas=m.linhas||[];m.resultados=m.resultados||[];m.prazos=m.prazos||[];m.vinculos=m.vinculos||[];m.hub=!!m.hub});
+    state.members.forEach(m=>{m.linhas=m.linhas||[];m.resultados=m.resultados||[];m.prazos=m.prazos||[];m.vinculos=m.vinculos||[];m.hub=!!m.hub;m.bolsista=!!m.bolsista});
     if(currentView==='rede') renderAll();
     if(currentView==='crono') renderCrono();
     refreshMemberDependentUI();
@@ -1489,28 +1584,31 @@ function subscribeAll(){
   // PUBLICAÇÕES
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_publicacoes'),f.orderBy('ts','desc')),snap=>{
     state.publicacoes=snap.docs.map(d=>({...d.data(),id:d.id}));
-    if(currentView==='pubs') renderPubs();
+    if(currentView==='pubs') renderPubs(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
   }));
   // ACOMPANHAMENTO
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_activities'),f.orderBy('updatedAt','desc')),snap=>{
     state.activities=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='track') renderTrack();
-    if(currentView==='feed') renderFeedSide();
+    if(currentView==='feed') renderFeedSide(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
   }));
   // FEED SOCIAL
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_feed'),f.orderBy('ts','desc')),snap=>{
     state.feed=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='feed') renderFeed();
+    if(currentView==='mural') renderMural(); else updateMuralBadge();
   }));
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_feed_comments'),f.orderBy('ts','asc')),snap=>{
     state.comments=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='feed') renderFeed();
+    if(currentView==='mural') renderMural();
     if(currentView==='fotos') renderFotos();
     if(lbPhotoId) renderLightboxSocial();
   }));
   subscriptions.push(f.onSnapshot(f.collection(window.db,'rede_feed_reactions'),snap=>{
     state.reactions=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='feed') renderFeed();
+    if(currentView==='mural') renderMural();
     if(currentView==='fotos') renderFotos();
     if(lbPhotoId) renderLightboxSocial();
   }));
@@ -1808,6 +1906,7 @@ function renderStats(){
     return d;
   };
   el.appendChild(card(total,'Membros','',()=>{clearFilters()}, false));
+  const bolsistas=state.members.filter(m=>m.bolsista).length; if(bolsistas) el.appendChild(card(bolsistas,'Bolsistas','#7437E8',null,false));
   for(const [k,v] of Object.entries(NIVEIS)){
     const n=state.members.filter(m=>m.nivel===k).length; if(!n) continue;
     const soloOn = hiddenNiveis.size>0 && !hiddenNiveis.has(k);
@@ -2090,11 +2189,14 @@ function renderDetail(){
             <span class="pill" style="background:${nv.color}">${nv.short}</span>
             ${m.programa?`<span class="pill sub">${esc(m.programa)}</span>`:''}
             ${m.status==='egresso'?'<span class="pill sub">Egresso</span>':''}
+            ${m.bolsista?'<span class="pill" style="background:#7437E8">Bolsista</span>':''}
             ${m.origem?`<span class="pill sub">${esc(m.origem)}</span>`:''}
           </div>
         </div>
       </div>
     </div>
+    ${m.bolsista?`<div class="dsec"><div class="lab">Bolsa</div>${scholarshipHTML(m)}</div>`:''}
+    <div class="dsec"><div class="lab">Repositório individual</div><div class="repo-summary"><span class="repo-count">${memberRepositoryItems(m.id).length}</span><span class="hint">documentos, produtos e links</span><button class="btn primary" style="margin-left:auto" onclick="openMemberRepository('${m.id}')">Abrir repositório</button></div></div>
     <div class="dsec"><div class="lab">Tema de pesquisa</div><p>${esc(m.tema)||'<span style="color:var(--ink-3)">sem descrição</span>'}</p></div>
     <div class="dsec"><div class="lab">Linhas de pesquisa</div><div class="chips">${m.linhas.map(l=>`<span class="chip linha" style="border-color:${linhaColor(l)}55" onclick="filterLinha('${esc(l)}')">${esc(l)}</span>`).join('')||'<span style="color:var(--ink-3)">nenhuma</span>'}</div></div>
     ${m.plataforma?`<div class="dsec"><div class="lab">Plataforma</div><a class="platlink" href="${esc(m.plataforma)}" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>Abrir plataforma<span class="u">${esc(m.plataforma.replace('https://',''))}</span></a></div>`:''}
@@ -2126,13 +2228,14 @@ function openMember(id){
   $('#selfEditNote').style.display = (m && isMe(id) && !isAdmin) ? 'block':'none';
   $('#mNome').value=m?m.nome:''; $('#mNivel').value=m?m.nivel:'doutorado';
   $('#mPrograma').value=m?m.programa:''; $('#mStatus').value=m?m.status:'ativo';
+  $('#mBolsista').checked=!!m?.bolsista; $('#mBolsaModalidade').value=m?m.bolsaModalidade||'':''; $('#mBolsaInicio').value=m?m.bolsaInicio||'':''; $('#mBolsaFim').value=m?m.bolsaFim||'':'';
   $('#mOrigem').value=m?m.origem||'':''; $('#mTelefone').value=m?m.telefone||'':'';
   $('#mTema').value=m?m.tema:''; $('#mPlataforma').value=m?m.plataforma||'':''; $('#mDrive').value=m?m.driveLink||'':'';
   $('#mNotas').value=m?m.notas||'':'';
   const lockField=(el,locked)=>{el.disabled=locked};
   // não-admin editando o próprio: pode mexer em foto, tema, plataforma, resultados, prazos, notas — não em nível/programa/status
   const restrict = m && isMe(id) && !isAdmin;
-  ['mNivel','mPrograma','mStatus','mOrigem'].forEach(k=>lockField($('#'+k),restrict));
+  ['mNivel','mPrograma','mStatus','mOrigem'].forEach(k=>lockField($('#'+k),restrict)); ['mBolsista','mBolsaModalidade','mBolsaInicio','mBolsaFim'].forEach(k=>lockField($('#'+k),!isAdmin));
   formLinhas=new Set(m?m.linhas:[]);
   formResultados=m?JSON.parse(JSON.stringify(m.resultados||[])):[];
   formPrazos=m?JSON.parse(JSON.stringify(m.prazos||[])):[];
@@ -2144,7 +2247,7 @@ function openMember(id){
   $('#mHubMotivo').style.display=formHub?'block':'none';
   $('#mHubMotivo').value=formHubMotivo;
   $('#vincSearch').value='';
-  renderLinhasPick(); renderRepList(); renderPrazoList(); renderPhotoPrev(); renderVinculosPick();
+  renderLinhasPick(); renderRepList(); renderPrazoList(); renderPhotoPrev(); renderVinculosPick(); toggleScholarFields();
   openOverlay('memberOverlay');
 }
 function renderLinhasPick(){
@@ -2213,6 +2316,11 @@ function renderVincMotivos(){
   el.querySelectorAll('input').forEach(inp=>inp.oninput=e=>{formVinculos[+e.target.dataset.i].motivo=e.target.value});
   el.querySelectorAll('button.icon-x').forEach(b=>b.onclick=e=>{formVinculos.splice(+e.target.dataset.i,1);renderVinculosPick()});
 }
+function toggleScholarFields(){
+  const on=$('#mBolsista')?.checked;
+  document.querySelectorAll('.bolsa-field').forEach(el=>{el.style.opacity=on?'1':'.45'});
+  ['mBolsaModalidade','mBolsaInicio','mBolsaFim'].forEach(k=>{const el=$('#'+k);if(el && isAdmin)el.disabled=!on});
+}
 function renderPhotoPrev(){
   const el=$('#photoPrev');
   if(formFoto){el.innerHTML=`<img src="${esc(formFoto)}" style="width:100%;height:100%;object-fit:cover;border-radius:14px" onerror="this.parentNode.textContent='URL inválida'">`;}
@@ -2235,6 +2343,7 @@ async function saveMember(){
 
   const data={
     nome, nivel:$('#mNivel').value, programa:$('#mPrograma').value.trim(), status:$('#mStatus').value,
+    bolsista:$('#mBolsista').checked, bolsaModalidade:$('#mBolsaModalidade').value.trim(), bolsaInicio:$('#mBolsaInicio').value, bolsaFim:$('#mBolsaFim').value,
     origem:$('#mOrigem').value.trim(), telefone:$('#mTelefone').value.trim(),
     tema:$('#mTema').value.trim(), plataforma:$('#mPlataforma').value.trim(), driveLink:$('#mDrive').value.trim(), notas:$('#mNotas').value.trim(),
     linhas:[...formLinhas], resultados:formResultados.filter(r=>r.titulo||r.url), prazos:formPrazos.filter(p=>p.titulo), foto:fotoUrl,
@@ -2265,7 +2374,7 @@ function renderPeopleManager(){
   if(!isAdmin || !$('#peopleList')) return;
   const q=($('#peopleSearch')?.value||'').trim().toLowerCase();
   const items=[...state.members].filter(m=>!q || [m.nome,m.programa,m.status,m.origem].some(v=>(v||'').toLowerCase().includes(q))).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
-  $('#peopleList').innerHTML=items.map(m=>{const nv=NIVEIS[m.nivel]||{color:'#607d8b',short:m.nivel||''};return `<div class="people-row"><div class="p-av" style="background:${nv.color}">${m.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m.nome)}</div><div><div class="p-name">${esc(m.nome)}</div><div class="p-meta">${esc(nv.short)}${m.programa?' · '+esc(m.programa):''}${m.status==='egresso'?' · Egresso':''}</div></div><div class="p-actions"><button type="button" class="btn" onclick="editPersonFromManager('${m.id}')">Editar</button>${!m.protegido?`<button type="button" class="btn danger" onclick="removePersonFromManager('${m.id}')">Retirar</button>`:''}</div></div>`}).join('') || '<div class="crono-empty">Nenhuma pessoa encontrada.</div>';
+  $('#peopleList').innerHTML=items.map(m=>{const nv=NIVEIS[m.nivel]||{color:'#607d8b',short:m.nivel||''};return `<div class="people-row"><div class="p-av" style="background:${nv.color}">${m.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m.nome)}</div><div><div class="p-name">${esc(m.nome)}</div><div class="p-meta">${esc(nv.short)}${m.programa?' · '+esc(m.programa):''}${m.status==='egresso'?' · Egresso':''}${m.bolsista?' · 🎓 Bolsista':''}</div></div><div class="p-actions"><button type="button" class="btn" onclick="editPersonFromManager('${m.id}')">Editar / vínculos</button>${!m.protegido?`<button type="button" class="btn danger" onclick="removePersonFromManager('${m.id}')">Retirar</button>`:''}</div></div>`}).join('') || '<div class="crono-empty">Nenhuma pessoa encontrada.</div>';
 }
 function openPeopleManager(){if(!isAdmin)return;renderPeopleManager();openOverlay('peopleOverlay')}
 function editPersonFromManager(id){closeOverlay('peopleOverlay');openMember(id)}
@@ -2284,22 +2393,61 @@ async function removePersonFromManager(id){
 }
 
 /* ============ VISUALIZADOR DE ARQUIVOS ============ */
+let previewObjectUrl='', previewWorkbook=null;
 function inferFileExt(url,name=''){
   const n=(name||'').split('?')[0].toLowerCase(); const m=n.match(/\.([a-z0-9]{2,6})$/); if(m)return m[1];
   try{const d=decodeURIComponent(new URL(url).pathname).toLowerCase();const x=d.match(/\.([a-z0-9]{2,6})$/);return x?x[1]:''}catch(e){return ''}
 }
-function openFilePreview(url,name='Arquivo'){
+function sanitizePreviewHtml(html){
+  const doc=new DOMParser().parseFromString('<div>'+html+'</div>','text/html');
+  doc.querySelectorAll('script,style,iframe,object,embed,form').forEach(n=>n.remove());
+  doc.querySelectorAll('*').forEach(el=>{
+    [...el.attributes].forEach(a=>{const n=a.name.toLowerCase(),v=(a.value||'').trim().toLowerCase();if(n.startsWith('on')||(n==='href'&&v.startsWith('javascript:')))el.removeAttribute(a.name)});
+  });
+  return doc.body.firstElementChild?.innerHTML||'';
+}
+async function previewFetch(url){
+  const r=await fetch(url,{mode:'cors'}); if(!r.ok) throw new Error('Não foi possível carregar o arquivo ('+r.status+').'); return r.arrayBuffer();
+}
+function showWorkbookSheet(i){
+  if(!previewWorkbook||!window.XLSX)return;
+  const names=previewWorkbook.SheetNames||[]; i=Math.max(0,Math.min(names.length-1,+i||0));
+  document.querySelectorAll('#excelTabs button').forEach((b,j)=>b.classList.toggle('on',j===i));
+  const ws=previewWorkbook.Sheets[names[i]], html=window.XLSX.utils.sheet_to_html(ws,{id:'excelTable'});
+  const el=$('#excelSheet'); if(el) el.innerHTML=sanitizePreviewHtml(html);
+}
+async function openFilePreview(url,name='Arquivo'){
   if(!url)return; const ext=inferFileExt(url,name), body=$('#filePreviewBody');
   $('#filePreviewTitle').textContent=name||'Visualizar arquivo'; $('#filePreviewOpen').href=url; $('#filePreviewDownload').href=url;
-  const office=['doc','docx','xls','xlsx','ppt','pptx'];
-  const images=['png','jpg','jpeg','webp','gif','svg'];
-  if(ext==='pdf'){body.innerHTML=`<iframe class="file-preview-frame" src="${esc(url)}" title="${esc(name)}"></iframe>`;}
-  else if(office.includes(ext)){const viewer='https://view.officeapps.live.com/op/embed.aspx?src='+encodeURIComponent(url);body.innerHTML=`<iframe class="file-preview-frame" src="${viewer}" title="${esc(name)}"></iframe>`;}
-  else if(images.includes(ext)){body.innerHTML=`<div class="file-preview-fallback"><img class="file-preview-img" src="${esc(url)}" alt="${esc(name)}"></div>`;}
-  else {body.innerHTML=`<div class="file-preview-fallback"><div><h3>Pré-visualização não disponível para este formato</h3><p>Use “Abrir em nova guia” ou “Baixar”. PDF, Word, Excel e PowerPoint podem ser visualizados aqui.</p></div></div>`;}
-  openOverlay('filePreviewOverlay');
+  if(previewObjectUrl){URL.revokeObjectURL(previewObjectUrl);previewObjectUrl=''} previewWorkbook=null;
+  body.innerHTML='<div class="preview-loading">Abrindo arquivo…</div>'; openOverlay('filePreviewOverlay');
+  try{
+    const images=['png','jpg','jpeg','webp','gif','svg'];
+    if(ext==='pdf'){
+      const ab=await previewFetch(url); previewObjectUrl=URL.createObjectURL(new Blob([ab],{type:'application/pdf'}));
+      body.innerHTML=`<iframe class="file-preview-frame" src="${previewObjectUrl}" title="${esc(name)}"></iframe>`;
+    }else if(ext==='docx'){
+      if(!window.mammoth) throw new Error('Leitor de Word não carregou.');
+      const ab=await previewFetch(url), result=await window.mammoth.convertToHtml({arrayBuffer:ab});
+      body.innerHTML=`<article class="docx-preview">${sanitizePreviewHtml(result.value||'<p>Documento vazio.</p>')}</article>`;
+    }else if(ext==='xlsx'||ext==='xls'){
+      if(!window.XLSX) throw new Error('Leitor de Excel não carregou.');
+      const ab=await previewFetch(url); previewWorkbook=window.XLSX.read(ab,{type:'array'});
+      const names=previewWorkbook.SheetNames||[]; if(!names.length) throw new Error('A planilha não contém abas legíveis.');
+      body.innerHTML=`<div class="excel-preview"><div class="excel-tabs" id="excelTabs">${names.map((n,i)=>`<button type="button" onclick="showWorkbookSheet(${i})">${esc(n)}</button>`).join('')}</div><div class="excel-sheet" id="excelSheet"></div></div>`;
+      showWorkbookSheet(0);
+    }else if(images.includes(ext)){
+      body.innerHTML=`<div class="file-preview-fallback"><img class="file-preview-img" src="${esc(url)}" alt="${esc(name)}"></div>`;
+    }else if(ext==='ppt'||ext==='pptx'){
+      body.innerHTML=`<div class="file-preview-fallback"><div><h3>PowerPoint</h3><p>O navegador não renderiza PowerPoint diretamente com fidelidade. Use “Abrir em nova guia” ou “Baixar”. Word, Excel e PDF agora abrem dentro da plataforma sem depender do visualizador da Microsoft.</p></div></div>`;
+    }else{
+      body.innerHTML=`<div class="file-preview-fallback"><div><h3>Pré-visualização não disponível</h3><p>Use “Abrir em nova guia” ou “Baixar”.</p></div></div>`;
+    }
+  }catch(e){
+    console.error(e); body.innerHTML=`<div class="file-preview-fallback"><div><h3>Não foi possível visualizar aqui</h3><p>${esc(e?.message||'Erro ao abrir o arquivo.')}</p><p>O arquivo continua disponível pelos botões “Abrir em nova guia” e “Baixar”.</p></div></div>`;
+  }
 }
-window.openFilePreview=openFilePreview; window.openPeopleManager=openPeopleManager; window.editPersonFromManager=editPersonFromManager; window.removePersonFromManager=removePersonFromManager;
+window.openFilePreview=openFilePreview; window.showWorkbookSheet=showWorkbookSheet; window.openPeopleManager=openPeopleManager; window.editPersonFromManager=editPersonFromManager; window.removePersonFromManager=removePersonFromManager;
 
 /* Photo upload with downscale -> dataURL (form foto do membro) */
 function handleFile(file){
@@ -2450,7 +2598,7 @@ async function saveMyPrazo(){
 
 /* ============ MURAL (CHAT) ============ */
 function updateMuralBadge(){
-  const unread=state.chat.filter(c=>(c.ts?.toMillis?c.ts.toMillis():+new Date(c.ts||0))>lastSeenChat).length;
+  const unread=[...state.chat,...state.feed].filter(c=>(c.ts?.toMillis?c.ts.toMillis():+new Date(c.ts||0))>lastSeenChat).length;
   const b=$('#muralBadge');
   if(currentView!=='mural' && unread){b.textContent=unread>9?'9+':unread;b.style.display='grid'} else b.style.display='none';
 }
@@ -2462,27 +2610,26 @@ function markChatSeen(){
 function isRecado(c){ return c.tipo==='recado' || c.para!==undefined; }
 function renderMural(){
   const wrap=$('#muralMsgs');
-  const list=state.chat.filter(c=>!isRecado(c));
-  if(!list.length){ wrap.innerHTML='<div class="mural-empty">Nenhuma mensagem ainda. Comece a conversa do grupo.</div>'; return; }
-  let html=''; let lastDay=null;
-  list.forEach(c=>{
-    const ms = c.ts?.toMillis?c.ts.toMillis():+new Date(c.ts||Date.now());
-    const dl=dayLabel(ms);
-    if(dl!==lastDay){ html+=`<div class="day-sep">${dl}</div>`; lastDay=dl; }
-    const mine = (myId && c.authorId===myId) || (!myId && myName && c.author===myName);
-    const canDel = isAdmin || mine;
-    const av = c.authorFoto ? `<img src="${esc(c.authorFoto)}" alt="">` : initials(c.author);
-    html+=`<div class="msg ${mine?'mine':''}">
-      <div class="mav" style="background:${c.authorColor||'var(--ink-3)'}">${av}</div>
-      <div class="msg-b">
-        <div class="msg-head"><span class="nm">${esc(c.author)}</span><span class="tm">${fmtTime(ms)}</span></div>
-        <div class="msg-txt">${esc(c.text)}</div>
-      </div>
-      ${canDel?`<button class="del" onclick="deleteChatMsg('${c.id}')" title="Apagar">×</button>`:''}
-    </div>`;
+  const chatItems=state.chat.filter(c=>!isRecado(c)).map(c=>({__type:'chat',...c}));
+  const postItems=state.feed.map(p=>({__type:'post',...p}));
+  const list=[...chatItems,...postItems].sort((a,b)=>{
+    const ta=a.ts?.toMillis?a.ts.toMillis():+new Date(a.ts||0), tb=b.ts?.toMillis?b.ts.toMillis():+new Date(b.ts||0); return ta-tb;
   });
-  wrap.innerHTML=html;
-  wrap.scrollTop=wrap.scrollHeight;
+  if(!list.length){ wrap.innerHTML='<div class="mural-empty">Nenhuma publicação ainda. Comece a conversa ou publique uma ação, link, foto ou arquivo.</div>'; return; }
+  let html='',lastDay=null;
+  list.forEach(item=>{
+    const ms=item.ts?.toMillis?item.ts.toMillis():+new Date(item.ts||Date.now()),dl=dayLabel(ms);
+    if(dl!==lastDay){html+=`<div class="day-sep">${dl}</div>`;lastDay=dl}
+    if(item.__type==='post'){
+      const m=memberForAuthor(item.authorId,item.authorName),can=isAdmin||isMe(item.authorId),pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.authorName||'Carbonauta';
+      const isImg=item.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(item.fileName||item.fileUrl)||item.mime?.startsWith('image/'));
+      html+=`<article class="feed-card mural-post"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div><div class="feed-author">${esc(nm)}</div><div class="feed-time">${fmtTime(ms)}</div></div><span class="feed-kind">${esc((item.kind||'atualizacao').replace(/^./,x=>x.toUpperCase()))}</span>${can?`<button class="mini-x" onclick="deleteFeedPost('${item.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${item.title?`<div class="feed-title">${esc(item.title)}</div>`:''}${item.text?`<div class="feed-text">${esc(item.text)}</div>`:''}${item.externalUrl?`<a class="feed-attachment" href="${esc(item.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${item.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(item.fileUrl)}'),decodeURIComponent('${encodeURIComponent(item.fileName||item.title||'Anexo')}'))">👁️ Visualizar · ${esc(item.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(item.fileUrl)}" alt="${esc(item.title||'Foto publicada')}">`:''}${socialBar('post',item.id)}${renderComments('post',item.id)}</article>`;
+    }else{
+      const m=memberForAuthor(item.authorId,item.author),mine=(myId&&item.authorId===myId)||(!myId&&myName&&item.author===myName),canDel=isAdmin||mine,pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.author||'Carbonauta';
+      html+=`<div class="mural-chat-card ${mine?'mine':''}"><div class="mav" style="background:${m?NIVEIS[m.nivel]?.color:(item.authorColor||'var(--ink-3)')}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div class="msg-b"><div class="msg-head"><span class="nm">${esc(nm)}</span><span class="tm">${fmtTime(ms)}</span></div><div class="msg-txt">${esc(item.text)}</div>${socialBar('chat',item.id)}${renderComments('chat',item.id)}</div>${canDel?`<button class="del" onclick="deleteChatMsg('${item.id}')" title="Apagar">×</button>`:''}</div>`;
+    }
+  });
+  wrap.innerHTML=html; wrap.scrollTop=wrap.scrollHeight;
 }
 function renderRecados(){
   const wrap=$('#recadosList');
@@ -2501,7 +2648,7 @@ function renderRecados(){
     const ms = c.ts?.toMillis?c.ts.toMillis():+new Date(c.ts||Date.now());
     const mine = (myId && c.authorId===myId) || (!myId && myName && c.author===myName);
     const canDel = isAdmin || mine;
-    const av = c.authorFoto ? `<img src="${esc(c.authorFoto)}" alt="">` : initials(c.author);
+    const cm=memberForAuthor(c.authorId,c.author); const currentPic=cm?.foto||c.authorFoto||''; const av = currentPic ? `<img src="${esc(currentPic)}" alt="">` : initials(cm?.nome||c.author);
     const targeted = c.para ? memberById(c.para) : null;
     const toLabel = c.para ? esc(targeted?targeted.nome:(c.paraNome||'alguém que saiu do grupo')) : 'Todos';
     const prio = c.prioridade || 'media';
@@ -2661,13 +2808,13 @@ function renderPubs(){
   }).join('');
 }
 let pubTipo='link', pubFileData='', pubFileName='';
-function openPubModal(){
+function openPubModal(presetMemberId=null){
   if(!myId && !isAdmin){ toast('Identifique-se primeiro para adicionar uma publicação.'); openIdentity(); return; }
   const sel=$('#pubAutor');
   if(isAdmin){
     $('#pubAutorRow').style.display='block';
     const ordered=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome));
-    sel.innerHTML=ordered.map(m=>`<option value="${m.id}" ${m.id===myId?'selected':''}>${esc(m.nome)}</option>`).join('');
+    sel.innerHTML=ordered.map(m=>`<option value="${m.id}" ${(presetMemberId||myId)===m.id?'selected':''}>${esc(m.nome)}</option>`).join('');
   }else{
     $('#pubAutorRow').style.display='none';
     sel.innerHTML=`<option value="${myId}">${esc(memberById(myId).nome)}</option>`;
@@ -2769,16 +2916,17 @@ function renderFeedSide(){
   $('#feedStats').innerHTML=`<div class="side-stat"><span>Carbonautas ativos</span><b>${active}</b></div><div class="side-stat"><span>Egressos</span><b>${eg}</b></div><div class="side-stat"><span>Registros acompanhados</span><b>${state.activities.length}</b></div><div class="side-stat"><span>Entregas concluídas</span><b>${done}</b></div>`;
   const upcoming=buildCronoItems().filter(x=>!x.feito&&x.data).sort((a,b)=>a.data.localeCompare(b.data)).slice(0,5); $('#feedDeadlines').innerHTML=upcoming.length?upcoming.map(x=>`<div class="side-stat"><span>${esc(x.titulo)}</span><b>${fmtDate(x.data)}</b></div>`).join(''):'<div class="hint">Nenhuma entrega próxima.</div>';
 }
-function renderComments(targetType,targetId){const s=socialFor(targetType,targetId);return `<div class="comments">${s.cs.slice(-8).map(c=>`<div class="comment"><div class="comment-av" style="background:${c.authorColor||'#7c8b90'}">${initials(c.authorName||'?')}</div><div class="comment-b"><div class="comment-name">${esc(c.authorName||'')}</div><div class="comment-text">${esc(c.text||'')}</div></div></div>`).join('')}<div class="comment-form"><input id="comment_${targetType}_${targetId}" placeholder="Escreva um comentário…"><button class="btn primary" onclick="addSocialComment('${targetType}','${targetId}','comment_${targetType}_${targetId}')">Enviar</button></div></div>`}
-function socialBar(targetType,targetId){const s=socialFor(targetType,targetId),mine=myReaction(targetType,targetId);return `<div class="social-bar"><button class="react-btn ${mine?.type==='like'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','like')">👍 ${s.likes||''}</button><button class="react-btn heart ${mine?.type==='heart'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','heart')">💙 ${s.hearts||''}</button><button class="comment-toggle">💬 ${s.cs.length||''}</button><div class="social-spacer"></div></div>`}
+function renderComments(targetType,targetId){const s=socialFor(targetType,targetId);return `<div class="comments" id="comments_${targetType}_${targetId}" style="display:none">${s.cs.slice(-8).map(c=>{const m=memberForAuthor(c.authorId,c.authorName);const pic=m?.foto||'';return `<div class="comment"><div class="comment-av" style="background:${m?NIVEIS[m.nivel]?.color:(c.authorColor||'#7c8b90')}">${pic?`<img src="${esc(pic)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`:initials(c.authorName||'?')}</div><div class="comment-b"><div class="comment-name">${esc(c.authorName||m?.nome||'')}</div><div class="comment-text">${esc(c.text||'')}</div></div></div>`}).join('')}<div class="comment-form"><input id="comment_${targetType}_${targetId}" placeholder="Escreva um comentário…"><button class="btn primary" onclick="addSocialComment('${targetType}','${targetId}','comment_${targetType}_${targetId}')">Enviar</button></div></div>`}
+function toggleComments(targetType,targetId){const el=$('#comments_'+targetType+'_'+targetId);if(el)el.style.display=el.style.display==='none'?'block':'none'}
+function socialBar(targetType,targetId){const s=socialFor(targetType,targetId),mine=myReaction(targetType,targetId);return `<div class="social-bar"><button class="react-btn ${mine?.type==='like'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','like')">👍 ${s.likes||''}</button><button class="react-btn heart ${mine?.type==='heart'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','heart')">💙 ${s.hearts||''}</button><button class="comment-toggle" onclick="toggleComments('${targetType}','${targetId}')">💬 ${s.cs.length||''}</button><div class="social-spacer"></div></div>`}
 function renderFeed(){
   renderFeedSide();const a=currentActor();const av=$('#feedMeAv'); if(av){av.innerHTML=a?.foto?`<img src="${esc(a.foto)}" alt="">`:initials(a?.name||'?');av.style.background=a?.color||'#7c8b90'}
-  const list=$('#feedList');$('#feedEmpty').style.display=state.feed.length?'none':'block';list.innerHTML=state.feed.map(p=>{const m=memberById(p.authorId),dt=p.ts?.toMillis?new Date(p.ts.toMillis()):null,can=isAdmin||isMe(p.authorId);const isImg=p.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(p.fileName||p.fileUrl)||p.mime?.startsWith('image/'));return `<article class="feed-card"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${p.authorFoto?`<img src="${esc(p.authorFoto)}" alt="">`:initials(p.authorName||'?')}</div><div><div class="feed-author">${esc(p.authorName||'Carbonauta')}</div><div class="feed-time">${dt?dt.toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div><span class="feed-kind">${esc((p.kind||'atualizacao').replace(/^./,x=>x.toUpperCase()))}</span>${can?`<button class="mini-x" onclick="deleteFeedPost('${p.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${p.title?`<div class="feed-title">${esc(p.title)}</div>`:''}${p.text?`<div class="feed-text">${esc(p.text)}</div>`:''}${p.externalUrl?`<a class="feed-attachment" href="${esc(p.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${p.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.fileUrl)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.title||'Anexo')}'))">👁️ Visualizar · ${esc(p.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(p.fileUrl)}" alt="${esc(p.title||'Foto publicada')}">`:''}${socialBar('post',p.id)}${renderComments('post',p.id)}</article>`}).join('');
+  const list=$('#feedList');$('#feedEmpty').style.display=state.feed.length?'none':'block';list.innerHTML=state.feed.map(p=>{const m=memberForAuthor(p.authorId,p.authorName),dt=p.ts?.toMillis?new Date(p.ts.toMillis()):null,can=isAdmin||isMe(p.authorId);const isImg=p.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(p.fileName||p.fileUrl)||p.mime?.startsWith('image/'));return `<article class="feed-card"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${(m?.foto||p.authorFoto)?`<img src="${esc(m?.foto||p.authorFoto)}" alt="">`:initials(m?.nome||p.authorName||'?')}</div><div><div class="feed-author">${esc(p.authorName||'Carbonauta')}</div><div class="feed-time">${dt?dt.toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div><span class="feed-kind">${esc((p.kind||'atualizacao').replace(/^./,x=>x.toUpperCase()))}</span>${can?`<button class="mini-x" onclick="deleteFeedPost('${p.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${p.title?`<div class="feed-title">${esc(p.title)}</div>`:''}${p.text?`<div class="feed-text">${esc(p.text)}</div>`:''}${p.externalUrl?`<a class="feed-attachment" href="${esc(p.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${p.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.fileUrl)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.title||'Anexo')}'))">👁️ Visualizar · ${esc(p.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(p.fileUrl)}" alt="${esc(p.title||'Foto publicada')}">`:''}${socialBar('post',p.id)}${renderComments('post',p.id)}</article>`}).join('');
 }
 function openPostModal(){if(!myId){toast('Identifique-se primeiro para publicar.');openIdentity();return}postFileData='';postFileName='';$('#postKind').value='atualizacao';$('#postTitle').value='';$('#postText').value='';$('#postUrl').value='';$('#postFileName').textContent='Nenhum arquivo escolhido.';openOverlay('postOverlay')}
 function handlePostFile(file){if(!file)return;if(file.size>15*1024*1024){toast('Arquivo maior que 15 MB.');return}const r=new FileReader();r.onload=e=>{postFileData=e.target.result;postFileName=file.name;$('#postFileName').textContent=file.name};r.readAsDataURL(file)}
-async function saveFeedPost(){const text=$('#postText').value.trim(),title=$('#postTitle').value.trim();if(!text&&!title&&!postFileData&&!$('#postUrl').value.trim()){toast('Adicione algum conteúdo à publicação.');return}const a=currentActor();let fileUrl='',storagePath='';try{if(postFileData){toast('Enviando anexo…');const up=await fbUploadAny('rede_feed','post_'+a.id,postFileData,postFileName);fileUrl=up.url;storagePath=up.path}await FB().addDoc(FB().collection(window.db,'rede_feed'),{authorId:a.id,authorUid:window.auth.currentUser?.uid||'',authorName:a.name,authorFoto:a.foto,kind:$('#postKind').value,title,text,externalUrl:$('#postUrl').value.trim(),fileUrl,fileName:postFileName,storagePath,ts:FB().serverTimestamp()});closeOverlay('postOverlay');toast('Publicado no feed.')}catch(e){console.error(e);const msg=e?.code==='permission-denied'?'Permissão negada pelo Firestore. Atualize as regras do feed.':(e?.message||'Erro ao publicar no feed.');toast(msg)}}
-async function deleteFeedPost(id){const p=state.feed.find(x=>x.id===id);if(!p||!(isAdmin||isMe(p.authorId))||!confirm('Excluir esta publicação do feed?'))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_feed',id));if(p.storagePath){try{await FB().deleteObject(FB().sRef(window.storage,p.storagePath))}catch(e){}}toast('Publicação removida.')}catch(e){console.error(e);toast('Erro ao excluir publicação.')}}
+async function saveFeedPost(){const text=$('#postText').value.trim(),title=$('#postTitle').value.trim();if(!text&&!title&&!postFileData&&!$('#postUrl').value.trim()){toast('Adicione algum conteúdo à publicação.');return}const a=currentActor();let fileUrl='',storagePath='';try{if(postFileData){toast('Enviando anexo…');const up=await fbUploadAny('rede_feed','post_'+a.id,postFileData,postFileName);fileUrl=up.url;storagePath=up.path}await FB().addDoc(FB().collection(window.db,'rede_feed'),{authorId:a.id,authorUid:window.auth.currentUser?.uid||'',authorName:a.name,authorFoto:a.foto,kind:$('#postKind').value,title,text,externalUrl:$('#postUrl').value.trim(),fileUrl,fileName:postFileName,storagePath,ts:FB().serverTimestamp()});closeOverlay('postOverlay');toast('Publicado no mural.')}catch(e){console.error(e);const msg=e?.code==='permission-denied'?'Permissão negada pelo Firestore. Verifique as regras de publicações do mural.':(e?.message||'Erro ao publicar no mural.');toast(msg)}}
+async function deleteFeedPost(id){const p=state.feed.find(x=>x.id===id);if(!p||!(isAdmin||isMe(p.authorId))||!confirm('Excluir esta publicação do mural?'))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_feed',id));if(p.storagePath){try{await FB().deleteObject(FB().sRef(window.storage,p.storagePath))}catch(e){}}toast('Publicação removida.')}catch(e){console.error(e);toast('Erro ao excluir publicação.')}}
 
 function renderLightboxSocial(){if(!lbPhotoId)return;$('#lbSocial').innerHTML=socialBar('photo',lbPhotoId)+renderComments('photo',lbPhotoId)}
 
@@ -2807,8 +2955,8 @@ async function dedupeMembers(){
 
   try{
     for(const m of toDelete){ await fbDeleteMember(m.id); }
-    closeOverlay('pinOverlay');
     toast(toDelete.length+' cadastro(s) duplicado(s) removido(s).');
+    if($('#peopleOverlay')?.classList.contains('open')) renderPeopleManager();
   }catch(e){ console.error(e); toast('Erro ao remover duplicados. Tente novamente.'); }
 }
 
@@ -2918,14 +3066,16 @@ $('#unlinkedLogoutBtn').onclick=doLogout;
 $('#linkAccessBtn').onclick=linkExistingAccess;
 $('#dedupeBtn').onclick=dedupeMembers;
 
-$('#addBtn').onclick=()=>openMember(null);
+$('#addBtn').onclick=openPeopleManager;
 if($('#managePeopleBtn')) $('#managePeopleBtn').onclick=openPeopleManager;
 if($('#peopleAddBtn')) $('#peopleAddBtn').onclick=()=>{closeOverlay('peopleOverlay');openMember(null)};
 if($('#peopleSearch')) $('#peopleSearch').oninput=renderPeopleManager;
+if($('#peopleDedupeBtn')) $('#peopleDedupeBtn').onclick=dedupeMembers;
 $('#recadoBtn').onclick=openRecado;
 $('#saveMember').onclick=saveMember;
 $('#deleteMember').onclick=deleteMember;
 $('#mHub').onchange=e=>{$('#mHubMotivo').style.display=e.target.checked?'block':'none'};
+$('#mBolsista').onchange=toggleScholarFields;
 $('#vincSearch').addEventListener('input',renderVincPick);
 $('#addRep').onclick=()=>{formResultados.push({titulo:'',url:''});renderRepList()};
 $('#addPrazo').onclick=()=>{formPrazos.push({titulo:'',data:'',feito:false});renderPrazoList()};
@@ -2967,7 +3117,7 @@ $('#trackOwner').onchange=renderTrack; $('#trackStatus').onchange=renderTrack; $
 $('#activityProgress').oninput=e=>$('#activityProgressLabel').textContent=e.target.value+'%';
 $('#activityFilePick').onclick=()=>$('#activityFile').click(); $('#activityFile').onchange=e=>handleActivityFile(e.target.files[0]);
 $('#saveActivityBtn').onclick=saveActivity; $('#deleteActivityBtn').onclick=deleteActivity;
-$('#newPostBtn').onclick=openPostModal; $('#postFilePick').onclick=()=>$('#postFile').click(); $('#postFile').onchange=e=>handlePostFile(e.target.files[0]); $('#savePostBtn').onclick=saveFeedPost;
+if($('#newPostBtn')) $('#newPostBtn').onclick=openPostModal; if($('#muralPostBtn')) $('#muralPostBtn').onclick=openPostModal; $('#postFilePick').onclick=()=>$('#postFile').click(); $('#postFile').onchange=e=>handlePostFile(e.target.files[0]); $('#savePostBtn').onclick=saveFeedPost;
 
 $('#addPhotoBtn').onclick=openPhotoModal;
 $('#gPickBtn').onclick=()=>$('#gFile').click();
@@ -2988,6 +3138,7 @@ $$('input[name="pubTipo"]').forEach(r=>r.onchange=e=>{
 $('#pubFilePick').onclick=()=>$('#pubFile').click();
 $('#pubFile').onchange=e=>handlePubFile(e.target.files[0]);
 $('#savePubBtn').onclick=savePublicacao;
+$('#repoAddBtn').onclick=()=>{const id=repoMemberId;if(!(isAdmin||isMe(id))){toast('Sem permissão para adicionar documentos para esta pessoa.');return}closeOverlay('repoOverlay');openPubModal(id)};
 
 $$('[data-close]').forEach(b=>b.onclick=()=>closeOverlay(b.dataset.close));
 $$('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
@@ -2998,7 +3149,7 @@ window.addEventListener('resize',()=>{if(simulation){const[W,H]=graphSize();simu
 window.selectNode=selectNode; window.closeDetail=closeDetail; window.openMember=openMember;
 window.filterLinha=filterLinha; window.recadoTo=recadoTo;
 window.toggleCronoItem=toggleCronoItem; window.deleteCronoItem=deleteCronoItem; window.unlinkAccess=unlinkAccess;
-window.deleteChatMsg=deleteChatMsg; window.deletePublicacao=deletePublicacao; window.editActivity=openActivity; window.toggleReaction=toggleReaction; window.addSocialComment=addSocialComment; window.deleteFeedPost=deleteFeedPost;
+window.deleteChatMsg=deleteChatMsg; window.deletePublicacao=deletePublicacao; window.editActivity=openActivity; window.toggleReaction=toggleReaction; window.toggleComments=toggleComments; window.addSocialComment=addSocialComment; window.deleteFeedPost=deleteFeedPost;
 
 refreshIdentityUI();
 waitFirebase().then(startAuth);
