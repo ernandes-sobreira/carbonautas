@@ -418,7 +418,7 @@
   .feed-body{padding:4px 15px 12px}.feed-title{font-family:'Fraunces';font-size:18px;font-weight:600;margin-bottom:5px}.feed-text{font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink)}
   .feed-image{width:100%;max-height:520px;object-fit:cover;display:block;background:var(--panel)}
   .feed-attachment{margin-top:10px;border:1px solid var(--line);border-radius:11px;padding:10px 12px;display:flex;gap:9px;align-items:center;text-decoration:none;color:var(--ink);font-size:12.5px;font-weight:600;background:var(--panel)}
-  .social-bar{display:flex;align-items:center;gap:4px;border-top:1px solid var(--line-2);padding:8px 10px}.react-btn,.comment-toggle{border:0;background:transparent;border-radius:9px;padding:7px 9px;font-size:12px;color:var(--ink-2);display:inline-flex;align-items:center;gap:5px}.react-btn:hover,.comment-toggle:hover{background:var(--panel)}.react-btn.on{background:#eef6fb;color:#166b9b}.react-btn.heart.on{color:#1670b7}.social-spacer{flex:1}
+  .social-wrap{border-top:1px solid var(--line-2);position:relative}.social-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 12px 3px;color:var(--ink-3);font-size:11.5px;min-height:26px}.social-summary .sum-left{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.social-summary .sum-right{white-space:nowrap}.social-bar{display:flex;align-items:center;gap:5px;padding:6px 9px 9px;position:relative}.react-btn,.comment-toggle{border:1px solid transparent;background:transparent;border-radius:11px;padding:8px 11px;font-size:12px;font-weight:700;color:var(--ink-2);display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;cursor:pointer;transition:.15s ease}.react-btn:hover,.comment-toggle:hover{background:var(--panel);border-color:var(--line)}.react-btn.on{background:#E7F2FF;border-color:#9BCBFF;color:#0A5EA8}.react-btn.heart.on{background:#E8F4FF;border-color:#7CC4FF;color:#0067B8}.react-btn.party.on{background:#FFF0D6;border-color:#FFC563;color:#9C5B00}.comment-toggle.on{background:#F1F4F7;border-color:var(--line);color:var(--ink)}.social-spacer{flex:1}.react-emoji{font-size:16px;line-height:1}.react-count{font-variant-numeric:tabular-nums}.emoji-burst{position:fixed;pointer-events:none;z-index:99999;font-size:22px;animation:emojiFloat .9s ease-out forwards;filter:drop-shadow(0 3px 5px rgba(0,0,0,.12))}@keyframes emojiFloat{0%{opacity:0;transform:translate(-50%,0) scale(.65) rotate(0deg)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-1 * var(--dy))) scale(1.35) rotate(var(--rot))}}@media (max-width:650px){.social-bar{display:grid;grid-template-columns:repeat(4,1fr)}.react-btn,.comment-toggle{padding:8px 5px;font-size:11px}.social-summary{font-size:10.5px}}@media (prefers-reduced-motion:reduce){.emoji-burst{display:none}}
   .comments{border-top:1px solid var(--line-2);padding:10px 14px 13px}.comment{display:flex;gap:8px;margin:8px 0}.comment-av{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:#fff;font-size:9px;font-weight:700;flex:0 0 auto}.comment-b{background:var(--panel);border-radius:11px;padding:7px 10px;min-width:0}.comment-name{font-size:10.5px;font-weight:700}.comment-text{font-size:12.5px;line-height:1.4;white-space:pre-wrap}.comment-form{display:flex;gap:7px;margin-top:9px}.comment-form input{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px;outline:0}.comment-form input:focus{border-color:var(--petrol)}
   .feed-side{position:sticky;top:14px}.side-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}.side-card h3{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin:0 0 10px}.side-stat{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--line-2)}.side-stat:last-child{border-bottom:0}.side-stat b{font-family:'Space Grotesk'}
   @media(max-width:900px){.feed-layout{grid-template-columns:1fr}.feed-side{position:static;display:grid;grid-template-columns:1fr 1fr;gap:10px}.side-card{margin:0}}
@@ -902,7 +902,7 @@
             <div class="sub">Documentos, projetos, apresentações, relatórios, planilhas, artigos e outros produtos de todos os Carbonautas.</div>
           </div>
           <div class="spacer"></div>
-          <button class="btn primary" id="addPubBtn">
+          <button class="btn primary" id="addPubBtn" onclick="openPubModal()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Adicionar publicação
           </button>
@@ -1679,20 +1679,69 @@ function currentActor(){
 function socialFor(targetType,targetId){
   const rs=state.reactions.filter(r=>r.targetType===targetType&&r.targetId===targetId);
   const cs=state.comments.filter(c=>c.targetType===targetType&&c.targetId===targetId);
-  return {rs,cs,likes:rs.filter(r=>r.type==='like').length,hearts:rs.filter(r=>r.type==='heart').length};
+  return {
+    rs,cs,
+    likes:rs.filter(r=>r.type==='like').length,
+    hearts:rs.filter(r=>r.type==='heart').length,
+    parties:rs.filter(r=>r.type==='party').length
+  };
 }
-function myReaction(targetType,targetId){return state.reactions.find(r=>r.targetType===targetType&&r.targetId===targetId&&r.actorId===myId)}
-async function toggleReaction(targetType,targetId,type){
-  if(!myId){toast('Identifique-se como um Carbonauta para reagir.');openIdentity();return}
-  const f=FB(), id=`${targetType}_${targetId}_${myId}`.replace(/[^a-zA-Z0-9_-]/g,'_');
-  const ref=f.doc(window.db,'rede_feed_reactions',id), cur=myReaction(targetType,targetId), actor=currentActor();
-  if(cur&&cur.type===type) await f.deleteDoc(ref);
-  else await f.setDoc(ref,{targetType,targetId,type,actorId:actor.id,actorUid:window.auth.currentUser?.uid||'',actorName:actor.name,ts:f.serverTimestamp()});
+function myReaction(targetType,targetId){
+  const uid=window.auth?.currentUser?.uid||'';
+  return state.reactions.find(r=>r.targetType===targetType&&r.targetId===targetId&&((uid&&r.actorUid===uid)||(myId&&r.actorId===myId)));
+}
+function burstReaction(btn,emoji){
+  if(!btn)return;
+  const r=btn.getBoundingClientRect();
+  const n=7;
+  for(let i=0;i<n;i++){
+    const e=document.createElement('span');
+    e.className='emoji-burst';e.textContent=emoji;
+    e.style.left=(r.left+r.width/2+(Math.random()*18-9))+'px';
+    e.style.top=(r.top+r.height/2)+'px';
+    e.style.setProperty('--dx',(Math.random()*90-45).toFixed(0)+'px');
+    e.style.setProperty('--dy',(70+Math.random()*85).toFixed(0)+'px');
+    e.style.setProperty('--rot',(Math.random()*50-25).toFixed(0)+'deg');
+    e.style.animationDelay=(i*28)+'ms';
+    document.body.appendChild(e);
+    setTimeout(()=>e.remove(),1250);
+  }
+}
+async function toggleReaction(targetType,targetId,type,btn){
+  if(!myId||!window.auth?.currentUser){toast('Entre na sua conta para reagir.');return}
+  const emoji=type==='heart'?'💙':type==='party'?'🎉':'👍';
+  const f=FB(),uid=window.auth.currentUser.uid;
+  const id=`${targetType}_${targetId}_${uid}`.replace(/[^a-zA-Z0-9_-]/g,'_');
+  const ref=f.doc(window.db,'rede_feed_reactions',id),cur=myReaction(targetType,targetId),actor=currentActor();
+  if(!actor){toast('Seu perfil não está vinculado ao login.');return}
+  try{
+    if(cur&&cur.type===type){
+      await f.deleteDoc(f.doc(window.db,'rede_feed_reactions',cur.id));
+    }else{
+      if(cur&&cur.id&&cur.id!==id){
+        try{await f.deleteDoc(f.doc(window.db,'rede_feed_reactions',cur.id))}catch(_e){}
+      }
+      await f.setDoc(ref,{targetType,targetId,type,actorId:actor.id,actorUid:uid,actorName:actor.name,ts:f.serverTimestamp()});
+      burstReaction(btn,emoji);
+    }
+  }catch(e){
+    console.error('Erro ao reagir',e);
+    toast(e?.code==='permission-denied'?'O Firebase bloqueou a reação. É preciso liberar rede_feed_reactions nas regras.':'Não foi possível registrar a reação.');
+  }
 }
 async function addSocialComment(targetType,targetId,inputId){
-  if(!myId){toast('Identifique-se como um Carbonauta para comentar.');openIdentity();return}
-  const el=$('#'+inputId); if(!el)return; const text=el.value.trim(); if(!text)return; const a=currentActor();
-  await FB().addDoc(FB().collection(window.db,'rede_feed_comments'),{targetType,targetId,text,authorId:a.id,authorUid:window.auth.currentUser?.uid||'',authorName:a.name,authorColor:a.color,ts:FB().serverTimestamp()}); el.value='';
+  if(!myId||!window.auth?.currentUser){toast('Entre na sua conta para comentar.');return}
+  const el=$('#'+inputId);if(!el)return;
+  const text=el.value.trim();if(!text){el.focus();return}
+  const a=currentActor();if(!a){toast('Seu perfil não está vinculado ao login.');return}
+  const btn=el.parentElement?.querySelector('button');if(btn){btn.disabled=true;btn.textContent='Enviando…'}
+  try{
+    await FB().addDoc(FB().collection(window.db,'rede_feed_comments'),{targetType,targetId,text,authorId:a.id,authorUid:window.auth.currentUser.uid,authorName:a.name,authorColor:a.color,ts:FB().serverTimestamp()});
+    el.value='';el.focus();
+  }catch(e){
+    console.error('Erro ao comentar',e);
+    toast(e?.code==='permission-denied'?'O Firebase bloqueou o comentário. É preciso liberar rede_feed_comments nas regras.':'Não foi possível publicar o comentário.');
+  }finally{if(btn){btn.disabled=false;btn.textContent='Enviar'}}
 }
 
 /* ============ AUTHENTICATION / PERMISSIONS ============ */
@@ -2690,11 +2739,11 @@ function renderFotos(){
     <div class="ph" data-id="${p.id}">
       <img src="${esc(p.url)}" alt="${esc(p.legenda||'')}" loading="lazy">
       ${(p.legenda||p.autor)?`<div class="ph-cap">${esc(p.legenda||'')}${p.autor?`<span class="by">por ${esc(p.autor)}</span>`:''}</div>`:''}
-      <div class="ph-social">${(()=>{const ss=socialFor('photo',p.id),mr=myReaction('photo',p.id);return `<button class="${mr?.type==='like'?'on':''}" data-react="like">👍 ${ss.likes||''}</button><button class="${mr?.type==='heart'?'on':''}" data-react="heart">💙 ${ss.hearts||''}</button><button data-comments>💬 ${ss.cs.length||''}</button>`})()}</div>
+      <div class="ph-social">${(()=>{const ss=socialFor('photo',p.id),mr=myReaction('photo',p.id);return `<button class="${mr?.type==='like'?'on':''}" data-react="like" title="Curtir">👍 ${ss.likes||''}</button><button class="${mr?.type==='heart'?'on':''}" data-react="heart" title="Amei">💙 ${ss.hearts||''}</button><button class="${mr?.type==='party'?'on':''}" data-react="party" title="Festa">🎉 ${ss.parties||''}</button><button data-comments title="Comentar">💬 ${ss.cs.length||''}</button>`})()}</div>
     </div>`).join('');
   gal.querySelectorAll('.ph').forEach(el=>{
     el.onclick=e=>{
-      const rb=e.target.closest('[data-react]'); if(rb){e.stopPropagation();toggleReaction('photo',el.dataset.id,rb.dataset.react);return}
+      const rb=e.target.closest('[data-react]'); if(rb){e.stopPropagation();toggleReaction('photo',el.dataset.id,rb.dataset.react,rb);return}
       openLightbox(el.dataset.id);
     };
   });
@@ -2916,9 +2965,21 @@ function renderFeedSide(){
   $('#feedStats').innerHTML=`<div class="side-stat"><span>Carbonautas ativos</span><b>${active}</b></div><div class="side-stat"><span>Egressos</span><b>${eg}</b></div><div class="side-stat"><span>Registros acompanhados</span><b>${state.activities.length}</b></div><div class="side-stat"><span>Entregas concluídas</span><b>${done}</b></div>`;
   const upcoming=buildCronoItems().filter(x=>!x.feito&&x.data).sort((a,b)=>a.data.localeCompare(b.data)).slice(0,5); $('#feedDeadlines').innerHTML=upcoming.length?upcoming.map(x=>`<div class="side-stat"><span>${esc(x.titulo)}</span><b>${fmtDate(x.data)}</b></div>`).join(''):'<div class="hint">Nenhuma entrega próxima.</div>';
 }
-function renderComments(targetType,targetId){const s=socialFor(targetType,targetId);return `<div class="comments" id="comments_${targetType}_${targetId}" style="display:none">${s.cs.slice(-8).map(c=>{const m=memberForAuthor(c.authorId,c.authorName);const pic=m?.foto||'';return `<div class="comment"><div class="comment-av" style="background:${m?NIVEIS[m.nivel]?.color:(c.authorColor||'#7c8b90')}">${pic?`<img src="${esc(pic)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`:initials(c.authorName||'?')}</div><div class="comment-b"><div class="comment-name">${esc(c.authorName||m?.nome||'')}</div><div class="comment-text">${esc(c.text||'')}</div></div></div>`}).join('')}<div class="comment-form"><input id="comment_${targetType}_${targetId}" placeholder="Escreva um comentário…"><button class="btn primary" onclick="addSocialComment('${targetType}','${targetId}','comment_${targetType}_${targetId}')">Enviar</button></div></div>`}
-function toggleComments(targetType,targetId){const el=$('#comments_'+targetType+'_'+targetId);if(el)el.style.display=el.style.display==='none'?'block':'none'}
-function socialBar(targetType,targetId){const s=socialFor(targetType,targetId),mine=myReaction(targetType,targetId);return `<div class="social-bar"><button class="react-btn ${mine?.type==='like'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','like')">👍 ${s.likes||''}</button><button class="react-btn heart ${mine?.type==='heart'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','heart')">💙 ${s.hearts||''}</button><button class="comment-toggle" onclick="toggleComments('${targetType}','${targetId}')">💬 ${s.cs.length||''}</button><div class="social-spacer"></div></div>`}
+function renderComments(targetType,targetId){
+  const s=socialFor(targetType,targetId);
+  return `<div class="comments" id="comments_${targetType}_${targetId}" style="display:none">${s.cs.slice(-20).map(c=>{const m=memberForAuthor(c.authorId,c.authorName);const pic=m?.foto||'';return `<div class="comment"><div class="comment-av" style="background:${m?NIVEIS[m.nivel]?.color:(c.authorColor||'#7c8b90')}">${pic?`<img src="${esc(pic)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`:initials(c.authorName||'?')}</div><div class="comment-b"><div class="comment-name">${esc(c.authorName||m?.nome||'')}</div><div class="comment-text">${esc(c.text||'')}</div></div></div>`}).join('')}<div class="comment-form"><input id="comment_${targetType}_${targetId}" placeholder="Escreva um comentário…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();addSocialComment('${targetType}','${targetId}','comment_${targetType}_${targetId}')}"><button class="btn primary" onclick="addSocialComment('${targetType}','${targetId}','comment_${targetType}_${targetId}')">Enviar</button></div></div>`
+}
+function toggleComments(targetType,targetId){
+  const el=$('#comments_'+targetType+'_'+targetId);if(!el)return;
+  const open=el.style.display!=='none';el.style.display=open?'none':'block';
+  if(!open)setTimeout(()=>$('#comment_'+targetType+'_'+targetId)?.focus(),30);
+}
+function socialBar(targetType,targetId){
+  const s=socialFor(targetType,targetId),mine=myReaction(targetType,targetId),total=s.likes+s.hearts+s.parties;
+  const left=[s.likes?`👍 ${s.likes}`:'',s.hearts?`💙 ${s.hearts}`:'',s.parties?`🎉 ${s.parties}`:''].filter(Boolean).join(' · ');
+  const summary=(total||s.cs.length)?`<div class="social-summary"><span class="sum-left">${left||'Sem reações ainda'}</span><span class="sum-right">${s.cs.length?`${s.cs.length} comentário${s.cs.length===1?'':'s'}`:''}</span></div>`:'';
+  return `<div class="social-wrap">${summary}<div class="social-bar"><button type="button" class="react-btn ${mine?.type==='like'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','like',this)" aria-label="Curtir"><span class="react-emoji">👍</span><span>Curtir</span>${s.likes?`<span class="react-count">${s.likes}</span>`:''}</button><button type="button" class="react-btn heart ${mine?.type==='heart'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','heart',this)" aria-label="Amei"><span class="react-emoji">💙</span><span>Amei</span>${s.hearts?`<span class="react-count">${s.hearts}</span>`:''}</button><button type="button" class="react-btn party ${mine?.type==='party'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','party',this)" aria-label="Comemorar"><span class="react-emoji">🎉</span><span>Festa</span>${s.parties?`<span class="react-count">${s.parties}</span>`:''}</button><button type="button" class="comment-toggle" onclick="toggleComments('${targetType}','${targetId}')"><span class="react-emoji">💬</span><span>Comentar</span>${s.cs.length?`<span class="react-count">${s.cs.length}</span>`:''}</button></div></div>`
+}
 function renderFeed(){
   renderFeedSide();const a=currentActor();const av=$('#feedMeAv'); if(av){av.innerHTML=a?.foto?`<img src="${esc(a.foto)}" alt="">`:initials(a?.name||'?');av.style.background=a?.color||'#7c8b90'}
   const list=$('#feedList');$('#feedEmpty').style.display=state.feed.length?'none':'block';list.innerHTML=state.feed.map(p=>{const m=memberForAuthor(p.authorId,p.authorName),dt=p.ts?.toMillis?new Date(p.ts.toMillis()):null,can=isAdmin||isMe(p.authorId);const isImg=p.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(p.fileName||p.fileUrl)||p.mime?.startsWith('image/'));return `<article class="feed-card"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${(m?.foto||p.authorFoto)?`<img src="${esc(m?.foto||p.authorFoto)}" alt="">`:initials(m?.nome||p.authorName||'?')}</div><div><div class="feed-author">${esc(p.authorName||'Carbonauta')}</div><div class="feed-time">${dt?dt.toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div><span class="feed-kind">${esc((p.kind||'atualizacao').replace(/^./,x=>x.toUpperCase()))}</span>${can?`<button class="mini-x" onclick="deleteFeedPost('${p.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${p.title?`<div class="feed-title">${esc(p.title)}</div>`:''}${p.text?`<div class="feed-text">${esc(p.text)}</div>`:''}${p.externalUrl?`<a class="feed-attachment" href="${esc(p.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${p.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.fileUrl)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.title||'Anexo')}'))">👁️ Visualizar · ${esc(p.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(p.fileUrl)}" alt="${esc(p.title||'Foto publicada')}">`:''}${socialBar('post',p.id)}${renderComments('post',p.id)}</article>`}).join('');
