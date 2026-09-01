@@ -406,6 +406,7 @@
   .track-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.track-links a{text-decoration:none}
   .track-actions{display:flex;gap:4px;margin-left:auto}
   @media(max-width:760px){.track-grid{grid-template-columns:1fr}.track-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  .track-people{display:flex;flex-direction:column;gap:14px}.track-person{border:1px solid var(--line);border-radius:18px;background:var(--white);overflow:hidden}.track-person-head{display:flex;align-items:center;gap:12px;padding:15px 17px;border-bottom:1px solid var(--line-2);background:linear-gradient(90deg,#f8fbfc,#fff)}.track-person-av{width:44px;height:44px;border-radius:13px;overflow:hidden;display:grid;place-items:center;color:#fff;font-weight:800;flex:0 0 auto}.track-person-av img{width:100%;height:100%;object-fit:cover}.track-person-title{font-weight:800;font-size:15px}.track-person-sub{font-size:11.5px;color:var(--ink-3);margin-top:2px}.track-person-body{padding:15px 17px}.track-person-actions{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}.track-dashboard{display:grid;grid-template-columns:1.35fr .65fr;gap:13px}.track-periods{display:flex;flex-direction:column;gap:10px}.track-sidebox{border:1px solid var(--line);border-radius:14px;padding:12px;background:var(--panel)}.track-sidebox h4{margin:0 0 9px;font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3)}.track-mini-stat{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--line-2);font-size:12px}.track-mini-stat:last-child{border-bottom:0}.track-mini-stat b{font-size:12px;text-align:right}.period-card{border:1px solid var(--line);border-radius:13px;padding:11px 12px;background:#fff}.period-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.period-type{font-weight:800;font-size:12.5px}.period-title{color:var(--ink-2);font-size:12px}.period-remain{margin-left:auto;font-size:11px;font-weight:800;color:var(--petrol)}.period-bar{height:9px;border-radius:10px;background:var(--line-2);overflow:hidden;margin-top:9px}.period-bar span{display:block;height:100%;border-radius:10px;background:linear-gradient(90deg,#00A6A6,#6C4AF2)}.period-foot{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:5px;color:var(--ink-3);font-size:10.5px}.follow-list{margin-top:13px;border-top:1px solid var(--line-2);padding-top:10px}.follow-title{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);font-weight:800;margin-bottom:7px}.follow-item{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:start;padding:8px 0;border-bottom:1px solid var(--line-2)}.follow-item:last-child{border-bottom:0}.follow-icon{width:28px;height:28px;border-radius:9px;background:#eef5f6;display:grid;place-items:center}.follow-main{min-width:0}.follow-name{font-weight:750;font-size:12.5px}.follow-desc{font-size:11.5px;color:var(--ink-3);white-space:pre-wrap;margin-top:2px}.follow-date{font-size:10.5px;color:var(--ink-3);white-space:nowrap}.follow-date.over{color:var(--red);font-weight:800}.follow-edit{border:0;background:transparent;color:var(--ink-3);font-size:15px;cursor:pointer;padding:2px}.follow-edit:hover{color:var(--petrol)}.track-empty-person{font-size:12px;color:var(--ink-3);padding:8px 0}.track-alert{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:3px 8px;font-size:10.5px;font-weight:800;background:#fff0f0;color:#b52d42}.track-ok{background:#eaf7ef;color:#247345}.track-warn{background:#fff4dc;color:#946000}@media(max-width:800px){.track-dashboard{grid-template-columns:1fr}.track-person-head{align-items:flex-start}.track-person-actions{width:100%;margin-left:0}.track-person-head{flex-wrap:wrap}}
 
   /* ===== Feed social ===== */
   .feed-layout{display:grid;grid-template-columns:minmax(0,690px) 280px;gap:18px;align-items:start}
@@ -864,16 +865,19 @@
   <!-- ============ VIEW: ACOMPANHAMENTO ============ -->
   <div class="view" id="viewTrack">
     <div class="track-scroll"><div class="track-wrap">
-      <div class="view-head"><div><h2>Acompanhamento dos Carbonautas</h2><div class="sub">Projetos, ações, apresentações, relatórios, arquivos, andamento e entregas de cada bolsista e egresso.</div></div><div class="spacer"></div><button class="btn primary" id="addActivityBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo registro</button></div>
+      <div class="view-head">
+        <div><h2>Acompanhamento acadêmico</h2><div class="sub">Tempo de bolsa e formação, orientações, correções, qualificações, defesas, entregas e pendências. Documentos ficam exclusivamente no Repositório.</div></div>
+        <div class="spacer"></div>
+        <button class="btn primary" id="addActivityBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Registrar acompanhamento</button>
+      </div>
       <div class="track-kpis" id="trackKpis"></div>
       <div class="crono-filters">
         <select class="mini" id="trackOwner" style="width:auto"><option value="">Todos os Carbonautas</option></select>
-        <select class="mini" id="trackStatus" style="width:auto"><option value="">Todos os status</option><option value="planejado">Planejado</option><option value="andamento">Em andamento</option><option value="revisao">Em revisão</option><option value="concluido">Concluído</option><option value="pausado">Pausado</option></select>
-        <select class="mini" id="trackType" style="width:auto"><option value="">Todos os tipos</option><option value="projeto">Projeto</option><option value="acao">Ação</option><option value="apresentacao">Apresentação</option><option value="cronograma">Cronograma</option><option value="relatorio">Relatório</option><option value="arquivo">Arquivo/repositório</option><option value="outro">Outro</option></select>
-        <label class="toggle"><input type="checkbox" id="trackMine"> Só os meus</label>
+        <select class="mini" id="trackStatus" style="width:auto"><option value="">Todos</option><option value="pendentes">Com pendências</option><option value="proximos">Prazo nos próximos 30 dias</option><option value="encerrando">Período encerrando em 90 dias</option></select>
+        <label class="toggle"><input type="checkbox" id="trackMine"> Só o meu acompanhamento</label>
       </div>
-      <div class="track-grid" id="trackGrid"></div>
-      <div class="crono-empty" id="trackEmpty" style="display:none">Nenhum registro de acompanhamento com esses filtros.</div>
+      <div class="track-people" id="trackGrid"></div>
+      <div class="crono-empty" id="trackEmpty" style="display:none">Nenhum acompanhamento encontrado com esses filtros.</div>
     </div></div>
   </div>
 
@@ -1218,19 +1222,24 @@
 
 
 <!-- ACTIVITY MODAL -->
-<div class="overlay" id="activityOverlay"><div class="modal" style="max-width:600px">
-  <div class="modal-h"><h2 id="activityTitle">Novo registro de acompanhamento</h2><div class="spacer"></div><button class="btn ghost" data-close="activityOverlay">Fechar</button></div>
+<div class="overlay" id="activityOverlay"><div class="modal" style="max-width:620px">
+  <div class="modal-h"><h2 id="activityTitle">Registrar acompanhamento</h2><div class="spacer"></div><button class="btn ghost" data-close="activityOverlay">Fechar</button></div>
   <div class="modal-b">
-    <div class="fg" id="activityOwnerRow"><label>Responsável</label><select id="activityOwnerSel"></select></div>
-    <div class="grid2"><div class="fg"><label>Tipo</label><select id="activityType"><option value="projeto">Projeto</option><option value="acao">Ação</option><option value="apresentacao">Apresentação</option><option value="cronograma">Cronograma</option><option value="relatorio">Relatório</option><option value="arquivo">Arquivo/repositório</option><option value="outro">Outro</option></select></div><div class="fg"><label>Status</label><select id="activityStatus"><option value="planejado">Planejado</option><option value="andamento">Em andamento</option><option value="revisao">Em revisão</option><option value="concluido">Concluído</option><option value="pausado">Pausado</option></select></div></div>
-    <div class="fg"><label>Título</label><input id="activityName" placeholder="Ex.: Artigo sobre qualidade do ar"></div>
-    <div class="fg"><label>Descrição / próxima ação</label><textarea id="activityDesc" placeholder="O que está sendo feito, o que já foi entregue e qual é o próximo passo"></textarea></div>
-    <div class="grid2"><div class="fg"><label>Início</label><input type="date" id="activityStart"></div><div class="fg"><label>Prazo</label><input type="date" id="activityDue"></div></div>
-    <div class="fg"><label>Progresso <span id="activityProgressLabel">0%</span></label><input type="range" min="0" max="100" step="5" value="0" id="activityProgress"></div>
-    <div class="fg"><label>Link externo (opcional)</label><input id="activityUrl" placeholder="https://..."></div>
-    <div class="fg"><label>Arquivo (opcional, até 15 MB)</label><button class="btn" id="activityFilePick" style="justify-content:center">Escolher arquivo</button><input type="file" id="activityFile" style="display:none"><span class="hint" id="activityFileName">Nenhum arquivo escolhido.</span></div>
+    <div class="notice">Esta área registra somente acompanhamento. Arquivos, links, relatórios, apresentações e produtos devem ser guardados no <b>Repositório</b>.</div>
+    <div class="fg" id="activityOwnerRow"><label>Carbonauta</label><select id="activityOwnerSel"></select></div>
+    <div class="grid2">
+      <div class="fg"><label>Tipo de acompanhamento</label><select id="activityType">
+        <option value="mestrado">Mestrado</option><option value="doutorado">Doutorado</option><option value="tcc">TCC</option>
+        <option value="orientacao">Orientação</option><option value="correcao">Correção</option><option value="qualificacao">Qualificação</option><option value="defesa">Defesa</option><option value="entrega">Entrega / prazo</option><option value="pendencia">Pendência</option><option value="outro">Outro acompanhamento</option>
+      </select></div>
+      <div class="fg"><label>Status</label><select id="activityStatus"><option value="planejado">Planejado</option><option value="andamento">Em andamento</option><option value="revisao">Em correção / revisão</option><option value="concluido">Concluído</option><option value="pausado">Pausado</option></select></div>
+    </div>
+    <div class="fg"><label>Etapa / assunto</label><input id="activityName" placeholder="Ex.: Correção do capítulo 2; período do mestrado; qualificação"></div>
+    <div class="fg"><label>Observação / próximo passo</label><textarea id="activityDesc" placeholder="O que foi discutido, o que precisa ser corrigido e qual é a próxima ação"></textarea></div>
+    <div class="grid2"><div class="fg"><label>Início / data da orientação</label><input type="date" id="activityStart"></div><div class="fg"><label>Fim / prazo</label><input type="date" id="activityDue"></div></div>
+    <div class="fg"><label>Andamento informado <span id="activityProgressLabel">0%</span></label><input type="range" min="0" max="100" step="5" value="0" id="activityProgress"><div class="hint">Para bolsa, mestrado, doutorado e TCC, a plataforma também calcula automaticamente o tempo decorrido entre início e fim.</div></div>
   </div>
-  <div class="modal-f"><button class="btn danger" id="deleteActivityBtn" style="display:none;margin-right:auto">Excluir</button><button class="btn" data-close="activityOverlay">Cancelar</button><button class="btn primary" id="saveActivityBtn">Salvar registro</button></div>
+  <div class="modal-f"><button class="btn danger" id="deleteActivityBtn" style="display:none;margin-right:auto">Excluir</button><button class="btn" data-close="activityOverlay">Cancelar</button><button class="btn primary" id="saveActivityBtn">Salvar acompanhamento</button></div>
 </div></div>
 
 <!-- FEED POST MODAL -->
@@ -3069,44 +3078,86 @@ async function deletePublicacao(id){
 
 
 /* ============ ACOMPANHAMENTO ============ */
-const ACTIVITY_TYPES={projeto:'Projeto',acao:'Ação',apresentacao:'Apresentação',cronograma:'Cronograma',relatorio:'Relatório',arquivo:'Arquivo/repositório',outro:'Outro'};
-const ACTIVITY_STATUS={planejado:'Planejado',andamento:'Em andamento',revisao:'Em revisão',concluido:'Concluído',pausado:'Pausado'};
-let editingActivityId=null, activityFileData='', activityFileName='', activityOldStorage='';
+const ACTIVITY_TYPES={bolsa:'Bolsa',mestrado:'Mestrado',doutorado:'Doutorado',tcc:'TCC',orientacao:'Orientação',correcao:'Correção',qualificacao:'Qualificação',defesa:'Defesa',entrega:'Entrega / prazo',pendencia:'Pendência',outro:'Outro acompanhamento',projeto:'Registro antigo · Projeto',acao:'Registro antigo · Ação',apresentacao:'Registro antigo · Apresentação',cronograma:'Registro antigo · Cronograma',relatorio:'Registro antigo · Relatório',arquivo:'Registro antigo · Arquivo'};
+const ACTIVITY_STATUS={planejado:'Planejado',andamento:'Em andamento',revisao:'Em correção / revisão',concluido:'Concluído',pausado:'Pausado'};
+const TRACK_PERIOD_TYPES=new Set(['mestrado','doutorado','tcc']);
+const TRACK_LEGACY_TYPES=new Set(['projeto','acao','apresentacao','cronograma','relatorio','arquivo']);
+const TRACK_ICONS={bolsa:'🎓',mestrado:'📘',doutorado:'📚',tcc:'📝',orientacao:'🧭',correcao:'✍️',qualificacao:'🎯',defesa:'🎓',entrega:'📌',pendencia:'⚠️',outro:'•',projeto:'•',acao:'•',apresentacao:'•',cronograma:'•',relatorio:'•',arquivo:'•'};
+let editingActivityId=null, activityOwnerPreset='';
 function refreshTrackOwners(){
   const el=$('#trackOwner'),cur=el.value; const list=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome));
   el.innerHTML='<option value="">Todos os Carbonautas</option>'+list.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join(''); el.value=cur;
 }
+function _trackDate(d){if(!d)return null;const [y,m,day]=String(d).split('-').map(Number);return y&&m&&day?new Date(y,m-1,day):null}
+function _daysText(n){const a=Math.abs(Math.round(n)); if(a<31)return `${a} ${a===1?'dia':'dias'}`; const mo=Math.floor(a/30),d=a%30; return `${mo} ${mo===1?'mês':'meses'}${d?' e '+d+' dias':''}`}
+function trackPeriodInfo(startDate,endDate){
+  const start=_trackDate(startDate),end=_trackDate(endDate),now=new Date();now.setHours(0,0,0,0);
+  if(!start||!end)return {pct:0,label:'Período incompleto',remain:'informe início e fim',days:null};
+  start.setHours(0,0,0,0);end.setHours(0,0,0,0);const total=Math.max(1,(end-start)/86400000),elapsed=(now-start)/86400000,days=(end-now)/86400000;
+  const pct=Math.max(0,Math.min(100,Math.round(elapsed/total*100)));
+  if(now<start)return {pct,label:'Ainda não iniciado',remain:`${_daysText(elapsed)} para começar`,days};
+  if(now>end)return {pct:100,label:'Período encerrado',remain:`encerrado há ${_daysText(days)}`,days};
+  return {pct,label:'Em andamento',remain:`${_daysText(days)} restantes`,days};
+}
+function _activityTime(a){return a.updatedAt?.toMillis?a.updatedAt.toMillis():(a.createdAt?.toMillis?a.createdAt.toMillis():0)}
+function _activityDate(a){return a.startDate||a.dueDate||''}
+function _isPending(a){return a.status!=='concluido' && ['correcao','pendencia','entrega'].includes(a.type)}
+function _isOverdue(a){return a.status!=='concluido'&&a.dueDate&&dateInfo(a.dueDate)?.over}
+function _periodHTML(type,title,start,end,canEdit,id,manualProgress){
+  const pi=trackPeriodInfo(start,end),label=ACTIVITY_TYPES[type]||type, pct=(start&&end)?pi.pct:Math.max(0,Math.min(100,+manualProgress||0));
+  return `<div class="period-card"><div class="period-top"><span class="period-type">${TRACK_ICONS[type]||'•'} ${esc(label)}</span>${title&&title!==label?`<span class="period-title">${esc(title)}</span>`:''}<span class="period-remain">${esc(pi.remain)}</span>${canEdit&&id?`<button class="follow-edit" onclick="editActivity('${id}')" title="Editar">✎</button>`:''}</div><div class="period-bar"><span style="width:${pct}%"></span></div><div class="period-foot"><span>${start?'Início '+fmtDate(start):'Início não informado'}</span><b>${pct}% do tempo</b><span>${end?'Fim '+fmtDate(end):'Fim não informado'}</span></div></div>`;
+}
+function _scholarPeriodHTML(m){
+  if(!m.bolsista)return '';
+  const pi=trackPeriodInfo(m.bolsaInicio,m.bolsaFim),title=m.bolsaModalidade||'Bolsa';
+  return `<div class="period-card"><div class="period-top"><span class="period-type">🎓 Bolsa</span><span class="period-title">${esc(title)}</span><span class="period-remain">${esc(pi.remain)}</span></div><div class="period-bar"><span style="width:${pi.pct}%"></span></div><div class="period-foot"><span>${m.bolsaInicio?'Início '+fmtDate(m.bolsaInicio):'Início não informado'}</span><b>${pi.pct}% do tempo</b><span>${m.bolsaFim?'Fim '+fmtDate(m.bolsaFim):'Fim não informado'}</span></div></div>`;
+}
+function _followItemHTML(a,can){
+  const over=_isOverdue(a), d=a.dueDate||a.startDate||'', status=ACTIVITY_STATUS[a.status]||a.status||'';
+  return `<div class="follow-item"><div class="follow-icon">${TRACK_ICONS[a.type]||'•'}</div><div class="follow-main"><div class="follow-name">${esc(ACTIVITY_TYPES[a.type]||a.type||'Acompanhamento')} · ${esc(a.title||status)}</div>${a.description?`<div class="follow-desc">${esc(a.description)}</div>`:''}<div style="margin-top:4px"><span class="track-alert ${a.status==='concluido'?'track-ok':over?'':'track-warn'}">${a.status==='concluido'?'Concluído':over?'Atrasado':esc(status)}</span></div></div><div style="display:flex;gap:4px;align-items:start"><span class="follow-date ${over?'over':''}">${d?fmtDate(d):''}</span>${can?`<button class="follow-edit" onclick="editActivity('${a.id}')" title="Editar">✎</button>`:''}</div></div>`;
+}
 function renderTrack(){
-  refreshTrackOwners(); let list=state.activities.slice();
-  const owner=$('#trackOwner').value,status=$('#trackStatus').value,type=$('#trackType').value;
-  if(owner)list=list.filter(a=>a.ownerId===owner); if(status)list=list.filter(a=>a.status===status); if(type)list=list.filter(a=>a.type===type);
-  if($('#trackMine').checked){if(!myId){$('#trackMine').checked=false;toast('Identifique-se primeiro.')}else list=list.filter(a=>a.ownerId===myId)}
-  const total=state.activities.length, active=state.activities.filter(a=>a.status==='andamento').length, done=state.activities.filter(a=>a.status==='concluido').length;
-  const overdue=state.activities.filter(a=>a.dueDate&&a.status!=='concluido'&&dateInfo(a.dueDate)?.over).length;
-  $('#trackKpis').innerHTML=`<div class="track-kpi"><div class="n">${total}</div><div class="l">registros</div></div><div class="track-kpi"><div class="n">${active}</div><div class="l">em andamento</div></div><div class="track-kpi"><div class="n">${done}</div><div class="l">concluídos</div></div><div class="track-kpi"><div class="n">${overdue}</div><div class="l">prazos vencidos</div></div>`;
-  const grid=$('#trackGrid'); $('#trackEmpty').style.display=list.length?'none':'block';
-  grid.innerHTML=list.map(a=>{const m=memberById(a.ownerId),can=isAdmin||isMe(a.ownerId),p=Math.max(0,Math.min(100,+a.progress||0)); const di=a.dueDate?dateInfo(a.dueDate):null;
-    return `<article class="track-card"><div class="track-top"><div class="track-main"><div class="track-title">${esc(a.title||'Sem título')}</div><div class="track-meta"><span class="track-tag">${esc(ACTIVITY_TYPES[a.type]||a.type||'Outro')}</span><span class="track-status s-${a.status||'planejado'}">${esc(ACTIVITY_STATUS[a.status]||a.status||'Planejado')}</span><span class="pub-author"><span class="d" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}"></span>${esc(a.ownerName||(m?m.nome:'—'))}</span>${a.dueDate?`<span class="pub-date" style="${di?.over&&a.status!=='concluido'?'color:var(--red);font-weight:700':''}">prazo ${fmtDate(a.dueDate)}</span>`:''}</div></div>${can?`<div class="track-actions"><button class="mini-x" onclick="editActivity('${a.id}')" title="Editar">✎</button></div>`:''}</div>${a.description?`<div class="track-desc">${esc(a.description)}</div>`:''}<div class="progress"><span style="width:${p}%"></span></div><div class="progress-lab"><span>Progresso</span><b>${p}%</b></div><div class="track-links">${a.externalUrl?`<a class="btn ghost" href="${esc(a.externalUrl)}" target="_blank" rel="noopener">Abrir link</a>`:''}${a.fileUrl?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(a.fileUrl)}'),decodeURIComponent('${encodeURIComponent(a.fileName||a.title||'Arquivo')}'))">Visualizar arquivo</button>`:''}</div></article>`;
+  refreshTrackOwners();
+  let members=[...state.members].sort((a,b)=>(a.status==='egresso')-(b.status==='egresso')||a.nome.localeCompare(b.nome));
+  const owner=$('#trackOwner').value,mode=$('#trackStatus').value;
+  if(owner)members=members.filter(m=>m.id===owner);
+  if($('#trackMine').checked){if(!myId){$('#trackMine').checked=false;toast('Seu perfil precisa estar vinculado ao login.')}else members=members.filter(m=>m.id===myId)}
+  const now=new Date();now.setHours(0,0,0,0);
+  const all=state.activities;
+  const pendingCorrections=all.filter(a=>a.type==='correcao'&&a.status!=='concluido').length;
+  const overdue=all.filter(_isOverdue).length;
+  const next30=all.filter(a=>a.status!=='concluido'&&a.dueDate).filter(a=>{const di=dateInfo(a.dueDate);return di&&di.diff>=0&&di.diff<=30}).length;
+  const activeScholar=state.members.filter(m=>{if(!m.bolsista)return false;const pi=trackPeriodInfo(m.bolsaInicio,m.bolsaFim);return pi.days!==null&&pi.days>=0}).length;
+  $('#trackKpis').innerHTML=`<div class="track-kpi"><div class="n">${activeScholar}</div><div class="l">bolsas em acompanhamento</div></div><div class="track-kpi"><div class="n">${next30}</div><div class="l">prazos em até 30 dias</div></div><div class="track-kpi"><div class="n">${pendingCorrections}</div><div class="l">correções pendentes</div></div><div class="track-kpi"><div class="n">${overdue}</div><div class="l">itens atrasados</div></div>`;
+  if(mode){
+    members=members.filter(m=>{const acts=all.filter(a=>a.ownerId===m.id);if(mode==='pendentes')return acts.some(a=>_isPending(a)||_isOverdue(a));if(mode==='proximos')return acts.some(a=>{const di=a.dueDate?dateInfo(a.dueDate):null;return a.status!=='concluido'&&di&&di.diff>=0&&di.diff<=30});if(mode==='encerrando'){const periods=acts.filter(a=>TRACK_PERIOD_TYPES.has(a.type));if(m.bolsista)periods.push({startDate:m.bolsaInicio,dueDate:m.bolsaFim});return periods.some(a=>{const pi=trackPeriodInfo(a.startDate,a.dueDate);return pi.days!==null&&pi.days>=0&&pi.days<=90})}return true})
+  }
+  const grid=$('#trackGrid');$('#trackEmpty').style.display=members.length?'none':'block';
+  grid.innerHTML=members.map(m=>{
+    const acts=all.filter(a=>a.ownerId===m.id).sort((a,b)=>_activityTime(b)-_activityTime(a));const can=isAdmin||isMe(m.id);
+    const periods=acts.filter(a=>TRACK_PERIOD_TYPES.has(a.type));const follows=acts.filter(a=>!TRACK_PERIOD_TYPES.has(a.type)&&!TRACK_LEGACY_TYPES.has(a.type)).sort((a,b)=>{const ad=_activityDate(a),bd=_activityDate(b);return (bd||'').localeCompare(ad||'')||_activityTime(b)-_activityTime(a)});
+    const pending=follows.filter(a=>_isPending(a)||_isOverdue(a));const lastOrient=follows.filter(a=>a.type==='orientacao').sort((a,b)=>(_activityDate(b)||'').localeCompare(_activityDate(a)||''))[0];const nextDue=follows.filter(a=>a.status!=='concluido'&&a.dueDate&&!dateInfo(a.dueDate)?.over).sort((a,b)=>a.dueDate.localeCompare(b.dueDate))[0];const corrections=follows.filter(a=>a.type==='correcao'&&a.status!=='concluido').length;
+    const nv=NIVEIS[m.nivel]||{short:m.nivel||'',color:'#607d8b'};
+    const periodsHTML=_scholarPeriodHTML(m)+periods.map(a=>_periodHTML(a.type,a.title,a.startDate,a.dueDate,can,a.id,a.progress)).join('');
+    const listHTML=follows.slice(0,8).map(a=>_followItemHTML(a,can)).join('');
+    return `<section class="track-person"><div class="track-person-head"><div class="track-person-av" style="background:${nv.color}">${m.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m.nome)}</div><div><div class="track-person-title">${esc(m.nome)}</div><div class="track-person-sub">${esc(nv.short)}${m.programa?' · '+esc(m.programa):''}${m.status==='egresso'?' · Egresso':''}${m.bolsista?' · Bolsista':''}</div></div><div class="track-person-actions">${can?`<button class="btn primary" type="button" onclick="openActivity(null,'${m.id}')">＋ Registrar</button>`:''}<button class="btn" type="button" onclick="openMemberRepository('${m.id}')">Repositório</button></div></div><div class="track-person-body"><div class="track-dashboard"><div><div class="follow-title">Régua de tempo</div><div class="track-periods">${periodsHTML||'<div class="track-empty-person">Nenhum período de bolsa, mestrado, doutorado ou TCC registrado.</div>'}</div></div><aside class="track-sidebox"><h4>Situação do acompanhamento</h4><div class="track-mini-stat"><span>Correções pendentes</span><b>${corrections}</b></div><div class="track-mini-stat"><span>Última orientação</span><b>${lastOrient?fmtDate(lastOrient.startDate||lastOrient.dueDate):'—'}</b></div><div class="track-mini-stat"><span>Próxima entrega</span><b>${nextDue?fmtDate(nextDue.dueDate):'—'}</b></div><div class="track-mini-stat"><span>Pendências / alertas</span><b>${pending.length}</b></div></aside></div><div class="follow-list"><div class="follow-title">Histórico e próximos passos</div>${listHTML||'<div class="track-empty-person">Sem orientações, correções ou pendências registradas.</div>'}</div></div></section>`;
   }).join('');
 }
-function openActivity(id=null){
-  if(!myId&&!isAdmin){toast('Identifique-se primeiro para registrar atividades.');openIdentity();return}
-  editingActivityId=id; activityFileData=''; activityFileName=''; activityOldStorage=''; const a=id?state.activities.find(x=>x.id===id):null;
-  if(a&&!(isAdmin||isMe(a.ownerId))){toast('Sem permissão para editar este registro.');return}
-  const sel=$('#activityOwnerSel'),ordered=[...state.members].sort((x,y)=>x.nome.localeCompare(y.nome)); sel.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');
-  $('#activityOwnerRow').style.display=isAdmin?'block':'none'; sel.value=a?.ownerId||(myId||ordered[0]?.id||'');
-  $('#activityTitle').textContent=a?'Editar acompanhamento':'Novo registro de acompanhamento'; $('#activityType').value=a?.type||'projeto'; $('#activityStatus').value=a?.status||'planejado'; $('#activityName').value=a?.title||''; $('#activityDesc').value=a?.description||''; $('#activityStart').value=a?.startDate||''; $('#activityDue').value=a?.dueDate||''; $('#activityProgress').value=a?.progress||0; $('#activityProgressLabel').textContent=(a?.progress||0)+'%'; $('#activityUrl').value=a?.externalUrl||''; activityOldStorage=a?.storagePath||''; $('#activityFileName').textContent=a?.fileName?`Arquivo atual: ${a.fileName}`:'Nenhum arquivo escolhido.'; $('#deleteActivityBtn').style.display=a?'inline-flex':'none'; openOverlay('activityOverlay');
+function openActivity(id=null,ownerPreset=''){
+  if(!myId&&!isAdmin){toast('Seu perfil precisa estar vinculado ao login.');return}
+  editingActivityId=id;activityOwnerPreset=ownerPreset||'';const a=id?state.activities.find(x=>x.id===id):null;
+  if(a&&!(isAdmin||isMe(a.ownerId))){toast('Sem permissão para editar este acompanhamento.');return}
+  const sel=$('#activityOwnerSel'),ordered=[...state.members].sort((x,y)=>x.nome.localeCompare(y.nome));sel.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');
+  $('#activityOwnerRow').style.display=isAdmin?'block':'none';sel.value=a?.ownerId||activityOwnerPreset||(myId||ordered[0]?.id||'');
+  $('#activityTitle').textContent=a?'Editar acompanhamento':'Registrar acompanhamento';$('#activityType').value=a?.type&&ACTIVITY_TYPES[a.type]?a.type:'orientacao';$('#activityStatus').value=a?.status||'andamento';$('#activityName').value=a?.title||'';$('#activityDesc').value=a?.description||'';$('#activityStart').value=a?.startDate||'';$('#activityDue').value=a?.dueDate||'';$('#activityProgress').value=a?.progress||0;$('#activityProgressLabel').textContent=(a?.progress||0)+'%';$('#deleteActivityBtn').style.display=a?'inline-flex':'none';openOverlay('activityOverlay');
 }
-function handleActivityFile(file){if(!file)return;if(file.size>15*1024*1024){toast('Arquivo maior que 15 MB.');return} const r=new FileReader();r.onload=e=>{activityFileData=e.target.result;activityFileName=file.name;$('#activityFileName').textContent=file.name};r.readAsDataURL(file)}
+function editActivity(id){openActivity(id)}
 async function saveActivity(){
-  const ownerId=isAdmin?$('#activityOwnerSel').value:myId,title=$('#activityName').value.trim(); if(!ownerId||!title){toast('Informe responsável e título.');return}
-  const old=editingActivityId?state.activities.find(x=>x.id===editingActivityId):null; let fileUrl=old?.fileUrl||'',fileName=old?.fileName||'',storagePath=old?.storagePath||'';
-  try{if(activityFileData){toast('Enviando arquivo…');const up=await fbUploadAny('rede_activities','atividade_'+ownerId,activityFileData,activityFileName);fileUrl=up.url;fileName=activityFileName;storagePath=up.path}}
-  catch(e){console.error(e);toast('Falha no upload do arquivo.');return}
-  const m=memberById(ownerId),data={ownerId,ownerUid:(state.users||[]).find(u=>u.memberId===ownerId)?.uid || (ownerId===myId ? (window.auth.currentUser?.uid||'') : ''),ownerName:m?.nome||'',type:$('#activityType').value,status:$('#activityStatus').value,title,description:$('#activityDesc').value.trim(),startDate:$('#activityStart').value,dueDate:$('#activityDue').value,progress:+$('#activityProgress').value||0,externalUrl:$('#activityUrl').value.trim(),fileUrl,fileName,storagePath,updatedAt:FB().serverTimestamp()};
-  try{if(editingActivityId)await FB().setDoc(FB().doc(window.db,'rede_activities',editingActivityId),data,{merge:true});else await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});closeOverlay('activityOverlay');toast('Acompanhamento salvo.')}catch(e){console.error(e);toast('Erro ao salvar acompanhamento.')}
+  const ownerId=isAdmin?$('#activityOwnerSel').value:myId,type=$('#activityType').value;let title=$('#activityName').value.trim();if(!title)title=ACTIVITY_TYPES[type]||'Acompanhamento';if(!ownerId){toast('Selecione o Carbonauta.');return}
+  const startDate=$('#activityStart').value,dueDate=$('#activityDue').value;if(startDate&&dueDate&&startDate>dueDate){toast('A data final não pode ser anterior ao início.');return}const m=memberById(ownerId),data={ownerId,ownerUid:(state.users||[]).find(u=>u.memberId===ownerId)?.uid || (ownerId===myId ? (window.auth.currentUser?.uid||'') : ''),ownerName:m?.nome||'',type,status:$('#activityStatus').value,title,description:$('#activityDesc').value.trim(),startDate,dueDate,progress:+$('#activityProgress').value||0,updatedAt:FB().serverTimestamp()};
+  try{if(editingActivityId)await FB().setDoc(FB().doc(window.db,'rede_activities',editingActivityId),data,{merge:true});else await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});closeOverlay('activityOverlay');toast('Acompanhamento salvo.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou o acompanhamento.':'Erro ao salvar acompanhamento.')}
 }
-async function deleteActivity(){if(!editingActivityId||!confirm('Excluir este registro de acompanhamento?'))return;const a=state.activities.find(x=>x.id===editingActivityId);if(!a||!(isAdmin||isMe(a.ownerId)))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_activities',editingActivityId));if(a.storagePath){try{await FB().deleteObject(FB().sRef(window.storage,a.storagePath))}catch(e){}}closeOverlay('activityOverlay');toast('Registro excluído.')}catch(e){console.error(e);toast('Erro ao excluir.')}}
+async function deleteActivity(){if(!editingActivityId||!confirm('Excluir este registro de acompanhamento?'))return;const a=state.activities.find(x=>x.id===editingActivityId);if(!a||!(isAdmin||isMe(a.ownerId)))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_activities',editingActivityId));closeOverlay('activityOverlay');toast('Registro excluído.')}catch(e){console.error(e);toast('Erro ao excluir.')}}
 
 /* ============ FEED SOCIAL ============ */
 let postFileData='',postFileName='';
@@ -3327,9 +3378,8 @@ $('#muralRecadoBtn').onclick=openRecado;
 $('#recadosToggle').onclick=()=>$('.recados-panel').classList.toggle('collapsed');
 
 $('#addActivityBtn').onclick=()=>openActivity(null);
-$('#trackOwner').onchange=renderTrack; $('#trackStatus').onchange=renderTrack; $('#trackType').onchange=renderTrack; $('#trackMine').onchange=renderTrack;
+$('#trackOwner').onchange=renderTrack; $('#trackStatus').onchange=renderTrack; $('#trackMine').onchange=renderTrack;
 $('#activityProgress').oninput=e=>$('#activityProgressLabel').textContent=e.target.value+'%';
-$('#activityFilePick').onclick=()=>$('#activityFile').click(); $('#activityFile').onchange=e=>handleActivityFile(e.target.files[0]);
 $('#saveActivityBtn').onclick=saveActivity; $('#deleteActivityBtn').onclick=deleteActivity;
 if($('#newPostBtn')) $('#newPostBtn').onclick=openPostModal; if($('#muralPostBtn')) $('#muralPostBtn').onclick=openPostModal; $('#postFilePick').onclick=()=>$('#postFile').click(); $('#postFile').onchange=e=>handlePostFile(e.target.files[0]); $('#savePostBtn').onclick=saveFeedPost;
 
