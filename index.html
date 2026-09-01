@@ -368,13 +368,52 @@
   .ph-cap{padding:9px 12px;font-size:12.5px;color:var(--ink-2);line-height:1.4}
   .ph-cap .by{display:block;font-size:11px;color:var(--ink-3);margin-top:2px}
   .fotos-empty{color:var(--ink-3);font-size:14px;text-align:center;padding:60px 20px}
-  .lightbox{position:fixed;inset:0;background:rgba(10,24,28,.9);z-index:70;display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px}
+  .lightbox{position:fixed;inset:0;background:rgba(10,24,28,.9);z-index:70;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:30px;overflow-y:auto}
   .lightbox.open{display:flex}
   .lightbox img{max-width:92vw;max-height:78vh;border-radius:12px;box-shadow:var(--shadow-lg)}
   .lb-cap{color:#d6e6e6;font-size:14px;margin-top:14px;text-align:center;max-width:700px}
   .lb-cap .by{color:#8fa8a8;font-size:12px}
   .lb-x{position:absolute;top:18px;right:18px;border:0;background:rgba(255,255,255,.12);color:#fff;width:38px;height:38px;border-radius:11px;font-size:17px}
   .lb-del{margin-top:12px;border:1px solid rgba(255,120,110,.5);background:transparent;color:#ffb3aa;border-radius:10px;padding:7px 14px;font-size:12.5px;font-weight:600}
+
+
+  /* ===== Acompanhamento profissional ===== */
+  .track-scroll,.feed-scroll{flex:1;overflow-y:auto}
+  .track-wrap,.feed-wrap{max-width:1040px;margin:0 auto;padding:26px 22px 60px}
+  .track-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:18px}
+  .track-kpi{border:1px solid var(--line);border-radius:13px;padding:13px 14px;background:var(--white)}
+  .track-kpi .n{font-family:'Space Grotesk';font-size:24px;font-weight:700}.track-kpi .l{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+  .track-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .track-card{border:1px solid var(--line);border-radius:15px;padding:15px;background:var(--white);transition:.15s;min-width:0}
+  .track-card:hover{border-color:#cdd8d8;box-shadow:var(--shadow)}
+  .track-top{display:flex;gap:10px;align-items:flex-start}.track-main{flex:1;min-width:0}.track-title{font-size:14.5px;font-weight:700;line-height:1.35}
+  .track-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:5px}.track-desc{font-size:12.5px;line-height:1.5;color:var(--ink-2);margin-top:10px;white-space:pre-wrap}
+  .track-tag{font-size:10.5px;font-weight:700;border-radius:20px;padding:3px 9px;background:var(--panel);border:1px solid var(--line);color:var(--ink-2)}
+  .track-status{font-size:10.5px;font-weight:700;border-radius:20px;padding:3px 9px}.s-planejado{background:#f1f3f4;color:#5f6b70}.s-andamento{background:#e8f3f2;color:var(--petrol)}.s-revisao{background:#fdf4e6;color:#9a6811}.s-concluido{background:#eaf6ef;color:#267a45}.s-pausado{background:#f8ecef;color:#9b3654}
+  .progress{height:7px;border-radius:8px;background:var(--line-2);overflow:hidden;margin-top:12px}.progress>span{display:block;height:100%;background:var(--petrol);border-radius:8px}
+  .progress-lab{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-3);margin-top:5px}
+  .track-links{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.track-links a{text-decoration:none}
+  .track-actions{display:flex;gap:4px;margin-left:auto}
+  @media(max-width:760px){.track-grid{grid-template-columns:1fr}.track-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+  /* ===== Feed social ===== */
+  .feed-layout{display:grid;grid-template-columns:minmax(0,690px) 280px;gap:18px;align-items:start}
+  .feed-compose{border:1px solid var(--line);border-radius:16px;padding:14px;background:var(--white);margin-bottom:14px}
+  .feed-compose-row{display:flex;gap:10px;align-items:center}.feed-compose-row .av{width:38px;height:38px;border-radius:12px;font-size:12px}
+  .feed-compose-btn{flex:1;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:22px;padding:10px 14px;color:var(--ink-3);font-size:13.5px}
+  .feed-card{border:1px solid var(--line);border-radius:16px;background:var(--white);margin-bottom:14px;overflow:hidden}
+  .feed-head{display:flex;gap:10px;align-items:center;padding:14px 15px 9px}.feed-av{width:39px;height:39px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700;overflow:hidden;flex:0 0 auto}.feed-av img{width:100%;height:100%;object-fit:cover}
+  .feed-author{font-size:13px;font-weight:700}.feed-time{font-size:10.5px;color:var(--ink-3);margin-top:2px}.feed-kind{margin-left:auto;font-size:10.5px;font-weight:700;padding:3px 9px;border:1px solid var(--line);border-radius:20px;color:var(--ink-2)}
+  .feed-body{padding:4px 15px 12px}.feed-title{font-family:'Fraunces';font-size:18px;font-weight:600;margin-bottom:5px}.feed-text{font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink)}
+  .feed-image{width:100%;max-height:520px;object-fit:cover;display:block;background:var(--panel)}
+  .feed-attachment{margin-top:10px;border:1px solid var(--line);border-radius:11px;padding:10px 12px;display:flex;gap:9px;align-items:center;text-decoration:none;color:var(--ink);font-size:12.5px;font-weight:600;background:var(--panel)}
+  .social-bar{display:flex;align-items:center;gap:4px;border-top:1px solid var(--line-2);padding:8px 10px}.react-btn,.comment-toggle{border:0;background:transparent;border-radius:9px;padding:7px 9px;font-size:12px;color:var(--ink-2);display:inline-flex;align-items:center;gap:5px}.react-btn:hover,.comment-toggle:hover{background:var(--panel)}.react-btn.on{background:#eef6fb;color:#166b9b}.react-btn.heart.on{color:#1670b7}.social-spacer{flex:1}
+  .comments{border-top:1px solid var(--line-2);padding:10px 14px 13px}.comment{display:flex;gap:8px;margin:8px 0}.comment-av{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:#fff;font-size:9px;font-weight:700;flex:0 0 auto}.comment-b{background:var(--panel);border-radius:11px;padding:7px 10px;min-width:0}.comment-name{font-size:10.5px;font-weight:700}.comment-text{font-size:12.5px;line-height:1.4;white-space:pre-wrap}.comment-form{display:flex;gap:7px;margin-top:9px}.comment-form input{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px;outline:0}.comment-form input:focus{border-color:var(--petrol)}
+  .feed-side{position:sticky;top:14px}.side-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}.side-card h3{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin:0 0 10px}.side-stat{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--line-2)}.side-stat:last-child{border-bottom:0}.side-stat b{font-family:'Space Grotesk'}
+  @media(max-width:900px){.feed-layout{grid-template-columns:1fr}.feed-side{position:static;display:grid;grid-template-columns:1fr 1fr;gap:10px}.side-card{margin:0}}
+  @media(max-width:560px){.feed-side{grid-template-columns:1fr}}
+  .ph-social{display:flex;gap:3px;align-items:center;border-top:1px solid var(--line-2);padding:6px 8px}.ph-social button{border:0;background:transparent;border-radius:8px;padding:6px 8px;font-size:11.5px;color:var(--ink-2)}.ph-social button.on{background:#eef6fb;color:#1670b7}
+  .lb-social{width:min(700px,92vw);margin-top:10px;background:rgba(255,255,255,.08);border-radius:12px;padding:10px;color:#fff}.lb-social .comment-b{background:rgba(255,255,255,.10)}.lb-social .comment-form input{background:rgba(255,255,255,.95)}
 
   /* Modal */
   .overlay{position:fixed;inset:0;background:rgba(16,38,44,.34);backdrop-filter:blur(2px);z-index:50;display:none;align-items:flex-start;justify-content:center;padding:34px 16px;overflow-y:auto}
@@ -433,6 +472,40 @@
 
   .recado-prev{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px 14px;font-size:13px;line-height:1.5;color:var(--ink-2);white-space:pre-wrap;min-height:70px}
 
+  /* Authentication */
+  .auth-gate{position:fixed;inset:0;z-index:120;background:linear-gradient(145deg,#f7fbfb,#eef7f6);display:flex;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
+  .auth-gate.off{display:none}
+  .auth-card{width:min(440px,100%);background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow-lg);padding:28px}
+  .auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+  .auth-brand .mark{width:44px;height:44px;border-radius:13px;background:radial-gradient(120% 120% at 25% 20%,#1a7a82,var(--petrol));display:grid;place-items:center;color:#dff3f2}
+  .auth-brand .mark svg{width:26px;height:26px}
+  .auth-brand h2{font-family:'Fraunces',serif;font-size:24px;margin:0;font-weight:600}
+  .auth-brand p{margin:2px 0 0;color:var(--ink-3);font-size:12px}
+  .auth-card .fg{margin-bottom:13px}
+  .auth-card .fg label{display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:6px}
+  .auth-card input{width:100%;border:1px solid var(--line);border-radius:11px;padding:12px 13px;font-size:16px;outline:0;background:#fff;color:var(--ink)}
+  .auth-card input:focus{border-color:var(--petrol);box-shadow:0 0 0 3px rgba(14,92,99,.10)}
+  .auth-actions{display:flex;gap:9px;align-items:center;margin-top:16px;flex-wrap:wrap}
+  .auth-actions .primary{flex:1;justify-content:center;min-height:44px}
+  .auth-msg{font-size:12.5px;line-height:1.45;color:var(--red);min-height:18px;margin-top:10px}
+  .auth-unlinked{display:none}
+  .auth-unlinked.on{display:block}
+  .auth-login.hidden,.auth-register.hidden{display:none}
+  .auth-register{display:block}
+  .auth-switch{margin-top:10px;text-align:center;font-size:12px;color:var(--ink-3)}
+  .auth-switch button{border:0;background:none;color:var(--petrol);font-weight:700;cursor:pointer;padding:5px}
+  .claim-select{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 10px;background:#fff;font-size:13px}
+  .uid-box{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;background:var(--panel);border:1px solid var(--line);padding:10px;border-radius:9px;word-break:break-all;margin:8px 0 14px}
+  .role-pill{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:3px 7px;border-radius:999px;background:#e8f4f3;color:var(--petrol)}
+  .access-list{display:flex;flex-direction:column;gap:7px;max-height:260px;overflow:auto;margin-top:10px}
+  .access-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:11px;padding:10px 11px}
+  .access-row .main{display:block;min-width:0}
+  .access-row .nm{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .access-row .em{font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .access-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .access-note{font-size:12px;line-height:1.45;color:var(--ink-3);background:var(--panel);border:1px solid var(--line);padding:10px 12px;border-radius:10px}
+  @media(max-width:620px){.access-grid{grid-template-columns:1fr}.auth-card{padding:22px}}
+
   /* Loading */
   .loading{position:fixed;inset:0;background:var(--white);z-index:100;display:flex;flex-direction:column;gap:16px;align-items:center;justify-content:center;transition:opacity .3s}
   .loading.off{opacity:0;pointer-events:none}
@@ -464,6 +537,44 @@
 </head>
 <body data-view="rede">
 
+<div class="auth-gate" id="authGate">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="2.6"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><circle cx="5" cy="18" r="2"/><line x1="10.1" y1="10.2" x2="6.7" y2="7.7"/><line x1="13.9" y1="10.2" x2="17.3" y2="7.7"/><line x1="13.9" y1="13.8" x2="17.3" y2="16.3"/><line x1="10.1" y1="13.8" x2="6.7" y2="16.3"/></svg></div>
+      <div><h2>Carbonautas</h2><p>Acompanhamento · projetos · rede</p></div>
+    </div>
+    <div class="auth-login" id="authLoginPane">
+      <div class="fg"><label>E-mail</label><input id="loginEmail" type="email" autocomplete="username" placeholder="seu@email.com"></div>
+      <div class="fg"><label>Senha</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="Sua senha"></div>
+      <div class="auth-actions">
+        <button class="btn primary" id="loginBtn">Entrar</button>
+        <button class="btn ghost" id="resetPasswordBtn" type="button">Esqueci a senha</button>
+      </div>
+      <div class="auth-switch">Primeiro acesso? <button type="button" id="showRegisterBtn">Criar meu acesso</button></div>
+      <div class="auth-msg" id="authMsg"></div>
+    </div>
+    <div class="auth-register hidden" id="authRegisterPane">
+      <h3 style="margin:0 0 10px;font-family:'Fraunces';font-size:19px">Criar meu acesso</h3>
+      <div class="fg"><label>E-mail</label><input id="registerEmail" type="email" autocomplete="email" placeholder="seu@email.com"></div>
+      <div class="fg"><label>Crie uma senha</label><input id="registerPassword" type="password" autocomplete="new-password" minlength="6" placeholder="mínimo 6 caracteres"></div>
+      <div class="fg"><label>Repita a senha</label><input id="registerPassword2" type="password" autocomplete="new-password" minlength="6" placeholder="repita a senha"></div>
+      <button class="btn primary" id="registerBtn" style="width:100%;justify-content:center">Continuar</button>
+      <div class="auth-switch">Já tenho acesso. <button type="button" id="showLoginBtn">Entrar</button></div>
+      <div class="auth-msg" id="registerMsg"></div>
+    </div>
+    <div class="auth-unlinked" id="authUnlinkedPane">
+      <h3 style="margin:0 0 8px;font-family:'Fraunces';font-size:19px">Finalize seu cadastro</h3>
+      <p class="hint" style="margin:0 0 12px">Escolha o seu próprio nome na lista e informe o código de entrada dos Carbonautas. Isso é feito uma única vez.</p>
+      <div class="fg"><label>Seu perfil Carbonauta</label><select id="selfMemberSelect" class="claim-select"><option value="">Carregando perfis…</option></select></div>
+      <div class="fg"><label>Código de entrada</label><input id="selfInviteCode" type="password" inputmode="numeric" placeholder="Código do projeto"></div>
+      <div class="hint" id="unlinkedEmail" style="margin-bottom:10px"></div>
+      <div class="auth-msg" id="claimMsg"></div>
+      <button class="btn primary" id="claimProfileBtn" style="width:100%;justify-content:center;margin-bottom:8px">Concluir meu cadastro</button>
+      <button class="btn ghost" id="unlinkedLogoutBtn" style="width:100%;justify-content:center">Sair</button>
+    </div>
+  </div>
+</div>
+
 <div class="loading" id="loading">
   <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="2.6"/><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><circle cx="5" cy="18" r="2"/><line x1="10.1" y1="10.2" x2="6.7" y2="7.7"/><line x1="13.9" y1="10.2" x2="17.3" y2="7.7"/><line x1="13.9" y1="13.8" x2="17.3" y2="16.3"/><line x1="10.1" y1="13.8" x2="6.7" y2="16.3"/></svg></div>
   <p id="loadingMsg">Conectando à rede…</p>
@@ -494,6 +605,14 @@
       <button class="tab" data-view="crono">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
         <span class="tl">Cronograma</span><span class="badge" id="cronoBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="track">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-7"/></svg>
+        <span class="tl">Acompanhamento</span>
+      </button>
+      <button class="tab" data-view="feed">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="8" cy="10" r="2"/><path d="M12 9h5M12 13h5M7 16h10"/></svg>
+        <span class="tl">Feed</span>
       </button>
       <button class="tab" data-view="mural">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -620,6 +739,34 @@
     </div>
   </div>
 
+
+  <!-- ============ VIEW: ACOMPANHAMENTO ============ -->
+  <div class="view" id="viewTrack">
+    <div class="track-scroll"><div class="track-wrap">
+      <div class="view-head"><div><h2>Acompanhamento dos Carbonautas</h2><div class="sub">Projetos, ações, apresentações, relatórios, arquivos, andamento e entregas de cada bolsista e egresso.</div></div><div class="spacer"></div><button class="btn primary" id="addActivityBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Novo registro</button></div>
+      <div class="track-kpis" id="trackKpis"></div>
+      <div class="crono-filters">
+        <select class="mini" id="trackOwner" style="width:auto"><option value="">Todos os Carbonautas</option></select>
+        <select class="mini" id="trackStatus" style="width:auto"><option value="">Todos os status</option><option value="planejado">Planejado</option><option value="andamento">Em andamento</option><option value="revisao">Em revisão</option><option value="concluido">Concluído</option><option value="pausado">Pausado</option></select>
+        <select class="mini" id="trackType" style="width:auto"><option value="">Todos os tipos</option><option value="projeto">Projeto</option><option value="acao">Ação</option><option value="apresentacao">Apresentação</option><option value="cronograma">Cronograma</option><option value="relatorio">Relatório</option><option value="arquivo">Arquivo/repositório</option><option value="outro">Outro</option></select>
+        <label class="toggle"><input type="checkbox" id="trackMine"> Só os meus</label>
+      </div>
+      <div class="track-grid" id="trackGrid"></div>
+      <div class="crono-empty" id="trackEmpty" style="display:none">Nenhum registro de acompanhamento com esses filtros.</div>
+    </div></div>
+  </div>
+
+  <!-- ============ VIEW: FEED ============ -->
+  <div class="view" id="viewFeed">
+    <div class="feed-scroll"><div class="feed-wrap"><div class="feed-layout">
+      <main>
+        <div class="feed-compose"><div class="feed-compose-row"><div class="feed-av" id="feedMeAv">?</div><button class="feed-compose-btn" id="newPostBtn">Compartilhe uma atualização, ação, resultado, foto ou arquivo…</button></div></div>
+        <div id="feedList"></div><div class="crono-empty" id="feedEmpty" style="display:none">Ainda não há publicações no feed.</div>
+      </main>
+      <aside class="feed-side"><div class="side-card"><h3>Visão do projeto</h3><div id="feedStats"></div></div><div class="side-card"><h3>Próximas entregas</h3><div id="feedDeadlines"></div></div></aside>
+    </div></div></div>
+  </div>
+
   <!-- ============ VIEW: MURAL ============ -->
   <div class="view" id="viewMural">
     <div class="mural-flex">
@@ -702,6 +849,7 @@
   <button class="lb-x" id="lbClose">×</button>
   <img id="lbImg" alt="">
   <div class="lb-cap" id="lbCap"></div>
+  <div class="lb-social" id="lbSocial"></div>
   <button class="lb-del" id="lbDel" style="display:none">Apagar esta foto</button>
 </div>
 
@@ -789,14 +937,21 @@
   </div>
 </div>
 
-<!-- IDENTITY MODAL -->
+<!-- ACCOUNT MODAL -->
 <div class="overlay" id="idOverlay">
   <div class="modal" style="max-width:440px">
-    <div class="modal-h"><h2>Quem é você?</h2><div class="spacer"></div><button class="btn ghost" data-close="idOverlay">Fechar</button></div>
+    <div class="modal-h"><h2>Minha conta</h2><div class="spacer"></div><button class="btn ghost" data-close="idOverlay">Fechar</button></div>
     <div class="modal-b">
-      <p class="hint" style="margin:0 0 14px">Escolha o seu nome para assinar mensagens no mural e para editar o seu próprio cadastro, prazos e foto. A escolha fica salva neste aparelho.</p>
-      <div class="id-list" id="idList"></div>
-      <button class="btn" id="idGuest" style="width:100%;justify-content:center">Continuar como visitante</button>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+        <span class="av" id="accountAv" style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:700;background:var(--petrol)">?</span>
+        <div style="min-width:0"><div id="accountName" style="font-weight:700"></div><div id="accountEmail" class="hint"></div></div>
+        <span class="role-pill" id="accountRole" style="margin-left:auto"></span>
+      </div>
+      <div class="access-note">Sua identidade vem do Firebase Authentication. Você só pode editar o que pertence ao seu perfil; o coordenador administra a plataforma.</div>
+    </div>
+    <div class="modal-f">
+      <button class="btn" id="accountResetBtn">Redefinir senha</button>
+      <button class="btn danger" id="accountLogoutBtn">Sair</button>
     </div>
   </div>
 </div>
@@ -816,23 +971,25 @@
   </div>
 </div>
 
-<!-- PIN MODAL -->
+<!-- ACCESS MANAGEMENT MODAL -->
 <div class="overlay" id="pinOverlay">
-  <div class="modal" style="max-width:380px">
-    <div class="modal-h"><h2>Modo coordenador</h2><div class="spacer"></div><button class="btn ghost" data-close="pinOverlay">Fechar</button></div>
+  <div class="modal" style="max-width:650px">
+    <div class="modal-h"><h2>Gerenciar acessos</h2><div class="spacer"></div><button class="btn ghost" data-close="pinOverlay">Fechar</button></div>
     <div class="modal-b">
-      <p class="hint" style="margin:0 0 14px">Digite o PIN para cadastrar e remover membros, criar eventos do grupo e moderar o mural.</p>
-      <input class="pin-input" id="pinInput" type="password" inputmode="numeric" autocomplete="off" placeholder="····">
-      <div id="pinChangeArea" style="display:none;margin-top:16px">
-        <div class="fg"><label>Trocar PIN (opcional)</label><input id="newPin" placeholder="Novo PIN"></div>
-        <button class="btn" id="savePinBtn" style="width:100%;justify-content:center">Salvar novo PIN</button>
-        <button class="btn danger" id="dedupeBtn" style="width:100%;justify-content:center;margin-top:8px">Remover membros duplicados</button>
-        <button class="btn danger" id="logoutAdminBtn" style="width:100%;justify-content:center;margin-top:8px">Sair do modo coordenador</button>
-      </div>
-    </div>
-    <div class="modal-f" id="pinFooter">
-      <button class="btn" data-close="pinOverlay">Cancelar</button>
-      <button class="btn primary" id="pinOkBtn">Entrar</button>
+      <div class="access-note" style="margin-bottom:16px"><strong>Autocadastro ativo.</strong> Cada Carbonauta cria a própria conta na tela inicial, escolhe o próprio perfil e informa o código de entrada. Aqui você apenas acompanha e, se necessário, desvincula acessos.</div>
+      <details>
+        <summary style="cursor:pointer;font-size:13px;font-weight:700">Vincular uma conta que já existe no Authentication</summary>
+        <div class="access-grid" style="margin-top:12px">
+          <div class="fg"><label>Pessoa</label><select id="linkMember"></select></div>
+          <div class="fg"><label>UID do Firebase Authentication</label><input id="linkUid" placeholder="Cole o UID"></div>
+          <div class="fg"><label>E-mail</label><input id="linkEmail" type="email" placeholder="email da conta"></div>
+          <div class="fg" style="display:flex;align-items:flex-end"><button class="btn" id="linkAccessBtn" style="width:100%;justify-content:center">Vincular UID</button></div>
+        </div>
+      </details>
+      <div style="border-top:1px solid var(--line);margin:18px 0"></div>
+      <h3 style="font-size:13px;margin:0">Contas vinculadas</h3>
+      <div class="access-list" id="accessList"><div class="hint">Carregando…</div></div>
+      <button class="btn danger" id="dedupeBtn" style="margin-top:14px">Remover membros duplicados</button>
     </div>
   </div>
 </div>
@@ -898,6 +1055,36 @@
   </div>
 </div>
 
+
+<!-- ACTIVITY MODAL -->
+<div class="overlay" id="activityOverlay"><div class="modal" style="max-width:600px">
+  <div class="modal-h"><h2 id="activityTitle">Novo registro de acompanhamento</h2><div class="spacer"></div><button class="btn ghost" data-close="activityOverlay">Fechar</button></div>
+  <div class="modal-b">
+    <div class="fg" id="activityOwnerRow"><label>Responsável</label><select id="activityOwnerSel"></select></div>
+    <div class="grid2"><div class="fg"><label>Tipo</label><select id="activityType"><option value="projeto">Projeto</option><option value="acao">Ação</option><option value="apresentacao">Apresentação</option><option value="cronograma">Cronograma</option><option value="relatorio">Relatório</option><option value="arquivo">Arquivo/repositório</option><option value="outro">Outro</option></select></div><div class="fg"><label>Status</label><select id="activityStatus"><option value="planejado">Planejado</option><option value="andamento">Em andamento</option><option value="revisao">Em revisão</option><option value="concluido">Concluído</option><option value="pausado">Pausado</option></select></div></div>
+    <div class="fg"><label>Título</label><input id="activityName" placeholder="Ex.: Artigo sobre qualidade do ar"></div>
+    <div class="fg"><label>Descrição / próxima ação</label><textarea id="activityDesc" placeholder="O que está sendo feito, o que já foi entregue e qual é o próximo passo"></textarea></div>
+    <div class="grid2"><div class="fg"><label>Início</label><input type="date" id="activityStart"></div><div class="fg"><label>Prazo</label><input type="date" id="activityDue"></div></div>
+    <div class="fg"><label>Progresso <span id="activityProgressLabel">0%</span></label><input type="range" min="0" max="100" step="5" value="0" id="activityProgress"></div>
+    <div class="fg"><label>Link externo (opcional)</label><input id="activityUrl" placeholder="https://..."></div>
+    <div class="fg"><label>Arquivo (opcional, até 15 MB)</label><button class="btn" id="activityFilePick" style="justify-content:center">Escolher arquivo</button><input type="file" id="activityFile" style="display:none"><span class="hint" id="activityFileName">Nenhum arquivo escolhido.</span></div>
+  </div>
+  <div class="modal-f"><button class="btn danger" id="deleteActivityBtn" style="display:none;margin-right:auto">Excluir</button><button class="btn" data-close="activityOverlay">Cancelar</button><button class="btn primary" id="saveActivityBtn">Salvar registro</button></div>
+</div></div>
+
+<!-- FEED POST MODAL -->
+<div class="overlay" id="postOverlay"><div class="modal" style="max-width:560px">
+  <div class="modal-h"><h2>Publicar no feed</h2><div class="spacer"></div><button class="btn ghost" data-close="postOverlay">Fechar</button></div>
+  <div class="modal-b">
+    <div class="fg"><label>Tipo de atualização</label><select id="postKind"><option value="atualizacao">Atualização</option><option value="projeto">Projeto</option><option value="acao">Ação</option><option value="resultado">Resultado</option><option value="evento">Evento/apresentação</option><option value="foto">Foto</option><option value="arquivo">Arquivo</option></select></div>
+    <div class="fg"><label>Título (opcional)</label><input id="postTitle" placeholder="Ex.: Coleta de campo concluída"></div>
+    <div class="fg"><label>Texto</label><textarea id="postText" style="min-height:110px" placeholder="Conte ao grupo o que aconteceu, o avanço do projeto ou o próximo passo…"></textarea></div>
+    <div class="fg"><label>Link (opcional)</label><input id="postUrl" placeholder="https://..."></div>
+    <div class="fg"><label>Anexo (foto, PDF, Word, planilha, apresentação etc.; até 15 MB)</label><button class="btn" id="postFilePick" style="justify-content:center">Escolher arquivo</button><input type="file" id="postFile" style="display:none"><span class="hint" id="postFileName">Nenhum arquivo escolhido.</span></div>
+  </div>
+  <div class="modal-f"><button class="btn" data-close="postOverlay">Cancelar</button><button class="btn primary" id="savePostBtn">Publicar</button></div>
+</div></div>
+
 <!-- PUBLICATION MODAL -->
 <div class="overlay" id="pubOverlay">
   <div class="modal" style="max-width:480px">
@@ -913,6 +1100,11 @@
           <option value="visibilidade">Plano de visibilidade</option>
           <option value="jogo">Jogo</option>
           <option value="plataforma">Plataforma</option>
+          <option value="projeto">Projeto</option>
+          <option value="apresentacao">Apresentação</option>
+          <option value="cronograma">Cronograma</option>
+          <option value="relatorio">Relatório</option>
+          <option value="dados">Dados / planilha</option>
           <option value="outro">Outro</option>
         </select>
       </div>
@@ -922,12 +1114,12 @@
         <label>Conteúdo</label>
         <div style="display:flex;gap:14px;margin-bottom:8px">
           <label class="toggle" style="padding:0"><input type="radio" name="pubTipo" value="link" checked> Link</label>
-          <label class="toggle" style="padding:0"><input type="radio" name="pubTipo" value="arquivo"> Arquivo (PDF/Word)</label>
+          <label class="toggle" style="padding:0"><input type="radio" name="pubTipo" value="arquivo"> Arquivo (PDF/Word/Excel/PPT etc.)</label>
         </div>
         <input id="pubUrl" placeholder="https://...">
         <div id="pubFileArea" style="display:none;margin-top:8px">
           <button class="btn" id="pubFilePick" style="width:100%;justify-content:center">Escolher arquivo</button>
-          <input type="file" id="pubFile" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display:none">
+          <input type="file" id="pubFile" style="display:none">
           <p class="hint" id="pubFileName" style="margin:8px 0 0">Nenhum arquivo escolhido. Máximo 15 MB.</p>
         </div>
       </div>
@@ -978,10 +1170,12 @@
 <div class="toast" id="toast"></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, addDoc, updateDoc, getDoc, limit }
+import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, addDoc, updateDoc, getDoc, limit, writeBatch }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref as sRef, uploadString, getDownloadURL, deleteObject }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBWcGAa3CWurSiDs5udEtESGwCGGnYTX5Y",
@@ -992,11 +1186,15 @@ const firebaseConfig = {
   appId: "1:876718329822:web:e0e0254ee909a933dad74f"
 };
 const app = initializeApp(firebaseConfig);
+const secondaryApp = initializeApp(firebaseConfig, 'carbonautas-secondary');
 window.db = getFirestore(app);
 window.storage = getStorage(app);
+window.auth = getAuth(app);
+window.secondaryAuth = getAuth(secondaryApp);
 window.fbFns = {
   collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp,
-  addDoc, updateDoc, getDoc, limit, sRef, uploadString, getDownloadURL, deleteObject
+  addDoc, updateDoc, getDoc, limit, writeBatch, sRef, uploadString, getDownloadURL, deleteObject,
+  onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail
 };
 window.dispatchEvent(new Event('firebase-ready'));
 </script>
@@ -1026,6 +1224,11 @@ const CATEGORIAS = {
   visibilidade:     {label:'Plano de visibilidade',    color:'#E0912E'},
   jogo:             {label:'Jogo',                     color:'#D6497A'},
   plataforma:       {label:'Plataforma',                color:'#16262c'},
+  projeto:          {label:'Projeto',                   color:'#0E5C63'},
+  apresentacao:     {label:'Apresentação',              color:'#6C5CE0'},
+  cronograma:       {label:'Cronograma',                color:'#E0912E'},
+  relatorio:        {label:'Relatório',                 color:'#2E9E5B'},
+  dados:            {label:'Dados / planilha',          color:'#1E88C7'},
   outro:            {label:'Outro',                    color:'#7c8b90'},
 };
 const P = 'https://ernandes-sobreira.github.io/';
@@ -1074,15 +1277,19 @@ const SEED_VINCULOS = [
 ];
 
 /* ============ STATE ============ */
-let state = { members: [], chat: [], schedule: [], photos: [], publicacoes: [], linhas: DEFAULT_LINHAS.slice(), settings: {groupLink:'', pin: DEFAULT_PIN} };
+let state = { members: [], chat: [], schedule: [], photos: [], publicacoes: [], activities: [], feed: [], comments: [], reactions: [], users: [], linhas: DEFAULT_LINHAS.slice(), settings: {groupLink:''} };
 let hiddenNiveis = new Set();
 let hiddenLinhas = new Set();
 let selectedId = null;
 let editingId = null;
 let simulation = null;
 let isAdmin = false;
-let myId = localStorage.getItem('rede_myId') || null;       // membro que "sou eu"
-let myName = localStorage.getItem('rede_myName') || '';      // nome de assinatura
+let myId = null;
+let myName = '';
+let authUser = null;
+let authProfile = null;
+let subscriptions = [];
+let bootstrapped = false;
 let currentView = 'rede';
 let lastSeenChat = +localStorage.getItem('rede_lastSeenChat') || 0;
 let lbPhotoId = null;
@@ -1106,6 +1313,10 @@ function dateInfo(d){
   const t=new Date(d+'T00:00:00'), now=new Date(); now.setHours(0,0,0,0);
   const diff=Math.round((t-now)/86400000);
   return {diff, over:diff<0, soon:diff>=0&&diff<=7, label:t.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})};
+}
+function fmtDate(d){
+  if(!d)return ''; const [y,m,day]=String(d).split('-').map(Number);
+  if(!y||!m||!day)return d; return new Date(Date.UTC(y,m-1,day)).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'UTC'});
 }
 function fmtTime(ts){
   if(!ts) return '';
@@ -1134,86 +1345,59 @@ function waitFirebase(){
 
 async function bootstrap(){
   await waitFirebase();
+  if(!authUser || !authProfile) return;
   const f=FB();
   try{
-    // MEMBERS: seed apenas se coleção vazia (nunca sobrescreve)
-    const memSnap = await f.getDocs(f.collection(window.db,'rede_members'));
+    clearSubscriptions();
+    let memSnap = await f.getDocs(f.collection(window.db,'rede_members'));
     if(memSnap.empty){
+      if(!isAdmin) throw new Error('A rede ainda precisa ser inicializada pelo coordenador.');
       $('#loadingMsg').textContent='Preparando a rede pela primeira vez…';
-      // IDs determinísticos (derivados do nome), não aleatórios: se duas abas rodarem
-      // este seed ao mesmo tempo, escrevem no MESMO documento em vez de duplicar.
-      const seedIds={};
-      SEED.forEach(s=>{seedIds[s.nome]=slugify(s.nome)});
-      for(const s of SEED){
-        const id=seedIds[s.nome];
-        const hub=!!SEED_HUBS[s.nome];
-        const hubMotivo=SEED_HUBS[s.nome]||'';
-        const vinculos=SEED_VINCULOS.filter(v=>v.de===s.nome && seedIds[v.para])
-          .map(v=>({id:seedIds[v.para],motivo:v.motivo}));
-        await f.setDoc(f.doc(window.db,'rede_members',id),
-          {id,foto:'',telefone:'',resultados:[],prazos:[],notas:'',hub,hubMotivo,vinculos,
-           createdAt:f.serverTimestamp(),...s});
+      const seedIds={}; SEED.forEach(x=>{seedIds[x.nome]=slugify(x.nome)});
+      for(const x of SEED){
+        const id=seedIds[x.nome], hub=!!SEED_HUBS[x.nome], hubMotivo=SEED_HUBS[x.nome]||'';
+        const vinculos=SEED_VINCULOS.filter(v=>v.de===x.nome && seedIds[v.para]).map(v=>({id:seedIds[v.para],motivo:v.motivo}));
+        await f.setDoc(f.doc(window.db,'rede_members',id),{id,foto:'',telefone:'',resultados:[],prazos:[],notas:'',hub,hubMotivo,vinculos,createdAt:f.serverTimestamp(),...x});
       }
-    } else {
-      // Coleção já existia (versão anterior sem coordenador/vínculos): aplica só o que falta,
-      // nunca sobrescreve campo já presente.
-      const existing = memSnap.docs.map(d=>({...d.data(),id:d.id}));
-      const byName = {}; existing.forEach(m=>{byName[m.nome]=m});
-
+      memSnap = await f.getDocs(f.collection(window.db,'rede_members'));
+    } else if(isAdmin) {
+      const existing=memSnap.docs.map(d=>({...d.data(),id:d.id})), byName={}; existing.forEach(m=>{byName[m.nome]=m});
       if(!existing.some(m=>m.nivel==='coord')){
-        const s=SEED.find(x=>x.nivel==='coord');
-        if(s){
-          const id=slugify(s.nome);
-          await f.setDoc(f.doc(window.db,'rede_members',id),
-            {id,foto:'',telefone:'',resultados:[],prazos:[],notas:'',hub:false,hubMotivo:'',vinculos:[],
-             createdAt:f.serverTimestamp(),...s});
-          byName[s.nome]={id,...s};
-        }
+        const x=SEED.find(v=>v.nivel==='coord'); if(x){const id=slugify(x.nome); await f.setDoc(f.doc(window.db,'rede_members',id),{id,foto:'',telefone:'',resultados:[],prazos:[],notas:'',hub:false,hubMotivo:'',vinculos:[],createdAt:f.serverTimestamp(),...x}); byName[x.nome]={id,...x};}
       }
-      for(const [nome,motivo] of Object.entries(SEED_HUBS)){
-        const m=byName[nome];
-        if(m && m.hub===undefined){
-          await f.setDoc(f.doc(window.db,'rede_members',m.id),{hub:true,hubMotivo:motivo},{merge:true});
-        }
-      }
-      for(const v of SEED_VINCULOS){
-        const de=byName[v.de], para=byName[v.para];
-        if(!de || !para) continue;
-        const atuais = de.vinculos || [];
-        if(!atuais.some(x=>x.id===para.id)){
-          const novos=[...atuais,{id:para.id,motivo:v.motivo}];
-          await f.setDoc(f.doc(window.db,'rede_members',de.id),{vinculos:novos},{merge:true});
-          byName[v.de]={...de,vinculos:novos};
-        }
-      }
+      for(const [nome,motivo] of Object.entries(SEED_HUBS)){const m=byName[nome]; if(m&&m.hub===undefined) await f.setDoc(f.doc(window.db,'rede_members',m.id),{hub:true,hubMotivo:motivo},{merge:true});}
+      for(const v of SEED_VINCULOS){const de=byName[v.de],para=byName[v.para]; if(!de||!para)continue; const atuais=de.vinculos||[]; if(!atuais.some(x=>x.id===para.id)){const novos=[...atuais,{id:para.id,motivo:v.motivo}]; await f.setDoc(f.doc(window.db,'rede_members',de.id),{vinculos:novos},{merge:true}); byName[v.de]={...de,vinculos:novos};}}
     }
-    // SETTINGS
-    const setRef=f.doc(window.db,'rede_settings','app');
-    const setSnap=await f.getDoc(setRef);
+    state.members=memSnap.docs.map(d=>({...d.data(),id:d.id}));
+    state.members.forEach(m=>{m.linhas=m.linhas||[];m.resultados=m.resultados||[];m.prazos=m.prazos||[];m.vinculos=m.vinculos||[];m.hub=!!m.hub});
+    const setRef=f.doc(window.db,'rede_settings','app'), setSnap=await f.getDoc(setRef);
     if(setSnap.exists()){
       state.settings={...state.settings,...setSnap.data()};
-      if(!Array.isArray(state.settings.linhas) || !state.settings.linhas.length){
-        state.settings.linhas=DEFAULT_LINHAS.slice();
-        await f.setDoc(setRef,{linhas:state.settings.linhas},{merge:true});
-      }
+      if(!Array.isArray(state.settings.linhas)||!state.settings.linhas.length){state.settings.linhas=DEFAULT_LINHAS.slice(); if(isAdmin) await f.setDoc(setRef,{linhas:state.settings.linhas},{merge:true});}
     } else {
       state.settings.linhas=DEFAULT_LINHAS.slice();
-      await f.setDoc(setRef,{groupLink:'',pin:DEFAULT_PIN,linhas:state.settings.linhas});
+      if(isAdmin) await f.setDoc(setRef,{groupLink:'',linhas:state.settings.linhas});
     }
     state.linhas=state.settings.linhas;
-
     subscribeAll();
+    bootstrapped=true;
+    $('#authGate').classList.add('off');
     $('#loading').classList.add('off');
+    refreshIdentityUI();
   }catch(e){
     console.error(e);
-    $('#loadingMsg').innerHTML='Não foi possível conectar ao banco de dados.<br>Verifique a conexão e as regras do Firestore.';
+    $('#loading').classList.add('off');
+    $('#authMsg').textContent=e?.message||'Não foi possível abrir a plataforma.';
+    $('#authGate').classList.remove('off');
   }
 }
+
+function clearSubscriptions(){subscriptions.forEach(fn=>{try{fn()}catch(e){}});subscriptions=[];}
 
 function subscribeAll(){
   const f=FB();
   // SETTINGS (linhas de pesquisa, pin, link do grupo)
-  f.onSnapshot(f.doc(window.db,'rede_settings','app'),snap=>{
+  subscriptions.push(f.onSnapshot(f.doc(window.db,'rede_settings','app'),snap=>{
     if(!snap.exists())return;
     const d=snap.data();
     state.settings={...state.settings,...d};
@@ -1221,38 +1405,68 @@ function subscribeAll(){
       state.linhas=d.linhas;
       if(currentView==='rede') renderAll();
     }
-  });
+  }));
   // MEMBERS
-  f.onSnapshot(f.collection(window.db,'rede_members'),snap=>{
+  subscriptions.push(f.onSnapshot(f.collection(window.db,'rede_members'),snap=>{
     state.members=snap.docs.map(d=>({...d.data(),id:d.id}));
     state.members.forEach(m=>{m.linhas=m.linhas||[];m.resultados=m.resultados||[];m.prazos=m.prazos||[];m.vinculos=m.vinculos||[];m.hub=!!m.hub});
     if(currentView==='rede') renderAll();
     if(currentView==='crono') renderCrono();
     refreshMemberDependentUI();
     if(selectedId && memberById(selectedId)) renderDetail();
-  });
+  }));
   // CHAT
-  f.onSnapshot(f.query(f.collection(window.db,'rede_chat'),f.orderBy('ts','asc')),snap=>{
+  subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_chat'),f.orderBy('ts','asc')),snap=>{
     state.chat=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='mural'){ renderMural(); renderRecados(); markChatSeen(); }
     else updateMuralBadge();
-  });
+  }));
   // SCHEDULE (eventos do grupo)
-  f.onSnapshot(f.query(f.collection(window.db,'rede_schedule'),f.orderBy('data','asc')),snap=>{
+  subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_schedule'),f.orderBy('data','asc')),snap=>{
     state.schedule=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='crono') renderCrono();
     updateCronoBadge();
-  });
+  }));
   // PHOTOS
-  f.onSnapshot(f.query(f.collection(window.db,'rede_photos'),f.orderBy('ts','desc')),snap=>{
+  subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_photos'),f.orderBy('ts','desc')),snap=>{
     state.photos=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='fotos') renderFotos();
-  });
+  }));
   // PUBLICAÇÕES
-  f.onSnapshot(f.query(f.collection(window.db,'rede_publicacoes'),f.orderBy('ts','desc')),snap=>{
+  subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_publicacoes'),f.orderBy('ts','desc')),snap=>{
     state.publicacoes=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='pubs') renderPubs();
-  });
+  }));
+  // ACOMPANHAMENTO
+  subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_activities'),f.orderBy('updatedAt','desc')),snap=>{
+    state.activities=snap.docs.map(d=>({...d.data(),id:d.id}));
+    if(currentView==='track') renderTrack();
+    if(currentView==='feed') renderFeedSide();
+  }));
+  // FEED SOCIAL
+  subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_feed'),f.orderBy('ts','desc')),snap=>{
+    state.feed=snap.docs.map(d=>({...d.data(),id:d.id}));
+    if(currentView==='feed') renderFeed();
+  }));
+  subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_feed_comments'),f.orderBy('ts','asc')),snap=>{
+    state.comments=snap.docs.map(d=>({...d.data(),id:d.id}));
+    if(currentView==='feed') renderFeed();
+    if(currentView==='fotos') renderFotos();
+    if(lbPhotoId) renderLightboxSocial();
+  }));
+  subscriptions.push(f.onSnapshot(f.collection(window.db,'rede_feed_reactions'),snap=>{
+    state.reactions=snap.docs.map(d=>({...d.data(),id:d.id}));
+    if(currentView==='feed') renderFeed();
+    if(currentView==='fotos') renderFotos();
+    if(lbPhotoId) renderLightboxSocial();
+  }));
+  // CONTAS (somente coordenador pode listar todas)
+  if(isAdmin){
+    subscriptions.push(f.onSnapshot(f.collection(window.db,'rede_users'),snap=>{
+      state.users=snap.docs.map(d=>({...d.data(),uid:d.id}));
+      renderAccessList();
+    }));
+  } else { state.users=authProfile?[{...authProfile,uid:authUser.uid}]:[]; }
 }
 
 async function fbSetMember(id,data){
@@ -1279,7 +1493,8 @@ async function fbSaveSettings(){
 /* upload base64 dataURL -> Storage, retorna URL */
 async function fbUploadImage(pathPrefix,dataUrl){
   const f=FB();
-  const path=`rede_uploads/${pathPrefix}_${Date.now()}_${Math.random().toString(36).slice(2,7)}.jpg`;
+  const au=window.auth.currentUser; if(!au)throw new Error('Sessão encerrada.');
+  const path=`rede_uploads/${au.uid}/${pathPrefix}_${Date.now()}_${Math.random().toString(36).slice(2,7)}.jpg`;
   const r=f.sRef(window.storage,path);
   await f.uploadString(r,dataUrl,'data_url');
   const url=await f.getDownloadURL(r);
@@ -1289,77 +1504,185 @@ async function fbUploadImage(pathPrefix,dataUrl){
 async function fbUploadFile(pathPrefix,dataUrl,filename){
   const f=FB();
   const ext=(filename.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'');
-  const path=`rede_publicacoes/${pathPrefix}_${Date.now()}_${Math.random().toString(36).slice(2,7)}.${ext}`;
+  const au=window.auth.currentUser; if(!au)throw new Error('Sessão encerrada.');
+  const path=`rede_publicacoes/${au.uid}/${pathPrefix}_${Date.now()}_${Math.random().toString(36).slice(2,7)}.${ext}`;
   const r=f.sRef(window.storage,path);
   await f.uploadString(r,dataUrl,'data_url');
   const url=await f.getDownloadURL(r);
   return {url,path};
 }
+async function fbUploadAny(folder,pathPrefix,dataUrl,filename){
+  const f=FB();
+  const ext=(filename.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'') || 'bin';
+  const au=window.auth.currentUser; if(!au)throw new Error('Sessão encerrada.');
+  const path=`${folder}/${au.uid}/${pathPrefix}_${Date.now()}_${Math.random().toString(36).slice(2,7)}.${ext}`;
+  const r=f.sRef(window.storage,path);
+  await f.uploadString(r,dataUrl,'data_url');
+  return {url:await f.getDownloadURL(r),path};
+}
+function currentActor(){
+  const me=myId?memberById(myId):null;
+  return me?{id:me.id,name:me.nome,foto:me.foto||'',nivel:me.nivel,color:NIVEIS[me.nivel]?.color||'#7c8b90'}:null;
+}
+function socialFor(targetType,targetId){
+  const rs=state.reactions.filter(r=>r.targetType===targetType&&r.targetId===targetId);
+  const cs=state.comments.filter(c=>c.targetType===targetType&&c.targetId===targetId);
+  return {rs,cs,likes:rs.filter(r=>r.type==='like').length,hearts:rs.filter(r=>r.type==='heart').length};
+}
+function myReaction(targetType,targetId){return state.reactions.find(r=>r.targetType===targetType&&r.targetId===targetId&&r.actorId===myId)}
+async function toggleReaction(targetType,targetId,type){
+  if(!myId){toast('Identifique-se como um Carbonauta para reagir.');openIdentity();return}
+  const f=FB(), id=`${targetType}_${targetId}_${myId}`.replace(/[^a-zA-Z0-9_-]/g,'_');
+  const ref=f.doc(window.db,'rede_feed_reactions',id), cur=myReaction(targetType,targetId), actor=currentActor();
+  if(cur&&cur.type===type) await f.deleteDoc(ref);
+  else await f.setDoc(ref,{targetType,targetId,type,actorId:actor.id,actorName:actor.name,ts:f.serverTimestamp()});
+}
+async function addSocialComment(targetType,targetId,inputId){
+  if(!myId){toast('Identifique-se como um Carbonauta para comentar.');openIdentity();return}
+  const el=$('#'+inputId); if(!el)return; const text=el.value.trim(); if(!text)return; const a=currentActor();
+  await FB().addDoc(FB().collection(window.db,'rede_feed_comments'),{targetType,targetId,text,authorId:a.id,authorName:a.name,authorColor:a.color,ts:FB().serverTimestamp()}); el.value='';
+}
 
-/* ============ IDENTITY / ADMIN ============ */
-function isMe(id){ return myId && id===myId }
+/* ============ AUTHENTICATION / PERMISSIONS ============ */
+function isMe(id){ return !!myId && id===myId }
 function canEditMember(id){ return isAdmin || isMe(id) }
+function authErrorMessage(e){
+  const c=e?.code||'';
+  if(c.includes('invalid-credential')||c.includes('wrong-password')||c.includes('user-not-found')) return 'E-mail ou senha incorretos.';
+  if(c.includes('too-many-requests')) return 'Muitas tentativas. Aguarde um pouco e tente novamente.';
+  if(c.includes('invalid-email')) return 'E-mail inválido.';
+  if(c.includes('weak-password')) return 'A senha precisa ter pelo menos 6 caracteres.';
+  if(c.includes('email-already-in-use')) return 'Esse e-mail já possui uma conta no Firebase.';
+  return e?.message||'Não foi possível concluir a operação.';
+}
+function showLogin(message=''){
+  $('#authGate').classList.remove('off'); $('#authLoginPane').classList.remove('hidden'); $('#authRegisterPane').classList.add('hidden'); $('#authUnlinkedPane').classList.remove('on');
+  $('#authMsg').textContent=message; $('#loading').classList.add('off');
+}
+function showRegister(){
+  $('#authGate').classList.remove('off'); $('#authLoginPane').classList.add('hidden'); $('#authRegisterPane').classList.remove('hidden'); $('#authUnlinkedPane').classList.remove('on');
+  $('#registerMsg').textContent=''; $('#loading').classList.add('off');
+}
+async function showUnlinked(user){
+  $('#authGate').classList.remove('off'); $('#authLoginPane').classList.add('hidden'); $('#authRegisterPane').classList.add('hidden'); $('#authUnlinkedPane').classList.add('on');
+  $('#unlinkedEmail').textContent=user.email||''; $('#claimMsg').textContent=''; $('#loading').classList.add('off');
+  const sel=$('#selfMemberSelect'); sel.innerHTML='<option value="">Carregando perfis…</option>';
+  try{
+    const snap=await FB().getDocs(FB().collection(window.db,'rede_members'));
+    const members=snap.docs.map(d=>({...d.data(),id:d.id})).filter(m=>m.nivel!=='coord').sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+    sel.innerHTML='<option value="">Selecione seu nome</option>'+members.map(m=>`<option value="${esc(m.id)}">${esc(m.nome||m.id)}</option>`).join('');
+  }catch(e){console.error(e);sel.innerHTML='<option value="">Não foi possível carregar os perfis</option>';$('#claimMsg').textContent='Verifique as regras do Firestore.';}
+}
+async function registerSelf(){
+  const email=$('#registerEmail').value.trim(), password=$('#registerPassword').value, password2=$('#registerPassword2').value;
+  if(!email||!password){$('#registerMsg').textContent='Digite e-mail e senha.';return}
+  if(password.length<6){$('#registerMsg').textContent='A senha precisa ter pelo menos 6 caracteres.';return}
+  if(password!==password2){$('#registerMsg').textContent='As senhas não coincidem.';return}
+  $('#registerBtn').disabled=true; $('#registerMsg').textContent='Criando sua conta…';
+  try{await FB().createUserWithEmailAndPassword(window.auth,email,password)}catch(e){$('#registerMsg').textContent=authErrorMessage(e)}finally{$('#registerBtn').disabled=false}
+}
+async function claimMyProfile(){
+  const user=window.auth.currentUser, memberId=$('#selfMemberSelect').value, code=$('#selfInviteCode').value.trim();
+  if(!user){showLogin();return}
+  if(!memberId){$('#claimMsg').textContent='Selecione o seu nome.';return}
+  if(!code){$('#claimMsg').textContent='Digite o código de entrada.';return}
+  $('#claimProfileBtn').disabled=true; $('#claimMsg').textContent='Vinculando seu perfil…';
+  try{
+    const ms=await FB().getDoc(FB().doc(window.db,'rede_members',memberId));
+    if(!ms.exists()) throw new Error('Perfil não encontrado.');
+    const m=ms.data();
+    const batch=FB().writeBatch(window.db);
+    batch.set(FB().doc(window.db,'rede_member_claims',memberId),{uid:user.uid,memberId,email:user.email||'',registrationCode:code,createdAt:FB().serverTimestamp()});
+    batch.set(FB().doc(window.db,'rede_users',user.uid),{memberId,nome:m.nome||'',email:user.email||'',role:'student',createdAt:FB().serverTimestamp()});
+    await batch.commit();
+    $('#selfInviteCode').value='';
+    await handleAuthUser(user);
+  }catch(e){
+    console.error(e);
+    $('#claimMsg').textContent=(e?.code==='permission-denied'||String(e?.message||'').includes('permission'))?'Não foi possível vincular. Confira o código ou escolha outro perfil; este nome pode já estar vinculado.':authErrorMessage(e);
+  }finally{$('#claimProfileBtn').disabled=false}
+}
+async function login(){
+  const email=$('#loginEmail').value.trim(), password=$('#loginPassword').value; if(!email||!password){$('#authMsg').textContent='Digite e-mail e senha.';return}
+  $('#loginBtn').disabled=true; $('#authMsg').textContent='Entrando…';
+  try{await FB().signInWithEmailAndPassword(window.auth,email,password)}catch(e){$('#authMsg').textContent=authErrorMessage(e)}finally{$('#loginBtn').disabled=false}
+}
+async function resetMyPassword(emailOverride=''){
+  const email=(emailOverride||authUser?.email||$('#loginEmail').value).trim(); if(!email){toast('Digite o e-mail primeiro.');return}
+  try{await FB().sendPasswordResetEmail(window.auth,email);toast('E-mail para redefinir a senha enviado.')}catch(e){toast(authErrorMessage(e))}
+}
+async function doLogout(){
+  clearSubscriptions(); bootstrapped=false; authProfile=null; authUser=null; myId=null; myName=''; isAdmin=false;
+  try{await FB().signOut(window.auth)}catch(e){console.error(e)}
+}
+async function handleAuthUser(user){
+  clearSubscriptions(); bootstrapped=false; state.users=[];
+  if(!user){authUser=null;authProfile=null;myId=null;myName='';isAdmin=false;showLogin();refreshIdentityUI();return}
+  authUser=user; $('#loading').classList.remove('off'); $('#loadingMsg').textContent='Validando sua conta…';
+  try{
+    const snap=await FB().getDoc(FB().doc(window.db,'rede_users',user.uid));
+    if(!snap.exists()){authProfile=null;myId=null;myName='';isAdmin=false;showUnlinked(user);return}
+    authProfile={uid:user.uid,...snap.data()}; myId=authProfile.memberId||null; myName=authProfile.nome||user.email||''; isAdmin=authProfile.role==='coordinator';
+    await bootstrap();
+  }catch(e){console.error(e);showLogin('Sua conta não conseguiu acessar o perfil. Verifique as regras do Firestore.')}
+}
+function startAuth(){FB().onAuthStateChanged(window.auth,handleAuthUser)}
 
 function refreshIdentityUI(){
-  const chip=$('#idChip'), av=$('#idAv'), nm=$('#idName');
-  const me = myId ? memberById(myId) : null;
-  if(me){
-    nm.textContent=me.nome;
-    av.innerHTML = me.foto ? `<img src="${esc(me.foto)}" alt="">` : initials(me.nome);
-    av.style.background = NIVEIS[me.nivel]?.color || 'var(--ink-3)';
-  } else if(myName){
-    nm.textContent=myName; av.innerHTML=initials(myName); av.style.background='var(--ink-3)';
-  } else {
-    nm.textContent='Quem é você?';
-    av.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
-    av.style.background='var(--ink-3)';
-  }
+  const chip=$('#idChip'),av=$('#idAv'),nm=$('#idName'),me=myId?memberById(myId):null;
+  const displayName=me?.nome||authProfile?.nome||authUser?.email||'Entrar';
+  nm.textContent=displayName;
+  av.innerHTML=me?.foto?`<img src="${esc(me.foto)}" alt="">`:initials(displayName);
+  av.style.background=me?(NIVEIS[me.nivel]?.color||'var(--ink-3)'):'var(--ink-3)';
   chip.classList.toggle('admin',isAdmin);
-  // who no mural
-  const me2=myId?memberById(myId):null;
-  $('#whoName').textContent = me2 ? me2.nome : (myName||'visitante');
-  $('#whoDot').style.background = me2 ? (NIVEIS[me2.nivel]?.color||'var(--ink-3)') : 'var(--ink-3)';
-  // admin lock icon
-  $('#lockIcon').innerHTML = isAdmin
-    ? '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0"/>'
-    : '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>';
-  $('#adminBtn').style.color = isAdmin ? 'var(--petrol)' : '';
-  // botões restritos
+  if($('#whoName')) $('#whoName').textContent=displayName;
+  if($('#whoDot')) $('#whoDot').style.background=me?(NIVEIS[me.nivel]?.color||'var(--ink-3)'):'var(--ink-3)';
+  $('#adminBtn').style.display=isAdmin?'inline-flex':'none';
+  $('#adminBtn').title='Gerenciar acessos';
+  $('#lockIcon').innerHTML=isAdmin?'<path d="M12 3 4 7v5c0 5 3.4 8.5 8 9 4.6-.5 8-4 8-9V7z"/><path d="m9 12 2 2 4-4"/>':'';
   updateAdminButtons();
 }
 function updateAdminButtons(){
-  $('#addBtn').style.display = isAdmin ? 'inline-flex' : 'none';
-  $('#newEventBtn').style.display = isAdmin ? 'inline-flex' : 'none';
+  $('#addBtn').style.display=isAdmin?'inline-flex':'none'; $('#newEventBtn').style.display=isAdmin?'inline-flex':'none';
+  $('#manageLinhasBtn').style.display=isAdmin?'inline-flex':'none'; $('#recadoBtn').style.display=isAdmin?'inline-flex':'none';
 }
 function refreshMemberDependentUI(){
-  refreshIdentityUI();
-  // dropdown de níveis no cronograma
-  const cn=$('#cNivel'); const cur=cn.value;
-  cn.innerHTML='<option value="">Todos os níveis</option>'+
-    Object.entries(NIVEIS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
-  cn.value=cur;
+  refreshIdentityUI(); const cn=$('#cNivel'),cur=cn.value; cn.innerHTML='<option value="">Todos os níveis</option>'+Object.entries(NIVEIS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join(''); cn.value=cur;
+  if(isAdmin) populateAccessMemberSelects();
 }
-
 function openIdentity(){
-  const list=$('#idList');
-  const ordered=[...state.members].sort((a,b)=>{
-    const oa=Object.keys(NIVEIS).indexOf(a.nivel), ob=Object.keys(NIVEIS).indexOf(b.nivel);
-    return oa-ob || a.nome.localeCompare(b.nome);
-  });
-  list.innerHTML=ordered.map(m=>{
-    const nv=NIVEIS[m.nivel];
-    const av=m.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m.nome);
-    return `<button class="id-item" data-id="${m.id}">
-      <span class="av" style="background:${nv.color}">${av}</span>
-      ${esc(m.nome)}<span class="lv">${nv.short}</span></button>`;
-  }).join('') || '<p class="hint">Nenhum membro cadastrado ainda.</p>';
-  list.querySelectorAll('.id-item').forEach(b=>b.onclick=()=>{
-    myId=b.dataset.id; const m=memberById(myId); myName=m?m.nome:'';
-    localStorage.setItem('rede_myId',myId); localStorage.setItem('rede_myName',myName);
-    refreshIdentityUI(); closeOverlay('idOverlay'); toast('Você agora está identificado como '+myName+'.');
-  });
-  openOverlay('idOverlay');
+  const me=myId?memberById(myId):null, name=me?.nome||authProfile?.nome||authUser?.email||'';
+  $('#accountName').textContent=name; $('#accountEmail').textContent=authUser?.email||''; $('#accountRole').textContent=isAdmin?'Coordenador':'Carbonauta';
+  $('#accountAv').textContent=initials(name); $('#accountAv').style.background=me?(NIVEIS[me.nivel]?.color||'var(--petrol)'):'var(--petrol)'; openOverlay('idOverlay');
 }
+function populateAccessMemberSelects(){
+  const linked=new Set((state.users||[]).map(u=>u.memberId)), opts=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome)).map(m=>`<option value="${m.id}" ${linked.has(m.id)?'disabled':''}>${esc(m.nome)}${linked.has(m.id)?' — já vinculado':''}</option>`).join('');
+  ['accessMember','linkMember'].forEach(id=>{const el=$('#'+id);if(el)el.innerHTML=opts});
+}
+function openAccessManager(){if(!isAdmin){toast('Acesso restrito ao coordenador.');return}populateAccessMemberSelects();renderAccessList();openOverlay('pinOverlay')}
+function renderAccessList(){
+  const el=$('#accessList');if(!el)return; if(!isAdmin){el.innerHTML='';return}
+  const rows=[...(state.users||[])].sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+  el.innerHTML=rows.length?rows.map(u=>{const m=memberById(u.memberId),self=u.uid===authUser?.uid;return `<div class="access-row"><div class="main"><div class="nm">${esc(m?.nome||u.nome||u.memberId||'Sem perfil')} ${u.role==='coordinator'?'<span class="role-pill">coordenador</span>':''}</div><div class="em">${esc(u.email||'')} · ${esc(u.uid)}</div></div>${self?'':`<button class="btn danger" onclick="unlinkAccess('${u.uid}')">Desvincular</button>`}</div>`}).join(''):'<div class="hint">Nenhuma conta vinculada.</div>';
+  populateAccessMemberSelects();
+}
+async function createAccess(){
+  if(!isAdmin)return; const memberId=$('#accessMember').value,email=$('#accessEmail').value.trim(),password=$('#accessPassword').value; const m=memberById(memberId);
+  if(!memberId||!email||password.length<6){toast('Selecione a pessoa, informe e-mail e senha com 6+ caracteres.');return}
+  $('#createAccessBtn').disabled=true; let created=null;
+  try{
+    const cred=await FB().createUserWithEmailAndPassword(window.secondaryAuth,email,password); created=cred.user;
+    await FB().signOut(window.secondaryAuth);
+    await FB().setDoc(FB().doc(window.db,'rede_users',created.uid),{memberId,nome:m?.nome||'',email,role:'student',createdAt:FB().serverTimestamp(),createdBy:authUser.uid});
+    $('#accessEmail').value='';$('#accessPassword').value='';toast('Conta criada e vinculada a '+(m?.nome||'Carbonauta')+'.');
+  }catch(e){console.error(e);toast(created?`A conta foi criada (UID ${created.uid}), mas o vínculo falhou. Vincule o UID abaixo.`:authErrorMessage(e));}
+  finally{$('#createAccessBtn').disabled=false}
+}
+async function linkExistingAccess(){
+  if(!isAdmin)return;const memberId=$('#linkMember').value,uidv=$('#linkUid').value.trim(),email=$('#linkEmail').value.trim(),m=memberById(memberId);if(!memberId||!uidv){toast('Selecione a pessoa e cole o UID.');return}
+  try{await FB().setDoc(FB().doc(window.db,'rede_users',uidv),{memberId,nome:m?.nome||'',email,role:'student',createdAt:FB().serverTimestamp(),createdBy:authUser.uid},{merge:true});$('#linkUid').value='';$('#linkEmail').value='';toast('Conta vinculada.')}catch(e){console.error(e);toast('Erro ao vincular conta.')}
+}
+async function unlinkAccess(uidv){if(!isAdmin||uidv===authUser?.uid||!confirm('Desvincular esta conta da plataforma?'))return;try{const u=(state.users||[]).find(x=>x.uid===uidv);const batch=FB().writeBatch(window.db);batch.delete(FB().doc(window.db,'rede_users',uidv));if(u?.memberId)batch.delete(FB().doc(window.db,'rede_member_claims',u.memberId));await batch.commit();toast('Acesso desvinculado. O perfil poderá ser reivindicado novamente.')}catch(e){console.error(e);toast('Erro ao desvincular.')}}
 
 /* ============ FILTER LOGIC ============ */
 function visibleMembers(){
@@ -2111,8 +2434,14 @@ function renderFotos(){
     <div class="ph" data-id="${p.id}">
       <img src="${esc(p.url)}" alt="${esc(p.legenda||'')}" loading="lazy">
       ${(p.legenda||p.autor)?`<div class="ph-cap">${esc(p.legenda||'')}${p.autor?`<span class="by">por ${esc(p.autor)}</span>`:''}</div>`:''}
+      <div class="ph-social">${(()=>{const ss=socialFor('photo',p.id),mr=myReaction('photo',p.id);return `<button class="${mr?.type==='like'?'on':''}" data-react="like">👍 ${ss.likes||''}</button><button class="${mr?.type==='heart'?'on':''}" data-react="heart">💙 ${ss.hearts||''}</button><button data-comments>💬 ${ss.cs.length||''}</button>`})()}</div>
     </div>`).join('');
-  gal.querySelectorAll('.ph').forEach(el=>el.onclick=()=>openLightbox(el.dataset.id));
+  gal.querySelectorAll('.ph').forEach(el=>{
+    el.onclick=e=>{
+      const rb=e.target.closest('[data-react]'); if(rb){e.stopPropagation();toggleReaction('photo',el.dataset.id,rb.dataset.react);return}
+      openLightbox(el.dataset.id);
+    };
+  });
 }
 function openLightbox(id){
   const p=state.photos.find(x=>x.id===id); if(!p)return;
@@ -2120,6 +2449,7 @@ function openLightbox(id){
   $('#lbImg').src=p.url;
   $('#lbCap').innerHTML=`${esc(p.legenda||'')}${p.autor?`<div class="by">por ${esc(p.autor)}</div>`:''}`;
   $('#lbDel').style.display=(isAdmin || (myName && p.autor===myName) || (myId && p.autorId===myId)) ? 'inline-flex':'none';
+  renderLightboxSocial();
   $('#lightbox').classList.add('open');
 }
 function closeLightbox(){ $('#lightbox').classList.remove('open'); lbPhotoId=null; }
@@ -2135,11 +2465,12 @@ async function deleteLightboxPhoto(){
 }
 let photoFoto='';
 function openPhotoModal(){
+  if(!myId){toast('Identifique-se como um Carbonauta para enviar fotos.');openIdentity();return}
   photoFoto='';
   $('#gPrev').textContent='sem foto'; $('#gPrev').innerHTML='sem foto';
   $('#gCap').value='';
-  const me=myId?memberById(myId):null;
-  $('#gAutor').value= me?me.nome:(myName||'');
+  const me=memberById(myId);
+  $('#gAutor').value= me?me.nome:''; $('#gAutor').readOnly=true;
   openOverlay('photoOverlay');
 }
 function handleGalleryFile(file){
@@ -2283,42 +2614,68 @@ async function deletePublicacao(id){
   catch(e){ console.error(e); toast('Erro ao excluir.'); }
 }
 
-/* ============ ADMIN / PIN ============ */
-function openPin(){
-  $('#pinInput').value='';
-  if(isAdmin){
-    $('#pinChangeArea').style.display='block';
-    $('#pinFooter').style.display='none';
-  }else{
-    $('#pinChangeArea').style.display='none';
-    $('#pinFooter').style.display='flex';
-  }
-  openOverlay('pinOverlay');
-  setTimeout(()=>$('#pinInput').focus(),50);
-}
-function checkPin(){
-  const v=$('#pinInput').value.trim();
-  if(v===(state.settings.pin||DEFAULT_PIN)){
-    isAdmin=true; refreshIdentityUI(); renderAll(); if(currentView==='crono')renderCrono();
-    toast('Modo coordenador ativado.');
-    $('#pinChangeArea').style.display='block';
-    $('#pinFooter').style.display='none';
-  }else{
-    toast('PIN incorreto.');
-  }
-}
-async function saveNewPin(){
-  const np=$('#newPin').value.trim();
-  if(!np){toast('Digite um novo PIN.');return}
-  state.settings.pin=np;
-  try{ await fbSaveSettings(); toast('PIN atualizado.'); $('#newPin').value=''; }
-  catch(e){console.error(e);toast('Erro ao salvar PIN.')}
-}
-function logoutAdmin(){
-  isAdmin=false; refreshIdentityUI(); renderAll(); if(currentView==='crono')renderCrono();
-  closeOverlay('pinOverlay'); toast('Modo coordenador desativado.');
-}
 
+/* ============ ACOMPANHAMENTO ============ */
+const ACTIVITY_TYPES={projeto:'Projeto',acao:'Ação',apresentacao:'Apresentação',cronograma:'Cronograma',relatorio:'Relatório',arquivo:'Arquivo/repositório',outro:'Outro'};
+const ACTIVITY_STATUS={planejado:'Planejado',andamento:'Em andamento',revisao:'Em revisão',concluido:'Concluído',pausado:'Pausado'};
+let editingActivityId=null, activityFileData='', activityFileName='', activityOldStorage='';
+function refreshTrackOwners(){
+  const el=$('#trackOwner'),cur=el.value; const list=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome));
+  el.innerHTML='<option value="">Todos os Carbonautas</option>'+list.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join(''); el.value=cur;
+}
+function renderTrack(){
+  refreshTrackOwners(); let list=state.activities.slice();
+  const owner=$('#trackOwner').value,status=$('#trackStatus').value,type=$('#trackType').value;
+  if(owner)list=list.filter(a=>a.ownerId===owner); if(status)list=list.filter(a=>a.status===status); if(type)list=list.filter(a=>a.type===type);
+  if($('#trackMine').checked){if(!myId){$('#trackMine').checked=false;toast('Identifique-se primeiro.')}else list=list.filter(a=>a.ownerId===myId)}
+  const total=state.activities.length, active=state.activities.filter(a=>a.status==='andamento').length, done=state.activities.filter(a=>a.status==='concluido').length;
+  const overdue=state.activities.filter(a=>a.dueDate&&a.status!=='concluido'&&dateInfo(a.dueDate)?.over).length;
+  $('#trackKpis').innerHTML=`<div class="track-kpi"><div class="n">${total}</div><div class="l">registros</div></div><div class="track-kpi"><div class="n">${active}</div><div class="l">em andamento</div></div><div class="track-kpi"><div class="n">${done}</div><div class="l">concluídos</div></div><div class="track-kpi"><div class="n">${overdue}</div><div class="l">prazos vencidos</div></div>`;
+  const grid=$('#trackGrid'); $('#trackEmpty').style.display=list.length?'none':'block';
+  grid.innerHTML=list.map(a=>{const m=memberById(a.ownerId),can=isAdmin||isMe(a.ownerId),p=Math.max(0,Math.min(100,+a.progress||0)); const di=a.dueDate?dateInfo(a.dueDate):null;
+    return `<article class="track-card"><div class="track-top"><div class="track-main"><div class="track-title">${esc(a.title||'Sem título')}</div><div class="track-meta"><span class="track-tag">${esc(ACTIVITY_TYPES[a.type]||a.type||'Outro')}</span><span class="track-status s-${a.status||'planejado'}">${esc(ACTIVITY_STATUS[a.status]||a.status||'Planejado')}</span><span class="pub-author"><span class="d" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}"></span>${esc(a.ownerName||(m?m.nome:'—'))}</span>${a.dueDate?`<span class="pub-date" style="${di?.over&&a.status!=='concluido'?'color:var(--red);font-weight:700':''}">prazo ${fmtDate(a.dueDate)}</span>`:''}</div></div>${can?`<div class="track-actions"><button class="mini-x" onclick="editActivity('${a.id}')" title="Editar">✎</button></div>`:''}</div>${a.description?`<div class="track-desc">${esc(a.description)}</div>`:''}<div class="progress"><span style="width:${p}%"></span></div><div class="progress-lab"><span>Progresso</span><b>${p}%</b></div><div class="track-links">${a.externalUrl?`<a class="btn ghost" href="${esc(a.externalUrl)}" target="_blank" rel="noopener">Abrir link</a>`:''}${a.fileUrl?`<a class="btn ghost" href="${esc(a.fileUrl)}" target="_blank" rel="noopener">${esc(a.fileName||'Abrir arquivo')}</a>`:''}</div></article>`;
+  }).join('');
+}
+function openActivity(id=null){
+  if(!myId&&!isAdmin){toast('Identifique-se primeiro para registrar atividades.');openIdentity();return}
+  editingActivityId=id; activityFileData=''; activityFileName=''; activityOldStorage=''; const a=id?state.activities.find(x=>x.id===id):null;
+  if(a&&!(isAdmin||isMe(a.ownerId))){toast('Sem permissão para editar este registro.');return}
+  const sel=$('#activityOwnerSel'),ordered=[...state.members].sort((x,y)=>x.nome.localeCompare(y.nome)); sel.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');
+  $('#activityOwnerRow').style.display=isAdmin?'block':'none'; sel.value=a?.ownerId||(myId||ordered[0]?.id||'');
+  $('#activityTitle').textContent=a?'Editar acompanhamento':'Novo registro de acompanhamento'; $('#activityType').value=a?.type||'projeto'; $('#activityStatus').value=a?.status||'planejado'; $('#activityName').value=a?.title||''; $('#activityDesc').value=a?.description||''; $('#activityStart').value=a?.startDate||''; $('#activityDue').value=a?.dueDate||''; $('#activityProgress').value=a?.progress||0; $('#activityProgressLabel').textContent=(a?.progress||0)+'%'; $('#activityUrl').value=a?.externalUrl||''; activityOldStorage=a?.storagePath||''; $('#activityFileName').textContent=a?.fileName?`Arquivo atual: ${a.fileName}`:'Nenhum arquivo escolhido.'; $('#deleteActivityBtn').style.display=a?'inline-flex':'none'; openOverlay('activityOverlay');
+}
+function handleActivityFile(file){if(!file)return;if(file.size>15*1024*1024){toast('Arquivo maior que 15 MB.');return} const r=new FileReader();r.onload=e=>{activityFileData=e.target.result;activityFileName=file.name;$('#activityFileName').textContent=file.name};r.readAsDataURL(file)}
+async function saveActivity(){
+  const ownerId=isAdmin?$('#activityOwnerSel').value:myId,title=$('#activityName').value.trim(); if(!ownerId||!title){toast('Informe responsável e título.');return}
+  const old=editingActivityId?state.activities.find(x=>x.id===editingActivityId):null; let fileUrl=old?.fileUrl||'',fileName=old?.fileName||'',storagePath=old?.storagePath||'';
+  try{if(activityFileData){toast('Enviando arquivo…');const up=await fbUploadAny('rede_activities','atividade_'+ownerId,activityFileData,activityFileName);fileUrl=up.url;fileName=activityFileName;storagePath=up.path}}
+  catch(e){console.error(e);toast('Falha no upload do arquivo.');return}
+  const m=memberById(ownerId),data={ownerId,ownerName:m?.nome||'',type:$('#activityType').value,status:$('#activityStatus').value,title,description:$('#activityDesc').value.trim(),startDate:$('#activityStart').value,dueDate:$('#activityDue').value,progress:+$('#activityProgress').value||0,externalUrl:$('#activityUrl').value.trim(),fileUrl,fileName,storagePath,updatedAt:FB().serverTimestamp()};
+  try{if(editingActivityId)await FB().setDoc(FB().doc(window.db,'rede_activities',editingActivityId),data,{merge:true});else await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});closeOverlay('activityOverlay');toast('Acompanhamento salvo.')}catch(e){console.error(e);toast('Erro ao salvar acompanhamento.')}
+}
+async function deleteActivity(){if(!editingActivityId||!confirm('Excluir este registro de acompanhamento?'))return;const a=state.activities.find(x=>x.id===editingActivityId);if(!a||!(isAdmin||isMe(a.ownerId)))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_activities',editingActivityId));if(a.storagePath){try{await FB().deleteObject(FB().sRef(window.storage,a.storagePath))}catch(e){}}closeOverlay('activityOverlay');toast('Registro excluído.')}catch(e){console.error(e);toast('Erro ao excluir.')}}
+
+/* ============ FEED SOCIAL ============ */
+let postFileData='',postFileName='';
+function renderFeedSide(){
+  if(!$('#feedStats'))return; const active=state.members.filter(m=>m.status==='ativo').length,eg=state.members.filter(m=>m.status==='egresso').length,done=state.activities.filter(a=>a.status==='concluido').length;
+  $('#feedStats').innerHTML=`<div class="side-stat"><span>Carbonautas ativos</span><b>${active}</b></div><div class="side-stat"><span>Egressos</span><b>${eg}</b></div><div class="side-stat"><span>Registros acompanhados</span><b>${state.activities.length}</b></div><div class="side-stat"><span>Entregas concluídas</span><b>${done}</b></div>`;
+  const upcoming=buildCronoItems().filter(x=>!x.feito&&x.data).sort((a,b)=>a.data.localeCompare(b.data)).slice(0,5); $('#feedDeadlines').innerHTML=upcoming.length?upcoming.map(x=>`<div class="side-stat"><span>${esc(x.titulo)}</span><b>${fmtDate(x.data)}</b></div>`).join(''):'<div class="hint">Nenhuma entrega próxima.</div>';
+}
+function renderComments(targetType,targetId){const s=socialFor(targetType,targetId);return `<div class="comments">${s.cs.slice(-8).map(c=>`<div class="comment"><div class="comment-av" style="background:${c.authorColor||'#7c8b90'}">${initials(c.authorName||'?')}</div><div class="comment-b"><div class="comment-name">${esc(c.authorName||'')}</div><div class="comment-text">${esc(c.text||'')}</div></div></div>`).join('')}<div class="comment-form"><input id="comment_${targetType}_${targetId}" placeholder="Escreva um comentário…"><button class="btn primary" onclick="addSocialComment('${targetType}','${targetId}','comment_${targetType}_${targetId}')">Enviar</button></div></div>`}
+function socialBar(targetType,targetId){const s=socialFor(targetType,targetId),mine=myReaction(targetType,targetId);return `<div class="social-bar"><button class="react-btn ${mine?.type==='like'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','like')">👍 ${s.likes||''}</button><button class="react-btn heart ${mine?.type==='heart'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','heart')">💙 ${s.hearts||''}</button><button class="comment-toggle">💬 ${s.cs.length||''}</button><div class="social-spacer"></div></div>`}
+function renderFeed(){
+  renderFeedSide();const a=currentActor();const av=$('#feedMeAv'); if(av){av.innerHTML=a?.foto?`<img src="${esc(a.foto)}" alt="">`:initials(a?.name||'?');av.style.background=a?.color||'#7c8b90'}
+  const list=$('#feedList');$('#feedEmpty').style.display=state.feed.length?'none':'block';list.innerHTML=state.feed.map(p=>{const m=memberById(p.authorId),dt=p.ts?.toMillis?new Date(p.ts.toMillis()):null,can=isAdmin||isMe(p.authorId);const isImg=p.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(p.fileName||p.fileUrl)||p.mime?.startsWith('image/'));return `<article class="feed-card"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${p.authorFoto?`<img src="${esc(p.authorFoto)}" alt="">`:initials(p.authorName||'?')}</div><div><div class="feed-author">${esc(p.authorName||'Carbonauta')}</div><div class="feed-time">${dt?dt.toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div><span class="feed-kind">${esc((p.kind||'atualizacao').replace(/^./,x=>x.toUpperCase()))}</span>${can?`<button class="mini-x" onclick="deleteFeedPost('${p.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${p.title?`<div class="feed-title">${esc(p.title)}</div>`:''}${p.text?`<div class="feed-text">${esc(p.text)}</div>`:''}${p.externalUrl?`<a class="feed-attachment" href="${esc(p.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${p.fileUrl&&!isImg?`<a class="feed-attachment" href="${esc(p.fileUrl)}" target="_blank" rel="noopener">📎 ${esc(p.fileName||'Abrir anexo')}</a>`:''}</div>${isImg?`<img class="feed-image" src="${esc(p.fileUrl)}" alt="${esc(p.title||'Foto publicada')}">`:''}${socialBar('post',p.id)}${renderComments('post',p.id)}</article>`}).join('');
+}
+function openPostModal(){if(!myId){toast('Identifique-se primeiro para publicar.');openIdentity();return}postFileData='';postFileName='';$('#postKind').value='atualizacao';$('#postTitle').value='';$('#postText').value='';$('#postUrl').value='';$('#postFileName').textContent='Nenhum arquivo escolhido.';openOverlay('postOverlay')}
+function handlePostFile(file){if(!file)return;if(file.size>15*1024*1024){toast('Arquivo maior que 15 MB.');return}const r=new FileReader();r.onload=e=>{postFileData=e.target.result;postFileName=file.name;$('#postFileName').textContent=file.name};r.readAsDataURL(file)}
+async function saveFeedPost(){const text=$('#postText').value.trim(),title=$('#postTitle').value.trim();if(!text&&!title&&!postFileData&&!$('#postUrl').value.trim()){toast('Adicione algum conteúdo à publicação.');return}const a=currentActor();let fileUrl='',storagePath='';try{if(postFileData){toast('Enviando anexo…');const up=await fbUploadAny('rede_feed','post_'+a.id,postFileData,postFileName);fileUrl=up.url;storagePath=up.path}await FB().addDoc(FB().collection(window.db,'rede_feed'),{authorId:a.id,authorName:a.name,authorFoto:a.foto,kind:$('#postKind').value,title,text,externalUrl:$('#postUrl').value.trim(),fileUrl,fileName:postFileName,storagePath,ts:FB().serverTimestamp()});closeOverlay('postOverlay');toast('Publicado no feed.')}catch(e){console.error(e);toast('Erro ao publicar no feed.')}}
+async function deleteFeedPost(id){const p=state.feed.find(x=>x.id===id);if(!p||!(isAdmin||isMe(p.authorId))||!confirm('Excluir esta publicação do feed?'))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_feed',id));if(p.storagePath){try{await FB().deleteObject(FB().sRef(window.storage,p.storagePath))}catch(e){}}toast('Publicação removida.')}catch(e){console.error(e);toast('Erro ao excluir publicação.')}}
+
+function renderLightboxSocial(){if(!lbPhotoId)return;$('#lbSocial').innerHTML=socialBar('photo',lbPhotoId)+renderComments('photo',lbPhotoId)}
+
+/* ============ ADMIN TOOLS ============ */
 async function dedupeMembers(){
   if(!isAdmin)return;
   const groups={};
@@ -2411,10 +2768,12 @@ function switchView(v){
   document.body.dataset.view=v;
   $$('.view').forEach(el=>el.classList.remove('on'));
   $$('.tab').forEach(el=>el.classList.toggle('on',el.dataset.view===v));
-  const map={rede:'viewRede',crono:'viewCrono',mural:'viewMural',fotos:'viewFotos',pubs:'viewPubs'};
+  const map={rede:'viewRede',crono:'viewCrono',track:'viewTrack',feed:'viewFeed',mural:'viewMural',fotos:'viewFotos',pubs:'viewPubs'};
   map[v] && $('#'+map[v]).classList.add('on');
   if(v==='rede') renderAll();
   if(v==='crono') renderCrono();
+  if(v==='track') renderTrack();
+  if(v==='feed') renderFeed();
   if(v==='mural'){ renderMural(); renderRecados(); markChatSeen(); }
   if(v==='fotos') renderFotos();
   if(v==='pubs') renderPubs();
@@ -2436,19 +2795,21 @@ initGraph();
 
 $$('.tab').forEach(t=>t.onclick=()=>switchView(t.dataset.view));
 $('#idChip').onclick=openIdentity;
-$('#idGuest').onclick=()=>{
-  myId=null; localStorage.removeItem('rede_myId');
-  const nm=prompt('Como você quer assinar suas mensagens?','');
-  myName=(nm||'').trim(); localStorage.setItem('rede_myName',myName);
-  refreshIdentityUI(); closeOverlay('idOverlay');
-};
 $('#whoBtn').onclick=openIdentity;
-$('#adminBtn').onclick=openPin;
-$('#pinOkBtn').onclick=checkPin;
-$('#pinInput').addEventListener('keydown',e=>{if(e.key==='Enter')checkPin()});
-$('#savePinBtn').onclick=saveNewPin;
+$('#adminBtn').onclick=openAccessManager;
+$('#accountLogoutBtn').onclick=doLogout;
+$('#accountResetBtn').onclick=()=>resetMyPassword(authUser?.email||'');
+$('#loginBtn').onclick=login;
+$('#loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+$('#resetPasswordBtn').onclick=()=>resetMyPassword();
+$('#showRegisterBtn').onclick=showRegister;
+$('#showLoginBtn').onclick=()=>showLogin();
+$('#registerBtn').onclick=registerSelf;
+$('#registerPassword2').addEventListener('keydown',e=>{if(e.key==='Enter')registerSelf()});
+$('#claimProfileBtn').onclick=claimMyProfile;
+$('#unlinkedLogoutBtn').onclick=doLogout;
+$('#linkAccessBtn').onclick=linkExistingAccess;
 $('#dedupeBtn').onclick=dedupeMembers;
-$('#logoutAdminBtn').onclick=logoutAdmin;
 
 $('#addBtn').onclick=()=>openMember(null);
 $('#recadoBtn').onclick=openRecado;
@@ -2491,6 +2852,13 @@ $('#mOnlyMine').onchange=renderRecados;
 $('#muralRecadoBtn').onclick=openRecado;
 $('#recadosToggle').onclick=()=>$('.recados-panel').classList.toggle('collapsed');
 
+$('#addActivityBtn').onclick=()=>openActivity(null);
+$('#trackOwner').onchange=renderTrack; $('#trackStatus').onchange=renderTrack; $('#trackType').onchange=renderTrack; $('#trackMine').onchange=renderTrack;
+$('#activityProgress').oninput=e=>$('#activityProgressLabel').textContent=e.target.value+'%';
+$('#activityFilePick').onclick=()=>$('#activityFile').click(); $('#activityFile').onchange=e=>handleActivityFile(e.target.files[0]);
+$('#saveActivityBtn').onclick=saveActivity; $('#deleteActivityBtn').onclick=deleteActivity;
+$('#newPostBtn').onclick=openPostModal; $('#postFilePick').onclick=()=>$('#postFile').click(); $('#postFile').onchange=e=>handlePostFile(e.target.files[0]); $('#savePostBtn').onclick=saveFeedPost;
+
 $('#addPhotoBtn').onclick=openPhotoModal;
 $('#gPickBtn').onclick=()=>$('#gFile').click();
 $('#gFile').onchange=e=>handleGalleryFile(e.target.files[0]);
@@ -2519,11 +2887,11 @@ window.addEventListener('resize',()=>{if(simulation){const[W,H]=graphSize();simu
 // expose for inline handlers
 window.selectNode=selectNode; window.closeDetail=closeDetail; window.openMember=openMember;
 window.filterLinha=filterLinha; window.recadoTo=recadoTo;
-window.toggleCronoItem=toggleCronoItem; window.deleteCronoItem=deleteCronoItem;
-window.deleteChatMsg=deleteChatMsg; window.deletePublicacao=deletePublicacao;
+window.toggleCronoItem=toggleCronoItem; window.deleteCronoItem=deleteCronoItem; window.unlinkAccess=unlinkAccess;
+window.deleteChatMsg=deleteChatMsg; window.deletePublicacao=deletePublicacao; window.editActivity=openActivity; window.toggleReaction=toggleReaction; window.addSocialComment=addSocialComment; window.deleteFeedPost=deleteFeedPost;
 
 refreshIdentityUI();
-bootstrap();
+waitFirebase().then(startAuth);
 </script>
 </body>
 </html>
