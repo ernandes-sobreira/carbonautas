@@ -602,6 +602,57 @@
   .people-list{display:flex;flex-direction:column;gap:8px}.people-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:11px;align-items:center;border:1px solid var(--line);border-left:5px solid #00A6C7;border-radius:12px;padding:10px;background:#fff}.people-row .p-av{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:800;overflow:hidden}.people-row .p-av img{width:100%;height:100%;object-fit:cover}.people-row .p-name{font-weight:800;font-size:13.5px}.people-row .p-meta{font-size:11.5px;color:var(--ink-3);margin-top:2px}.people-row .p-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
   .file-preview-modal{max-width:1120px;width:min(94vw,1120px);height:min(86vh,860px);display:flex;flex-direction:column}.file-preview-modal .modal-b{padding:0;flex:1;min-height:0;background:#EAF1F6}.file-preview-frame{border:0;width:100%;height:100%;display:block;background:#fff}.file-preview-img{max-width:100%;max-height:100%;display:block;margin:auto;object-fit:contain}.file-preview-fallback{height:100%;display:grid;place-items:center;padding:30px;text-align:center}.file-preview-fallback>div{max-width:560px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px}.preview-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 
+
+  /* Logo Carbonautas — animação suave */
+  .topbar .brand .mark,
+  .auth-brand .mark{
+    position:relative;
+    animation:carbonautaLogoGlow 5.6s ease-in-out infinite, carbonautaLogoPulse 6.8s ease-in-out infinite;
+    transform-origin:center;
+    will-change:transform,filter,box-shadow;
+  }
+  .topbar .brand .mark svg,
+  .auth-brand .mark svg{
+    transform-origin:50% 50%;
+    animation:carbonautaLogoSpin 26s linear infinite;
+    will-change:transform;
+  }
+  .topbar .brand .mark::after,
+  .auth-brand .mark::after{
+    content:"";
+    position:absolute;
+    inset:-5px;
+    border-radius:inherit;
+    border:1px solid rgba(88,214,199,.24);
+    opacity:.18;
+    pointer-events:none;
+    animation:carbonautaLogoHalo 5.6s ease-in-out infinite;
+  }
+  @keyframes carbonautaLogoGlow{
+    0%,100%{filter:brightness(1) saturate(1);box-shadow:0 0 0 2px rgba(255,255,255,.12),inset 0 -7px 16px rgba(0,0,0,.22),0 0 4px rgba(88,214,199,.08)}
+    50%{filter:brightness(1.16) saturate(1.12);box-shadow:0 0 0 2px rgba(255,255,255,.18),inset 0 -7px 16px rgba(0,0,0,.16),0 0 15px rgba(88,214,199,.48),0 0 27px rgba(110,68,255,.18)}
+  }
+  @keyframes carbonautaLogoPulse{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.045)}
+  }
+  @keyframes carbonautaLogoSpin{
+    from{transform:rotate(0deg)}
+    to{transform:rotate(360deg)}
+  }
+  @keyframes carbonautaLogoHalo{
+    0%,100%{opacity:.10;transform:scale(.96)}
+    50%{opacity:.48;transform:scale(1.08)}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .topbar .brand .mark,
+    .auth-brand .mark,
+    .topbar .brand .mark svg,
+    .auth-brand .mark svg,
+    .topbar .brand .mark::after,
+    .auth-brand .mark::after{animation:none!important}
+  }
+
 </style>
 </head>
 <body data-view="rede">
@@ -902,7 +953,7 @@
             <div class="sub">Documentos, projetos, apresentações, relatórios, planilhas, artigos e outros produtos de todos os Carbonautas.</div>
           </div>
           <div class="spacer"></div>
-          <button class="btn primary" id="addPubBtn" onclick="openPubModal()">
+          <button class="btn primary" type="button" id="addPubBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Adicionar publicação
           </button>
@@ -2914,27 +2965,60 @@ function renderPubs(){
   }).join('');
 }
 let pubTipo='link', pubFileData='', pubFileName='';
-function openPubModal(presetMemberId=null){
-  if(!myId && !isAdmin){ toast('Identifique-se primeiro para adicionar uma publicação.'); openIdentity(); return; }
-  const sel=$('#pubAutor');
-  if(isAdmin){
-    $('#pubAutorRow').style.display='block';
-    const ordered=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome));
-    const resolved=resolveCurrentMember();
-    const defaultId=presetMemberId||(resolved?.id)||myId||ordered[0]?.id||'';
-    sel.innerHTML=ordered.map(m=>`<option value="${m.id}" ${defaultId===m.id?'selected':''}>${esc(m.nome)}</option>`).join('');
-    if(defaultId)sel.value=defaultId;
-  }else{
-    $('#pubAutorRow').style.display='none';
-    sel.innerHTML=`<option value="${myId}">${esc(memberById(myId).nome)}</option>`;
+async function openPubModal(presetMemberId=null){
+  try{
+    if(!window.auth?.currentUser){
+      toast('Entre na plataforma para adicionar documentos.');
+      showLogin();
+      return;
+    }
+
+    // Corrige automaticamente vínculos antigos/quebrados antes de abrir o repositório.
+    let resolved=resolveCurrentMember();
+    if(!resolved && authProfile){
+      try{ await repairCurrentAccountLink(false); }catch(_e){}
+      resolved=resolveCurrentMember();
+    }
+
+    const sel=$('#pubAutor');
+    if(!sel) throw new Error('Formulário do repositório não foi carregado.');
+
+    if(isAdmin){
+      $('#pubAutorRow').style.display='block';
+      const ordered=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome));
+      const defaultId=presetMemberId||(resolved?.id)||myId||ordered[0]?.id||'';
+      sel.innerHTML=ordered.map(m=>`<option value="${m.id}" ${defaultId===m.id?'selected':''}>${esc(m.nome)}</option>`).join('');
+      if(defaultId) sel.value=defaultId;
+    }else{
+      resolved=resolved||memberById(myId);
+      if(!resolved){
+        toast('Seu login ainda não está vinculado ao seu perfil. Clique no seu nome e use “Corrigir vínculo”.');
+        openIdentity();
+        return;
+      }
+      // Mantém o id efetivo sincronizado no navegador mesmo quando o Firestore tinha um vínculo antigo.
+      myId=resolved.id;
+      $('#pubAutorRow').style.display='none';
+      sel.innerHTML=`<option value="${resolved.id}">${esc(resolved.nome)}</option>`;
+      sel.value=resolved.id;
+    }
+
+    $('#pubCategoriaSel').value='artigo';
+    $('#pubOutroRow').style.display='none';
+    $('#pubOutroTxt').value='';
+    $('#pubTitulo').value='';
+    $('#pubUrl').value='';
+    pubTipo='link'; pubFileData=''; pubFileName='';
+    $$('input[name="pubTipo"]').forEach(r=>r.checked=r.value==='link');
+    $('#pubUrl').style.display='block';
+    $('#pubFileArea').style.display='none';
+    $('#pubFileName').textContent='Nenhum arquivo escolhido. Máximo 15 MB.';
+    openOverlay('pubOverlay');
+    setTimeout(()=>$('#pubTitulo')?.focus(),50);
+  }catch(e){
+    console.error('Erro ao abrir o repositório',e);
+    toast('Não consegui abrir o formulário do repositório. Recarregue a página e tente novamente.');
   }
-  $('#pubCategoriaSel').value='artigo'; $('#pubOutroRow').style.display='none'; $('#pubOutroTxt').value='';
-  $('#pubTitulo').value=''; $('#pubUrl').value='';
-  pubTipo='link'; pubFileData=''; pubFileName='';
-  $$('input[name="pubTipo"]').forEach(r=>r.checked=r.value==='link');
-  $('#pubUrl').style.display='block'; $('#pubFileArea').style.display='none';
-  $('#pubFileName').textContent='Nenhum arquivo escolhido. Máximo 15 MB.';
-  openOverlay('pubOverlay');
 }
 function handlePubFile(file){
   if(!file)return;
@@ -2944,7 +3028,8 @@ function handlePubFile(file){
   reader.readAsDataURL(file);
 }
 async function savePublicacao(){
-  const autorId = isAdmin? $('#pubAutor').value : myId;
+  const resolved=resolveCurrentMember();
+  const autorId = isAdmin? $('#pubAutor').value : (resolved?.id||myId);
   const categoria=$('#pubCategoriaSel').value;
   const categoriaOutro=$('#pubOutroTxt').value.trim();
   const titulo=$('#pubTitulo').value.trim();
@@ -3256,7 +3341,7 @@ $('#lbClose').onclick=closeLightbox;
 $('#lbDel').onclick=deleteLightboxPhoto;
 $('#lightbox').addEventListener('click',e=>{if(e.target.id==='lightbox')closeLightbox()});
 
-$('#addPubBtn').onclick=openPubModal;
+$('#addPubBtn').onclick=async()=>{try{await openPubModal()}catch(e){console.error(e);toast('Erro ao abrir o repositório.')}};
 $('#pubCategoria').onchange=renderPubs; $('#pubPessoa').onchange=renderPubs; $('#pubMine').onchange=renderPubs;
 $('#pubCategoriaSel').onchange=e=>{$('#pubOutroRow').style.display=e.target.value==='outro'?'block':'none'};
 $$('input[name="pubTipo"]').forEach(r=>r.onchange=e=>{
@@ -3267,7 +3352,7 @@ $$('input[name="pubTipo"]').forEach(r=>r.onchange=e=>{
 $('#pubFilePick').onclick=()=>$('#pubFile').click();
 $('#pubFile').onchange=e=>handlePubFile(e.target.files[0]);
 $('#savePubBtn').onclick=savePublicacao;
-$('#repoAddBtn').onclick=()=>{const id=repoMemberId;if(!(isAdmin||isMe(id))){toast('Sem permissão para adicionar documentos para esta pessoa.');return}closeOverlay('repoOverlay');openPubModal(id)};
+$('#repoAddBtn').onclick=async()=>{const id=repoMemberId;if(!(isAdmin||isMe(id))){toast('Sem permissão para adicionar documentos para esta pessoa.');return}closeOverlay('repoOverlay');await openPubModal(id)};
 
 $$('[data-close]').forEach(b=>b.onclick=()=>closeOverlay(b.dataset.close));
 $$('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
