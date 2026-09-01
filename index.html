@@ -467,7 +467,7 @@
   }
   .pin-input:focus{border-color:var(--petrol)}
 
-  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:11px;font-size:13.5px;font-weight:500;opacity:0;pointer-events:none;transition:.25s;z-index:90;box-shadow:var(--shadow-lg);max-width:88vw;text-align:center}
+  .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:11px 18px;border-radius:11px;font-size:13.5px;font-weight:500;opacity:0;pointer-events:none;transition:.25s;z-index:200;box-shadow:var(--shadow-lg);max-width:88vw;text-align:center}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
   .recado-prev{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:12px 14px;font-size:13px;line-height:1.5;color:var(--ink-2);white-space:pre-wrap;min-height:70px}
@@ -533,6 +533,35 @@
     .msg{max-width:94%}
   }
   .menu-btn{display:none}
+
+
+  /* ===== TEMA V5: alto contraste, profissional e mais vibrante ===== */
+  :root{
+    --petrol:#007C91; --petrol-d:#005F73; --agua:#1769E0; --cerrado:#36A852;
+    --indigo:#6E44FF; --ocre:#F59E0B; --coral:#F43F5E;
+    --ink:#071827; --ink-2:#334B5C; --ink-3:#6B7F8D;
+    --line:#C8D7E2; --line-2:#E5EEF4; --panel:#F3F8FB; --white:#FFFFFF;
+    --amber:#D97706; --red:#D62828;
+  }
+  body{background:#F7FBFD}
+  .topbar{background:#071827;border-bottom-color:#17364D;box-shadow:0 6px 22px rgba(7,24,39,.18)}
+  .brand h1{color:#fff}.brand .sub{color:#8EDBE8}.brand .mark{background:linear-gradient(135deg,#00A6C7,#6E44FF);box-shadow:0 0 0 2px rgba(255,255,255,.12),inset 0 -7px 16px rgba(0,0,0,.22)}
+  .tabs{background:#102B3D;border-color:#264A61}
+  .tab{color:#D7E8F2}.tab:hover{color:#fff;background:#17384F}.tab.on{background:#00B8D9;color:#061A26;box-shadow:none}
+  .tab:nth-child(2).on{background:#FFC857}.tab:nth-child(3).on{background:#7BE495}.tab:nth-child(4).on{background:#FF5C8A;color:#fff}.tab:nth-child(5).on{background:#B99CFF}.tab:nth-child(6).on{background:#58D6C7}.tab:nth-child(7).on{background:#FF9F43}
+  .id-chip{background:#102B3D;border-color:#31536A;color:#fff}.id-chip:hover{background:#17384F;border-color:#4E7892}.id-chip.admin{border-color:#FFC857;box-shadow:0 0 0 1px #FFC857 inset}
+  .topbar>.btn:not(.primary){background:#102B3D;border-color:#31536A;color:#fff}.topbar>.btn:not(.primary):hover{background:#17384F}
+  .btn.primary{background:#F43F5E;border-color:#F43F5E;color:#fff}.btn.primary:hover{background:#D92F4D;border-color:#D92F4D}
+  .stats{background:#EAF3F8}.stat{border-color:#BCD1DE;box-shadow:0 2px 0 rgba(7,24,39,.03)}.stat:nth-child(3n+1){border-top:4px solid #00A6C7}.stat:nth-child(3n+2){border-top:4px solid #6E44FF}.stat:nth-child(3n+3){border-top:4px solid #FF5C8A}
+  .graph-wrap{background:radial-gradient(900px 500px at 62% -5%,#DFF8FB,transparent),#FAFDFF}
+  .feed-card,.track-card,.pub-row{border-color:#BCD1DE;box-shadow:0 5px 18px rgba(7,24,39,.06)}
+  .feed-card{border-left:5px solid #00A6C7}.feed-kind{background:#071827;color:#fff;border-color:#071827}
+  .social-btn.on.like{background:#FFF2BF;border-color:#F5B800}.social-btn.on.heart{background:#E9F3FF;border-color:#1769E0;color:#1769E0}
+  .modal-h{background:#F3F8FB}.modal-h h2{color:#071827}.overlay{background:rgba(3,16,27,.66)}
+  input:focus,select:focus,textarea:focus{border-color:#00A6C7!important;box-shadow:0 0 0 3px rgba(0,166,199,.13)}
+  .people-list{display:flex;flex-direction:column;gap:8px}.people-row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:11px;align-items:center;border:1px solid var(--line);border-left:5px solid #00A6C7;border-radius:12px;padding:10px;background:#fff}.people-row .p-av{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:11px;font-weight:800;overflow:hidden}.people-row .p-av img{width:100%;height:100%;object-fit:cover}.people-row .p-name{font-weight:800;font-size:13.5px}.people-row .p-meta{font-size:11.5px;color:var(--ink-3);margin-top:2px}.people-row .p-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .file-preview-modal{max-width:1120px;width:min(94vw,1120px);height:min(86vh,860px);display:flex;flex-direction:column}.file-preview-modal .modal-b{padding:0;flex:1;min-height:0;background:#EAF1F6}.file-preview-frame{border:0;width:100%;height:100%;display:block;background:#fff}.file-preview-img{max-width:100%;max-height:100%;display:block;margin:auto;object-fit:contain}.file-preview-fallback{height:100%;display:grid;place-items:center;padding:30px;text-align:center}.file-preview-fallback>div{max-width:560px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px}.preview-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
 </style>
 </head>
 <body data-view="rede">
@@ -646,7 +675,7 @@
     </button>
     <button class="btn primary" id="addBtn">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      <span class="bl">Novo membro</span>
+      <span class="bl">Adicionar pessoa</span>
     </button>
   </div>
 
@@ -655,6 +684,11 @@
     <div class="stats" id="stats"></div>
     <div class="main">
       <aside class="side" id="side">
+        <div class="block" id="peopleAdminBlock" style="display:none">
+          <h3>Pessoas da rede</h3>
+          <button class="btn primary" id="managePeopleBtn" style="width:100%;justify-content:center;margin-bottom:8px">Gerenciar pessoas</button>
+          <div class="hint">Adicionar, editar, retirar e ajustar vínculos.</div>
+        </div>
         <div class="block">
           <h3>Nível <span class="hint" style="text-transform:none;letter-spacing:0">(clique para ver só um)</span></h3>
           <div id="legend"></div>
@@ -841,6 +875,25 @@
         <div id="pubList"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- PEOPLE MANAGER -->
+<div class="overlay" id="peopleOverlay">
+  <div class="modal" style="max-width:820px">
+    <div class="modal-h"><h2>Gerenciar pessoas da rede</h2><div class="spacer"></div><button class="btn primary" id="peopleAddBtn">+ Adicionar pessoa</button><button class="btn ghost" data-close="peopleOverlay">Fechar</button></div>
+    <div class="modal-b">
+      <div class="fg"><label>Buscar</label><input id="peopleSearch" placeholder="Nome, programa ou situação"></div>
+      <div class="people-list" id="peopleList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FILE PREVIEW -->
+<div class="overlay" id="filePreviewOverlay">
+  <div class="modal file-preview-modal">
+    <div class="modal-h"><h2 id="filePreviewTitle">Visualizar arquivo</h2><div class="spacer"></div><div class="preview-actions"><a class="btn" id="filePreviewOpen" target="_blank" rel="noopener">Abrir em nova guia</a><a class="btn" id="filePreviewDownload" target="_blank" rel="noopener">Baixar</a><button class="btn ghost" data-close="filePreviewOverlay">Fechar</button></div></div>
+    <div class="modal-b" id="filePreviewBody"></div>
   </div>
 </div>
 
@@ -1365,8 +1418,9 @@ async function bootstrap(){
       if(!existing.some(m=>m.nivel==='coord')){
         const x=SEED.find(v=>v.nivel==='coord'); if(x){const id=slugify(x.nome); await f.setDoc(f.doc(window.db,'rede_members',id),{id,foto:'',telefone:'',resultados:[],prazos:[],notas:'',hub:false,hubMotivo:'',vinculos:[],createdAt:f.serverTimestamp(),...x}); byName[x.nome]={id,...x};}
       }
+      // Migração apenas de campos ausentes. Vínculos não são mais restaurados automaticamente:
+      // depois da primeira inicialização, a rede passa a ser totalmente editável pelo coordenador.
       for(const [nome,motivo] of Object.entries(SEED_HUBS)){const m=byName[nome]; if(m&&m.hub===undefined) await f.setDoc(f.doc(window.db,'rede_members',m.id),{hub:true,hubMotivo:motivo},{merge:true});}
-      for(const v of SEED_VINCULOS){const de=byName[v.de],para=byName[v.para]; if(!de||!para)continue; const atuais=de.vinculos||[]; if(!atuais.some(x=>x.id===para.id)){const novos=[...atuais,{id:para.id,motivo:v.motivo}]; await f.setDoc(f.doc(window.db,'rede_members',de.id),{vinculos:novos},{merge:true}); byName[v.de]={...de,vinculos:novos};}}
     }
     state.members=memSnap.docs.map(d=>({...d.data(),id:d.id}));
     state.members.forEach(m=>{m.linhas=m.linhas||[];m.resultados=m.resultados||[];m.prazos=m.prazos||[];m.vinculos=m.vinculos||[];m.hub=!!m.hub});
@@ -1413,7 +1467,7 @@ function subscribeAll(){
     if(currentView==='rede') renderAll();
     if(currentView==='crono') renderCrono();
     refreshMemberDependentUI();
-    if(selectedId && memberById(selectedId)) renderDetail();
+    if(selectedId && memberById(selectedId)) renderDetail(); if(isAdmin && $('#peopleOverlay')?.classList.contains('on')) renderPeopleManager();
   }));
   // CHAT
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_chat'),f.orderBy('ts','asc')),snap=>{
@@ -1535,12 +1589,12 @@ async function toggleReaction(targetType,targetId,type){
   const f=FB(), id=`${targetType}_${targetId}_${myId}`.replace(/[^a-zA-Z0-9_-]/g,'_');
   const ref=f.doc(window.db,'rede_feed_reactions',id), cur=myReaction(targetType,targetId), actor=currentActor();
   if(cur&&cur.type===type) await f.deleteDoc(ref);
-  else await f.setDoc(ref,{targetType,targetId,type,actorId:actor.id,actorName:actor.name,ts:f.serverTimestamp()});
+  else await f.setDoc(ref,{targetType,targetId,type,actorId:actor.id,actorUid:window.auth.currentUser?.uid||'',actorName:actor.name,ts:f.serverTimestamp()});
 }
 async function addSocialComment(targetType,targetId,inputId){
   if(!myId){toast('Identifique-se como um Carbonauta para comentar.');openIdentity();return}
   const el=$('#'+inputId); if(!el)return; const text=el.value.trim(); if(!text)return; const a=currentActor();
-  await FB().addDoc(FB().collection(window.db,'rede_feed_comments'),{targetType,targetId,text,authorId:a.id,authorName:a.name,authorColor:a.color,ts:FB().serverTimestamp()}); el.value='';
+  await FB().addDoc(FB().collection(window.db,'rede_feed_comments'),{targetType,targetId,text,authorId:a.id,authorUid:window.auth.currentUser?.uid||'',authorName:a.name,authorColor:a.color,ts:FB().serverTimestamp()}); el.value='';
 }
 
 /* ============ AUTHENTICATION / PERMISSIONS ============ */
@@ -1608,8 +1662,21 @@ async function login(){
   try{await FB().signInWithEmailAndPassword(window.auth,email,password)}catch(e){$('#authMsg').textContent=authErrorMessage(e)}finally{$('#loginBtn').disabled=false}
 }
 async function resetMyPassword(emailOverride=''){
-  const email=(emailOverride||authUser?.email||$('#loginEmail').value).trim(); if(!email){toast('Digite o e-mail primeiro.');return}
-  try{await FB().sendPasswordResetEmail(window.auth,email);toast('E-mail para redefinir a senha enviado.')}catch(e){toast(authErrorMessage(e))}
+  const email=(emailOverride||authUser?.email||$('#loginEmail').value).trim();
+  if(!email){
+    $('#authMsg').textContent='Digite seu e-mail primeiro.';
+    return;
+  }
+  $('#authMsg').textContent='Enviando e-mail de redefinição…';
+  try{
+    await FB().sendPasswordResetEmail(window.auth,email);
+    $('#authMsg').textContent='E-mail de redefinição enviado. Confira também a pasta de spam.';
+    toast('E-mail de redefinição enviado.');
+  }catch(e){
+    const msg=authErrorMessage(e);
+    $('#authMsg').textContent=msg;
+    toast(msg);
+  }
 }
 async function doLogout(){
   clearSubscriptions(); bootstrapped=false; authProfile=null; authUser=null; myId=null; myName=''; isAdmin=false;
@@ -1644,7 +1711,7 @@ function refreshIdentityUI(){
 }
 function updateAdminButtons(){
   $('#addBtn').style.display=isAdmin?'inline-flex':'none'; $('#newEventBtn').style.display=isAdmin?'inline-flex':'none';
-  $('#manageLinhasBtn').style.display=isAdmin?'inline-flex':'none'; $('#recadoBtn').style.display=isAdmin?'inline-flex':'none';
+  $('#manageLinhasBtn').style.display=isAdmin?'inline-flex':'none'; $('#recadoBtn').style.display=isAdmin?'inline-flex':'none'; if($('#peopleAdminBlock')) $('#peopleAdminBlock').style.display=isAdmin?'block':'none';
 }
 function refreshMemberDependentUI(){
   refreshIdentityUI(); const cn=$('#cNivel'),cur=cn.value; cn.innerHTML='<option value="">Todos os níveis</option>'+Object.entries(NIVEIS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join(''); cn.value=cur;
@@ -2186,11 +2253,53 @@ async function deleteMember(){
   if(m && m.protegido){ toast('O perfil do coordenador não pode ser removido por aqui.'); return; }
   if(!confirm('Descadastrar este membro? A ação não pode ser desfeita.'))return;
   try{
-    await fbDeleteMember(editingId);
-    closeOverlay('memberOverlay'); if(selectedId===editingId)closeDetail();
-    toast('Membro removido.');
+    const idToDelete=editingId, f=FB(), linked=(state.users||[]).filter(u=>u.memberId===idToDelete);
+    const batch=f.writeBatch(window.db); batch.delete(f.doc(window.db,'rede_members',idToDelete)); batch.delete(f.doc(window.db,'rede_member_claims',idToDelete)); linked.forEach(u=>batch.delete(f.doc(window.db,'rede_users',u.uid))); await batch.commit();
+    closeOverlay('memberOverlay'); if(selectedId===idToDelete)closeDetail();
+    toast('Membro removido e acesso desvinculado.');
   }catch(e){ console.error(e); toast('Erro ao remover.'); }
 }
+
+/* ============ GERENCIAR PESSOAS ============ */
+function renderPeopleManager(){
+  if(!isAdmin || !$('#peopleList')) return;
+  const q=($('#peopleSearch')?.value||'').trim().toLowerCase();
+  const items=[...state.members].filter(m=>!q || [m.nome,m.programa,m.status,m.origem].some(v=>(v||'').toLowerCase().includes(q))).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+  $('#peopleList').innerHTML=items.map(m=>{const nv=NIVEIS[m.nivel]||{color:'#607d8b',short:m.nivel||''};return `<div class="people-row"><div class="p-av" style="background:${nv.color}">${m.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m.nome)}</div><div><div class="p-name">${esc(m.nome)}</div><div class="p-meta">${esc(nv.short)}${m.programa?' · '+esc(m.programa):''}${m.status==='egresso'?' · Egresso':''}</div></div><div class="p-actions"><button type="button" class="btn" onclick="editPersonFromManager('${m.id}')">Editar</button>${!m.protegido?`<button type="button" class="btn danger" onclick="removePersonFromManager('${m.id}')">Retirar</button>`:''}</div></div>`}).join('') || '<div class="crono-empty">Nenhuma pessoa encontrada.</div>';
+}
+function openPeopleManager(){if(!isAdmin)return;renderPeopleManager();openOverlay('peopleOverlay')}
+function editPersonFromManager(id){closeOverlay('peopleOverlay');openMember(id)}
+async function removePersonFromManager(id){
+  if(!isAdmin)return; const m=memberById(id); if(!m||m.protegido)return;
+  if(!confirm(`Retirar ${m.nome} da rede? O acesso dele à plataforma também será desvinculado.`))return;
+  try{
+    const f=FB(), linked=(state.users||[]).filter(u=>u.memberId===id);
+    const batch=f.writeBatch(window.db);
+    batch.delete(f.doc(window.db,'rede_members',id));
+    batch.delete(f.doc(window.db,'rede_member_claims',id));
+    linked.forEach(u=>batch.delete(f.doc(window.db,'rede_users',u.uid)));
+    await batch.commit();
+    toast('Pessoa retirada da rede.'); renderPeopleManager();
+  }catch(e){console.error(e);toast(e?.code==='permission-denied'?'Permissão negada pelas regras do Firestore.':'Erro ao retirar pessoa.')}
+}
+
+/* ============ VISUALIZADOR DE ARQUIVOS ============ */
+function inferFileExt(url,name=''){
+  const n=(name||'').split('?')[0].toLowerCase(); const m=n.match(/\.([a-z0-9]{2,6})$/); if(m)return m[1];
+  try{const d=decodeURIComponent(new URL(url).pathname).toLowerCase();const x=d.match(/\.([a-z0-9]{2,6})$/);return x?x[1]:''}catch(e){return ''}
+}
+function openFilePreview(url,name='Arquivo'){
+  if(!url)return; const ext=inferFileExt(url,name), body=$('#filePreviewBody');
+  $('#filePreviewTitle').textContent=name||'Visualizar arquivo'; $('#filePreviewOpen').href=url; $('#filePreviewDownload').href=url;
+  const office=['doc','docx','xls','xlsx','ppt','pptx'];
+  const images=['png','jpg','jpeg','webp','gif','svg'];
+  if(ext==='pdf'){body.innerHTML=`<iframe class="file-preview-frame" src="${esc(url)}" title="${esc(name)}"></iframe>`;}
+  else if(office.includes(ext)){const viewer='https://view.officeapps.live.com/op/embed.aspx?src='+encodeURIComponent(url);body.innerHTML=`<iframe class="file-preview-frame" src="${viewer}" title="${esc(name)}"></iframe>`;}
+  else if(images.includes(ext)){body.innerHTML=`<div class="file-preview-fallback"><img class="file-preview-img" src="${esc(url)}" alt="${esc(name)}"></div>`;}
+  else {body.innerHTML=`<div class="file-preview-fallback"><div><h3>Pré-visualização não disponível para este formato</h3><p>Use “Abrir em nova guia” ou “Baixar”. PDF, Word, Excel e PowerPoint podem ser visualizados aqui.</p></div></div>`;}
+  openOverlay('filePreviewOverlay');
+}
+window.openFilePreview=openFilePreview; window.openPeopleManager=openPeopleManager; window.editPersonFromManager=editPersonFromManager; window.removePersonFromManager=removePersonFromManager;
 
 /* Photo upload with downscale -> dataURL (form foto do membro) */
 function handleFile(file){
@@ -2415,7 +2524,7 @@ async function sendChat(){
   const authorColor = me? (NIVEIS[me.nivel]?.color||'var(--ink-3)') : 'var(--ink-3)';
   try{
     await fbAddChat({
-      text, author, authorId: myId||null, authorFoto: me?me.foto||'':'', authorColor, ts: FB().serverTimestamp()
+      text, author, authorId: myId||null, authorUid: window.auth.currentUser?.uid||'', authorFoto: me?me.foto||'':'', authorColor, ts: FB().serverTimestamp()
     });
     ta.value=''; ta.style.height='auto';
   }catch(e){ console.error(e); toast('Erro ao enviar. Verifique a conexão.'); }
@@ -2496,7 +2605,7 @@ async function savePhoto(){
     const {url,path}=await fbUploadImage('galeria',photoFoto);
     await FB().addDoc(FB().collection(window.db,'rede_photos'),{
       url, storagePath:path, legenda:$('#gCap').value.trim(), autor:$('#gAutor').value.trim(),
-      autorId: myId||null, ts: FB().serverTimestamp()
+      autorId: myId||null, authorUid: window.auth.currentUser?.uid||'', ts: FB().serverTimestamp()
     });
     closeOverlay('photoOverlay'); toast('Foto publicada.');
   }catch(e){ console.error(e); toast('Erro ao enviar a foto.'); }
@@ -2533,7 +2642,7 @@ function renderPubs(){
     const canDel = isAdmin || canEditMember(p.memberId);
     const dt = p.ts?.toMillis?new Date(p.ts.toMillis()):null;
     const dateLabel = dt ? dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}) : '';
-    const abrirLabel = p.tipo==='arquivo' ? 'Baixar arquivo' : 'Abrir link';
+    const abrirLabel = p.tipo==='arquivo' ? 'Visualizar arquivo' : 'Abrir link';
     return `<div class="pub-row">
       <div class="pub-cat" style="background:${cfg.color}"></div>
       <div class="pub-body">
@@ -2545,9 +2654,7 @@ function renderPubs(){
         </div>
       </div>
       <div class="pub-act">
-        <a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="${abrirLabel}" style="padding:6px 9px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px">${p.tipo==='arquivo'?'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>':'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.5-1.5"/>'}</svg>
-        </a>
+        ${p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Visualizar" style="padding:6px 9px">👁️</button><a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir/baixar" style="padding:6px 9px">↗</a>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}
         ${canDel?`<button class="mini-x" onclick="deletePublicacao('${p.id}')" title="Excluir">×</button>`:''}
       </div>
     </div>`;
@@ -2602,7 +2709,7 @@ async function savePublicacao(){
     }
     const m=memberById(autorId);
     await FB().addDoc(FB().collection(window.db,'rede_publicacoes'),{
-      memberId:autorId, memberNome: m?m.nome:'', categoria, categoriaOutro, titulo, tipo:tipoFinal, url,
+      memberId:autorId, ownerUid:(state.users||[]).find(u=>u.memberId===autorId)?.uid || (autorId===myId ? (window.auth.currentUser?.uid||'') : ''), memberNome: m?m.nome:'', categoria, categoriaOutro, titulo, tipo:tipoFinal, url, fileName:pubTipo==='arquivo'?pubFileName:'',
       ts: FB().serverTimestamp()
     });
     closeOverlay('pubOverlay'); toast('Publicação adicionada.');
@@ -2633,7 +2740,7 @@ function renderTrack(){
   $('#trackKpis').innerHTML=`<div class="track-kpi"><div class="n">${total}</div><div class="l">registros</div></div><div class="track-kpi"><div class="n">${active}</div><div class="l">em andamento</div></div><div class="track-kpi"><div class="n">${done}</div><div class="l">concluídos</div></div><div class="track-kpi"><div class="n">${overdue}</div><div class="l">prazos vencidos</div></div>`;
   const grid=$('#trackGrid'); $('#trackEmpty').style.display=list.length?'none':'block';
   grid.innerHTML=list.map(a=>{const m=memberById(a.ownerId),can=isAdmin||isMe(a.ownerId),p=Math.max(0,Math.min(100,+a.progress||0)); const di=a.dueDate?dateInfo(a.dueDate):null;
-    return `<article class="track-card"><div class="track-top"><div class="track-main"><div class="track-title">${esc(a.title||'Sem título')}</div><div class="track-meta"><span class="track-tag">${esc(ACTIVITY_TYPES[a.type]||a.type||'Outro')}</span><span class="track-status s-${a.status||'planejado'}">${esc(ACTIVITY_STATUS[a.status]||a.status||'Planejado')}</span><span class="pub-author"><span class="d" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}"></span>${esc(a.ownerName||(m?m.nome:'—'))}</span>${a.dueDate?`<span class="pub-date" style="${di?.over&&a.status!=='concluido'?'color:var(--red);font-weight:700':''}">prazo ${fmtDate(a.dueDate)}</span>`:''}</div></div>${can?`<div class="track-actions"><button class="mini-x" onclick="editActivity('${a.id}')" title="Editar">✎</button></div>`:''}</div>${a.description?`<div class="track-desc">${esc(a.description)}</div>`:''}<div class="progress"><span style="width:${p}%"></span></div><div class="progress-lab"><span>Progresso</span><b>${p}%</b></div><div class="track-links">${a.externalUrl?`<a class="btn ghost" href="${esc(a.externalUrl)}" target="_blank" rel="noopener">Abrir link</a>`:''}${a.fileUrl?`<a class="btn ghost" href="${esc(a.fileUrl)}" target="_blank" rel="noopener">${esc(a.fileName||'Abrir arquivo')}</a>`:''}</div></article>`;
+    return `<article class="track-card"><div class="track-top"><div class="track-main"><div class="track-title">${esc(a.title||'Sem título')}</div><div class="track-meta"><span class="track-tag">${esc(ACTIVITY_TYPES[a.type]||a.type||'Outro')}</span><span class="track-status s-${a.status||'planejado'}">${esc(ACTIVITY_STATUS[a.status]||a.status||'Planejado')}</span><span class="pub-author"><span class="d" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}"></span>${esc(a.ownerName||(m?m.nome:'—'))}</span>${a.dueDate?`<span class="pub-date" style="${di?.over&&a.status!=='concluido'?'color:var(--red);font-weight:700':''}">prazo ${fmtDate(a.dueDate)}</span>`:''}</div></div>${can?`<div class="track-actions"><button class="mini-x" onclick="editActivity('${a.id}')" title="Editar">✎</button></div>`:''}</div>${a.description?`<div class="track-desc">${esc(a.description)}</div>`:''}<div class="progress"><span style="width:${p}%"></span></div><div class="progress-lab"><span>Progresso</span><b>${p}%</b></div><div class="track-links">${a.externalUrl?`<a class="btn ghost" href="${esc(a.externalUrl)}" target="_blank" rel="noopener">Abrir link</a>`:''}${a.fileUrl?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(a.fileUrl)}'),decodeURIComponent('${encodeURIComponent(a.fileName||a.title||'Arquivo')}'))">Visualizar arquivo</button>`:''}</div></article>`;
   }).join('');
 }
 function openActivity(id=null){
@@ -2650,7 +2757,7 @@ async function saveActivity(){
   const old=editingActivityId?state.activities.find(x=>x.id===editingActivityId):null; let fileUrl=old?.fileUrl||'',fileName=old?.fileName||'',storagePath=old?.storagePath||'';
   try{if(activityFileData){toast('Enviando arquivo…');const up=await fbUploadAny('rede_activities','atividade_'+ownerId,activityFileData,activityFileName);fileUrl=up.url;fileName=activityFileName;storagePath=up.path}}
   catch(e){console.error(e);toast('Falha no upload do arquivo.');return}
-  const m=memberById(ownerId),data={ownerId,ownerName:m?.nome||'',type:$('#activityType').value,status:$('#activityStatus').value,title,description:$('#activityDesc').value.trim(),startDate:$('#activityStart').value,dueDate:$('#activityDue').value,progress:+$('#activityProgress').value||0,externalUrl:$('#activityUrl').value.trim(),fileUrl,fileName,storagePath,updatedAt:FB().serverTimestamp()};
+  const m=memberById(ownerId),data={ownerId,ownerUid:(state.users||[]).find(u=>u.memberId===ownerId)?.uid || (ownerId===myId ? (window.auth.currentUser?.uid||'') : ''),ownerName:m?.nome||'',type:$('#activityType').value,status:$('#activityStatus').value,title,description:$('#activityDesc').value.trim(),startDate:$('#activityStart').value,dueDate:$('#activityDue').value,progress:+$('#activityProgress').value||0,externalUrl:$('#activityUrl').value.trim(),fileUrl,fileName,storagePath,updatedAt:FB().serverTimestamp()};
   try{if(editingActivityId)await FB().setDoc(FB().doc(window.db,'rede_activities',editingActivityId),data,{merge:true});else await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});closeOverlay('activityOverlay');toast('Acompanhamento salvo.')}catch(e){console.error(e);toast('Erro ao salvar acompanhamento.')}
 }
 async function deleteActivity(){if(!editingActivityId||!confirm('Excluir este registro de acompanhamento?'))return;const a=state.activities.find(x=>x.id===editingActivityId);if(!a||!(isAdmin||isMe(a.ownerId)))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_activities',editingActivityId));if(a.storagePath){try{await FB().deleteObject(FB().sRef(window.storage,a.storagePath))}catch(e){}}closeOverlay('activityOverlay');toast('Registro excluído.')}catch(e){console.error(e);toast('Erro ao excluir.')}}
@@ -2666,11 +2773,11 @@ function renderComments(targetType,targetId){const s=socialFor(targetType,target
 function socialBar(targetType,targetId){const s=socialFor(targetType,targetId),mine=myReaction(targetType,targetId);return `<div class="social-bar"><button class="react-btn ${mine?.type==='like'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','like')">👍 ${s.likes||''}</button><button class="react-btn heart ${mine?.type==='heart'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','heart')">💙 ${s.hearts||''}</button><button class="comment-toggle">💬 ${s.cs.length||''}</button><div class="social-spacer"></div></div>`}
 function renderFeed(){
   renderFeedSide();const a=currentActor();const av=$('#feedMeAv'); if(av){av.innerHTML=a?.foto?`<img src="${esc(a.foto)}" alt="">`:initials(a?.name||'?');av.style.background=a?.color||'#7c8b90'}
-  const list=$('#feedList');$('#feedEmpty').style.display=state.feed.length?'none':'block';list.innerHTML=state.feed.map(p=>{const m=memberById(p.authorId),dt=p.ts?.toMillis?new Date(p.ts.toMillis()):null,can=isAdmin||isMe(p.authorId);const isImg=p.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(p.fileName||p.fileUrl)||p.mime?.startsWith('image/'));return `<article class="feed-card"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${p.authorFoto?`<img src="${esc(p.authorFoto)}" alt="">`:initials(p.authorName||'?')}</div><div><div class="feed-author">${esc(p.authorName||'Carbonauta')}</div><div class="feed-time">${dt?dt.toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div><span class="feed-kind">${esc((p.kind||'atualizacao').replace(/^./,x=>x.toUpperCase()))}</span>${can?`<button class="mini-x" onclick="deleteFeedPost('${p.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${p.title?`<div class="feed-title">${esc(p.title)}</div>`:''}${p.text?`<div class="feed-text">${esc(p.text)}</div>`:''}${p.externalUrl?`<a class="feed-attachment" href="${esc(p.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${p.fileUrl&&!isImg?`<a class="feed-attachment" href="${esc(p.fileUrl)}" target="_blank" rel="noopener">📎 ${esc(p.fileName||'Abrir anexo')}</a>`:''}</div>${isImg?`<img class="feed-image" src="${esc(p.fileUrl)}" alt="${esc(p.title||'Foto publicada')}">`:''}${socialBar('post',p.id)}${renderComments('post',p.id)}</article>`}).join('');
+  const list=$('#feedList');$('#feedEmpty').style.display=state.feed.length?'none':'block';list.innerHTML=state.feed.map(p=>{const m=memberById(p.authorId),dt=p.ts?.toMillis?new Date(p.ts.toMillis()):null,can=isAdmin||isMe(p.authorId);const isImg=p.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(p.fileName||p.fileUrl)||p.mime?.startsWith('image/'));return `<article class="feed-card"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${p.authorFoto?`<img src="${esc(p.authorFoto)}" alt="">`:initials(p.authorName||'?')}</div><div><div class="feed-author">${esc(p.authorName||'Carbonauta')}</div><div class="feed-time">${dt?dt.toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div><span class="feed-kind">${esc((p.kind||'atualizacao').replace(/^./,x=>x.toUpperCase()))}</span>${can?`<button class="mini-x" onclick="deleteFeedPost('${p.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${p.title?`<div class="feed-title">${esc(p.title)}</div>`:''}${p.text?`<div class="feed-text">${esc(p.text)}</div>`:''}${p.externalUrl?`<a class="feed-attachment" href="${esc(p.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${p.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.fileUrl)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.title||'Anexo')}'))">👁️ Visualizar · ${esc(p.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(p.fileUrl)}" alt="${esc(p.title||'Foto publicada')}">`:''}${socialBar('post',p.id)}${renderComments('post',p.id)}</article>`}).join('');
 }
 function openPostModal(){if(!myId){toast('Identifique-se primeiro para publicar.');openIdentity();return}postFileData='';postFileName='';$('#postKind').value='atualizacao';$('#postTitle').value='';$('#postText').value='';$('#postUrl').value='';$('#postFileName').textContent='Nenhum arquivo escolhido.';openOverlay('postOverlay')}
 function handlePostFile(file){if(!file)return;if(file.size>15*1024*1024){toast('Arquivo maior que 15 MB.');return}const r=new FileReader();r.onload=e=>{postFileData=e.target.result;postFileName=file.name;$('#postFileName').textContent=file.name};r.readAsDataURL(file)}
-async function saveFeedPost(){const text=$('#postText').value.trim(),title=$('#postTitle').value.trim();if(!text&&!title&&!postFileData&&!$('#postUrl').value.trim()){toast('Adicione algum conteúdo à publicação.');return}const a=currentActor();let fileUrl='',storagePath='';try{if(postFileData){toast('Enviando anexo…');const up=await fbUploadAny('rede_feed','post_'+a.id,postFileData,postFileName);fileUrl=up.url;storagePath=up.path}await FB().addDoc(FB().collection(window.db,'rede_feed'),{authorId:a.id,authorName:a.name,authorFoto:a.foto,kind:$('#postKind').value,title,text,externalUrl:$('#postUrl').value.trim(),fileUrl,fileName:postFileName,storagePath,ts:FB().serverTimestamp()});closeOverlay('postOverlay');toast('Publicado no feed.')}catch(e){console.error(e);toast('Erro ao publicar no feed.')}}
+async function saveFeedPost(){const text=$('#postText').value.trim(),title=$('#postTitle').value.trim();if(!text&&!title&&!postFileData&&!$('#postUrl').value.trim()){toast('Adicione algum conteúdo à publicação.');return}const a=currentActor();let fileUrl='',storagePath='';try{if(postFileData){toast('Enviando anexo…');const up=await fbUploadAny('rede_feed','post_'+a.id,postFileData,postFileName);fileUrl=up.url;storagePath=up.path}await FB().addDoc(FB().collection(window.db,'rede_feed'),{authorId:a.id,authorUid:window.auth.currentUser?.uid||'',authorName:a.name,authorFoto:a.foto,kind:$('#postKind').value,title,text,externalUrl:$('#postUrl').value.trim(),fileUrl,fileName:postFileName,storagePath,ts:FB().serverTimestamp()});closeOverlay('postOverlay');toast('Publicado no feed.')}catch(e){console.error(e);const msg=e?.code==='permission-denied'?'Permissão negada pelo Firestore. Atualize as regras do feed.':(e?.message||'Erro ao publicar no feed.');toast(msg)}}
 async function deleteFeedPost(id){const p=state.feed.find(x=>x.id===id);if(!p||!(isAdmin||isMe(p.authorId))||!confirm('Excluir esta publicação do feed?'))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_feed',id));if(p.storagePath){try{await FB().deleteObject(FB().sRef(window.storage,p.storagePath))}catch(e){}}toast('Publicação removida.')}catch(e){console.error(e);toast('Erro ao excluir publicação.')}}
 
 function renderLightboxSocial(){if(!lbPhotoId)return;$('#lbSocial').innerHTML=socialBar('photo',lbPhotoId)+renderComments('photo',lbPhotoId)}
@@ -2732,7 +2839,7 @@ async function sendRecado(){
   const prioridade = $('#rPrioridade').value;
   try{
     await fbAddChat({
-      tipo:'recado', text: msg, author, authorId: myId||null, authorFoto: me?me.foto||'':'', authorColor,
+      tipo:'recado', text: msg, author, authorId: myId||null, authorUid: window.auth.currentUser?.uid||'', authorFoto: me?me.foto||'':'', authorColor,
       para, paraNome: para? (memberById(para)?.nome||'') : '', prioridade, ts: FB().serverTimestamp()
     });
     closeOverlay('recadoOverlay');
@@ -2812,6 +2919,9 @@ $('#linkAccessBtn').onclick=linkExistingAccess;
 $('#dedupeBtn').onclick=dedupeMembers;
 
 $('#addBtn').onclick=()=>openMember(null);
+if($('#managePeopleBtn')) $('#managePeopleBtn').onclick=openPeopleManager;
+if($('#peopleAddBtn')) $('#peopleAddBtn').onclick=()=>{closeOverlay('peopleOverlay');openMember(null)};
+if($('#peopleSearch')) $('#peopleSearch').oninput=renderPeopleManager;
 $('#recadoBtn').onclick=openRecado;
 $('#saveMember').onclick=saveMember;
 $('#deleteMember').onclick=deleteMember;
