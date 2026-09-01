@@ -1181,7 +1181,7 @@
 <!-- MY PRAZO MODAL -->
 <div class="overlay" id="prazoOverlay">
   <div class="modal" style="max-width:440px">
-    <div class="modal-h"><h2>Meu prazo</h2><div class="spacer"></div><button class="btn ghost" data-close="prazoOverlay">Fechar</button></div>
+    <div class="modal-h"><h2 id="prazoTitle">Meu prazo</h2><div class="spacer"></div><button class="btn ghost" data-close="prazoOverlay">Fechar</button></div>
     <div class="modal-b">
       <p class="hint" style="margin:0 0 14px" id="prazoWho"></p>
       <div class="fg"><label>Entrega</label><input id="pTitulo" placeholder="Ex.: Qualificação, envio do artigo, relatório"></div>
@@ -1190,6 +1190,24 @@
     <div class="modal-f">
       <button class="btn" data-close="prazoOverlay">Cancelar</button>
       <button class="btn primary" id="savePrazoBtn">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- CRONOGRAMA: EDITAR OU EXCLUIR -->
+<div class="overlay" id="cronoManageOverlay">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-h"><h2>Gerenciar item do cronograma</h2><div class="spacer"></div><button class="btn ghost" data-close="cronoManageOverlay">Fechar</button></div>
+    <div class="modal-b">
+      <div id="cronoManageName" style="font-weight:800;font-size:17px;margin-bottom:6px"></div>
+      <div class="hint">O que você deseja fazer com este item?</div>
+    </div>
+    <div class="modal-f" style="justify-content:space-between;flex-wrap:wrap">
+      <button class="btn danger" id="cronoDeleteBtn">Excluir</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" data-close="cronoManageOverlay">Cancelar</button>
+        <button class="btn primary" id="cronoEditBtn">Editar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2710,12 +2728,76 @@ function renderCrono(){
           <button class="ev-check ${it.feito?'ok':''}" ${canToggle?'':'disabled style="opacity:.3"'} onclick="toggleCronoItem('${it.kind}','${it.id}')" title="Marcar concluído">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
           </button>
-          ${canDel?`<button class="mini-x" onclick="deleteCronoItem('${it.kind}','${it.id}')" title="Excluir">×</button>`:''}
+          ${canDel?`<button class="mini-x" onclick="openCronoManage('${it.kind}','${it.id}')" title="Editar ou excluir" aria-label="Editar ou excluir">⋯</button>`:''}
         </div>
       </div>`;
     }).join('')}</div>`;
   }).join('');
 }
+let cronoManageTarget=null;
+let editingEventId=null;
+let editingPrazoTarget=null;
+
+function getCronoItem(kind,id){
+  if(kind==='grupo'){
+    const ev=state.schedule.find(x=>x.id===id);
+    return ev?{kind,id,titulo:ev.titulo||'Evento do grupo'}:null;
+  }
+  const [mid,idxS]=String(id).split('::');
+  const m=memberById(mid), idx=Number(idxS);
+  const p=m?.prazos?.[idx];
+  return p?{kind,id,titulo:p.titulo||'Prazo',memberId:mid,idx}:null;
+}
+function openCronoManage(kind,id){
+  const item=getCronoItem(kind,id);
+  if(!item){toast('Item não encontrado.');return;}
+  const allowed=kind==='grupo'?isAdmin:canEditMember(item.memberId);
+  if(!allowed){toast('Você não tem permissão para alterar este item.');return;}
+  cronoManageTarget={kind,id};
+  $('#cronoManageName').textContent=item.titulo;
+  openOverlay('cronoManageOverlay');
+}
+function editCronoSelected(){
+  if(!cronoManageTarget)return;
+  const {kind,id}=cronoManageTarget;
+  closeOverlay('cronoManageOverlay');
+  editCronoItem(kind,id);
+}
+async function deleteCronoSelected(){
+  if(!cronoManageTarget)return;
+  const {kind,id}=cronoManageTarget;
+  closeOverlay('cronoManageOverlay');
+  await deleteCronoItem(kind,id);
+  cronoManageTarget=null;
+}
+function editCronoItem(kind,id){
+  if(kind==='grupo'){
+    if(!isAdmin){toast('Só o coordenador edita eventos do grupo.');return;}
+    const ev=state.schedule.find(x=>x.id===id);
+    if(!ev){toast('Evento não encontrado.');return;}
+    editingEventId=id;
+    $('#eventTitle').textContent='Editar evento do grupo';
+    $('#eTitulo').value=ev.titulo||'';
+    $('#eData').value=ev.data||'';
+    $('#eHora').value=ev.hora||'';
+    $('#eDesc').value=ev.descricao||'';
+    openOverlay('eventOverlay');
+    return;
+  }
+  const [mid,idxS]=String(id).split('::'), idx=Number(idxS);
+  if(!canEditMember(mid)){toast('Sem permissão.');return;}
+  const m=memberById(mid), p=m?.prazos?.[idx];
+  if(!m||!p){toast('Prazo não encontrado.');return;}
+  editingPrazoTarget={memberId:mid,idx};
+  $('#prazoTitle').textContent='Editar prazo';
+  $('#prazoWho').textContent='Prazo de '+m.nome+'.';
+  $('#pTitulo').value=p.titulo||'';
+  $('#pData').value=p.data||'';
+  openOverlay('prazoOverlay');
+}
+
+window.openCronoManage=openCronoManage;
+
 async function toggleCronoItem(kind,id){
   if(kind==='grupo'){
     if(!isAdmin){toast('Só o coordenador altera eventos do grupo.');return}
@@ -2747,6 +2829,7 @@ async function deleteCronoItem(kind,id){
 }
 function openEventModal(){
   if(!isAdmin){toast('Só o coordenador cria eventos do grupo.');return}
+  editingEventId=null;
   $('#eventTitle').textContent='Evento do grupo';
   $('#eTitulo').value=''; $('#eData').value=''; $('#eHora').value=''; $('#eDesc').value='';
   openOverlay('eventOverlay');
@@ -2755,14 +2838,22 @@ async function saveEvent(){
   const titulo=$('#eTitulo').value.trim(), data=$('#eData').value;
   if(!titulo||!data){toast('Preencha título e data.');return}
   try{
-    await FB().addDoc(FB().collection(window.db,'rede_schedule'),{
-      titulo, data, hora:$('#eHora').value||'', descricao:$('#eDesc').value.trim(), feito:false, ts:FB().serverTimestamp()
-    });
-    closeOverlay('eventOverlay'); toast('Evento criado.');
-  }catch(e){console.error(e);toast('Erro ao criar evento.')}
+    const payload={titulo,data,hora:$('#eHora').value||'',descricao:$('#eDesc').value.trim()};
+    if(editingEventId){
+      await FB().updateDoc(FB().doc(window.db,'rede_schedule',editingEventId),payload);
+      toast('Evento atualizado.');
+    }else{
+      await FB().addDoc(FB().collection(window.db,'rede_schedule'),{...payload,feito:false,ts:FB().serverTimestamp()});
+      toast('Evento criado.');
+    }
+    editingEventId=null;
+    closeOverlay('eventOverlay');
+  }catch(e){console.error(e);toast('Erro ao salvar evento.')}
 }
 function openPrazoModal(){
   if(!myId){ toast('Identifique-se primeiro para adicionar um prazo seu.'); openIdentity(); return; }
+  editingPrazoTarget=null;
+  $('#prazoTitle').textContent='Meu prazo';
   $('#prazoWho').textContent='Prazo para '+memberById(myId).nome+'.';
   $('#pTitulo').value=''; $('#pData').value='';
   openOverlay('prazoOverlay');
@@ -2770,11 +2861,22 @@ function openPrazoModal(){
 async function saveMyPrazo(){
   const titulo=$('#pTitulo').value.trim(), data=$('#pData').value;
   if(!titulo||!data){toast('Preencha a entrega e a data.');return}
-  const m=memberById(myId); if(!m)return;
-  const prazos=[...(m.prazos||[]),{titulo,data,feito:false}];
+  const target=editingPrazoTarget;
+  const mid=target?.memberId||myId;
+  if(!mid||!canEditMember(mid)){toast('Sem permissão para alterar este prazo.');return;}
+  const m=memberById(mid); if(!m)return;
+  const prazos=JSON.parse(JSON.stringify(m.prazos||[]));
+  if(target){
+    if(!prazos[target.idx]){toast('Prazo não encontrado.');return;}
+    prazos[target.idx]={...prazos[target.idx],titulo,data};
+  }else{
+    prazos.push({titulo,data,feito:false});
+  }
   try{
-    await fbSetMember(myId,{prazos});
-    closeOverlay('prazoOverlay'); toast('Prazo adicionado.');
+    await fbSetMember(mid,{prazos});
+    closeOverlay('prazoOverlay');
+    toast(target?'Prazo atualizado.':'Prazo adicionado.');
+    editingPrazoTarget=null;
   }catch(e){console.error(e);toast('Erro ao salvar prazo.')}
 }
 
@@ -3383,6 +3485,8 @@ $('#newEventBtn').onclick=openEventModal;
 $('#saveEventBtn').onclick=saveEvent;
 $('#myPrazoBtn').onclick=openPrazoModal;
 $('#savePrazoBtn').onclick=saveMyPrazo;
+$('#cronoEditBtn').onclick=editCronoSelected;
+$('#cronoDeleteBtn').onclick=deleteCronoSelected;
 $('#cNivel').onchange=renderCrono; $('#cTipo').onchange=renderCrono;
 $('#cMeus').onchange=renderCrono; $('#cFeitos').onchange=renderCrono;
 
