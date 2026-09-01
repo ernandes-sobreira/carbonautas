@@ -3050,7 +3050,7 @@ async function savePublicacao(){
     }
     const m=memberById(autorId);
     await FB().addDoc(FB().collection(window.db,'rede_publicacoes'),{
-      memberId:autorId, ownerUid:(state.users||[]).find(u=>u.memberId===autorId)?.uid || (autorId===myId ? (window.auth.currentUser?.uid||'') : ''), memberNome: m?m.nome:'', categoria, categoriaOutro, titulo, tipo:tipoFinal, url, fileName:pubTipo==='arquivo'?pubFileName:'',
+      memberId:autorId, ownerUid:(autorId===myId ? (window.auth.currentUser?.uid||'') : ((state.users||[]).find(u=>u.memberId===autorId)?.uid||'')), createdByUid:(window.auth.currentUser?.uid||''), memberNome: m?m.nome:'', categoria, categoriaOutro, titulo, tipo:tipoFinal, url, fileName:pubTipo==='arquivo'?pubFileName:'',
       ts: FB().serverTimestamp()
     });
     closeOverlay('pubOverlay'); toast('Publicação adicionada.');
