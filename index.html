@@ -1053,12 +1053,13 @@
     <div class="modal-b">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
         <span class="av" id="accountAv" style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center;color:#fff;font-weight:700;background:var(--petrol)">?</span>
-        <div style="min-width:0"><div id="accountName" style="font-weight:700"></div><div id="accountEmail" class="hint"></div></div>
+        <div style="min-width:0"><div id="accountName" style="font-weight:700"></div><div id="accountEmail" class="hint"></div><div id="accountLink" class="hint" style="margin-top:3px;font-size:11px"></div></div>
         <span class="role-pill" id="accountRole" style="margin-left:auto"></span>
       </div>
       <div class="access-note">Sua identidade vem do Firebase Authentication. Você só pode editar o que pertence ao seu perfil; o coordenador administra a plataforma.</div>
     </div>
     <div class="modal-f">
+      <button class="btn" id="accountRepairBtn">Corrigir vínculo</button>
       <button class="btn" id="accountResetBtn">Redefinir senha</button>
       <button class="btn danger" id="accountLogoutBtn">Sair</button>
     </div>
@@ -1511,7 +1512,7 @@ async function bootstrap(){
     } else if(isAdmin) {
       const existing=memSnap.docs.map(d=>({...d.data(),id:d.id})), byName={}; existing.forEach(m=>{byName[m.nome]=m});
       if(!existing.some(m=>m.nivel==='coord')){
-        const x=SEED.find(v=>v.nivel==='coord'); if(x){const id=slugify(x.nome); await f.setDoc(f.doc(window.db,'rede_members',id),{id,foto:'',telefone:'',resultados:[],prazos:[],notas:'',hub:false,hubMotivo:'',vinculos:[],createdAt:f.serverTimestamp(),...x}); byName[x.nome]={id,...x};}
+        const x=SEED.find(v=>v.nivel==='coord'); if(x){const id=slugify(x.nome); await f.setDoc(f.doc(window.db,'rede_members',id),{id,foto:'',telefone:'',resultados:[],prazos:[],notas:'',hub:false,hubMotivo:'',vinculos:[],createdAt:f.serverTimestamp(),...x}); byName[x.nome]={id,...x}; memSnap=await f.getDocs(f.collection(window.db,'rede_members'));}
       }
       // Migração apenas de campos ausentes. Vínculos não são mais restaurados automaticamente:
       // depois da primeira inicialização, a rede passa a ser totalmente editável pelo coordenador.
@@ -1519,6 +1520,15 @@ async function bootstrap(){
     }
     state.members=memSnap.docs.map(d=>({...d.data(),id:d.id}));
     state.members.forEach(m=>{m.linhas=m.linhas||[];m.resultados=m.resultados||[];m.prazos=m.prazos||[];m.vinculos=m.vinculos||[];m.hub=!!m.hub;m.bolsista=!!m.bolsista});
+    if(isAdmin){
+      const linked=resolveCurrentMember();
+      if(linked && linked.id!==myId){
+        try{
+          await f.setDoc(f.doc(window.db,'rede_users',authUser.uid),{memberId:linked.id,nome:linked.nome||authProfile.nome||'',email:authUser.email||'',role:'coordinator',updatedAt:f.serverTimestamp()},{merge:true});
+          myId=linked.id; authProfile.memberId=linked.id; authProfile.nome=linked.nome||authProfile.nome;
+        }catch(e){console.warn('Não foi possível autorreparar o vínculo',e)}
+      }
+    }
     const setRef=f.doc(window.db,'rede_settings','app'), setSnap=await f.getDoc(setRef);
     if(setSnap.exists()){
       state.settings={...state.settings,...setSnap.data()};
@@ -1673,8 +1683,12 @@ async function fbUploadAny(folder,pathPrefix,dataUrl,filename){
   return {url:await f.getDownloadURL(r),path};
 }
 function currentActor(){
-  const me=myId?memberById(myId):null;
-  return me?{id:me.id,name:me.nome,foto:me.foto||'',nivel:me.nivel,color:NIVEIS[me.nivel]?.color||'#7c8b90'}:null;
+  const me=resolveCurrentMember();
+  if(me) return {id:me.id,name:me.nome,foto:me.foto||'',nivel:me.nivel,color:NIVEIS[me.nivel]?.color||'#7c8b90'};
+  if(window.auth?.currentUser && authProfile){
+    return {id:myId||('auth-'+window.auth.currentUser.uid),name:authProfile.nome||window.auth.currentUser.email||'Carbonauta',foto:'',nivel:isAdmin?'coord':'',color:isAdmin?(NIVEIS.coord?.color||'#0E5C63'):'#7c8b90'};
+  }
+  return null;
 }
 function socialFor(targetType,targetId){
   const rs=state.reactions.filter(r=>r.targetType===targetType&&r.targetId===targetId);
@@ -1708,7 +1722,7 @@ function burstReaction(btn,emoji){
   }
 }
 async function toggleReaction(targetType,targetId,type,btn){
-  if(!myId||!window.auth?.currentUser){toast('Entre na sua conta para reagir.');return}
+  if(!window.auth?.currentUser){toast('Entre na sua conta para reagir.');return}
   const emoji=type==='heart'?'💙':type==='party'?'🎉':'👍';
   const f=FB(),uid=window.auth.currentUser.uid;
   const id=`${targetType}_${targetId}_${uid}`.replace(/[^a-zA-Z0-9_-]/g,'_');
@@ -1730,7 +1744,7 @@ async function toggleReaction(targetType,targetId,type,btn){
   }
 }
 async function addSocialComment(targetType,targetId,inputId){
-  if(!myId||!window.auth?.currentUser){toast('Entre na sua conta para comentar.');return}
+  if(!window.auth?.currentUser){toast('Entre na sua conta para comentar.');return}
   const el=$('#'+inputId);if(!el)return;
   const text=el.value.trim();if(!text){el.focus();return}
   const a=currentActor();if(!a){toast('Seu perfil não está vinculado ao login.');return}
@@ -1745,6 +1759,35 @@ async function addSocialComment(targetType,targetId,inputId){
 }
 
 /* ============ AUTHENTICATION / PERMISSIONS ============ */
+function normName(v){
+  return (v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+}
+function resolveCurrentMember(){
+  if(myId){ const direct=memberById(myId); if(direct)return direct; }
+  const wanted=normName(authProfile?.nome||'');
+  if(wanted){
+    const same=state.members.filter(m=>normName(m.nome)===wanted);
+    if(same.length) return same.find(m=>m.foto)||same.find(m=>m.nivel==='coord')||same[0];
+  }
+  if(isAdmin) return state.members.find(m=>m.nivel==='coord'&&m.foto)||state.members.find(m=>m.nivel==='coord')||null;
+  return null;
+}
+async function repairCurrentAccountLink(showMessage=true){
+  if(!window.auth?.currentUser || !authProfile)return false;
+  const candidate=resolveCurrentMember();
+  if(!candidate){ if(showMessage)toast('Não encontrei um perfil da rede para vincular a esta conta.'); return false; }
+  const uidv=window.auth.currentUser.uid;
+  const changed=myId!==candidate.id || authProfile.nome!==candidate.nome;
+  try{
+    if(changed){
+      await FB().setDoc(FB().doc(window.db,'rede_users',uidv),{memberId:candidate.id,nome:candidate.nome||authProfile.nome||'',email:window.auth.currentUser.email||authProfile.email||'',role:isAdmin?'coordinator':(authProfile.role||'student'),updatedAt:FB().serverTimestamp()},{merge:true});
+      myId=candidate.id; authProfile.memberId=candidate.id; authProfile.nome=candidate.nome||authProfile.nome;
+    }
+    refreshIdentityUI();
+    if(showMessage)toast(changed?'Vínculo corrigido. Mural e repositório liberados.':'Seu vínculo já está correto.');
+    return true;
+  }catch(e){ console.error('Erro ao reparar vínculo',e); if(showMessage)toast('Não consegui corrigir o vínculo. Verifique a regra de rede_users.'); return false; }
+}
 function isMe(id){ return !!myId && id===myId }
 function canEditMember(id){ return isAdmin || isMe(id) }
 function authErrorMessage(e){
@@ -1843,7 +1886,7 @@ async function handleAuthUser(user){
 function startAuth(){FB().onAuthStateChanged(window.auth,handleAuthUser)}
 
 function refreshIdentityUI(){
-  const chip=$('#idChip'),av=$('#idAv'),nm=$('#idName'),me=myId?memberById(myId):null;
+  const chip=$('#idChip'),av=$('#idAv'),nm=$('#idName'),me=resolveCurrentMember();
   const displayName=me?.nome||authProfile?.nome||authUser?.email||'Entrar';
   nm.textContent=displayName;
   av.innerHTML=me?.foto?`<img src="${esc(me.foto)}" alt="">`:initials(displayName);
@@ -1865,8 +1908,10 @@ function refreshMemberDependentUI(){
   if(isAdmin) populateAccessMemberSelects();
 }
 function openIdentity(){
-  const me=myId?memberById(myId):null, name=me?.nome||authProfile?.nome||authUser?.email||'';
+  const me=resolveCurrentMember(), name=me?.nome||authProfile?.nome||authUser?.email||'';
   $('#accountName').textContent=name; $('#accountEmail').textContent=authUser?.email||''; $('#accountRole').textContent=isAdmin?'Coordenador':'Carbonauta';
+  const link=$('#accountLink'); if(link)link.textContent=`UID: ${authUser?.uid||'—'} · Perfil: ${me?.id||myId||'não vinculado'}`;
+  $('#accountRepairBtn').style.display=authUser?'inline-flex':'none';
   $('#accountAv').textContent=initials(name); $('#accountAv').style.background=me?(NIVEIS[me.nivel]?.color||'var(--petrol)'):'var(--petrol)'; openOverlay('idOverlay');
 }
 function populateAccessMemberSelects(){
@@ -1877,7 +1922,7 @@ function openAccessManager(){if(!isAdmin){toast('Acesso restrito ao coordenador.
 function renderAccessList(){
   const el=$('#accessList');if(!el)return; if(!isAdmin){el.innerHTML='';return}
   const rows=[...(state.users||[])].sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
-  el.innerHTML=rows.length?rows.map(u=>{const m=memberById(u.memberId),self=u.uid===authUser?.uid;return `<div class="access-row"><div class="main"><div class="nm">${esc(m?.nome||u.nome||u.memberId||'Sem perfil')} ${u.role==='coordinator'?'<span class="role-pill">coordenador</span>':''}</div><div class="em">${esc(u.email||'')} · ${esc(u.uid)}</div></div>${self?'':`<button class="btn danger" onclick="unlinkAccess('${u.uid}')">Desvincular</button>`}</div>`}).join(''):'<div class="hint">Nenhuma conta vinculada.</div>';
+  el.innerHTML=rows.length?rows.map(u=>{const m=memberById(u.memberId),self=u.uid===authUser?.uid,broken=!m;return `<div class="access-row"><div class="main"><div class="nm">${esc(m?.nome||u.nome||u.memberId||'Sem perfil')} ${u.role==='coordinator'?'<span class="role-pill">coordenador</span>':''} ${self?'<span class="role-pill">conta atual</span>':''} ${broken?'<span class="role-pill" style="background:#fff0f0;color:#c62828">vínculo quebrado</span>':''}</div><div class="em">${esc(u.email||'')} · ${esc(u.uid)}</div></div>${self?'':`<button class="btn danger" onclick="unlinkAccess('${u.uid}')">Desvincular</button>`}</div>`}).join(''):'<div class="hint">Nenhuma conta vinculada.</div>';
   populateAccessMemberSelects();
 }
 async function createAccess(){
@@ -2863,7 +2908,10 @@ function openPubModal(presetMemberId=null){
   if(isAdmin){
     $('#pubAutorRow').style.display='block';
     const ordered=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome));
-    sel.innerHTML=ordered.map(m=>`<option value="${m.id}" ${(presetMemberId||myId)===m.id?'selected':''}>${esc(m.nome)}</option>`).join('');
+    const resolved=resolveCurrentMember();
+    const defaultId=presetMemberId||(resolved?.id)||myId||ordered[0]?.id||'';
+    sel.innerHTML=ordered.map(m=>`<option value="${m.id}" ${defaultId===m.id?'selected':''}>${esc(m.nome)}</option>`).join('');
+    if(defaultId)sel.value=defaultId;
   }else{
     $('#pubAutorRow').style.display='none';
     sel.innerHTML=`<option value="${myId}">${esc(memberById(myId).nome)}</option>`;
@@ -2909,7 +2957,12 @@ async function savePublicacao(){
       ts: FB().serverTimestamp()
     });
     closeOverlay('pubOverlay'); toast('Publicação adicionada.');
-  }catch(e){ console.error(e); toast('Erro ao salvar a publicação.'); }
+  }catch(e){
+    console.error('Erro ao salvar publicação',e);
+    if(e?.code==='permission-denied') toast('O Firestore bloqueou o repositório. Ajuste a regra rede_publicacoes.');
+    else if(String(e?.code||'').includes('storage')) toast('O Storage bloqueou o envio do arquivo.');
+    else toast(e?.message||'Erro ao salvar a publicação.');
+  }
 }
 async function deletePublicacao(id){
   if(!confirm('Excluir esta publicação?'))return;
@@ -2999,8 +3052,10 @@ async function dedupeMembers(){
   const dupGroups=Object.values(groups).filter(g=>g.length>1);
   if(!dupGroups.length){ toast('Nenhum nome duplicado encontrado.'); return; }
 
+  const linkedIds=new Set((state.users||[]).map(u=>u.memberId));
   const score=m=>(m.notas||'').length + (m.resultados||[]).length + (m.prazos||[]).length
-    + (m.telefone?1:0) + (m.foto?1:0) + (m.linhas||[]).length + (m.vinculos||[]).length;
+    + (m.telefone?1:0) + (m.foto?5:0) + (m.linhas||[]).length + (m.vinculos||[]).length
+    + (linkedIds.has(m.id)?10000:0) + (m.id===myId?20000:0);
   const toDelete=[];
   dupGroups.forEach(g=>{
     const sorted=g.slice().sort((a,b)=>{
@@ -3113,6 +3168,7 @@ $$('.tab').forEach(t=>t.onclick=()=>switchView(t.dataset.view));
 $('#idChip').onclick=openIdentity;
 $('#whoBtn').onclick=openIdentity;
 $('#adminBtn').onclick=openAccessManager;
+$('#accountRepairBtn').onclick=async()=>{await repairCurrentAccountLink(true);openIdentity()};
 $('#accountLogoutBtn').onclick=doLogout;
 $('#accountResetBtn').onclick=()=>resetMyPassword(authUser?.email||'');
 $('#loginBtn').onclick=login;
