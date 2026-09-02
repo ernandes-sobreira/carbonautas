@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Carbonautas · LIPAN LEFA CELBE · v7</title>
+<meta name="theme-color" content="#071827">
+<meta name="application-name" content="Carbonautas">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Carbonautas">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16.png">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -1112,6 +1124,7 @@
       <div class="access-note">Sua identidade vem do Firebase Authentication. Você só pode editar o que pertence ao seu perfil; o coordenador administra a plataforma.</div>
     </div>
     <div class="modal-f">
+      <button class="btn primary" id="installAppBtn" type="button" style="display:none">Instalar Carbonautas</button>
       <button class="btn" id="accountRepairBtn">Corrigir vínculo</button>
       <button class="btn" id="accountResetBtn">Redefinir senha</button>
       <button class="btn danger" id="accountLogoutBtn">Sair</button>
@@ -3565,6 +3578,51 @@ document.addEventListener('click',e=>{
   }
 });
 window.sparkleLogo=sparkleLogo;
+
+
+// PWA / instalação
+let deferredInstallPrompt=null;
+const installBtn=document.getElementById('installAppBtn');
+function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)}
+function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true}
+function updateInstallButton(){
+  if(!installBtn)return;
+  if(isStandalone()){installBtn.style.display='none';return}
+  if(deferredInstallPrompt || isIOS()) installBtn.style.display='inline-flex';
+}
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  updateInstallButton();
+});
+window.addEventListener('appinstalled',()=>{
+  deferredInstallPrompt=null;
+  if(installBtn) installBtn.style.display='none';
+  if(typeof toast==='function') toast('Carbonautas instalado!');
+});
+if(installBtn){
+  installBtn.addEventListener('click',async()=>{
+    if(isStandalone()){toast('O Carbonautas já está instalado.');return}
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      try{await deferredInstallPrompt.userChoice}catch(_e){}
+      deferredInstallPrompt=null;
+      updateInstallButton();
+      return;
+    }
+    if(isIOS()){
+      alert('No iPhone/iPad: toque em Compartilhar e depois em “Adicionar à Tela de Início”.');
+      return;
+    }
+    alert('No navegador, abra o menu e escolha “Instalar app” ou “Adicionar à tela inicial”.');
+  });
+}
+updateInstallButton();
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('Service Worker:',err));
+  });
+}
 
 refreshIdentityUI();
 waitFirebase().then(startAuth);

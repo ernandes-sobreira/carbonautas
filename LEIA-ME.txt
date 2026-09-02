@@ -1,0 +1,15 @@
+CARBONAUTAS PWA — COMO PUBLICAR
+
+Envie TODOS estes arquivos/pastas para a mesma raiz do repositório do GitHub Pages:
+- index.html
+- manifest.webmanifest
+- sw.js
+- favicon.ico
+- pasta icons/ completa
+
+Depois aguarde o GitHub Pages atualizar e abra o site por HTTPS.
+Android/Chrome: menu → Instalar app / Adicionar à tela inicial.
+iPhone/iPad/Safari: Compartilhar → Adicionar à Tela de Início.
+PC (Chrome/Edge): opção Instalar Carbonautas na barra/endereço ou no menu.
+
+O botão “Instalar Carbonautas” também aparece em Minha conta quando o navegador permite instalação.
