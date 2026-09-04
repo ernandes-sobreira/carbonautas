@@ -454,6 +454,26 @@
   .mural-chat-card .comments{border:0;padding:6px 0 0}
   .mural-chat-card.mine .comments{text-align:left}
 
+
+  /* Mural direcional — pedidos, alertas e resenha */
+  .mural-command{background:linear-gradient(135deg,#071827 0%,#0C2840 62%,#102F49 100%);border:1px solid #17415E;border-radius:18px;padding:18px;margin:4px 0 14px;color:#fff;box-shadow:0 14px 34px rgba(4,25,42,.14)}
+  .mural-command-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+  .mural-command h2{font-family:'Fraunces';font-size:22px;margin:0 0 4px;color:#fff}.mural-command p{margin:0;color:#A9C6D8;font-size:12.5px;line-height:1.45}
+  .mural-action-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+  .mural-action{border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.06);border-radius:14px;padding:12px;text-align:left;color:#fff;min-height:94px;cursor:pointer;transition:.16s ease;position:relative;overflow:hidden}
+  .mural-action:hover{transform:translateY(-2px);background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.24)}
+  .mural-action .ma-ico{font-size:23px;display:block;margin-bottom:7px}.mural-action .ma-title{font-size:12.5px;font-weight:900;line-height:1.2;display:block}.mural-action .ma-sub{font-size:10.5px;line-height:1.3;color:#AFC8D8;display:block;margin-top:4px}
+  .mural-action.campo{box-shadow:inset 0 3px 0 #32C875}.mural-action.lab{box-shadow:inset 0 3px 0 #57A8FF}.mural-action.dados{box-shadow:inset 0 3px 0 #A47CFF}.mural-action.ajuda{box-shadow:inset 0 3px 0 #FFB648}.mural-action.alerta{box-shadow:inset 0 3px 0 #FF4B63;background:rgba(255,75,99,.09)}.mural-action.ideia{box-shadow:inset 0 3px 0 #FFD95E}.mural-action.resenha{box-shadow:inset 0 3px 0 #FF72B5}.mural-action.outro{box-shadow:inset 0 3px 0 #72E6E0}
+  .mural-section-title{display:flex;align-items:center;gap:8px;margin:16px 0 8px;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+  .mural-filterbar{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}.mural-filter{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 10px;font-size:11px;font-weight:800;color:var(--ink-2);cursor:pointer}.mural-filter.on{background:#071827;color:#fff;border-color:#071827}
+  .mural-post{border-left-width:6px}.mural-post.kind-ajuda_campo{border-left-color:#20B96A}.mural-post.kind-ajuda_lab{border-left-color:#318CFF}.mural-post.kind-ajuda_dados{border-left-color:#8A5CFF}.mural-post.kind-ajuda_outro{border-left-color:#F2A62B}.mural-post.kind-alerta{border-left-color:#F23855;background:#FFF9FA}.mural-post.kind-ideia{border-left-color:#E7B900}.mural-post.kind-resenha{border-left-color:#EF5AA5;background:#FFFAFD}
+  .feed-kind.kind-ajuda_campo{background:#E7F8EF;border-color:#9EE0BA;color:#157742}.feed-kind.kind-ajuda_lab{background:#EAF3FF;border-color:#A8CFFF;color:#1D67B8}.feed-kind.kind-ajuda_dados{background:#F1EBFF;border-color:#C5B0FF;color:#6540B9}.feed-kind.kind-ajuda_outro{background:#FFF5E3;border-color:#FFD18A;color:#9C6400}.feed-kind.kind-alerta{background:#FFE9ED;border-color:#FF9EAE;color:#B51F39}.feed-kind.kind-ideia{background:#FFF9D9;border-color:#F2D65C;color:#8C7000}.feed-kind.kind-resenha{background:#FFEAF5;border-color:#FFADD5;color:#A72967}
+  .mural-chat-label{font-size:10px;font-weight:900;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin:0 0 5px}
+  .composer-shell{border:1px solid var(--line);border-radius:15px;padding:10px 12px;background:#fff;margin-top:10px}.composer-shell .composer{border:0;padding:0;margin:0}
+  .recados-panel{border:1px solid var(--line);border-radius:14px;margin:0 0 12px;background:#fff;overflow:hidden}.recados-head{padding:10px 12px}.recados-body{padding:0 10px 10px}
+  @media(max-width:900px){.mural-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:520px){.mural-command{padding:14px}.mural-action-grid{grid-template-columns:1fr 1fr;gap:7px}.mural-action{min-height:92px;padding:10px}.mural-action .ma-title{font-size:11.5px}.mural-action .ma-sub{font-size:9.7px}}
+
   /* Visualizador local de documentos */
   .file-preview-modal .modal-b{overflow:auto;background:#EEF3F8}
   .docx-preview{max-width:900px;margin:22px auto;background:#fff;padding:42px 54px;min-height:680px;box-shadow:0 2px 18px rgba(16,38,44,.12);color:#111;line-height:1.55}
@@ -900,10 +920,24 @@
   <!-- ============ VIEW: MURAL ============ -->
   <div class="view" id="viewMural">
     <div class="mural-flex">
-      <div class="recados-panel">
+      <section class="mural-command">
+        <div class="mural-command-head"><div><h2>O que você precisa do grupo?</h2><p>Escolha o tipo de mensagem. Assim todo mundo entende rapidamente o que precisa ser feito.</p></div></div>
+        <div class="mural-action-grid">
+          <button type="button" class="mural-action campo" data-mural-kind="ajuda_campo"><span class="ma-ico">🌿</span><span class="ma-title">PRECISO DE AJUDA PRA CAMPO</span><span class="ma-sub">Coleta, logística, equipamentos, transporte, equipe.</span></button>
+          <button type="button" class="mural-action lab" data-mural-kind="ajuda_lab"><span class="ma-ico">🧪</span><span class="ma-title">PRECISO DE AJUDA PARA ANÁLISE DE LAB.</span><span class="ma-sub">Amostras, equipamentos, reagentes, protocolos.</span></button>
+          <button type="button" class="mural-action dados" data-mural-kind="ajuda_dados"><span class="ma-ico">📊</span><span class="ma-title">PRECISO DE AJUDA PARA ANÁLISE DE DADOS</span><span class="ma-sub">Estatística, planilhas, R, gráficos, interpretação.</span></button>
+          <button type="button" class="mural-action ajuda" data-mural-kind="ajuda_outro"><span class="ma-ico">🆘</span><span class="ma-title">PRECISO DE AJUDA PARA...</span><span class="ma-sub">Qualquer outra demanda do projeto.</span></button>
+          <button type="button" class="mural-action alerta" data-mural-kind="alerta"><span class="ma-ico">⚠️</span><span class="ma-title">PESSOAL, SE ATENTE A ISSO</span><span class="ma-sub">Alerta, prazo, mudança importante ou cuidado.</span></button>
+          <button type="button" class="mural-action ideia" data-mural-kind="ideia"><span class="ma-ico">💡</span><span class="ma-title">TENHO UMA IDEIA / SUGESTÃO</span><span class="ma-sub">Proposta, oportunidade, evento ou nova ação.</span></button>
+          <button type="button" class="mural-action resenha" data-mural-kind="resenha"><span class="ma-ico">😂</span><span class="ma-title">RESENHA / TÓPICO ENGRAÇADINHO</span><span class="ma-sub">Pra descontrair sem perder o foco do grupo.</span></button>
+          <button type="button" class="mural-action outro" data-mural-kind="atualizacao"><span class="ma-ico">📌</span><span class="ma-title">OUTRA ATUALIZAÇÃO</span><span class="ma-sub">Resultado, ação concluída, link, arquivo ou novidade.</span></button>
+        </div>
+      </section>
+
+      <div class="recados-panel collapsed">
         <div class="recados-head" id="recadosToggle">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
-          Recados <span class="count-badge" id="recadosCount"></span>
+          Recados diretos <span class="count-badge" id="recadosCount"></span>
           <div class="spacer"></div>
           <label class="toggle" style="padding:0 4px" onclick="event.stopPropagation()"><input type="checkbox" id="mOnlyMine"> só pra mim</label>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="recadosChevron" style="width:15px;height:15px;transition:.2s"><polyline points="6 9 12 15 18 9"/></svg>
@@ -916,18 +950,23 @@
           </button>
         </div>
       </div>
-      <div class="mural-tools">
-        <button class="btn mural-publish" id="muralPostBtn" type="button">＋ Publicar ação, link, foto ou arquivo</button>
-        <span class="hint">O mural reúne conversa, ações, eventos, resultados e arquivos do projeto.</span>
+      <div class="mural-section-title">📣 Pedidos, avisos e conversa do grupo</div>
+      <div class="mural-filterbar" id="muralFilterbar">
+        <button type="button" class="mural-filter on" data-mf="all">Tudo</button>
+        <button type="button" class="mural-filter" data-mf="ajuda">🆘 Pedidos de ajuda</button>
+        <button type="button" class="mural-filter" data-mf="alerta">⚠️ Alertas</button>
+        <button type="button" class="mural-filter" data-mf="ideia">💡 Ideias</button>
+        <button type="button" class="mural-filter" data-mf="resenha">😂 Resenha</button>
+        <button type="button" class="mural-filter" data-mf="conversa">💬 Conversa rápida</button>
       </div>
-      <div class="mural-msgs" id="muralMsgs"><div class="mural-empty">Nenhuma mensagem ainda. Comece a conversa do grupo.</div></div>
-      <div class="composer">
+      <div class="mural-msgs" id="muralMsgs"><div class="mural-empty">Nenhuma mensagem ainda.</div></div>
+      <div class="composer-shell"><div class="mural-chat-label">💬 Conversa rápida</div><div class="composer">
         <button class="who" id="whoBtn" title="Trocar identidade"><span class="d" id="whoDot"></span><span id="whoName">visitante</span></button>
         <textarea id="chatInput" rows="1" placeholder="Escreva para o grupo…"></textarea>
         <button class="send" id="sendBtn" title="Enviar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
         </button>
-      </div>
+      </div></div>
     </div>
   </div>
 
@@ -1271,9 +1310,9 @@
 <div class="overlay" id="postOverlay"><div class="modal" style="max-width:560px">
   <div class="modal-h"><h2>Publicar no mural</h2><div class="spacer"></div><button class="btn ghost" data-close="postOverlay">Fechar</button></div>
   <div class="modal-b">
-    <div class="fg"><label>Tipo de atualização</label><select id="postKind"><option value="atualizacao">Atualização</option><option value="projeto">Projeto</option><option value="acao">Ação</option><option value="resultado">Resultado</option><option value="evento">Evento/apresentação</option><option value="foto">Foto</option><option value="arquivo">Arquivo</option></select></div>
-    <div class="fg"><label>Título (opcional)</label><input id="postTitle" placeholder="Ex.: Coleta de campo concluída"></div>
-    <div class="fg"><label>Texto</label><textarea id="postText" style="min-height:110px" placeholder="Conte ao grupo o que aconteceu, o avanço do projeto ou o próximo passo…"></textarea></div>
+    <div class="fg"><label>Tipo da mensagem</label><select id="postKind"><option value="ajuda_campo">🌿 Preciso de ajuda pra campo</option><option value="ajuda_lab">🧪 Preciso de ajuda para análise de lab.</option><option value="ajuda_dados">📊 Preciso de ajuda para análise de dados</option><option value="ajuda_outro">🆘 Preciso de ajuda para...</option><option value="alerta">⚠️ Pessoal, se atente a isso</option><option value="ideia">💡 Tenho uma ideia / sugestão</option><option value="resenha">😂 Resenha / tópico engraçadinho</option><option value="atualizacao">📌 Outra atualização</option><option value="resultado">✅ Resultado</option><option value="evento">📅 Evento / apresentação</option></select></div>
+    <div class="fg"><label>Assunto</label><input id="postTitle" placeholder="Ex.: Preciso de duas pessoas para a coleta de sexta"></div>
+    <div class="fg"><label>Mensagem</label><textarea id="postText" style="min-height:125px" placeholder="Diga de forma objetiva o que você precisa, quando e como o grupo pode ajudar."></textarea></div>
     <div class="fg"><label>Link (opcional)</label><input id="postUrl" placeholder="https://..."></div>
     <div class="fg"><label>Anexo (foto, PDF, Word, planilha, apresentação etc.; até 15 MB)</label><button class="btn" id="postFilePick" style="justify-content:center">Escolher arquivo</button><input type="file" id="postFile" style="display:none"><span class="hint" id="postFileName">Nenhum arquivo escolhido.</span></div>
   </div>
@@ -2908,14 +2947,39 @@ function markChatSeen(){
   $('#muralBadge').style.display='none';
 }
 function isRecado(c){ return c.tipo==='recado' || c.para!==undefined; }
+let muralFilter='all';
+const MURAL_KINDS={
+  ajuda_campo:{icon:'🌿',label:'Ajuda pra campo',cls:'ajuda_campo'},
+  ajuda_lab:{icon:'🧪',label:'Ajuda no laboratório',cls:'ajuda_lab'},
+  ajuda_dados:{icon:'📊',label:'Ajuda com dados',cls:'ajuda_dados'},
+  ajuda_outro:{icon:'🆘',label:'Preciso de ajuda',cls:'ajuda_outro'},
+  alerta:{icon:'⚠️',label:'Pessoal, se atente a isso',cls:'alerta'},
+  ideia:{icon:'💡',label:'Ideia / sugestão',cls:'ideia'},
+  resenha:{icon:'😂',label:'Resenha',cls:'resenha'},
+  atualizacao:{icon:'📌',label:'Atualização',cls:'atualizacao'},
+  projeto:{icon:'🧭',label:'Projeto',cls:'atualizacao'},
+  acao:{icon:'⚡',label:'Ação',cls:'atualizacao'},
+  resultado:{icon:'✅',label:'Resultado',cls:'atualizacao'},
+  evento:{icon:'📅',label:'Evento',cls:'atualizacao'},
+  foto:{icon:'📷',label:'Foto',cls:'atualizacao'},
+  arquivo:{icon:'📎',label:'Arquivo',cls:'atualizacao'}
+};
+function muralKindMeta(kind){return MURAL_KINDS[kind]||MURAL_KINDS.atualizacao}
+function muralMatches(item){
+  if(muralFilter==='all')return true;
+  if(item.__type==='chat')return muralFilter==='conversa';
+  const k=item.kind||'atualizacao';
+  if(muralFilter==='ajuda')return k.startsWith('ajuda_');
+  return k===muralFilter;
+}
 function renderMural(){
   const wrap=$('#muralMsgs');
   const chatItems=state.chat.filter(c=>!isRecado(c)).map(c=>({__type:'chat',...c}));
   const postItems=state.feed.map(p=>({__type:'post',...p}));
-  const list=[...chatItems,...postItems].sort((a,b)=>{
+  const list=[...chatItems,...postItems].filter(muralMatches).sort((a,b)=>{
     const ta=a.ts?.toMillis?a.ts.toMillis():+new Date(a.ts||0), tb=b.ts?.toMillis?b.ts.toMillis():+new Date(b.ts||0); return ta-tb;
   });
-  if(!list.length){ wrap.innerHTML='<div class="mural-empty">Nenhuma publicação ainda. Comece a conversa ou publique uma ação, link, foto ou arquivo.</div>'; return; }
+  if(!list.length){ wrap.innerHTML='<div class="mural-empty">Nada nesta categoria ainda. Escolha um botão acima para publicar.</div>'; return; }
   let html='',lastDay=null;
   list.forEach(item=>{
     const ms=item.ts?.toMillis?item.ts.toMillis():+new Date(item.ts||Date.now()),dl=dayLabel(ms);
@@ -2923,7 +2987,8 @@ function renderMural(){
     if(item.__type==='post'){
       const m=memberForAuthor(item.authorId,item.authorName),can=isAdmin||isMe(item.authorId),pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.authorName||'Carbonauta';
       const isImg=item.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(item.fileName||item.fileUrl)||item.mime?.startsWith('image/'));
-      html+=`<article class="feed-card mural-post"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div><div class="feed-author">${esc(nm)}</div><div class="feed-time">${fmtTime(ms)}</div></div><span class="feed-kind">${esc((item.kind||'atualizacao').replace(/^./,x=>x.toUpperCase()))}</span>${can?`<button class="mini-x" onclick="deleteFeedPost('${item.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${item.title?`<div class="feed-title">${esc(item.title)}</div>`:''}${item.text?`<div class="feed-text">${esc(item.text)}</div>`:''}${item.externalUrl?`<a class="feed-attachment" href="${esc(item.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${item.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(item.fileUrl)}'),decodeURIComponent('${encodeURIComponent(item.fileName||item.title||'Anexo')}'))">👁️ Visualizar · ${esc(item.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(item.fileUrl)}" alt="${esc(item.title||'Foto publicada')}">`:''}${socialBar('post',item.id)}${renderComments('post',item.id)}</article>`;
+      const km=muralKindMeta(item.kind);
+      html+=`<article class="feed-card mural-post kind-${km.cls}"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div><div class="feed-author">${esc(nm)}</div><div class="feed-time">${fmtTime(ms)}</div></div><span class="feed-kind kind-${km.cls}">${km.icon} ${esc(km.label)}</span>${can?`<button class="mini-x" onclick="deleteFeedPost('${item.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${item.title?`<div class="feed-title">${esc(item.title)}</div>`:''}${item.text?`<div class="feed-text">${esc(item.text)}</div>`:''}${item.externalUrl?`<a class="feed-attachment" href="${esc(item.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${item.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(item.fileUrl)}'),decodeURIComponent('${encodeURIComponent(item.fileName||item.title||'Anexo')}'))">👁️ Visualizar · ${esc(item.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(item.fileUrl)}" alt="${esc(item.title||'Foto publicada')}">`:''}${socialBar('post',item.id)}${renderComments('post',item.id)}</article>`;
     }else{
       const m=memberForAuthor(item.authorId,item.author),mine=(myId&&item.authorId===myId)||(!myId&&myName&&item.author===myName),canDel=isAdmin||mine,pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.author||'Carbonauta';
       html+=`<div class="mural-chat-card ${mine?'mine':''}"><div class="mav" style="background:${m?NIVEIS[m.nivel]?.color:(item.authorColor||'var(--ink-3)')}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div class="msg-b"><div class="msg-head"><span class="nm">${esc(nm)}</span><span class="tm">${fmtTime(ms)}</span></div><div class="msg-txt">${esc(item.text)}</div>${socialBar('chat',item.id)}${renderComments('chat',item.id)}</div>${canDel?`<button class="del" onclick="deleteChatMsg('${item.id}')" title="Apagar">×</button>`:''}</div>`;
@@ -3323,7 +3388,28 @@ function renderFeed(){
   renderFeedSide();const a=currentActor();const av=$('#feedMeAv'); if(av){av.innerHTML=a?.foto?`<img src="${esc(a.foto)}" alt="">`:initials(a?.name||'?');av.style.background=a?.color||'#7c8b90'}
   const list=$('#feedList');$('#feedEmpty').style.display=state.feed.length?'none':'block';list.innerHTML=state.feed.map(p=>{const m=memberForAuthor(p.authorId,p.authorName),dt=p.ts?.toMillis?new Date(p.ts.toMillis()):null,can=isAdmin||isMe(p.authorId);const isImg=p.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(p.fileName||p.fileUrl)||p.mime?.startsWith('image/'));return `<article class="feed-card"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${(m?.foto||p.authorFoto)?`<img src="${esc(m?.foto||p.authorFoto)}" alt="">`:initials(m?.nome||p.authorName||'?')}</div><div><div class="feed-author">${esc(p.authorName||'Carbonauta')}</div><div class="feed-time">${dt?dt.toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div><span class="feed-kind">${esc((p.kind||'atualizacao').replace(/^./,x=>x.toUpperCase()))}</span>${can?`<button class="mini-x" onclick="deleteFeedPost('${p.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${p.title?`<div class="feed-title">${esc(p.title)}</div>`:''}${p.text?`<div class="feed-text">${esc(p.text)}</div>`:''}${p.externalUrl?`<a class="feed-attachment" href="${esc(p.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${p.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.fileUrl)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.title||'Anexo')}'))">👁️ Visualizar · ${esc(p.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(p.fileUrl)}" alt="${esc(p.title||'Foto publicada')}">`:''}${socialBar('post',p.id)}${renderComments('post',p.id)}</article>`}).join('');
 }
-function openPostModal(){if(!myId){toast('Identifique-se primeiro para publicar.');openIdentity();return}postFileData='';postFileName='';$('#postKind').value='atualizacao';$('#postTitle').value='';$('#postText').value='';$('#postUrl').value='';$('#postFileName').textContent='Nenhum arquivo escolhido.';openOverlay('postOverlay')}
+function openPostModal(kind='atualizacao'){
+  if(!myId){toast('Identifique-se primeiro para publicar.');openIdentity();return}
+  postFileData='';postFileName='';
+  const meta=muralKindMeta(kind);
+  $('#postKind').value=MURAL_KINDS[kind]?kind:'atualizacao';
+  $('#postTitle').value='';$('#postText').value='';$('#postUrl').value='';$('#postFileName').textContent='Nenhum arquivo escolhido.';
+  const hints={
+    ajuda_campo:['Ex.: Preciso de 2 pessoas para a coleta de sexta','Diga local, data, horário, atividade, o que levar e quantas pessoas precisa.'],
+    ajuda_lab:['Ex.: Preciso de ajuda com as análises de CH4','Informe amostra, técnica/equipamento, prazo e qual ajuda está precisando.'],
+    ajuda_dados:['Ex.: Alguém consegue me ajudar com esta análise no R?','Explique a base, análise desejada, erro/dúvida e prazo.'],
+    ajuda_outro:['Ex.: Preciso de ajuda para preparar a apresentação','Explique objetivamente o que precisa e até quando.'],
+    alerta:['Ex.: Atenção ao prazo de submissão','Diga claramente o que mudou, qual é o risco/prazo e o que cada pessoa deve fazer.'],
+    ideia:['Ex.: Ideia para uma nova ação do projeto','Conte a ideia, por que vale a pena e quem poderia participar.'],
+    resenha:['Ex.: Depois dessa coleta, merecemos um tereré 😂','Manda a resenha, assunto leve ou tópico engraçadinho do grupo.'],
+    atualizacao:['Ex.: Atualização da semana','Conte o que aconteceu, avanço, link ou próximo passo.']
+  };
+  const h=hints[kind]||hints.atualizacao;
+  $('#postTitle').placeholder=h[0]; $('#postText').placeholder=h[1];
+  $('#postOverlay .modal-h h2').textContent=meta.icon+' '+meta.label;
+  openOverlay('postOverlay');
+}
+function openMuralAction(kind){openPostModal(kind)}
 function handlePostFile(file){if(!file)return;if(file.size>15*1024*1024){toast('Arquivo maior que 15 MB.');return}const r=new FileReader();r.onload=e=>{postFileData=e.target.result;postFileName=file.name;$('#postFileName').textContent=file.name};r.readAsDataURL(file)}
 async function saveFeedPost(){const text=$('#postText').value.trim(),title=$('#postTitle').value.trim();if(!text&&!title&&!postFileData&&!$('#postUrl').value.trim()){toast('Adicione algum conteúdo à publicação.');return}const a=currentActor();let fileUrl='',storagePath='';try{if(postFileData){toast('Enviando anexo…');const up=await fbUploadAny('rede_feed','post_'+a.id,postFileData,postFileName);fileUrl=up.url;storagePath=up.path}await FB().addDoc(FB().collection(window.db,'rede_feed'),{authorId:a.id,authorUid:window.auth.currentUser?.uid||'',authorName:a.name,authorFoto:a.foto,kind:$('#postKind').value,title,text,externalUrl:$('#postUrl').value.trim(),fileUrl,fileName:postFileName,storagePath,ts:FB().serverTimestamp()});closeOverlay('postOverlay');toast('Publicado no mural.')}catch(e){console.error(e);const msg=e?.code==='permission-denied'?'Permissão negada pelo Firestore. Verifique as regras de publicações do mural.':(e?.message||'Erro ao publicar no mural.');toast(msg)}}
 async function deleteFeedPost(id){const p=state.feed.find(x=>x.id===id);if(!p||!(isAdmin||isMe(p.authorId))||!confirm('Excluir esta publicação do mural?'))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_feed',id));if(p.storagePath){try{await FB().deleteObject(FB().sRef(window.storage,p.storagePath))}catch(e){}}toast('Publicação removida.')}catch(e){console.error(e);toast('Erro ao excluir publicação.')}}
@@ -3521,7 +3607,7 @@ $('#addActivityBtn').onclick=()=>openActivity(null);
 $('#trackOwner').onchange=renderTrack; $('#trackStatus').onchange=renderTrack; $('#trackMine').onchange=renderTrack;
 $('#activityProgress').oninput=e=>$('#activityProgressLabel').textContent=e.target.value+'%';
 $('#saveActivityBtn').onclick=saveActivity; $('#deleteActivityBtn').onclick=deleteActivity;
-if($('#newPostBtn')) $('#newPostBtn').onclick=openPostModal; if($('#muralPostBtn')) $('#muralPostBtn').onclick=openPostModal; $('#postFilePick').onclick=()=>$('#postFile').click(); $('#postFile').onchange=e=>handlePostFile(e.target.files[0]); $('#savePostBtn').onclick=saveFeedPost;
+if($('#newPostBtn')) $('#newPostBtn').onclick=()=>openPostModal('atualizacao'); if($('#muralPostBtn')) $('#muralPostBtn').onclick=()=>openPostModal('atualizacao'); $$('[data-mural-kind]').forEach(b=>b.onclick=()=>openMuralAction(b.dataset.muralKind)); $$('[data-mf]').forEach(b=>b.onclick=()=>{muralFilter=b.dataset.mf;$$('[data-mf]').forEach(x=>x.classList.toggle('on',x===b));renderMural()}); $('#postFilePick').onclick=()=>$('#postFile').click(); $('#postFile').onchange=e=>handlePostFile(e.target.files[0]); $('#savePostBtn').onclick=saveFeedPost;
 
 $('#addPhotoBtn').onclick=openPhotoModal;
 $('#gPickBtn').onclick=()=>$('#gFile').click();
@@ -3561,7 +3647,7 @@ window.addEventListener('resize',()=>{if(simulation){const[W,H]=graphSize();simu
 window.selectNode=selectNode; window.closeDetail=closeDetail; window.openMember=openMember;
 window.filterLinha=filterLinha; window.recadoTo=recadoTo;
 window.toggleCronoItem=toggleCronoItem; window.deleteCronoItem=deleteCronoItem; window.unlinkAccess=unlinkAccess;
-window.deleteChatMsg=deleteChatMsg; window.deletePublicacao=deletePublicacao; window.editActivity=openActivity; window.toggleReaction=toggleReaction; window.toggleComments=toggleComments; window.addSocialComment=addSocialComment; window.deleteFeedPost=deleteFeedPost;
+window.deleteChatMsg=deleteChatMsg; window.deletePublicacao=deletePublicacao; window.openMuralAction=openMuralAction; window.editActivity=openActivity; window.toggleReaction=toggleReaction; window.toggleComments=toggleComments; window.addSocialComment=addSocialComment; window.deleteFeedPost=deleteFeedPost;
 
 
 function sparkleLogo(mode='wow'){
