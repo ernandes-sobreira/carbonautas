@@ -491,6 +491,14 @@
   @media(max-width:900px){.mural-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
   @media(max-width:520px){.mural-command{padding:12px}.mural-action-grid{grid-template-columns:1fr 1fr;gap:7px}.mural-action{min-height:70px;padding:9px}.mural-action .ma-title{font-size:11px}.mural-action .ma-sub{display:none}.mural-msgs{gap:12px;padding:12px 0 10px}.mural-post .feed-head{padding:14px 14px 8px}.mural-post .feed-body{padding:2px 14px 12px}.mural-post .feed-title{font-size:19px}.mural-post .feed-text,.mural-chat-card .msg-txt{font-size:14.5px}.mural-chat-card{padding:14px}.mural-command-toggle{width:100%;justify-content:center}}
 
+  /* Notificações */
+  .notify-btn{position:relative;min-width:42px;justify-content:center;padding:9px 11px;font-size:17px}
+  .notify-badge{position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:#FF3D6E;color:#fff;border:2px solid #071827;font-size:10px;font-weight:900;display:grid;place-items:center}
+  .notify-tools{display:flex;gap:8px;flex-wrap:wrap}.notify-list{display:flex;flex-direction:column;gap:9px;max-height:58vh;overflow:auto}
+  .notify-item{border:1px solid var(--line);border-radius:14px;padding:12px 13px;background:#fff;cursor:pointer;display:flex;gap:11px;align-items:flex-start;transition:.14s}.notify-item:hover{border-color:#9FC8DA;box-shadow:0 5px 15px rgba(7,24,39,.07)}.notify-item.unread{background:#EEF9FF;border-color:#9DDCF3}.notify-ico{font-size:22px;line-height:1;flex:0 0 auto}.notify-main{flex:1;min-width:0}.notify-title{font-size:13px;font-weight:900;color:#10283A}.notify-text{font-size:12.5px;line-height:1.45;color:var(--ink-2);margin-top:3px}.notify-time{font-size:10.5px;color:var(--ink-3);margin-top:5px}.notify-empty{text-align:center;padding:28px;color:var(--ink-3);font-size:13px}
+  .feed-target{font-size:10px;font-weight:800;border-radius:999px;padding:4px 8px;background:#EAF6FF;color:#075985;border:1px solid #BFE6FF;white-space:nowrap}
+  @media(max-width:650px){.notify-btn{padding:8px 10px}.notify-tools .btn{flex:1 1 100%}}
+
   /* Visualizador local de documentos */
   .file-preview-modal .modal-b{overflow:auto;background:#EEF3F8}
   .docx-preview{max-width:900px;margin:22px auto;background:#fff;padding:42px 54px;min-height:680px;box-shadow:0 2px 18px rgba(16,38,44,.12);color:#111;line-height:1.55}
@@ -792,6 +800,7 @@
       <input id="search" placeholder="Buscar pessoa, tema ou linha">
     </div>
     <button class="btn" id="installPwaBtn" type="button" title="Instalar Carbonautas neste dispositivo">⬇ <span class="bl">Instalar</span></button>
+    <button class="btn notify-btn" id="notifyBtn" type="button" title="Notificações">🔔<span class="notify-badge" id="notifyBadge" style="display:none"></span></button>
     <button class="id-chip" id="idChip" title="Identificar-se">
       <span class="av" id="idAv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
       <span id="idName">Quem é você?</span>
@@ -1343,6 +1352,7 @@
   <div class="modal-h"><h2>Publicar no mural</h2><div class="spacer"></div><button class="btn ghost" data-close="postOverlay">Fechar</button></div>
   <div class="modal-b">
     <div class="fg"><label>Tipo da mensagem</label><select id="postKind"><option value="ajuda_campo">🌿 Preciso de ajuda pra campo</option><option value="ajuda_lab">🧪 Preciso de ajuda para análise de lab.</option><option value="ajuda_dados">📊 Preciso de ajuda para análise de dados</option><option value="ajuda_outro">🆘 Preciso de ajuda para...</option><option value="alerta">⚠️ Pessoal, se atente a isso</option><option value="ideia">💡 Tenho uma ideia / sugestão</option><option value="resenha">😂 Resenha / tópico engraçadinho</option><option value="atualizacao">📌 Outra atualização</option><option value="resultado">✅ Resultado</option><option value="evento">📅 Evento / apresentação</option></select></div>
+    <div class="fg"><label>Quem deve ser notificado?</label><select id="postDest"><option value="all">🔔 Todo o grupo</option></select><div class="hint" style="margin-top:5px">A publicação continua no Mural, mas a pessoa escolhida — ou todo o grupo — recebe uma notificação.</div></div>
     <div class="fg"><label>Assunto</label><input id="postTitle" placeholder="Ex.: Preciso de duas pessoas para a coleta de sexta"></div>
     <div class="fg"><label>Mensagem</label><textarea id="postText" style="min-height:125px" placeholder="Diga de forma objetiva o que você precisa, quando e como o grupo pode ajudar."></textarea></div>
     <div class="fg"><label>Link (opcional)</label><input id="postUrl" placeholder="https://..."></div>
@@ -1433,10 +1443,19 @@
   </div>
 </div>
 
+<div class="overlay" id="notifyOverlay"><div class="modal" style="max-width:620px">
+  <div class="modal-h"><h2>🔔 Notificações</h2><div class="spacer"></div><button class="btn ghost" data-close="notifyOverlay">Fechar</button></div>
+  <div class="modal-b">
+    <div class="notify-tools"><button class="btn primary" id="enableDeviceNotifications" type="button">Ativar notificações do dispositivo</button><button class="btn" id="markAllNotifications" type="button">Marcar tudo como lido</button></div>
+    <div class="hint" id="notifyPermissionHint" style="margin:8px 0 12px"></div>
+    <div class="notify-list" id="notifyList"><div class="notify-empty">Nenhuma notificação.</div></div>
+  </div>
+</div></div>
+
 <div class="toast" id="toast"></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp, addDoc, updateDoc, getDoc, limit, writeBatch }
+import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp, addDoc, updateDoc, getDoc, limit, writeBatch }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref as sRef, uploadString, getDownloadURL, deleteObject }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
@@ -1458,7 +1477,7 @@ window.storage = getStorage(app);
 window.auth = getAuth(app);
 window.secondaryAuth = getAuth(secondaryApp);
 window.fbFns = {
-  collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp,
+  collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp,
   addDoc, updateDoc, getDoc, limit, writeBatch, sRef, uploadString, getDownloadURL, deleteObject,
   onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail
 };
@@ -1543,7 +1562,7 @@ const SEED_VINCULOS = [
 ];
 
 /* ============ STATE ============ */
-let state = { members: [], chat: [], schedule: [], photos: [], publicacoes: [], activities: [], feed: [], comments: [], reactions: [], users: [], linhas: DEFAULT_LINHAS.slice(), settings: {groupLink:''} };
+let state = { members: [], chat: [], schedule: [], photos: [], publicacoes: [], activities: [], feed: [], comments: [], reactions: [], notifications: [], users: [], linhas: DEFAULT_LINHAS.slice(), settings: {groupLink:''} };
 let hiddenNiveis = new Set();
 let hiddenLinhas = new Set();
 let selectedId = null;
@@ -1780,6 +1799,18 @@ function subscribeAll(){
     if(currentView==='fotos') renderFotos();
     if(lbPhotoId) renderLightboxSocial();
   }));
+  // NOTIFICAÇÕES DO USUÁRIO LOGADO
+  if(myId){
+    let notifInitial=true;
+    const nq=f.query(f.collection(window.db,'rede_notifications'),f.where('recipientId','==',myId));
+    subscriptions.push(f.onSnapshot(nq,snap=>{
+      state.notifications=snap.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>notifMillis(b)-notifMillis(a));
+      renderNotificationUI();
+      if(!notifInitial){snap.docChanges().filter(ch=>ch.type==='added').forEach(ch=>{const n={...ch.doc.data(),id:ch.doc.id};if(n.senderId!==myId)showDeviceNotification(n)})}
+      notifInitial=false;
+    },err=>console.warn('Notificações não disponíveis:',err)));
+  }
+
   // CONTAS (somente coordenador pode listar todas)
   if(isAdmin){
     subscriptions.push(f.onSnapshot(f.collection(window.db,'rede_users'),snap=>{
@@ -3020,7 +3051,7 @@ function renderMural(){
       const m=memberForAuthor(item.authorId,item.authorName),can=isAdmin||isMe(item.authorId),pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.authorName||'Carbonauta';
       const isImg=item.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(item.fileName||item.fileUrl)||item.mime?.startsWith('image/'));
       const km=muralKindMeta(item.kind);
-      html+=`<article class="feed-card mural-post kind-${km.cls}"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div><div class="feed-author">${esc(nm)}</div><div class="feed-time">${fmtTime(ms)}</div></div><span class="feed-kind kind-${km.cls}">${km.icon} ${esc(km.label)}</span>${can?`<button class="mini-x" onclick="deleteFeedPost('${item.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${item.title?`<div class="feed-title">${esc(item.title)}</div>`:''}${item.text?`<div class="feed-text">${esc(item.text)}</div>`:''}${item.externalUrl?`<a class="feed-attachment" href="${esc(item.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${item.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(item.fileUrl)}'),decodeURIComponent('${encodeURIComponent(item.fileName||item.title||'Anexo')}'))">👁️ Visualizar · ${esc(item.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(item.fileUrl)}" alt="${esc(item.title||'Foto publicada')}">`:''}${socialBar('post',item.id)}${renderComments('post',item.id)}</article>`;
+      html+=`<article class="feed-card mural-post kind-${km.cls}"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div><div class="feed-author">${esc(nm)}</div><div class="feed-time">${fmtTime(ms)}</div></div><span class="feed-kind kind-${km.cls}">${km.icon} ${esc(km.label)}</span>${item.para?`<span class="feed-target">Para: ${esc(item.paraNome||memberById(item.para)?.nome||'alguém')}</span>`:`<span class="feed-target">Para: todos</span>`}${can?`<button class="mini-x" onclick="deleteFeedPost('${item.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${item.title?`<div class="feed-title">${esc(item.title)}</div>`:''}${item.text?`<div class="feed-text">${esc(item.text)}</div>`:''}${item.externalUrl?`<a class="feed-attachment" href="${esc(item.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${item.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(item.fileUrl)}'),decodeURIComponent('${encodeURIComponent(item.fileName||item.title||'Anexo')}'))">👁️ Visualizar · ${esc(item.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(item.fileUrl)}" alt="${esc(item.title||'Foto publicada')}">`:''}${socialBar('post',item.id)}${renderComments('post',item.id)}</article>`;
     }else{
       const m=memberForAuthor(item.authorId,item.author),mine=(myId&&item.authorId===myId)||(!myId&&myName&&item.author===myName),canDel=isAdmin||mine,pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.author||'Carbonauta';
       html+=`<div class="mural-chat-card ${mine?'mine':''}"><div class="mav" style="background:${m?NIVEIS[m.nivel]?.color:(item.authorColor||'var(--ink-3)')}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div class="msg-b"><div class="msg-head"><span class="nm">${esc(nm)}</span><span class="tm">${fmtTime(ms)}</span></div><div class="msg-txt">${esc(item.text)}</div>${socialBar('chat',item.id)}${renderComments('chat',item.id)}</div>${canDel?`<button class="del" onclick="deleteChatMsg('${item.id}')" title="Apagar">×</button>`:''}</div>`;
@@ -3438,6 +3469,7 @@ function renderFeed(){
 }
 function openPostModal(kind='atualizacao'){
   if(!myId){toast('Identifique-se primeiro para publicar.');openIdentity();return}
+  populatePostDest();
   postFileData='';postFileName='';
   const meta=muralKindMeta(kind);
   $('#postKind').value=MURAL_KINDS[kind]?kind:'atualizacao';
@@ -3459,7 +3491,18 @@ function openPostModal(kind='atualizacao'){
 }
 function openMuralAction(kind){openPostModal(kind)}
 function handlePostFile(file){if(!file)return;if(file.size>15*1024*1024){toast('Arquivo maior que 15 MB.');return}const r=new FileReader();r.onload=e=>{postFileData=e.target.result;postFileName=file.name;$('#postFileName').textContent=file.name};r.readAsDataURL(file)}
-async function saveFeedPost(){const text=$('#postText').value.trim(),title=$('#postTitle').value.trim();if(!text&&!title&&!postFileData&&!$('#postUrl').value.trim()){toast('Adicione algum conteúdo à publicação.');return}const a=currentActor();let fileUrl='',storagePath='';try{if(postFileData){toast('Enviando anexo…');const up=await fbUploadAny('rede_feed','post_'+a.id,postFileData,postFileName);fileUrl=up.url;storagePath=up.path}await FB().addDoc(FB().collection(window.db,'rede_feed'),{authorId:a.id,authorUid:window.auth.currentUser?.uid||'',authorName:a.name,authorFoto:a.foto,kind:$('#postKind').value,title,text,externalUrl:$('#postUrl').value.trim(),fileUrl,fileName:postFileName,storagePath,ts:FB().serverTimestamp()});closeOverlay('postOverlay');toast('Publicado no mural.')}catch(e){console.error(e);const msg=e?.code==='permission-denied'?'Permissão negada pelo Firestore. Verifique as regras de publicações do mural.':(e?.message||'Erro ao publicar no mural.');toast(msg)}}
+async function saveFeedPost(){
+  const text=$('#postText').value.trim(),title=$('#postTitle').value.trim(),dest=$('#postDest')?.value||'all';
+  if(!text&&!title&&!postFileData&&!$('#postUrl').value.trim()){toast('Adicione algum conteúdo à publicação.');return}
+  const a=currentActor();let fileUrl='',storagePath='';
+  try{
+    if(postFileData){toast('Enviando anexo…');const up=await fbUploadAny('rede_feed','post_'+a.id,postFileData,postFileName);fileUrl=up.url;storagePath=up.path}
+    const para=dest==='all'?null:dest,paraNome=para?(memberById(para)?.nome||''):'';
+    const ref=await FB().addDoc(FB().collection(window.db,'rede_feed'),{authorId:a.id,authorUid:window.auth.currentUser?.uid||'',authorName:a.name,authorFoto:a.foto,kind:$('#postKind').value,title,text,externalUrl:$('#postUrl').value.trim(),fileUrl,fileName:postFileName,storagePath,para,paraNome,ts:FB().serverTimestamp()});
+    try{await createMuralNotifications(dest,{kind:$('#postKind').value,title:(paraNome?'Para '+paraNome+': ':'')+(title||muralKindMeta($('#postKind').value).label),message:text||title||'Nova publicação no Mural',sourceType:'mural-post',sourceId:ref.id})}catch(ne){console.warn('Publicou, mas não notificou:',ne);toast('Publicado, mas o Firebase bloqueou a notificação.')}
+    closeOverlay('postOverlay');toast(paraNome?'Publicado e '+paraNome+' foi notificado.':'Publicado e o grupo foi notificado.');
+  }catch(e){console.error(e);const msg=e?.code==='permission-denied'?'Permissão negada pelo Firestore. Verifique as regras de publicações do mural.':(e?.message||'Erro ao publicar no mural.');toast(msg)}
+}
 async function deleteFeedPost(id){const p=state.feed.find(x=>x.id===id);if(!p||!(isAdmin||isMe(p.authorId))||!confirm('Excluir esta publicação do mural?'))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_feed',id));if(p.storagePath){try{await FB().deleteObject(FB().sRef(window.storage,p.storagePath))}catch(e){}}toast('Publicação removida.')}catch(e){console.error(e);toast('Erro ao excluir publicação.')}}
 
 function renderLightboxSocial(){if(!lbPhotoId)return;$('#lbSocial').innerHTML=socialBar('photo',lbPhotoId)+renderComments('photo',lbPhotoId)}
@@ -3496,6 +3539,50 @@ async function dedupeMembers(){
   }catch(e){ console.error(e); toast('Erro ao remover duplicados. Tente novamente.'); }
 }
 
+/* ============ NOTIFICAÇÕES ============ */
+function notifMillis(n){return n?.ts?.toMillis?n.ts.toMillis():+new Date(n?.ts||0)}
+function notificationIcon(kind='atualizacao'){return ({ajuda_campo:'🌿',ajuda_lab:'🧪',ajuda_dados:'📊',ajuda_outro:'🆘',alerta:'⚠️',ideia:'💡',resenha:'😂',recado:'✈️',atualizacao:'📌',resultado:'✅',evento:'📅'})[kind]||'🔔'}
+function renderNotificationUI(){
+  const unread=state.notifications.filter(n=>!n.read).length,b=$('#notifyBadge');
+  if(b){b.textContent=unread>99?'99+':unread;b.style.display=unread?'grid':'none'}
+  const list=$('#notifyList');if(!list)return;
+  if(!state.notifications.length){list.innerHTML='<div class="notify-empty">Nenhuma notificação ainda.</div>';return}
+  list.innerHTML=state.notifications.slice(0,80).map(n=>`<div class="notify-item ${n.read?'':'unread'}" data-nid="${n.id}"><div class="notify-ico">${notificationIcon(n.kind)}</div><div class="notify-main"><div class="notify-title">${esc(n.title||'Nova mensagem no Mural')}</div><div class="notify-text">${esc(n.message||'')}</div><div class="notify-time">${esc(n.senderName||'Carbonauta')} · ${fmtTime(notifMillis(n))}</div></div></div>`).join('');
+  list.querySelectorAll('.notify-item').forEach(el=>el.onclick=()=>openNotification(el.dataset.nid));
+}
+async function openNotification(id){
+  const n=state.notifications.find(x=>x.id===id);if(!n)return;
+  try{await FB().updateDoc(FB().doc(window.db,'rede_notifications',id),{read:true,readAt:FB().serverTimestamp()})}catch(e){console.warn(e)}
+  closeOverlay('notifyOverlay');switchView('mural');
+}
+async function markAllNotificationsRead(){
+  const unread=state.notifications.filter(n=>!n.read);if(!unread.length){toast('Não há notificações novas.');return}
+  try{const f=FB(),batch=f.writeBatch(window.db);unread.forEach(n=>batch.update(f.doc(window.db,'rede_notifications',n.id),{read:true,readAt:f.serverTimestamp()}));await batch.commit();toast('Notificações marcadas como lidas.')}catch(e){console.error(e);toast('Não foi possível marcar as notificações.')}
+}
+async function requestDeviceNotifications(){
+  if(!('Notification' in window)){toast('Este navegador não oferece notificações do dispositivo.');return}
+  try{const p=await Notification.requestPermission();updateNotificationPermissionHint();toast(p==='granted'?'Notificações do dispositivo ativadas.':'Permissão de notificação não concedida.')}catch(e){console.error(e)}
+}
+function updateNotificationPermissionHint(){
+  const el=$('#notifyPermissionHint');if(!el)return;
+  if(!('Notification' in window)){el.textContent='Este navegador não oferece notificações nativas.';return}
+  const p=Notification.permission;el.textContent=p==='granted'?'✅ Avisos do navegador ativados enquanto o Carbonautas estiver aberto ou em execução.':p==='denied'?'⚠️ As notificações foram bloqueadas no navegador. Libere nas permissões do site.':'Ative para receber um aviso do navegador quando chegar uma nova mensagem.';
+}
+function showDeviceNotification(n){
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  if(document.visibilityState==='visible'&&currentView==='mural')return;
+  try{const note=new Notification(n.title||'Carbonautas',{body:n.message||'Nova mensagem no Mural',icon:'./icons/icon-192.png',badge:'./icons/icon-192.png',tag:'carbonautas-'+(n.sourceId||n.id)});note.onclick=()=>{window.focus();switchView('mural');note.close()}}catch(e){console.warn('Notificação nativa falhou',e)}
+}
+async function createMuralNotifications(dest,meta={}){
+  const me=currentActor();if(!me?.id)return;
+  let ids=dest&&dest!=='all'?[dest]:state.members.filter(m=>m.id!==me.id&&m.status!=='inativo').map(m=>m.id);
+  ids=[...new Set(ids.filter(Boolean))];if(!ids.length)return;
+  const f=FB(),batch=f.writeBatch(window.db);
+  ids.forEach(recipientId=>{const ref=f.doc(f.collection(window.db,'rede_notifications'));batch.set(ref,{recipientId,senderId:me.id,senderUid:window.auth.currentUser?.uid||'',senderName:me.name||'',kind:meta.kind||'atualizacao',title:meta.title||'Nova mensagem no Mural',message:(meta.message||'').slice(0,240),sourceType:meta.sourceType||'mural',sourceId:meta.sourceId||'',read:false,ts:f.serverTimestamp()})});
+  await batch.commit();
+}
+function populatePostDest(){const sel=$('#postDest');if(!sel)return;const cur=sel.value||'all';sel.innerHTML='<option value="all">🔔 Todo o grupo</option>'+state.members.filter(m=>m.status!=='inativo').sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');sel.value=[...sel.options].some(o=>o.value===cur)?cur:'all'}
+
 /* ============ RECADO (WhatsApp) ============ */
 function openRecado(){
   const sel=$('#rDest');
@@ -3522,12 +3609,13 @@ async function sendRecado(){
   const para = dest==='all' ? null : dest;
   const prioridade = $('#rPrioridade').value;
   try{
-    await fbAddChat({
+    const ref=await FB().addDoc(FB().collection(window.db,'rede_chat'),{
       tipo:'recado', text: msg, author, authorId: myId||null, authorUid: window.auth.currentUser?.uid||'', authorFoto: me?me.foto||'':'', authorColor,
       para, paraNome: para? (memberById(para)?.nome||'') : '', prioridade, ts: FB().serverTimestamp()
     });
+    try{await createMuralNotifications(dest,{kind:'recado',title:para?'Recado direto de '+author:'Recado para o grupo',message:msg,sourceType:'recado',sourceId:ref.id})}catch(ne){console.warn('Recado publicado, notificação falhou:',ne);toast('Recado publicado, mas o Firebase bloqueou a notificação.')}
     closeOverlay('recadoOverlay');
-    toast(para?'Recado publicado para '+(memberById(para)?.nome||'')+'.':'Recado publicado para o grupo.');
+    toast(para?'Recado publicado e '+(memberById(para)?.nome||'')+' foi notificado.':'Recado publicado e o grupo foi notificado.');
   }catch(e){ console.error(e); toast('Erro ao publicar. Verifique a conexão.'); }
 }
 function copyRecado(){
@@ -3609,6 +3697,9 @@ if($('#peopleAddBtn')) $('#peopleAddBtn').onclick=()=>{closeOverlay('peopleOverl
 if($('#peopleSearch')) $('#peopleSearch').oninput=renderPeopleManager;
 if($('#peopleDedupeBtn')) $('#peopleDedupeBtn').onclick=dedupeMembers;
 $('#recadoBtn').onclick=openRecado;
+$('#notifyBtn').onclick=()=>{renderNotificationUI();updateNotificationPermissionHint();openOverlay('notifyOverlay')};
+$('#enableDeviceNotifications').onclick=requestDeviceNotifications;
+$('#markAllNotifications').onclick=markAllNotificationsRead;
 $('#saveMember').onclick=saveMember;
 $('#deleteMember').onclick=deleteMember;
 $('#mHub').onchange=e=>{$('#mHubMotivo').style.display=e.target.checked?'block':'none'};
