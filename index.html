@@ -4,18 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Carbonautas · LIPAN LEFA CELBE · v7</title>
-<meta name="theme-color" content="#071827">
-<meta name="application-name" content="Carbonautas">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Carbonautas">
-<meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="./manifest.webmanifest">
-<link rel="icon" href="./favicon.ico" sizes="any">
-<link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16.png">
-<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
-
+<link rel="icon" href="./favicon.ico">
+<meta name="theme-color" content="#08152B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
@@ -400,6 +391,9 @@
   .lb-del{margin-top:12px;border:1px solid rgba(255,120,110,.5);background:transparent;color:#ffb3aa;border-radius:10px;padding:7px 14px;font-size:12.5px;font-weight:600}
 
 
+
+  .photo-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.photo-pill{font-size:10.5px;font-weight:800;border-radius:20px;padding:3px 8px;background:#EAF6FF;color:#075985;border:1px solid #BFE6FF}.photo-pill.date{background:#FFF0D8;color:#8A4F00;border-color:#FFD08A}.photo-pill.print{background:#F2E9FF;color:#6D28A8;border-color:#D8C1FF}.photo-action{font-size:11.5px;line-height:1.45;margin-top:7px;color:var(--ink-2);white-space:pre-wrap}.paste-zone{border:2px dashed #7D5CFF;border-radius:14px;padding:14px;text-align:center;background:linear-gradient(135deg,#F7F3FF,#EEF9FF);color:#4B3F72;font-size:12px;font-weight:700;cursor:pointer;outline:none}.paste-zone:focus,.paste-zone.drag{border-color:#00A6C7;box-shadow:0 0 0 4px rgba(0,166,199,.12);background:#ECFCFF}.paste-zone small{display:block;font-weight:500;color:var(--ink-3);margin-top:4px}
+
   /* ===== Acompanhamento profissional ===== */
   .track-scroll,.feed-scroll{flex:1;overflow-y:auto}
   .track-wrap,.feed-wrap{max-width:1040px;margin:0 auto;padding:26px 22px 60px}
@@ -431,7 +425,7 @@
   .feed-body{padding:4px 15px 12px}.feed-title{font-family:'Fraunces';font-size:18px;font-weight:600;margin-bottom:5px}.feed-text{font-size:13.5px;line-height:1.55;white-space:pre-wrap;color:var(--ink)}
   .feed-image{width:100%;max-height:520px;object-fit:cover;display:block;background:var(--panel)}
   .feed-attachment{margin-top:10px;border:1px solid var(--line);border-radius:11px;padding:10px 12px;display:flex;gap:9px;align-items:center;text-decoration:none;color:var(--ink);font-size:12.5px;font-weight:600;background:var(--panel)}
-  .social-wrap{border-top:1px solid var(--line-2);position:relative}.social-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 12px 3px;color:var(--ink-3);font-size:11.5px;min-height:26px}.social-summary .sum-left{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.social-summary .sum-right{white-space:nowrap}.social-bar{display:flex;align-items:center;gap:5px;padding:6px 9px 9px;position:relative}.react-btn,.comment-toggle{border:1px solid transparent;background:transparent;border-radius:11px;padding:8px 11px;font-size:12px;font-weight:700;color:var(--ink-2);display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;cursor:pointer;transition:.15s ease}.react-btn:hover,.comment-toggle:hover{background:var(--panel);border-color:var(--line)}.react-btn.on{background:#E7F2FF;border-color:#9BCBFF;color:#0A5EA8}.react-btn.heart.on{background:#E8F4FF;border-color:#7CC4FF;color:#0067B8}.react-btn.party.on{background:#FFF0D6;border-color:#FFC563;color:#9C5B00}.comment-toggle.on{background:#F1F4F7;border-color:var(--line);color:var(--ink)}.social-spacer{flex:1}.react-emoji{font-size:16px;line-height:1}.react-count{font-variant-numeric:tabular-nums}.emoji-burst-layer{position:fixed;inset:0;pointer-events:none;z-index:2147483647;overflow:hidden}.emoji-burst{position:absolute;pointer-events:none;line-height:1;will-change:transform,opacity;animation:emojiFloat 1.18s cubic-bezier(.17,.74,.28,1) forwards;filter:drop-shadow(0 4px 7px rgba(0,0,0,.22))}@keyframes emojiFloat{0%{opacity:0;transform:translate(-50%,-35%) scale(.45) rotate(0deg)}10%{opacity:1;transform:translate(-50%,-50%) scale(1.05) rotate(0deg)}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% - var(--dy))) scale(var(--scale)) rotate(var(--rot))}}@media (max-width:650px){.social-bar{display:grid;grid-template-columns:repeat(4,1fr)}.react-btn,.comment-toggle{padding:8px 5px;font-size:11px}.social-summary{font-size:10.5px}}@media (prefers-reduced-motion:reduce){.emoji-burst{display:none}}
+  .social-wrap{border-top:1px solid var(--line-2);position:relative}.social-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 12px 3px;color:var(--ink-3);font-size:11.5px;min-height:26px}.social-summary .sum-left{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.social-summary .sum-right{white-space:nowrap}.social-bar{display:flex;align-items:center;gap:5px;padding:6px 9px 9px;position:relative}.react-btn,.comment-toggle{border:1px solid transparent;background:transparent;border-radius:11px;padding:8px 11px;font-size:12px;font-weight:700;color:var(--ink-2);display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:36px;cursor:pointer;transition:.15s ease}.react-btn:hover,.comment-toggle:hover{background:var(--panel);border-color:var(--line)}.react-btn.on{background:#E7F2FF;border-color:#9BCBFF;color:#0A5EA8}.react-btn.heart.on{background:#E8F4FF;border-color:#7CC4FF;color:#0067B8}.react-btn.party.on{background:#FFF0D6;border-color:#FFC563;color:#9C5B00}.react-btn.dislike.on{background:#F4E8FF;border-color:#B57CFF;color:#6D28A8}.comment-toggle.on{background:#F1F4F7;border-color:var(--line);color:var(--ink)}.social-spacer{flex:1}.react-emoji{font-size:16px;line-height:1}.react-count{font-variant-numeric:tabular-nums}.emoji-burst-layer{position:fixed;inset:0;pointer-events:none;z-index:2147483647;overflow:hidden}.emoji-burst{position:absolute;pointer-events:none;line-height:1;will-change:transform,opacity;animation:emojiFloat var(--dur,3.2s) cubic-bezier(.16,.72,.22,1) forwards;filter:drop-shadow(0 8px 14px rgba(0,0,0,.28)) drop-shadow(0 0 12px rgba(255,255,255,.35))}@keyframes emojiFloat{0%{opacity:0;transform:translate(-50%,0) scale(.55) rotate(0deg)}10%{opacity:1;transform:translate(-50%,-15%) scale(1.15) rotate(0deg)}72%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-1 * var(--dy))) scale(var(--scale)) rotate(var(--rot))}}@media (max-width:650px){.social-bar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.react-btn,.comment-toggle{padding:9px 6px;font-size:11px}.comment-toggle{grid-column:1/-1}.social-summary{font-size:10.5px}}@media (prefers-reduced-motion:reduce){.emoji-burst{display:none}}
   .comments{border-top:1px solid var(--line-2);padding:10px 14px 13px}.comment{display:flex;gap:8px;margin:8px 0}.comment-av{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:#fff;font-size:9px;font-weight:700;flex:0 0 auto}.comment-b{background:var(--panel);border-radius:11px;padding:7px 10px;min-width:0}.comment-name{font-size:10.5px;font-weight:700}.comment-text{font-size:12.5px;line-height:1.4;white-space:pre-wrap}.comment-form{display:flex;gap:7px;margin-top:9px}.comment-form input{flex:1;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12.5px;outline:0}.comment-form input:focus{border-color:var(--petrol)}
   .feed-side{position:sticky;top:14px}.side-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}.side-card h3{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-3);margin:0 0 10px}.side-stat{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--line-2)}.side-stat:last-child{border-bottom:0}.side-stat b{font-family:'Space Grotesk'}
   @media(max-width:900px){.feed-layout{grid-template-columns:1fr}.feed-side{position:static;display:grid;grid-template-columns:1fr 1fr;gap:10px}.side-card{margin:0}}
@@ -760,6 +754,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
       <input id="search" placeholder="Buscar pessoa, tema ou linha">
     </div>
+    <button class="btn" id="installPwaBtn" type="button" title="Instalar Carbonautas neste dispositivo">⬇ <span class="bl">Instalar</span></button>
     <button class="id-chip" id="idChip" title="Identificar-se">
       <span class="av" id="idAv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
       <span id="idName">Quem é você?</span>
@@ -943,7 +938,7 @@
         <div class="view-head">
           <div>
             <h2>Fotos do grupo</h2>
-            <div class="sub">Campo, laboratório, defesas e eventos. Qualquer membro pode enviar.</div>
+            <div class="sub">Fotos e prints de campo, laboratório, eventos e ações — vinculados ao projeto, data e atividade realizada.</div>
           </div>
           <div class="spacer"></div>
           <button class="btn primary" id="addPhotoBtn">
@@ -1124,7 +1119,6 @@
       <div class="access-note">Sua identidade vem do Firebase Authentication. Você só pode editar o que pertence ao seu perfil; o coordenador administra a plataforma.</div>
     </div>
     <div class="modal-f">
-      <button class="btn primary" id="installAppBtn" type="button" style="display:none">Instalar Carbonautas</button>
       <button class="btn" id="accountRepairBtn">Corrigir vínculo</button>
       <button class="btn" id="accountResetBtn">Redefinir senha</button>
       <button class="btn danger" id="accountLogoutBtn">Sair</button>
@@ -1225,27 +1219,29 @@
 
 <!-- PHOTO MODAL -->
 <div class="overlay" id="photoOverlay">
-  <div class="modal" style="max-width:440px">
-    <div class="modal-h"><h2>Enviar foto</h2><div class="spacer"></div><button class="btn ghost" data-close="photoOverlay">Fechar</button></div>
+  <div class="modal" style="max-width:560px">
+    <div class="modal-h"><h2>Enviar foto ou print</h2><div class="spacer"></div><button class="btn ghost" data-close="photoOverlay">Fechar</button></div>
     <div class="modal-b">
+      <div class="grid2"><div class="fg"><label>Tipo</label><select id="gTipoImagem"><option value="foto">📷 Foto</option><option value="print">🖥️ Print / captura de tela</option></select></div><div class="fg"><label>Data da realização</label><input id="gData" type="date"></div></div>
+      <div class="fg"><label>Projeto vinculado</label><select id="gProjeto"></select></div>
+      <div class="fg" id="gProjetoOutroRow" style="display:none"><label>Outro projeto</label><input id="gProjetoOutro" placeholder="Nome do projeto"></div>
+      <div class="fg"><label>Um pouco da ação realizada</label><textarea id="gAcao" style="min-height:90px" placeholder="O que estava sendo feito? Onde? Qual atividade ou resultado aparece na imagem?"></textarea></div>
       <div class="fg">
         <label>Imagem</label>
         <div class="photo-pick">
-          <div class="photo-prev" id="gPrev" style="width:90px;height:90px">sem foto</div>
+          <div class="photo-prev" id="gPrev" style="width:105px;height:105px">sem imagem</div>
           <div style="flex:1">
-            <button class="btn" id="gPickBtn" style="width:100%;justify-content:center">Escolher arquivo</button>
+            <button class="btn" id="gPickBtn" style="width:100%;justify-content:center">Escolher foto ou print</button>
             <input type="file" id="gFile" accept="image/*" style="display:none">
-            <p class="hint" style="margin:8px 0 0">A imagem é redimensionada e enviada para o armazenamento do grupo.</p>
+            <p class="hint" style="margin:8px 0 0">Aceita JPG, PNG, WEBP e capturas de tela.</p>
           </div>
         </div>
       </div>
-      <div class="fg"><label>Legenda (opcional)</label><input id="gCap" placeholder="Ex.: Coleta no rio Paraguai, jun 2026"></div>
-      <div class="fg"><label>Enviada por</label><input id="gAutor" placeholder="Seu nome"></div>
+      <div class="paste-zone" id="gPasteZone" tabindex="0">📋 Cole um print aqui com Ctrl+V<small>ou arraste uma imagem para esta área</small></div>
+      <div class="fg"><label>Legenda (opcional)</label><input id="gCap" placeholder="Ex.: Coleta no rio Paraguai"></div>
+      <div class="fg"><label>Enviada por</label><input id="gAutor" placeholder="Seu nome" readonly></div>
     </div>
-    <div class="modal-f">
-      <button class="btn" data-close="photoOverlay">Cancelar</button>
-      <button class="btn primary" id="savePhotoBtn">Publicar</button>
-    </div>
+    <div class="modal-f"><button class="btn" data-close="photoOverlay">Cancelar</button><button class="btn primary" id="savePhotoBtn">Publicar</button></div>
   </div>
 </div>
 
@@ -1788,7 +1784,8 @@ function socialFor(targetType,targetId){
     rs,cs,
     likes:rs.filter(r=>r.type==='like').length,
     hearts:rs.filter(r=>r.type==='heart').length,
-    parties:rs.filter(r=>r.type==='party').length
+    parties:rs.filter(r=>r.type==='party').length,
+    dislikes:rs.filter(r=>r.type==='dislike').length
   };
 }
 function myReaction(targetType,targetId){
@@ -1797,37 +1794,31 @@ function myReaction(targetType,targetId){
 }
 function burstReaction(btn,emoji){
   let layer=document.getElementById('emojiBurstLayer');
-  if(!layer){
-    layer=document.createElement('div');
-    layer.id='emojiBurstLayer';
-    layer.className='emoji-burst-layer';
-    document.body.appendChild(layer);
-  }
-
-  // Origem fixa: centro inferior da tela.
-  const cx=window.innerWidth/2;
-  const cy=window.innerHeight*0.84;
-  const n=18;
-
+  if(!layer){layer=document.createElement('div');layer.id='emojiBurstLayer';layer.className='emoji-burst-layer';document.body.appendChild(layer)}
+  const cx=window.innerWidth/2, cy=window.innerHeight*0.88;
+  const packs={
+    '👍':['👍','👍','✨','⭐'],
+    '💙':['💙','💙','✨','💫'],
+    '🎉':['🎉','🥳','🎊','✨'],
+    '🤨':['🤨','👀','😬','✨']
+  };
+  const pool=packs[emoji]||[emoji,'✨'];
+  const n=30;
   for(let i=0;i<n;i++){
-    const e=document.createElement('span');
-    e.className='emoji-burst';
-    e.textContent=emoji;
-    e.style.left=(cx+(Math.random()*110-55))+'px';
-    e.style.top=(cy+(Math.random()*28-14))+'px';
-    e.style.fontSize=(27+Math.random()*18).toFixed(0)+'px';
-    e.style.setProperty('--dx',(Math.random()*300-150).toFixed(0)+'px');
-    e.style.setProperty('--dy',(180+Math.random()*260).toFixed(0)+'px');
-    e.style.setProperty('--rot',(Math.random()*120-60).toFixed(0)+'deg');
-    e.style.setProperty('--scale',(1.00+Math.random()*.85).toFixed(2));
-    e.style.animationDelay=(i*18)+'ms';
-    layer.appendChild(e);
-    setTimeout(()=>e.remove(),1700);
+    const e=document.createElement('span');e.className='emoji-burst';e.textContent=pool[Math.floor(Math.random()*pool.length)];
+    e.style.left=(cx+(Math.random()*180-90))+'px';e.style.top=(cy+(Math.random()*45-22))+'px';
+    e.style.fontSize=(38+Math.random()*34).toFixed(0)+'px';
+    e.style.setProperty('--dx',(Math.random()*520-260).toFixed(0)+'px');
+    e.style.setProperty('--dy',(320+Math.random()*330).toFixed(0)+'px');
+    e.style.setProperty('--rot',(Math.random()*220-110).toFixed(0)+'deg');
+    e.style.setProperty('--scale',(1.15+Math.random()*1.05).toFixed(2));
+    e.style.setProperty('--dur',(2.7+Math.random()*1.35).toFixed(2)+'s');
+    e.style.animationDelay=(i*35)+'ms';layer.appendChild(e);setTimeout(()=>e.remove(),4700);
   }
 }
 async function toggleReaction(targetType,targetId,type,btn){
   if(!window.auth?.currentUser){toast('Entre na sua conta para reagir.');return}
-  const emoji=type==='heart'?'💙':type==='party'?'🎉':'👍';
+  const emoji=type==='heart'?'💙':type==='party'?'🎉':type==='dislike'?'🤨':'👍';
   const f=FB(),uid=window.auth.currentUser.uid;
   const id=`${targetType}_${targetId}_${uid}`.replace(/[^a-zA-Z0-9_-]/g,'_');
   const ref=f.doc(window.db,'rede_feed_reactions',id),cur=myReaction(targetType,targetId),actor=currentActor();
@@ -2993,26 +2984,20 @@ async function deleteChatMsg(id){
 /* ============ FOTOS ============ */
 function renderFotos(){
   const gal=$('#gallery'), empty=$('#fotosEmpty');
-  if(!state.photos.length){ gal.innerHTML=''; empty.style.display='block'; return; }
+  if(!state.photos.length){gal.innerHTML='';empty.style.display='block';return}
   empty.style.display='none';
-  gal.innerHTML=state.photos.map(p=>`
-    <div class="ph" data-id="${p.id}">
-      <img src="${esc(p.url)}" alt="${esc(p.legenda||'')}" loading="lazy">
-      ${(p.legenda||p.autor)?`<div class="ph-cap">${esc(p.legenda||'')}${p.autor?`<span class="by">por ${esc(p.autor)}</span>`:''}</div>`:''}
-      <div class="ph-social">${(()=>{const ss=socialFor('photo',p.id),mr=myReaction('photo',p.id);return `<button class="${mr?.type==='like'?'on':''}" data-react="like" title="Topizera">👍 ${ss.likes||''}</button><button class="${mr?.type==='heart'?'on':''}" data-react="heart" title="Qui linduuu!">💙 ${ss.hearts||''}</button><button class="${mr?.type==='party'?'on':''}" data-react="party" title="Agó, xaí esse!">🎉 ${ss.parties||''}</button><button data-comments title="fala ae xomano(a)">💬 ${ss.cs.length||''}</button>`})()}</div>
-    </div>`).join('');
-  gal.querySelectorAll('.ph').forEach(el=>{
-    el.onclick=e=>{
-      const rb=e.target.closest('[data-react]'); if(rb){e.stopPropagation();toggleReaction('photo',el.dataset.id,rb.dataset.react,rb);return}
-      openLightbox(el.dataset.id);
-    };
-  });
+  gal.innerHTML=state.photos.map(p=>{
+    const ss=socialFor('photo',p.id),mr=myReaction('photo',p.id);
+    const meta=[p.projeto?`<span class="photo-pill">📌 ${esc(p.projeto)}</span>`:'',p.dataRealizacao?`<span class="photo-pill date">📅 ${fmtDate(p.dataRealizacao)}</span>`:'',p.tipoImagem==='print'?'<span class="photo-pill print">🖥️ Print</span>':''].filter(Boolean).join('');
+    return `<div class="ph" data-id="${p.id}"><img src="${esc(p.url)}" alt="${esc(p.legenda||p.acao||'')}" loading="lazy"><div class="ph-cap">${p.legenda?`<div>${esc(p.legenda)}</div>`:''}${meta?`<div class="photo-meta">${meta}</div>`:''}${p.acao?`<div class="photo-action">${esc(p.acao)}</div>`:''}${p.autor?`<span class="by">por ${esc(p.autor)}</span>`:''}</div><div class="ph-social"><button class="${mr?.type==='like'?'on':''}" data-react="like" title="Topizera">👍 ${ss.likes||''}</button><button class="${mr?.type==='heart'?'on':''}" data-react="heart" title="Qui linduuu!">💙 ${ss.hearts||''}</button><button class="${mr?.type==='party'?'on':''}" data-react="party" title="Agó, xaí esse!">🎉 ${ss.parties||''}</button><button class="${mr?.type==='dislike'?'on':''}" data-react="dislike" title="Agó, çei não ein!">🤨 ${ss.dislikes||''}</button><button data-comments title="fala ae xomano(a)">💬 ${ss.cs.length||''}</button></div></div>`
+  }).join('');
+  gal.querySelectorAll('.ph').forEach(el=>{el.onclick=e=>{const rb=e.target.closest('[data-react]');if(rb){e.stopPropagation();toggleReaction('photo',el.dataset.id,rb.dataset.react,rb);return}openLightbox(el.dataset.id)}});
 }
 function openLightbox(id){
   const p=state.photos.find(x=>x.id===id); if(!p)return;
   lbPhotoId=id;
   $('#lbImg').src=p.url;
-  $('#lbCap').innerHTML=`${esc(p.legenda||'')}${p.autor?`<div class="by">por ${esc(p.autor)}</div>`:''}`;
+  $('#lbCap').innerHTML=`${p.legenda?`<div style="font-size:16px;font-weight:800">${esc(p.legenda)}</div>`:''}${p.projeto?`<div style="margin-top:8px">📌 <b>${esc(p.projeto)}</b></div>`:''}${p.dataRealizacao?`<div>📅 ${fmtDate(p.dataRealizacao)}</div>`:''}${p.acao?`<div style="margin-top:8px;white-space:pre-wrap">${esc(p.acao)}</div>`:''}${p.autor?`<div class="by" style="margin-top:8px">por ${esc(p.autor)}</div>`:''}`;
   $('#lbDel').style.display=(isAdmin || (myName && p.autor===myName) || (myId && p.autorId===myId)) ? 'inline-flex':'none';
   renderLightboxSocial();
   $('#lightbox').classList.add('open');
@@ -3029,42 +3014,52 @@ async function deleteLightboxPhoto(){
   }catch(e){ console.error(e); toast('Erro ao remover.'); }
 }
 let photoFoto='';
+function photoProjectChoices(){
+  const vals=[];
+  state.members.forEach(m=>{if(m.tema)vals.push(m.tema)});
+  state.publicacoes.forEach(x=>{if(x.categoria==='projeto'&&(x.titulo||x.nome))vals.push(x.titulo||x.nome)});
+  state.feed.forEach(x=>{if(x.kind==='projeto'&&x.title)vals.push(x.title)});
+  return [...new Set(vals.map(v=>(v||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+}
+function refreshPhotoProjects(){
+  const sel=$('#gProjeto');if(!sel)return;const choices=photoProjectChoices();
+  sel.innerHTML='<option value="">Sem projeto específico</option>'+choices.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')+'<option value="__outro">Outro projeto…</option>';
+  const me=memberById(myId);if(me?.tema&&choices.includes(me.tema))sel.value=me.tema;
+  $('#gProjetoOutroRow').style.display=sel.value==='__outro'?'block':'none';
+}
 function openPhotoModal(){
   if(!myId){toast('Identifique-se como um Carbonauta para enviar fotos.');openIdentity();return}
-  photoFoto='';
-  $('#gPrev').textContent='sem foto'; $('#gPrev').innerHTML='sem foto';
-  $('#gCap').value='';
-  const me=memberById(myId);
-  $('#gAutor').value= me?me.nome:''; $('#gAutor').readOnly=true;
-  openOverlay('photoOverlay');
+  photoFoto='';$('#gPrev').innerHTML='sem imagem';$('#gCap').value='';$('#gAcao').value='';$('#gTipoImagem').value='foto';$('#gData').value=new Date().toISOString().slice(0,10);$('#gProjetoOutro').value='';
+  refreshPhotoProjects();const me=memberById(myId);$('#gAutor').value=me?me.nome:'';$('#gAutor').readOnly=true;openOverlay('photoOverlay');
 }
-function handleGalleryFile(file){
-  if(!file)return;
+function handleGalleryFile(file,fromPaste=false){
+  if(!file||!file.type.startsWith('image/')){toast('Escolha uma imagem ou print.');return}
+  if(fromPaste) $('#gTipoImagem').value='print';
   const reader=new FileReader();
   reader.onload=e=>{
     const img=new Image();
     img.onload=()=>{
-      const max=1280, sc=Math.min(1,max/Math.max(img.width,img.height));
-      const c=document.createElement('canvas'); c.width=img.width*sc; c.height=img.height*sc;
+      const max=1600;
+      const sc=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');
+      c.width=Math.max(1,Math.round(img.width*sc));
+      c.height=Math.max(1,Math.round(img.height*sc));
       c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      photoFoto=c.toDataURL('image/jpeg',0.85);
+      const usePng=fromPaste||file.type==='image/png'||$('#gTipoImagem').value==='print';
+      photoFoto=usePng ? c.toDataURL('image/png') : c.toDataURL('image/jpeg',.88);
       $('#gPrev').innerHTML=`<img src="${photoFoto}" style="width:100%;height:100%;object-fit:cover;border-radius:14px">`;
+      $('#gPasteZone').innerHTML=fromPaste
+        ? '✅ Print colado com sucesso<small>Você pode colar outro para substituir</small>'
+        : '✅ Imagem pronta<small>Você pode arrastar ou colar outra para substituir</small>';
     };
     img.src=e.target.result;
   };
   reader.readAsDataURL(file);
 }
 async function savePhoto(){
-  if(!photoFoto){toast('Escolha uma imagem.');return}
-  try{
-    toast('Enviando foto…');
-    const {url,path}=await fbUploadImage('galeria',photoFoto);
-    await FB().addDoc(FB().collection(window.db,'rede_photos'),{
-      url, storagePath:path, legenda:$('#gCap').value.trim(), autor:$('#gAutor').value.trim(),
-      autorId: myId||null, authorUid: window.auth.currentUser?.uid||'', ts: FB().serverTimestamp()
-    });
-    closeOverlay('photoOverlay'); toast('Foto publicada.');
-  }catch(e){ console.error(e); toast('Erro ao enviar a foto.'); }
+  if(!photoFoto){toast('Escolha uma foto ou cole um print.');return}
+  const projeto=$('#gProjeto').value==='__outro'?$('#gProjetoOutro').value.trim():$('#gProjeto').value;
+  try{toast('Enviando imagem…');const {url,path}=await fbUploadImage('galeria',photoFoto);await FB().addDoc(FB().collection(window.db,'rede_photos'),{url,storagePath:path,legenda:$('#gCap').value.trim(),projeto,acao:$('#gAcao').value.trim(),dataRealizacao:$('#gData').value,tipoImagem:$('#gTipoImagem').value,autor:$('#gAutor').value.trim(),autorId:myId||null,authorUid:window.auth.currentUser?.uid||'',ts:FB().serverTimestamp()});closeOverlay('photoOverlay');toast('Imagem publicada.')}catch(e){console.error(e);toast('Erro ao enviar a imagem.')}
 }
 
 /* ============ PUBLICAÇÕES ============ */
@@ -3319,10 +3314,10 @@ function toggleComments(targetType,targetId){
   if(!open)setTimeout(()=>$('#comment_'+targetType+'_'+targetId)?.focus(),30);
 }
 function socialBar(targetType,targetId){
-  const s=socialFor(targetType,targetId),mine=myReaction(targetType,targetId),total=s.likes+s.hearts+s.parties;
-  const left=[s.likes?`👍 ${s.likes}`:'',s.hearts?`💙 ${s.hearts}`:'',s.parties?`🎉 ${s.parties}`:''].filter(Boolean).join(' · ');
+  const s=socialFor(targetType,targetId),mine=myReaction(targetType,targetId),total=s.likes+s.hearts+s.parties+s.dislikes;
+  const left=[s.likes?`👍 ${s.likes}`:'',s.hearts?`💙 ${s.hearts}`:'',s.parties?`🎉 ${s.parties}`:'',s.dislikes?`🤨 ${s.dislikes}`:''].filter(Boolean).join(' · ');
   const summary=(total||s.cs.length)?`<div class="social-summary"><span class="sum-left">${left||'Sem reações ainda'}</span><span class="sum-right">${s.cs.length?`${s.cs.length} comentário${s.cs.length===1?'':'s'}`:''}</span></div>`:'';
-  return `<div class="social-wrap">${summary}<div class="social-bar"><button type="button" class="react-btn ${mine?.type==='like'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','like',this)" aria-label="Topizera"><span class="react-emoji">👍</span><span>Topizera</span>${s.likes?`<span class="react-count">${s.likes}</span>`:''}</button><button type="button" class="react-btn heart ${mine?.type==='heart'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','heart',this)" aria-label="Qui linduuu!"><span class="react-emoji">💙</span><span>Qui linduuu!</span>${s.hearts?`<span class="react-count">${s.hearts}</span>`:''}</button><button type="button" class="react-btn party ${mine?.type==='party'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','party',this)" aria-label="Agó, xaí esse!"><span class="react-emoji">🎉</span><span>Agó, xaí esse!</span>${s.parties?`<span class="react-count">${s.parties}</span>`:''}</button><button type="button" class="comment-toggle" onclick="toggleComments('${targetType}','${targetId}')"><span class="react-emoji">💬</span><span>fala ae xomano(a)</span>${s.cs.length?`<span class="react-count">${s.cs.length}</span>`:''}</button></div></div>`
+  return `<div class="social-wrap">${summary}<div class="social-bar"><button type="button" class="react-btn ${mine?.type==='like'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','like',this)"><span class="react-emoji">👍</span><span>Topizera</span>${s.likes?`<span class="react-count">${s.likes}</span>`:''}</button><button type="button" class="react-btn heart ${mine?.type==='heart'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','heart',this)"><span class="react-emoji">💙</span><span>Qui linduuu!</span>${s.hearts?`<span class="react-count">${s.hearts}</span>`:''}</button><button type="button" class="react-btn party ${mine?.type==='party'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','party',this)"><span class="react-emoji">🎉</span><span>Agó, xaí esse!</span>${s.parties?`<span class="react-count">${s.parties}</span>`:''}</button><button type="button" class="react-btn dislike ${mine?.type==='dislike'?'on':''}" onclick="toggleReaction('${targetType}','${targetId}','dislike',this)"><span class="react-emoji">🤨</span><span>Agó, çei não ein!</span>${s.dislikes?`<span class="react-count">${s.dislikes}</span>`:''}</button><button type="button" class="comment-toggle" onclick="toggleComments('${targetType}','${targetId}')"><span class="react-emoji">💬</span><span>fala ae xomano(a)</span>${s.cs.length?`<span class="react-count">${s.cs.length}</span>`:''}</button></div></div>`
 }
 function renderFeed(){
   renderFeedSide();const a=currentActor();const av=$('#feedMeAv'); if(av){av.innerHTML=a?.foto?`<img src="${esc(a.foto)}" alt="">`:initials(a?.name||'?');av.style.background=a?.color||'#7c8b90'}
@@ -3531,6 +3526,14 @@ if($('#newPostBtn')) $('#newPostBtn').onclick=openPostModal; if($('#muralPostBtn
 $('#addPhotoBtn').onclick=openPhotoModal;
 $('#gPickBtn').onclick=()=>$('#gFile').click();
 $('#gFile').onchange=e=>handleGalleryFile(e.target.files[0]);
+$('#gProjeto').onchange=e=>{$('#gProjetoOutroRow').style.display=e.target.value==='__outro'?'block':'none'};
+const gPasteZone=$('#gPasteZone');
+if(gPasteZone){
+  gPasteZone.addEventListener('paste',e=>{const item=[...(e.clipboardData?.items||[])].find(x=>x.type?.startsWith('image/'));if(item){e.preventDefault();handleGalleryFile(item.getAsFile(),true)}});
+  gPasteZone.addEventListener('dragover',e=>{e.preventDefault();gPasteZone.classList.add('drag')});
+  gPasteZone.addEventListener('dragleave',()=>gPasteZone.classList.remove('drag'));
+  gPasteZone.addEventListener('drop',e=>{e.preventDefault();gPasteZone.classList.remove('drag');const file=[...(e.dataTransfer?.files||[])].find(x=>x.type.startsWith('image/'));if(file)handleGalleryFile(file,true)});
+}
 $('#savePhotoBtn').onclick=savePhoto;
 $('#lbClose').onclick=closeLightbox;
 $('#lbDel').onclick=deleteLightboxPhoto;
@@ -3579,51 +3582,20 @@ document.addEventListener('click',e=>{
 });
 window.sparkleLogo=sparkleLogo;
 
-
-// PWA / instalação
 let deferredInstallPrompt=null;
-const installBtn=document.getElementById('installAppBtn');
-function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)}
-function isStandalone(){return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true}
-function updateInstallButton(){
-  if(!installBtn)return;
-  if(isStandalone()){installBtn.style.display='none';return}
-  if(deferredInstallPrompt || isIOS()) installBtn.style.display='inline-flex';
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;});
+const installPwaBtn=$('#installPwaBtn');
+if(installPwaBtn){
+  const standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+  if(standalone) installPwaBtn.style.display='none';
+  installPwaBtn.onclick=async()=>{
+    if(deferredInstallPrompt){deferredInstallPrompt.prompt();try{await deferredInstallPrompt.userChoice}catch(_e){}deferredInstallPrompt=null;return}
+    if(/iphone|ipad|ipod/i.test(navigator.userAgent)) alert('No iPhone/iPad: toque em Compartilhar e escolha “Adicionar à Tela de Início”.');
+    else alert('No celular ou PC: abra o menu do navegador e escolha “Instalar app” ou “Adicionar à tela inicial”.');
+  };
+  window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();
-  deferredInstallPrompt=e;
-  updateInstallButton();
-});
-window.addEventListener('appinstalled',()=>{
-  deferredInstallPrompt=null;
-  if(installBtn) installBtn.style.display='none';
-  if(typeof toast==='function') toast('Carbonautas instalado!');
-});
-if(installBtn){
-  installBtn.addEventListener('click',async()=>{
-    if(isStandalone()){toast('O Carbonautas já está instalado.');return}
-    if(deferredInstallPrompt){
-      deferredInstallPrompt.prompt();
-      try{await deferredInstallPrompt.userChoice}catch(_e){}
-      deferredInstallPrompt=null;
-      updateInstallButton();
-      return;
-    }
-    if(isIOS()){
-      alert('No iPhone/iPad: toque em Compartilhar e depois em “Adicionar à Tela de Início”.');
-      return;
-    }
-    alert('No navegador, abra o menu e escolha “Instalar app” ou “Adicionar à tela inicial”.');
-  });
-}
-updateInstallButton();
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('Service Worker:',err));
-  });
-}
-
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
 refreshIdentityUI();
 waitFirebase().then(startAuth);
 </script>
