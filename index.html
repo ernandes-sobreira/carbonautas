@@ -434,25 +434,37 @@
   .lb-social{width:min(700px,92vw);margin-top:10px;background:rgba(255,255,255,.08);border-radius:12px;padding:10px;color:#fff}.lb-social .comment-b{background:rgba(255,255,255,.10)}.lb-social .comment-form input{background:rgba(255,255,255,.95)}
 
   /* Mural social unificado */
-  .mural-flex{max-width:920px}
+  .mural-flex{max-width:1260px}
   .mural-tools{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 4px;border-bottom:1px solid var(--line);background:var(--white)}
   .mural-publish{background:#FF3D6E;border-color:#FF3D6E;color:#fff;font-weight:800;box-shadow:0 5px 18px rgba(255,61,110,.18)}
   .mural-publish:hover{background:#E91E63;border-color:#E91E63}
-  .mural-msgs{gap:10px}
-  .mural-post{width:100%;margin:2px 0 8px;border-left:6px solid var(--indigo)}
-  .mural-chat-card{display:flex;gap:10px;width:min(86%,720px);padding:4px}
-  .mural-chat-card .mav{width:34px;height:34px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:700;overflow:hidden;background:var(--ink-3)}
+  .mural-msgs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;gap:16px;padding:18px 2px 14px}
+  .mural-msgs .day-sep{grid-column:1/-1;justify-self:center;margin:4px 0 -2px}
+  .mural-post{width:100%;margin:0;border-left:7px solid var(--indigo);border-radius:20px;box-shadow:0 10px 24px rgba(7,24,39,.08);height:max-content}
+  .mural-post .feed-head{padding:16px 18px 10px;align-items:flex-start}
+  .mural-post .feed-body{padding:2px 18px 14px}
+  .mural-post .feed-title{font-size:22px;line-height:1.2;margin-bottom:8px}
+  .mural-post .feed-text{font-size:15.5px;line-height:1.65;color:#173247}
+  .mural-post .feed-kind{font-size:11px;padding:6px 10px;border-radius:999px;margin-left:auto}
+  .mural-post .feed-image{max-height:360px;object-fit:cover}
+  .mural-chat-card{display:flex;gap:12px;width:100%;padding:16px 18px;background:linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);border:1px solid #CFE0EB;border-radius:20px;box-shadow:0 10px 24px rgba(7,24,39,.08);height:max-content;position:relative}
+  .mural-chat-card .mav{width:42px;height:42px;border-radius:13px;flex:0 0 auto;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:700;overflow:hidden;background:var(--ink-3)}
   .mural-chat-card .mav img{width:100%;height:100%;object-fit:cover}
-  .mural-chat-card .del{opacity:.35;transition:.12s;border:0;background:transparent;color:var(--ink-3);font-size:13px;cursor:pointer;align-self:center}
+  .mural-chat-card .del{opacity:.38;transition:.12s;border:0;background:transparent;color:var(--ink-3);font-size:15px;cursor:pointer;align-self:flex-start;padding-top:4px}
   .mural-chat-card:hover .del{opacity:1}.mural-chat-card .del:hover{color:var(--red)}
-  .mural-chat-card.mine{align-self:flex-end;flex-direction:row-reverse}
+  .mural-chat-card.mine{align-self:auto;flex-direction:row;border-left:7px solid var(--petrol);background:linear-gradient(180deg,#f7fffe 0%,#f3fbfb 100%)}
   .mural-chat-card .msg-b{flex:1;min-width:0}
-  .mural-chat-card.mine .msg-head{justify-content:flex-end}
-  .mural-chat-card.mine .msg-txt{background:var(--petrol);border-color:var(--petrol);color:#f0fbfa;border-radius:14px 4px 14px 14px}
-  .mural-chat-card .social-bar{border:0;padding:4px 2px 0}
-  .mural-chat-card.mine .social-bar{justify-content:flex-end}
-  .mural-chat-card .comments{border:0;padding:6px 0 0}
+  .mural-chat-card .msg-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+  .mural-chat-card .msg-head .nm{font-size:15px;font-weight:900;color:#10283a}
+  .mural-chat-card .msg-head .tm{font-size:11.5px;color:var(--ink-3)}
+  .mural-chat-card.mine .msg-head{justify-content:flex-start}
+  .mural-chat-card .msg-txt{background:#F6FBFE;border:1px solid #D7E6EF;border-radius:16px;padding:14px 16px;font-size:15.5px;line-height:1.65;color:#173247;white-space:pre-wrap;word-break:break-word}
+  .mural-chat-card.mine .msg-txt{background:#EFFFFC;border-color:#B9E8E1;color:#0F3340;border-radius:16px}
+  .mural-chat-card .social-bar{border:0;padding:8px 0 0;justify-content:flex-start}
+  .mural-chat-card.mine .social-bar{justify-content:flex-start}
+  .mural-chat-card .comments{border:0;padding:8px 0 0}
   .mural-chat-card.mine .comments{text-align:left}
+  .mural-chat-card .mural-chat-label{display:inline-flex;align-items:center;gap:6px;background:#EEF5FA;border:1px solid #D4E0E8;color:#496477;border-radius:999px;padding:5px 9px;margin-bottom:8px}
 
 
   /* Mural direcional — pedidos, alertas e resenha */
@@ -471,8 +483,9 @@
   .mural-chat-label{font-size:10px;font-weight:900;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;margin:0 0 5px}
   .composer-shell{border:1px solid var(--line);border-radius:15px;padding:10px 12px;background:#fff;margin-top:10px}.composer-shell .composer{border:0;padding:0;margin:0}
   .recados-panel{border:1px solid var(--line);border-radius:14px;margin:0 0 12px;background:#fff;overflow:hidden}.recados-head{padding:10px 12px}.recados-body{padding:0 10px 10px}
+  @media(max-width:1100px){.mural-msgs{grid-template-columns:1fr}.mural-flex{max-width:920px}}
   @media(max-width:900px){.mural-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  @media(max-width:520px){.mural-command{padding:14px}.mural-action-grid{grid-template-columns:1fr 1fr;gap:7px}.mural-action{min-height:92px;padding:10px}.mural-action .ma-title{font-size:11.5px}.mural-action .ma-sub{font-size:9.7px}}
+  @media(max-width:520px){.mural-command{padding:14px}.mural-action-grid{grid-template-columns:1fr 1fr;gap:7px}.mural-action{min-height:92px;padding:10px}.mural-action .ma-title{font-size:11.5px}.mural-action .ma-sub{font-size:9.7px}.mural-msgs{gap:12px;padding:14px 0 10px}.mural-post .feed-head{padding:14px 14px 8px}.mural-post .feed-body{padding:2px 14px 12px}.mural-post .feed-title{font-size:19px}.mural-post .feed-text,.mural-chat-card .msg-txt{font-size:14.5px}.mural-chat-card{padding:14px}}
 
   /* Visualizador local de documentos */
   .file-preview-modal .modal-b{overflow:auto;background:#EEF3F8}
