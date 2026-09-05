@@ -506,6 +506,7 @@
   .excel-preview{padding:16px}.excel-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;position:sticky;top:0;background:#EEF3F8;padding:8px 0;z-index:2}.excel-tabs button{border:1px solid #7C3AED;background:#fff;color:#5521B5;border-radius:9px;padding:7px 11px;font-weight:700}.excel-tabs button.on{background:#7C3AED;color:#fff}
   .excel-sheet{overflow:auto;background:#fff;border:1px solid #cfd8df;border-radius:12px;padding:12px}.excel-sheet table{border-collapse:collapse;font-size:12px;white-space:nowrap}.excel-sheet td,.excel-sheet th{border:1px solid #c8d0d8;padding:5px 8px;max-width:360px;overflow:hidden;text-overflow:ellipsis}.excel-sheet tr:first-child{font-weight:700;background:#EDE9FE}
   .preview-loading{height:100%;display:grid;place-items:center;font-weight:700;color:var(--ink-2)}
+  .online-preview-wrap{height:100%;display:flex;flex-direction:column;background:#EEF3F8}.online-preview-note{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 12px;background:#fff;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-2)}.online-preview-note>div{display:flex;gap:6px}.online-preview-wrap .file-preview-frame{flex:1;min-height:0}
 
   /* Modal */
   .overlay{position:fixed;inset:0;background:rgba(16,38,44,.34);backdrop-filter:blur(2px);z-index:50;display:none;align-items:flex-start;justify-content:center;padding:34px 16px;overflow-y:auto}
@@ -2711,7 +2712,21 @@ function sanitizePreviewHtml(html){
   return doc.body.firstElementChild?.innerHTML||'';
 }
 async function previewFetch(url){
-  const r=await fetch(url,{mode:'cors'}); if(!r.ok) throw new Error('Não foi possível carregar o arquivo ('+r.status+').'); return r.arrayBuffer();
+  const r=await fetch(url,{credentials:'omit',cache:'no-store'});
+  if(!r.ok) throw new Error('Não foi possível carregar o arquivo ('+r.status+').');
+  return r.arrayBuffer();
+}
+function onlineViewerHtml(url,name='',service='google'){
+  const safeUrl=encodeURIComponent(url), safeName=esc(name||'Arquivo');
+  const src=service==='office'
+    ? `https://view.officeapps.live.com/op/embed.aspx?src=${safeUrl}`
+    : `https://docs.google.com/gview?embedded=1&url=${safeUrl}`;
+  return `<div class="online-preview-wrap"><div class="online-preview-note"><span>Visualização online de <b>${safeName}</b></span><div><button class="btn" type="button" onclick="switchOnlineViewer('google')">Google</button><button class="btn" type="button" onclick="switchOnlineViewer('office')">Microsoft</button></div></div><iframe class="file-preview-frame" src="${src}" title="${safeName}" referrerpolicy="no-referrer"></iframe></div>`;
+}
+let currentPreviewUrl='', currentPreviewName='';
+function switchOnlineViewer(service='google'){
+  const body=$('#filePreviewBody'); if(!body||!currentPreviewUrl)return;
+  body.innerHTML=onlineViewerHtml(currentPreviewUrl,currentPreviewName,service);
 }
 function showWorkbookSheet(i){
   if(!previewWorkbook||!window.XLSX)return;
@@ -2722,36 +2737,51 @@ function showWorkbookSheet(i){
 }
 async function openFilePreview(url,name='Arquivo'){
   if(!url)return; const ext=inferFileExt(url,name), body=$('#filePreviewBody');
+  currentPreviewUrl=url; currentPreviewName=name||'Arquivo';
   $('#filePreviewTitle').textContent=name||'Visualizar arquivo'; $('#filePreviewOpen').href=url; $('#filePreviewDownload').href=url;
   if(previewObjectUrl){URL.revokeObjectURL(previewObjectUrl);previewObjectUrl=''} previewWorkbook=null;
   body.innerHTML='<div class="preview-loading">Abrindo arquivo…</div>'; openOverlay('filePreviewOverlay');
-  try{
-    const images=['png','jpg','jpeg','webp','gif','svg'];
-    if(ext==='pdf'){
-      const ab=await previewFetch(url); previewObjectUrl=URL.createObjectURL(new Blob([ab],{type:'application/pdf'}));
-      body.innerHTML=`<iframe class="file-preview-frame" src="${previewObjectUrl}" title="${esc(name)}"></iframe>`;
-    }else if(ext==='docx'){
-      if(!window.mammoth) throw new Error('Leitor de Word não carregou.');
+  const images=['png','jpg','jpeg','webp','gif','svg'];
+  if(ext==='pdf'){
+    // PDF: abre diretamente pela URL do Firebase, sem fetch/CORS.
+    body.innerHTML=`<object class="file-preview-frame" data="${esc(url)}#toolbar=1&navpanes=1&view=FitH" type="application/pdf"><iframe class="file-preview-frame" src="${esc(url)}#toolbar=1&navpanes=1&view=FitH" title="${esc(name)}"></iframe></object>`;
+    return;
+  }
+  if(images.includes(ext)){
+    body.innerHTML=`<div class="file-preview-fallback"><img class="file-preview-img" src="${esc(url)}" alt="${esc(name)}"></div>`;
+    return;
+  }
+  if(ext==='docx'){
+    try{
+      if(!window.mammoth) throw new Error('Leitor local indisponível.');
       const ab=await previewFetch(url), result=await window.mammoth.convertToHtml({arrayBuffer:ab});
       body.innerHTML=`<article class="docx-preview">${sanitizePreviewHtml(result.value||'<p>Documento vazio.</p>')}</article>`;
-    }else if(ext==='xlsx'||ext==='xls'){
-      if(!window.XLSX) throw new Error('Leitor de Excel não carregou.');
+    }catch(e){
+      console.warn('Leitor local do Word falhou; usando visualizador online.',e);
+      body.innerHTML=onlineViewerHtml(url,name,'google');
+    }
+    return;
+  }
+  if(ext==='xlsx'||ext==='xls'){
+    try{
+      if(!window.XLSX) throw new Error('Leitor local indisponível.');
       const ab=await previewFetch(url); previewWorkbook=window.XLSX.read(ab,{type:'array'});
       const names=previewWorkbook.SheetNames||[]; if(!names.length) throw new Error('A planilha não contém abas legíveis.');
       body.innerHTML=`<div class="excel-preview"><div class="excel-tabs" id="excelTabs">${names.map((n,i)=>`<button type="button" onclick="showWorkbookSheet(${i})">${esc(n)}</button>`).join('')}</div><div class="excel-sheet" id="excelSheet"></div></div>`;
       showWorkbookSheet(0);
-    }else if(images.includes(ext)){
-      body.innerHTML=`<div class="file-preview-fallback"><img class="file-preview-img" src="${esc(url)}" alt="${esc(name)}"></div>`;
-    }else if(ext==='ppt'||ext==='pptx'){
-      body.innerHTML=`<div class="file-preview-fallback"><div><h3>PowerPoint</h3><p>O navegador não renderiza PowerPoint diretamente com fidelidade. Use “Abrir em nova guia” ou “Baixar”. Word, Excel e PDF agora abrem dentro da plataforma sem depender do visualizador da Microsoft.</p></div></div>`;
-    }else{
-      body.innerHTML=`<div class="file-preview-fallback"><div><h3>Pré-visualização não disponível</h3><p>Use “Abrir em nova guia” ou “Baixar”.</p></div></div>`;
+    }catch(e){
+      console.warn('Leitor local do Excel falhou; usando visualizador online.',e);
+      body.innerHTML=onlineViewerHtml(url,name,'google');
     }
-  }catch(e){
-    console.error(e); body.innerHTML=`<div class="file-preview-fallback"><div><h3>Não foi possível visualizar aqui</h3><p>${esc(e?.message||'Erro ao abrir o arquivo.')}</p><p>O arquivo continua disponível pelos botões “Abrir em nova guia” e “Baixar”.</p></div></div>`;
+    return;
   }
+  if(ext==='ppt'||ext==='pptx'){
+    body.innerHTML=onlineViewerHtml(url,name,'office');
+    return;
+  }
+  body.innerHTML=`<div class="file-preview-fallback"><div><h3>Pré-visualização não disponível</h3><p>Use “Abrir em nova guia” ou “Baixar”.</p></div></div>`;
 }
-window.openFilePreview=openFilePreview; window.showWorkbookSheet=showWorkbookSheet; window.openPeopleManager=openPeopleManager; window.editPersonFromManager=editPersonFromManager; window.removePersonFromManager=removePersonFromManager;
+window.openFilePreview=openFilePreview; window.showWorkbookSheet=showWorkbookSheet; window.switchOnlineViewer=switchOnlineViewer; window.openPeopleManager=openPeopleManager; window.editPersonFromManager=editPersonFromManager; window.removePersonFromManager=removePersonFromManager;
 
 /* Photo upload with downscale -> dataURL (form foto do membro) */
 function handleFile(file){
