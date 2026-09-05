@@ -3077,28 +3077,57 @@ const MURAL_KINDS={
 };
 function muralKindMeta(kind){return MURAL_KINDS[kind]||MURAL_KINDS.atualizacao}
 function muralMatches(item){
-  if(muralFilter==='all')return true;
-  if(item.__type==='recado')return muralFilter==='recado';
-  const k=item.kind||'atualizacao'; if(muralFilter==='ajuda')return k.startsWith('ajuda_'); return k===muralFilter;
+  const filter=muralFilter||'all';
+  if(filter==='all') return true;
+  if(filter==='recado') return item.__type==='recado';
+  if(item.__type!=='post') return false;
+  const k=item.kind||'atualizacao';
+  if(filter==='ajuda') return k.startsWith('ajuda_');
+  return k===filter;
+}
+function muralTime(item){
+  const t=item?.ts;
+  if(t?.toMillis) return t.toMillis();
+  if(t instanceof Date) return t.getTime();
+  if(typeof t==='number') return t;
+  const parsed=Date.parse(t||'');
+  return Number.isFinite(parsed)?parsed:0;
 }
 function renderMural(){
   const wrap=$('#muralMsgs'); if(!wrap)return;
-  const recadoItems=state.chat.filter(isRecado).map(c=>({__type:'recado',...c}));
-  const postItems=state.feed.map(p=>({__type:'post',...p}));
-  const list=[...recadoItems,...postItems].filter(muralMatches).sort((a,b)=>{const ta=a.ts?.toMillis?a.ts.toMillis():+new Date(a.ts||0),tb=b.ts?.toMillis?b.ts.toMillis():+new Date(b.ts||0);return tb-ta});
-  if(!list.length){wrap.innerHTML='<div class="mural-empty">Nada nesta categoria ainda. Use os botões acima para publicar.</div>';return}
+
+  // Normaliza primeiro e só depois filtra. Isso evita uma publicação
+  // desaparecer quando “Tudo” mistura feed + mensagens direcionadas.
+  const recadoItems=state.chat
+    .filter(isRecado)
+    .map(c=>({...c,__type:'recado',__ms:muralTime(c)}));
+  const postItems=state.feed
+    .map(p=>({...p,__type:'post',__ms:muralTime(p)}));
+
+  const allItems=[...postItems,...recadoItems]
+    .sort((a,b)=>(b.__ms||0)-(a.__ms||0));
+  const list=allItems.filter(muralMatches);
+
+  if(!list.length){
+    wrap.innerHTML='<div class="mural-empty">Nada nesta categoria ainda. Use os botões acima para publicar.</div>';
+    wrap.scrollTop=0;
+    return;
+  }
+
   let html='',lastDay=null;
   list.forEach(item=>{
-    const ms=item.ts?.toMillis?item.ts.toMillis():+new Date(item.ts||Date.now()),dl=dayLabel(ms);
+    const ms=item.__ms||Date.now(),dl=dayLabel(ms);
     if(dl!==lastDay){html+=`<div class="day-sep">${dl}</div>`;lastDay=dl}
+
     if(item.__type==='post'){
       const m=memberForAuthor(item.authorId,item.authorName),can=isAdmin||isMe(item.authorId),pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.authorName||'Carbonauta',isImg=item.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(item.fileName||item.fileUrl)||item.mime?.startsWith('image/')),km=muralKindMeta(item.kind),dest=item.para?`<span class="mural-recado-dest">🔔 Para: ${esc(item.paraNome||memberById(item.para)?.nome||'Pessoa')}</span>`:`<span class="mural-recado-dest">🔔 Todo o grupo</span>`;
-      html+=`<article class="feed-card mural-post kind-${km.cls}"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div><div class="feed-author">${esc(nm)}</div><div class="feed-time">${fmtTime(ms)}</div></div><span class="feed-kind kind-${km.cls}">${km.icon} ${esc(km.label)}</span>${dest}${can?`<button class="mini-x" onclick="deleteFeedPost('${item.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${item.title?`<div class="feed-title">${esc(item.title)}</div>`:''}${item.text?`<div class="feed-text">${esc(item.text)}</div>`:''}${item.externalUrl?`<a class="feed-attachment" href="${esc(item.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${item.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(item.fileUrl)}'),decodeURIComponent('${encodeURIComponent(item.fileName||item.title||'Anexo')}'))">👁️ Visualizar · ${esc(item.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(item.fileUrl)}" alt="${esc(item.title||'Foto publicada')}">`:''}${socialBar('post',item.id)}${renderComments('post',item.id)}</article>`;
+      html+=`<article class="feed-card mural-post kind-${km.cls}" data-mural-id="${esc(item.id||'')}" data-mural-type="post"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div><div class="feed-author">${esc(nm)}</div><div class="feed-time">${fmtTime(ms)}</div></div><span class="feed-kind kind-${km.cls}">${km.icon} ${esc(km.label)}</span>${dest}${can?`<button class="mini-x" onclick="deleteFeedPost('${item.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${item.title?`<div class="feed-title">${esc(item.title)}</div>`:''}${item.text?`<div class="feed-text">${esc(item.text)}</div>`:''}${item.externalUrl?`<a class="feed-attachment" href="${esc(item.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${item.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(item.fileUrl)}'),decodeURIComponent('${encodeURIComponent(item.fileName||item.title||'Anexo')}'))">👁️ Visualizar · ${esc(item.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(item.fileUrl)}" alt="${esc(item.title||'Foto publicada')}">`:''}${socialBar('post',item.id)}${renderComments('post',item.id)}</article>`;
     }else{
       const m=memberForAuthor(item.authorId,item.author),can=isAdmin||isMe(item.authorId),pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.author||'Carbonauta',to=item.para?(item.paraNome||memberById(item.para)?.nome||'Pessoa'):'Todo o grupo',prio=item.prioridade||'media';
-      html+=`<article class="mural-recado-card"><div class="mural-recado-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div class="mural-recado-main"><div class="mural-recado-name">${esc(nm)}</div><div class="mural-recado-time">${fmtTime(ms)}</div></div><span class="mural-recado-dest">✈️ Para: ${esc(to)}</span><span class="mural-recado-prio ${prio}">${prio==='alta'?'URGENTE':prio==='baixa'?'Baixa prioridade':'Importante'}</span>${can?`<button class="mini-x" onclick="deleteChatMsg('${item.id}')" title="Excluir">×</button>`:''}</div><div class="mural-recado-text">${esc(item.text)}</div>${socialBar('chat',item.id)}${renderComments('chat',item.id)}</article>`;
+      html+=`<article class="mural-recado-card" data-mural-id="${esc(item.id||'')}" data-mural-type="recado"><div class="mural-recado-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div class="mural-recado-main"><div class="mural-recado-name">${esc(nm)}</div><div class="mural-recado-time">${fmtTime(ms)}</div></div><span class="mural-recado-dest">✈️ Para: ${esc(to)}</span><span class="mural-recado-prio ${prio}">${prio==='alta'?'URGENTE':prio==='baixa'?'Baixa prioridade':'Importante'}</span>${can?`<button class="mini-x" onclick="deleteChatMsg('${item.id}')" title="Excluir">×</button>`:''}</div><div class="mural-recado-text">${esc(item.text)}</div>${socialBar('chat',item.id)}${renderComments('chat',item.id)}</article>`;
     }
-  }); wrap.innerHTML=html;
+  });
+  wrap.innerHTML=html;
 }
 function renderMensagens(){
   const wrap=$('#quickMsgs');if(!wrap)return;const list=state.chat.filter(c=>!isRecado(c));
@@ -3800,7 +3829,7 @@ $('#trackOwner').onchange=renderTrack; $('#trackStatus').onchange=renderTrack; $
 $('#activityProgress').oninput=e=>$('#activityProgressLabel').textContent=e.target.value+'%';
 $('#saveActivityBtn').onclick=saveActivity; $('#deleteActivityBtn').onclick=deleteActivity;
 $('#saveProjectProfileBtn').onclick=saveProjectProfile;
-if($('#newPostBtn')) $('#newPostBtn').onclick=()=>openPostModal('atualizacao'); if($('#muralPostBtn')) $('#muralPostBtn').onclick=()=>openPostModal('atualizacao'); $$('[data-mural-kind]').forEach(b=>b.onclick=()=>openMuralAction(b.dataset.muralKind)); $$('[data-mf]').forEach(b=>b.onclick=()=>{muralFilter=b.dataset.mf;$$('[data-mf]').forEach(x=>x.classList.toggle('on',x===b));renderMural()}); $('#postFilePick').onclick=()=>$('#postFile').click(); $('#postFile').onchange=e=>handlePostFile(e.target.files[0]); $('#savePostBtn').onclick=saveFeedPost;
+if($('#newPostBtn')) $('#newPostBtn').onclick=()=>openPostModal('atualizacao'); if($('#muralPostBtn')) $('#muralPostBtn').onclick=()=>openPostModal('atualizacao'); $$('[data-mural-kind]').forEach(b=>b.onclick=()=>openMuralAction(b.dataset.muralKind)); $$('[data-mf]').forEach(b=>b.onclick=()=>{muralFilter=b.dataset.mf;$$('[data-mf]').forEach(x=>x.classList.toggle('on',x===b));renderMural();if($('#muralMsgs'))$('#muralMsgs').scrollTop=0;}); $('#postFilePick').onclick=()=>$('#postFile').click(); $('#postFile').onchange=e=>handlePostFile(e.target.files[0]); $('#savePostBtn').onclick=saveFeedPost;
 
 $('#addPhotoBtn').onclick=openPhotoModal;
 $('#gPickBtn').onclick=()=>$('#gFile').click();
