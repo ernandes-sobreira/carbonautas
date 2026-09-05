@@ -721,9 +721,34 @@
     .logo-mark,.logo-mark::before,.logo-mark .logo-img{animation:none!important}
   }
 
+
+
+  /* ===== Painel de gestão / Dossiê Carbonauta ===== */
+  .dash-scroll{flex:1;overflow-y:auto}
+  .dash-wrap{max-width:1180px;margin:0 auto;padding:28px 22px 70px}
+  .dash-hero{display:flex;align-items:flex-start;gap:18px;padding:22px 24px;border-radius:22px;background:linear-gradient(135deg,#071827 0%,#0a3047 55%,#16445a 100%);color:#fff;box-shadow:0 18px 40px rgba(7,24,39,.14);margin-bottom:16px}
+  .dash-hero h2{font-family:'Fraunces';font-size:27px;margin:0 0 5px}.dash-hero p{margin:0;color:#b7d0dc;line-height:1.5;font-size:13px}
+  .dash-hero .spacer{flex:1}.dash-hero-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.dash-hero-actions .btn{background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.16);color:#fff}.dash-hero-actions .btn.primary{background:#FF3D6E;border-color:#FF3D6E}
+  .dash-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:14px 0 16px}
+  .dash-kpi{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 15px;min-width:0}.dash-kpi .k-n{font-family:'Space Grotesk';font-weight:800;font-size:27px;line-height:1}.dash-kpi .k-l{font-size:11px;color:var(--ink-3);margin-top:5px;line-height:1.25}.dash-kpi.bad .k-n{color:#d62f4b}.dash-kpi.warn .k-n{color:#c47700}.dash-kpi.good .k-n{color:#14824f}
+  .dash-grid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(300px,.7fr);gap:14px;align-items:start}
+  .dash-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:17px 18px;box-shadow:0 6px 20px rgba(7,24,39,.04)}
+  .dash-card h3{font-family:'Fraunces';font-size:19px;margin:0}.dash-card-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}.dash-card-head .spacer{flex:1}.dash-sub{font-size:11.5px;color:var(--ink-3);margin-top:2px}
+  .attention-list{display:flex;flex-direction:column;gap:9px}.attention-item{display:grid;grid-template-columns:11px minmax(0,1fr) auto;gap:11px;align-items:start;border:1px solid var(--line-2);border-radius:14px;padding:11px 12px;background:#fbfdfe;cursor:pointer;transition:.15s}.attention-item:hover{border-color:#aac4d4;transform:translateY(-1px);box-shadow:0 6px 16px rgba(7,24,39,.05)}.attention-dot{width:10px;height:10px;border-radius:50%;margin-top:5px;background:#F2A62B}.attention-item.critical .attention-dot{background:#F23855;box-shadow:0 0 0 4px rgba(242,56,85,.10)}.attention-item.ok .attention-dot{background:#23A96E}.attention-who{font-weight:850;font-size:13px}.attention-why{font-size:12.5px;color:var(--ink-2);margin-top:2px;line-height:1.42}.attention-date{font-size:10.5px;font-weight:800;color:var(--ink-3);white-space:nowrap}
+  .health-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-2)}.health-row:last-child{border-bottom:0}.health-dot{width:13px;height:13px;border-radius:50%;flex:0 0 auto}.health-dot.green{background:#22a06b}.health-dot.yellow{background:#efb52f}.health-dot.red{background:#ef405f}.health-person{min-width:0;flex:1}.health-person b{font-size:12.5px}.health-person span{display:block;font-size:10.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.health-score{font-family:'Space Grotesk';font-size:12px;font-weight:800}
+  .dash-empty{padding:24px 12px;text-align:center;color:var(--ink-3);font-size:12.5px;background:var(--panel);border-radius:13px}
+  .checkin-spot{border:1px solid #cfdde6;border-radius:15px;padding:14px;background:linear-gradient(135deg,#f8fbff,#f7fffd)}.checkin-month{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:900}.checkin-title{font-weight:850;margin:5px 0 4px}.checkin-note{font-size:11.5px;color:var(--ink-2);line-height:1.45}.checkin-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+  .product-mini{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--line-2)}.product-mini:last-child{border-bottom:0}.product-type{font-size:18px}.product-main{flex:1;min-width:0}.product-main b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.product-main span{display:block;font-size:10.5px;color:var(--ink-3)}.product-status{font-size:9.5px;font-weight:900;border-radius:999px;padding:4px 7px;background:#eef4f8;color:#496477}
+  .track-health{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 9px;font-size:10.5px;font-weight:850;border:1px solid var(--line)}.track-health.green{background:#eaf8f1;color:#16754b;border-color:#b5e5cc}.track-health.yellow{background:#fff8e8;color:#976200;border-color:#f0d59b}.track-health.red{background:#fff0f3;color:#ae203b;border-color:#f0b6c1}
+  .track-quick-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.track-quick-actions .btn{padding:6px 9px;font-size:10.5px}
+  .dossier-modal{max-width:1000px}.dossier-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.dossier-body{background:#f4f8fb}.dossier-sheet{max-width:900px;margin:0 auto;background:#fff;border:1px solid #d8e3e9;border-radius:18px;padding:24px;box-shadow:0 8px 24px rgba(7,24,39,.06)}.dossier-head{display:flex;gap:14px;align-items:center;padding-bottom:16px;border-bottom:2px solid #e4edf2}.dossier-avatar{width:62px;height:62px;border-radius:18px;display:grid;place-items:center;color:#fff;font-weight:900;font-size:18px;overflow:hidden}.dossier-avatar img{width:100%;height:100%;object-fit:cover}.dossier-name{font-family:'Fraunces';font-size:25px}.dossier-meta{font-size:12px;color:var(--ink-3);margin-top:3px}.dossier-section{margin-top:18px}.dossier-section h3{font-family:'Fraunces';font-size:17px;margin:0 0 9px}.dossier-question{padding:14px 15px;border-radius:14px;background:linear-gradient(135deg,#f1edff,#f6fbff);border:1px solid #d6c9ff;font-size:14px;line-height:1.55}.dossier-table{width:100%;border-collapse:collapse;font-size:11.5px}.dossier-table th,.dossier-table td{border-bottom:1px solid #e5ecef;padding:8px 7px;text-align:left;vertical-align:top}.dossier-table th{font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3)}
+  .cycle-step{font-size:10px;font-weight:850;border-radius:999px;padding:4px 8px;background:#eef4f8;color:#496477}.cycle-step.review{background:#fff3df;color:#946000}.cycle-step.done{background:#eaf8f1;color:#16754b}
+  @media(max-width:1000px){.dash-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}.dash-grid{grid-template-columns:1fr}}
+  @media(max-width:620px){.dash-wrap{padding:18px 12px 55px}.dash-hero{padding:17px;flex-direction:column}.dash-hero-actions{justify-content:flex-start}.dash-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-kpi:last-child{grid-column:1/-1}.dossier-sheet{padding:15px}.dossier-table{font-size:10.5px}.dossier-toolbar{width:100%}}
+
 </style>
 </head>
-<body data-view="rede">
+<body data-view="painel">
 
 <div class="auth-gate" id="authGate">
   <div class="auth-card">
@@ -784,7 +809,11 @@
     </div>
 
     <nav class="tabs" id="tabs">
-      <button class="tab on" data-view="rede">
+      <button class="tab on" data-view="painel" title="O que precisa da minha atenção">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h4l3-9 4 16 3-7h4"/><circle cx="12" cy="12" r="10" opacity=".15"/></svg>
+        <span class="tl">Painel</span><span class="badge" id="attentionBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="rede">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="7" r="2.2"/><circle cx="12" cy="17" r="2.2"/><line x1="7.6" y1="7.3" x2="10.5" y2="15"/><line x1="16.5" y1="8.7" x2="13.5" y2="15.3"/></svg>
         <span class="tl">Rede</span>
       </button>
@@ -838,8 +867,28 @@
     </button>
   </div>
 
+  <!-- ============ VIEW: PAINEL ============ -->
+  <div class="view on" id="viewPainel">
+    <div class="dash-scroll"><div class="dash-wrap">
+      <div class="dash-hero">
+        <div><h2>O que precisa da minha atenção?</h2><p id="dashGreeting">Prazos, correções, bolsas, check-ins, produtos e pessoas que precisam de acompanhamento.</p></div>
+        <div class="spacer"></div>
+        <div class="dash-hero-actions"><button class="btn" id="dashCheckinBtn">✓ Check-in mensal</button><button class="btn" id="dashProductBtn">🎯 Registrar produto</button><button class="btn primary" id="dashDossierBtn">📚 Dossiê</button><button class="btn" id="dashBackupBtn" style="display:none">📦 Backup Excel</button></div>
+      </div>
+      <div class="dash-kpis" id="dashKpis"></div>
+      <div class="dash-grid">
+        <section class="dash-card"><div class="dash-card-head"><div><h3>⚡ Atenção agora</h3><div class="dash-sub">O que merece ação primeiro.</div></div><div class="spacer"></div><button class="btn" id="dashNewTaskBtn">＋ Pendência</button></div><div class="attention-list" id="dashAttention"></div></section>
+        <aside style="display:flex;flex-direction:column;gap:14px">
+          <section class="dash-card"><div class="dash-card-head"><div><h3>🚦 Saúde dos projetos</h3><div class="dash-sub">Verde = em dia; amarelo = atenção; vermelho = intervenção.</div></div></div><div id="dashHealth"></div></section>
+          <section class="dash-card"><div class="dash-card-head"><div><h3>🗓 Check-in mensal</h3><div class="dash-sub">Uma fotografia curta do mês.</div></div></div><div id="dashCheckin"></div></section>
+          <section class="dash-card"><div class="dash-card-head"><div><h3>🎯 Produtos e entregas</h3><div class="dash-sub">Artigos, relatórios, eventos, plataformas e outros resultados.</div></div><div class="spacer"></div><button class="btn" id="dashProductsAllBtn">Ver</button></div><div id="dashProducts"></div></section>
+        </aside>
+      </div>
+    </div></div>
+  </div>
+
   <!-- ============ VIEW: REDE ============ -->
-  <div class="view on" id="viewRede">
+  <div class="view" id="viewRede">
     <div class="stats" id="stats"></div>
     <div class="main">
       <aside class="side" id="side">
@@ -939,6 +988,9 @@
       <div class="view-head">
         <div><h2>Acompanhamento acadêmico</h2><div class="sub">Tempo de bolsa e formação, orientações, correções, qualificações, defesas, entregas e pendências. Documentos ficam exclusivamente no Repositório.</div></div>
         <div class="spacer"></div>
+        <button class="btn" id="trackCheckinBtn">✓ Check-in mensal</button>
+        <button class="btn" id="trackProductBtn">🎯 Produto</button>
+        <button class="btn" id="trackDossierBtn">📚 Dossiê</button>
         <button class="btn primary" id="addActivityBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Registrar acompanhamento</button>
       </div>
       <div class="track-kpis" id="trackKpis"></div>
@@ -1329,6 +1381,40 @@
 </div>
 
 
+
+<!-- CHECK-IN MENSAL -->
+<div class="overlay" id="checkinOverlay"><div class="modal" style="max-width:650px">
+  <div class="modal-h"><h2>Check-in mensal do Carbonauta</h2><div class="spacer"></div><button class="btn ghost" data-close="checkinOverlay">Fechar</button></div>
+  <div class="modal-b">
+    <div class="notice">Leva poucos minutos. O objetivo é registrar evolução, entrega, dificuldade e próximo passo — não é relatório burocrático.</div>
+    <div class="grid2"><div class="fg" id="checkinOwnerRow"><label>Carbonauta</label><select id="checkinOwner"></select></div><div class="fg"><label>Mês de referência</label><input id="checkinMonth" type="month"></div></div>
+    <div class="fg"><label>O que fiz neste mês?</label><textarea id="checkinDid" placeholder="Atividades, campo, laboratório, análise, escrita, reuniões..."></textarea></div>
+    <div class="fg"><label>O que entreguei / concluí?</label><textarea id="checkinDelivered" placeholder="Produto, etapa, texto, banco, apresentação, relatório..."></textarea></div>
+    <div class="fg"><label>Qual foi a principal dificuldade?</label><textarea id="checkinDifficulty" placeholder="O que travou ou onde preciso de ajuda?"></textarea></div>
+    <div class="fg"><label>O que farei no próximo mês?</label><textarea id="checkinNext" placeholder="Próxima prioridade e entrega esperada."></textarea></div>
+  </div>
+  <div class="modal-f"><button class="btn" data-close="checkinOverlay">Cancelar</button><button class="btn primary" id="saveCheckinBtn">Salvar check-in</button></div>
+</div></div>
+
+<!-- PRODUTO / ENTREGA -->
+<div class="overlay" id="productOverlay"><div class="modal" style="max-width:620px">
+  <div class="modal-h"><h2>Produto / entrega do projeto</h2><div class="spacer"></div><button class="btn ghost" data-close="productOverlay">Fechar</button></div>
+  <div class="modal-b">
+    <div class="grid2"><div class="fg" id="productOwnerRow"><label>Carbonauta</label><select id="productOwner"></select></div><div class="fg"><label>Tipo de produto</label><select id="productType"><option value="artigo">Artigo científico</option><option value="resumo">Resumo / trabalho em evento</option><option value="apresentacao">Apresentação</option><option value="relatorio">Relatório</option><option value="base">Banco / base de dados</option><option value="plataforma">Software / plataforma</option><option value="material">Material didático / cartilha</option><option value="evento">Evento / oficina / extensão</option><option value="tcc">TCC / dissertação / tese</option><option value="outro">Outro produto</option></select></div></div>
+    <div class="fg"><label>Produto</label><input id="productTitle" placeholder="Ex.: Artigo sobre qualidade da água"></div>
+    <div class="grid2"><div class="fg"><label>Status</label><select id="productStatus"><option value="planejado">Planejado</option><option value="andamento">Em andamento</option><option value="revisao">Em revisão</option><option value="concluido">Concluído</option></select></div><div class="fg"><label>Prazo previsto</label><input id="productDue" type="date"></div></div>
+    <div class="fg"><label>Observações</label><textarea id="productNotes" placeholder="Periódico, evento, público, próximos passos, detalhes do produto..."></textarea></div>
+    <div class="hint">O arquivo final deve ser colocado no Repositório. Aqui registramos o produto e seu andamento.</div>
+  </div>
+  <div class="modal-f"><button class="btn" data-close="productOverlay">Cancelar</button><button class="btn primary" id="saveProductBtn">Salvar produto</button></div>
+</div></div>
+
+<!-- DOSSIÊ -->
+<div class="overlay" id="dossierOverlay"><div class="modal dossier-modal">
+  <div class="modal-h"><h2>Dossiê do Carbonauta</h2><div class="spacer"></div><div class="dossier-toolbar"><select class="mini" id="dossierPerson"></select><button class="btn" id="dossierExcelBtn">Excel</button><button class="btn" id="dossierCsvBtn">CSV</button><button class="btn" id="dossierWordBtn">Word</button><button class="btn primary" id="dossierPrintBtn">PDF / imprimir</button><button class="btn ghost" data-close="dossierOverlay">Fechar</button></div></div>
+  <div class="modal-b dossier-body"><div id="dossierContent"></div></div>
+</div></div>
+
 <!-- ACTIVITY MODAL -->
 <div class="overlay" id="activityOverlay"><div class="modal" style="max-width:620px">
   <div class="modal-h"><h2 id="activityTitle">Registrar acompanhamento</h2><div class="spacer"></div><button class="btn ghost" data-close="activityOverlay">Fechar</button></div>
@@ -1338,10 +1424,11 @@
     <div class="grid2">
       <div class="fg"><label>Tipo de acompanhamento</label><select id="activityType">
         <option value="mestrado">Mestrado</option><option value="doutorado">Doutorado</option><option value="tcc">TCC</option>
-        <option value="orientacao">Orientação</option><option value="correcao">Correção</option><option value="qualificacao">Qualificação</option><option value="defesa">Defesa</option><option value="entrega">Entrega / prazo</option><option value="pendencia">Pendência</option><option value="outro">Outro acompanhamento</option>
+        <option value="orientacao">Orientação</option><option value="correcao">Correção</option><option value="qualificacao">Qualificação</option><option value="defesa">Defesa</option><option value="entrega">Entrega / prazo</option><option value="pendencia">Pendência</option><option value="checkin">Check-in mensal</option><option value="produto">Produto / entrega do projeto</option><option value="outro">Outro acompanhamento</option>
       </select></div>
-      <div class="fg"><label>Status</label><select id="activityStatus"><option value="planejado">Planejado</option><option value="andamento">Em andamento</option><option value="revisao">Em correção / revisão</option><option value="concluido">Concluído</option><option value="pausado">Pausado</option></select></div>
+      <div class="fg"><label>Status</label><select id="activityStatus"><option value="planejado">Planejado</option><option value="afazer">A fazer</option><option value="andamento">Em andamento</option><option value="recebido">Orientador recebeu</option><option value="revisao">Em correção / revisão</option><option value="devolvido">Correção devolvida</option><option value="revisando">Aluno revisando</option><option value="aprovado">Aprovado</option><option value="concluido">Concluído</option><option value="pausado">Pausado</option></select></div>
     </div>
+    <div class="notice" id="correctionCycleHint" style="display:none;margin-top:-4px">✍️ <b>Ciclo de correção:</b> Aluno enviou → Orientador recebeu → Em correção → Correção devolvida → Aluno revisando → Aprovado.</div>
     <div class="fg"><label>Etapa / assunto</label><input id="activityName" placeholder="Ex.: Correção do capítulo 2; período do mestrado; qualificação"></div>
     <div class="fg"><label>Observação / próximo passo</label><textarea id="activityDesc" placeholder="O que foi discutido, o que precisa ser corrigido e qual é a próxima ação"></textarea></div>
     <div class="grid2"><div class="fg"><label>Início / data da orientação</label><input type="date" id="activityStart"></div><div class="fg"><label>Fim / prazo</label><input type="date" id="activityDue"></div></div>
@@ -1593,7 +1680,7 @@ let authUser = null;
 let authProfile = null;
 let subscriptions = [];
 let bootstrapped = false;
-let currentView = 'rede';
+let currentView = 'painel';
 let lastSeenChat = +localStorage.getItem('rede_lastSeenChat') || 0;
 let lbPhotoId = null;
 const FB = () => window.fbFns;
@@ -1764,8 +1851,10 @@ function subscribeAll(){
   subscriptions.push(f.onSnapshot(f.collection(window.db,'rede_members'),snap=>{
     state.members=snap.docs.map(d=>({...d.data(),id:d.id}));
     state.members.forEach(m=>{m.linhas=m.linhas||[];m.resultados=m.resultados||[];m.prazos=m.prazos||[];m.vinculos=m.vinculos||[];m.hub=!!m.hub;m.bolsista=!!m.bolsista});
+    if(currentView==='painel') renderPainel();
     if(currentView==='rede') renderAll();
     if(currentView==='crono') renderCrono();
+    updateAttentionBadge();
     refreshMemberDependentUI();
     if(selectedId && memberById(selectedId)) renderDetail(); if(isAdmin && $('#peopleOverlay')?.classList.contains('on')) renderPeopleManager();
   }));
@@ -1781,6 +1870,7 @@ function subscribeAll(){
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_schedule'),f.orderBy('data','asc')),snap=>{
     state.schedule=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='crono') renderCrono();
+    if(currentView==='painel') renderPainel();
     updateCronoBadge();
   }));
   // PHOTOS
@@ -1791,12 +1881,15 @@ function subscribeAll(){
   // PUBLICAÇÕES
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_publicacoes'),f.orderBy('ts','desc')),snap=>{
     state.publicacoes=snap.docs.map(d=>({...d.data(),id:d.id}));
-    if(currentView==='pubs') renderPubs(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
+    if(currentView==='pubs') renderPubs(); if(currentView==='painel') renderPainel(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
   }));
   // ACOMPANHAMENTO
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_activities'),f.orderBy('updatedAt','desc')),snap=>{
     state.activities=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='track') renderTrack();
+    if(currentView==='painel') renderPainel();
+    updateAttentionBadge();
+    if($('#dossierOverlay')?.classList.contains('open')) renderDossier();
     if(currentView==='feed') renderFeedSide(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
   }));
   // FEED SOCIAL
@@ -1828,6 +1921,7 @@ function subscribeAll(){
     subscriptions.push(f.onSnapshot(nq,snap=>{
       state.notifications=snap.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>notifMillis(b)-notifMillis(a));
       renderNotificationUI();
+      if(currentView==='painel') renderPainel(); updateAttentionBadge();
       if(!notifInitial){snap.docChanges().filter(ch=>ch.type==='added').forEach(ch=>{const n={...ch.doc.data(),id:ch.doc.id};if(n.senderId!==myId)showDeviceNotification(n)})}
       notifInitial=false;
     },err=>console.warn('Notificações não disponíveis:',err)));
@@ -3443,11 +3537,11 @@ async function deletePublicacao(id){
 
 
 /* ============ ACOMPANHAMENTO ============ */
-const ACTIVITY_TYPES={bolsa:'Bolsa',mestrado:'Mestrado',doutorado:'Doutorado',tcc:'TCC',orientacao:'Orientação',correcao:'Correção',qualificacao:'Qualificação',defesa:'Defesa',entrega:'Entrega / prazo',pendencia:'Pendência',outro:'Outro acompanhamento',projeto:'Registro antigo · Projeto',acao:'Registro antigo · Ação',apresentacao:'Registro antigo · Apresentação',cronograma:'Registro antigo · Cronograma',relatorio:'Registro antigo · Relatório',arquivo:'Registro antigo · Arquivo'};
-const ACTIVITY_STATUS={planejado:'Planejado',andamento:'Em andamento',revisao:'Em correção / revisão',concluido:'Concluído',pausado:'Pausado'};
+const ACTIVITY_TYPES={bolsa:'Bolsa',mestrado:'Mestrado',doutorado:'Doutorado',tcc:'TCC',orientacao:'Orientação',correcao:'Correção',qualificacao:'Qualificação',defesa:'Defesa',entrega:'Entrega / prazo',pendencia:'Pendência',checkin:'Check-in mensal',produto:'Produto / entrega',outro:'Outro acompanhamento',projeto:'Registro antigo · Projeto',acao:'Registro antigo · Ação',apresentacao:'Registro antigo · Apresentação',cronograma:'Registro antigo · Cronograma',relatorio:'Registro antigo · Relatório',arquivo:'Registro antigo · Arquivo'};
+const ACTIVITY_STATUS={planejado:'Planejado',afazer:'A fazer',andamento:'Em andamento',recebido:'Orientador recebeu',revisao:'Em correção / revisão',devolvido:'Correção devolvida',revisando:'Aluno revisando',aprovado:'Aprovado',concluido:'Concluído',pausado:'Pausado'};
 const TRACK_PERIOD_TYPES=new Set(['mestrado','doutorado','tcc']);
 const TRACK_LEGACY_TYPES=new Set(['projeto','acao','apresentacao','cronograma','relatorio','arquivo']);
-const TRACK_ICONS={bolsa:'🎓',mestrado:'📘',doutorado:'📚',tcc:'📝',orientacao:'🧭',correcao:'✍️',qualificacao:'🎯',defesa:'🎓',entrega:'📌',pendencia:'⚠️',outro:'•',projeto:'•',acao:'•',apresentacao:'•',cronograma:'•',relatorio:'•',arquivo:'•'};
+const TRACK_ICONS={bolsa:'🎓',mestrado:'📘',doutorado:'📚',tcc:'📝',orientacao:'🧭',correcao:'✍️',qualificacao:'🎯',defesa:'🎓',entrega:'📌',pendencia:'⚠️',checkin:'🗓',produto:'🎯',outro:'•',projeto:'•',acao:'•',apresentacao:'•',cronograma:'•',relatorio:'•',arquivo:'•'};
 let editingActivityId=null, activityOwnerPreset='';
 function refreshTrackOwners(){
   const el=$('#trackOwner'),cur=el.value; const list=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome));
@@ -3466,8 +3560,9 @@ function trackPeriodInfo(startDate,endDate){
 }
 function _activityTime(a){return a.updatedAt?.toMillis?a.updatedAt.toMillis():(a.createdAt?.toMillis?a.createdAt.toMillis():0)}
 function _activityDate(a){return a.startDate||a.dueDate||''}
-function _isPending(a){return a.status!=='concluido' && ['correcao','pendencia','entrega'].includes(a.type)}
-function _isOverdue(a){return a.status!=='concluido'&&a.dueDate&&dateInfo(a.dueDate)?.over}
+function _activityDone(a){return ['concluido','aprovado'].includes(a?.status)}
+function _isPending(a){return !_activityDone(a) && ['correcao','pendencia','entrega'].includes(a.type)}
+function _isOverdue(a){return !_activityDone(a)&&a.dueDate&&dateInfo(a.dueDate)?.over}
 function _periodHTML(type,title,start,end,canEdit,id,manualProgress){
   const pi=trackPeriodInfo(start,end),label=ACTIVITY_TYPES[type]||type, pct=(start&&end)?pi.pct:Math.max(0,Math.min(100,+manualProgress||0));
   return `<div class="period-card"><div class="period-top"><span class="period-type">${TRACK_ICONS[type]||'•'} ${esc(label)}</span>${title&&title!==label?`<span class="period-title">${esc(title)}</span>`:''}<span class="period-remain">${esc(pi.remain)}</span>${canEdit&&id?`<button class="follow-edit" onclick="editActivity('${id}')" title="Editar">✎</button>`:''}</div><div class="period-bar"><span style="width:${pct}%"></span></div><div class="period-foot"><span>${start?'Início '+fmtDate(start):'Início não informado'}</span><b>${pct}% do tempo</b><span>${end?'Fim '+fmtDate(end):'Fim não informado'}</span></div></div>`;
@@ -3479,7 +3574,7 @@ function _scholarPeriodHTML(m){
 }
 function _followItemHTML(a,can){
   const over=_isOverdue(a), d=a.dueDate||a.startDate||'', status=ACTIVITY_STATUS[a.status]||a.status||'';
-  return `<div class="follow-item"><div class="follow-icon">${TRACK_ICONS[a.type]||'•'}</div><div class="follow-main"><div class="follow-name">${esc(ACTIVITY_TYPES[a.type]||a.type||'Acompanhamento')} · ${esc(a.title||status)}</div>${a.description?`<div class="follow-desc">${esc(a.description)}</div>`:''}<div style="margin-top:4px"><span class="track-alert ${a.status==='concluido'?'track-ok':over?'':'track-warn'}">${a.status==='concluido'?'Concluído':over?'Atrasado':esc(status)}</span></div></div><div style="display:flex;gap:4px;align-items:start"><span class="follow-date ${over?'over':''}">${d?fmtDate(d):''}</span>${can?`<button class="follow-edit" onclick="editActivity('${a.id}')" title="Editar">✎</button>`:''}</div></div>`;
+  return `<div class="follow-item"><div class="follow-icon">${TRACK_ICONS[a.type]||'•'}</div><div class="follow-main"><div class="follow-name">${esc(ACTIVITY_TYPES[a.type]||a.type||'Acompanhamento')} · ${esc(a.title||status)}</div>${a.description?`<div class="follow-desc">${esc(a.description)}</div>`:''}<div style="margin-top:4px"><span class="track-alert ${_activityDone(a)?'track-ok':over?'':'track-warn'}">${_activityDone(a)?esc(status||'Concluído'):over?'Atrasado':esc(status)}</span></div></div><div style="display:flex;gap:4px;align-items:start"><span class="follow-date ${over?'over':''}">${d?fmtDate(d):''}</span>${can?`<button class="follow-edit" onclick="editActivity('${a.id}')" title="Editar">✎</button>`:''}</div></div>`;
 }
 let projectProfileMemberId='';
 function projectIdentityHTML(m,can){
@@ -3505,40 +3600,103 @@ function renderTrack(){
   if($('#trackMine').checked){if(!myId){$('#trackMine').checked=false;toast('Seu perfil precisa estar vinculado ao login.')}else members=members.filter(m=>m.id===myId)}
   const now=new Date();now.setHours(0,0,0,0);
   const all=state.activities;
-  const pendingCorrections=all.filter(a=>a.type==='correcao'&&a.status!=='concluido').length;
+  const pendingCorrections=all.filter(a=>a.type==='correcao'&&!_activityDone(a)).length;
   const overdue=all.filter(_isOverdue).length;
-  const next30=all.filter(a=>a.status!=='concluido'&&a.dueDate).filter(a=>{const di=dateInfo(a.dueDate);return di&&di.diff>=0&&di.diff<=30}).length;
+  const next30=all.filter(a=>!_activityDone(a)&&a.dueDate).filter(a=>{const di=dateInfo(a.dueDate);return di&&di.diff>=0&&di.diff<=30}).length;
   const activeScholar=state.members.filter(m=>{if(!m.bolsista)return false;const pi=trackPeriodInfo(m.bolsaInicio,m.bolsaFim);return pi.days!==null&&pi.days>=0}).length;
   $('#trackKpis').innerHTML=`<div class="track-kpi"><div class="n">${activeScholar}</div><div class="l">bolsas em acompanhamento</div></div><div class="track-kpi"><div class="n">${next30}</div><div class="l">prazos em até 30 dias</div></div><div class="track-kpi"><div class="n">${pendingCorrections}</div><div class="l">correções pendentes</div></div><div class="track-kpi"><div class="n">${overdue}</div><div class="l">itens atrasados</div></div>`;
   if(mode){
-    members=members.filter(m=>{const acts=all.filter(a=>a.ownerId===m.id);if(mode==='pendentes')return acts.some(a=>_isPending(a)||_isOverdue(a));if(mode==='proximos')return acts.some(a=>{const di=a.dueDate?dateInfo(a.dueDate):null;return a.status!=='concluido'&&di&&di.diff>=0&&di.diff<=30});if(mode==='encerrando'){const periods=acts.filter(a=>TRACK_PERIOD_TYPES.has(a.type));if(m.bolsista)periods.push({startDate:m.bolsaInicio,dueDate:m.bolsaFim});return periods.some(a=>{const pi=trackPeriodInfo(a.startDate,a.dueDate);return pi.days!==null&&pi.days>=0&&pi.days<=90})}return true})
+    members=members.filter(m=>{const acts=all.filter(a=>a.ownerId===m.id);if(mode==='pendentes')return acts.some(a=>_isPending(a)||_isOverdue(a));if(mode==='proximos')return acts.some(a=>{const di=a.dueDate?dateInfo(a.dueDate):null;return !_activityDone(a)&&di&&di.diff>=0&&di.diff<=30});if(mode==='encerrando'){const periods=acts.filter(a=>TRACK_PERIOD_TYPES.has(a.type));if(m.bolsista)periods.push({startDate:m.bolsaInicio,dueDate:m.bolsaFim});return periods.some(a=>{const pi=trackPeriodInfo(a.startDate,a.dueDate);return pi.days!==null&&pi.days>=0&&pi.days<=90})}return true})
   }
   const grid=$('#trackGrid');$('#trackEmpty').style.display=members.length?'none':'block';
   grid.innerHTML=members.map(m=>{
     const acts=all.filter(a=>a.ownerId===m.id).sort((a,b)=>_activityTime(b)-_activityTime(a));const can=isAdmin||isMe(m.id);
     const periods=acts.filter(a=>TRACK_PERIOD_TYPES.has(a.type));const follows=acts.filter(a=>!TRACK_PERIOD_TYPES.has(a.type)&&!TRACK_LEGACY_TYPES.has(a.type)).sort((a,b)=>{const ad=_activityDate(a),bd=_activityDate(b);return (bd||'').localeCompare(ad||'')||_activityTime(b)-_activityTime(a)});
-    const pending=follows.filter(a=>_isPending(a)||_isOverdue(a));const lastOrient=follows.filter(a=>a.type==='orientacao').sort((a,b)=>(_activityDate(b)||'').localeCompare(_activityDate(a)||''))[0];const nextDue=follows.filter(a=>a.status!=='concluido'&&a.dueDate&&!dateInfo(a.dueDate)?.over).sort((a,b)=>a.dueDate.localeCompare(b.dueDate))[0];const corrections=follows.filter(a=>a.type==='correcao'&&a.status!=='concluido').length;
+    const pending=follows.filter(a=>_isPending(a)||_isOverdue(a));const lastOrient=follows.filter(a=>a.type==='orientacao').sort((a,b)=>(_activityDate(b)||'').localeCompare(_activityDate(a)||''))[0];const nextDue=follows.filter(a=>!_activityDone(a)&&a.dueDate&&!dateInfo(a.dueDate)?.over).sort((a,b)=>a.dueDate.localeCompare(b.dueDate))[0];const corrections=follows.filter(a=>a.type==='correcao'&&!_activityDone(a)).length;
     const nv=NIVEIS[m.nivel]||{short:m.nivel||'',color:'#607d8b'};
     const periodsHTML=_scholarPeriodHTML(m)+periods.map(a=>_periodHTML(a.type,a.title,a.startDate,a.dueDate,can,a.id,a.progress)).join('');
     const listHTML=follows.slice(0,8).map(a=>_followItemHTML(a,can)).join('');
-    return `<section class="track-person"><div class="track-person-head"><div class="track-person-av" style="background:${nv.color}">${m.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m.nome)}</div><div><div class="track-person-title">${esc(m.nome)}</div><div class="track-person-sub">${esc(nv.short)}${m.programa?' · '+esc(m.programa):''}${m.status==='egresso'?' · Egresso':''}${m.bolsista?' · Bolsista':''}</div></div><div class="track-person-actions">${can?`<button class="btn primary" type="button" onclick="openActivity(null,'${m.id}')">＋ Registrar</button>`:''}<button class="btn" type="button" onclick="openMemberRepository('${m.id}')">Repositório</button></div></div><div class="track-person-body">${projectIdentityHTML(m,can)}<div class="track-dashboard"><div><div class="follow-title">Régua de tempo</div><div class="track-periods">${periodsHTML||'<div class="track-empty-person">Nenhum período de bolsa, mestrado, doutorado ou TCC registrado.</div>'}</div></div><aside class="track-sidebox"><h4>Situação do acompanhamento</h4><div class="track-mini-stat"><span>Correções pendentes</span><b>${corrections}</b></div><div class="track-mini-stat"><span>Última orientação</span><b>${lastOrient?fmtDate(lastOrient.startDate||lastOrient.dueDate):'—'}</b></div><div class="track-mini-stat"><span>Próxima entrega</span><b>${nextDue?fmtDate(nextDue.dueDate):'—'}</b></div><div class="track-mini-stat"><span>Pendências / alertas</span><b>${pending.length}</b></div></aside></div><div class="follow-list"><div class="follow-title">Histórico e próximos passos</div>${listHTML||'<div class="track-empty-person">Sem orientações, correções ou pendências registradas.</div>'}</div></div></section>`;
+    return `<section class="track-person"><div class="track-person-head"><div class="track-person-av" style="background:${nv.color}">${m.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m.nome)}</div><div><div class="track-person-title">${esc(m.nome)}</div><div class="track-person-sub">${esc(nv.short)}${m.programa?' · '+esc(m.programa):''}${m.status==='egresso'?' · Egresso':''}${m.bolsista?' · Bolsista':''}</div></div><div class="track-person-actions"><span class="track-health ${memberHealth(m).level}">● ${memberHealth(m).level==='green'?'Em dia':memberHealth(m).level==='yellow'?'Atenção':'Intervir'}</span>${can?`<button class="btn primary" type="button" onclick="openActivity(null,'${m.id}')">＋ Registrar</button>`:''}<button class="btn" type="button" onclick="openDossier('${m.id}')">Dossiê</button><button class="btn" type="button" onclick="openMemberRepository('${m.id}')">Repositório</button></div></div><div class="track-person-body">${projectIdentityHTML(m,can)}${can?`<div class="track-quick-actions"><button class="btn" onclick="openCheckin('${m.id}')">✓ Check-in</button><button class="btn" onclick="openProduct('${m.id}')">🎯 Produto</button><button class="btn" onclick="openActivityPreset('pendencia','${m.id}')">⚠️ Pendência</button><button class="btn" onclick="openActivityPreset('correcao','${m.id}')">✍️ Correção</button></div>`:''}<div class="track-dashboard"><div><div class="follow-title">Régua de tempo</div><div class="track-periods">${periodsHTML||'<div class="track-empty-person">Nenhum período de bolsa, mestrado, doutorado ou TCC registrado.</div>'}</div></div><aside class="track-sidebox"><h4>Situação do acompanhamento</h4><div class="track-mini-stat"><span>Correções pendentes</span><b>${corrections}</b></div><div class="track-mini-stat"><span>Última orientação</span><b>${lastOrient?fmtDate(lastOrient.startDate||lastOrient.dueDate):'—'}</b></div><div class="track-mini-stat"><span>Próxima entrega</span><b>${nextDue?fmtDate(nextDue.dueDate):'—'}</b></div><div class="track-mini-stat"><span>Pendências / alertas</span><b>${pending.length}</b></div></aside></div><div class="follow-list"><div class="follow-title">Histórico e próximos passos</div>${listHTML||'<div class="track-empty-person">Sem orientações, correções ou pendências registradas.</div>'}</div></div></section>`;
   }).join('');
 }
+function syncActivityTypeUi(){const type=$('#activityType')?.value;const hint=$('#correctionCycleHint');if(hint)hint.style.display=type==='correcao'?'block':'none'}
 function openActivity(id=null,ownerPreset=''){
   if(!myId&&!isAdmin){toast('Seu perfil precisa estar vinculado ao login.');return}
   editingActivityId=id;activityOwnerPreset=ownerPreset||'';const a=id?state.activities.find(x=>x.id===id):null;
   if(a&&!(isAdmin||isMe(a.ownerId))){toast('Sem permissão para editar este acompanhamento.');return}
   const sel=$('#activityOwnerSel'),ordered=[...state.members].sort((x,y)=>x.nome.localeCompare(y.nome));sel.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');
   $('#activityOwnerRow').style.display=isAdmin?'block':'none';sel.value=a?.ownerId||activityOwnerPreset||(myId||ordered[0]?.id||'');
-  $('#activityTitle').textContent=a?'Editar acompanhamento':'Registrar acompanhamento';$('#activityType').value=a?.type&&ACTIVITY_TYPES[a.type]?a.type:'orientacao';$('#activityStatus').value=a?.status||'andamento';$('#activityName').value=a?.title||'';$('#activityDesc').value=a?.description||'';$('#activityStart').value=a?.startDate||'';$('#activityDue').value=a?.dueDate||'';$('#activityProgress').value=a?.progress||0;$('#activityProgressLabel').textContent=(a?.progress||0)+'%';$('#deleteActivityBtn').style.display=a?'inline-flex':'none';openOverlay('activityOverlay');
+  $('#activityTitle').textContent=a?'Editar acompanhamento':'Registrar acompanhamento';$('#activityType').value=a?.type&&ACTIVITY_TYPES[a.type]?a.type:'orientacao';$('#activityStatus').value=a?.status||'andamento';$('#activityName').value=a?.title||'';$('#activityDesc').value=a?.description||'';$('#activityStart').value=a?.startDate||'';$('#activityDue').value=a?.dueDate||'';$('#activityProgress').value=a?.progress||0;$('#activityProgressLabel').textContent=(a?.progress||0)+'%';$('#deleteActivityBtn').style.display=a?'inline-flex':'none';syncActivityTypeUi();openOverlay('activityOverlay');
 }
 function editActivity(id){openActivity(id)}
+function openActivityPreset(type,ownerPreset=''){openActivity(null,ownerPreset);setTimeout(()=>{if($('#activityType'))$('#activityType').value=type;if(type==='pendencia'){$('#activityStatus').value='afazer';$('#activityName').placeholder='Ex.: Enviar capítulo revisado';}if(type==='correcao'){$('#activityStatus').value='recebido';$('#activityName').placeholder='Ex.: Correção do capítulo 2';}},20)}
+async function notifyAcompanhamentoOwner(ownerId,meta={}){if(!isAdmin||!ownerId||ownerId===myId)return;const me=currentActor(),f=FB();try{await f.addDoc(f.collection(window.db,'rede_notifications'),{recipientId:ownerId,senderId:me?.id||myId||'',senderUid:window.auth.currentUser?.uid||'',senderName:me?.name||'Coordenação',kind:meta.kind||'acompanhamento',title:meta.title||'Novo item de acompanhamento',message:(meta.message||'').slice(0,240),sourceType:'acompanhamento',sourceId:meta.sourceId||'',ownerId,read:false,ts:f.serverTimestamp()})}catch(e){console.warn('Não foi possível notificar o acompanhamento',e)}}
 async function saveActivity(){
   const ownerId=isAdmin?$('#activityOwnerSel').value:myId,type=$('#activityType').value;let title=$('#activityName').value.trim();if(!title)title=ACTIVITY_TYPES[type]||'Acompanhamento';if(!ownerId){toast('Selecione o Carbonauta.');return}
   const startDate=$('#activityStart').value,dueDate=$('#activityDue').value;if(startDate&&dueDate&&startDate>dueDate){toast('A data final não pode ser anterior ao início.');return}const m=memberById(ownerId),data={ownerId,ownerUid:(state.users||[]).find(u=>u.memberId===ownerId)?.uid || (ownerId===myId ? (window.auth.currentUser?.uid||'') : ''),ownerName:m?.nome||'',type,status:$('#activityStatus').value,title,description:$('#activityDesc').value.trim(),startDate,dueDate,progress:+$('#activityProgress').value||0,updatedAt:FB().serverTimestamp()};
-  try{if(editingActivityId)await FB().setDoc(FB().doc(window.db,'rede_activities',editingActivityId),data,{merge:true});else await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});closeOverlay('activityOverlay');toast('Acompanhamento salvo.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou o acompanhamento.':'Erro ao salvar acompanhamento.')}
+  try{let savedId=editingActivityId||'',wasNew=!editingActivityId;if(editingActivityId){await FB().setDoc(FB().doc(window.db,'rede_activities',editingActivityId),data,{merge:true})}else{const ref=await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});savedId=ref.id}if(isAdmin&&ownerId!==myId){const notifyNew=wasNew&&['pendencia','correcao','entrega'].includes(type);const notifyReturn=!wasNew&&type==='correcao'&&['devolvido','aprovado'].includes(data.status);if(notifyNew||notifyReturn)await notifyAcompanhamentoOwner(ownerId,{kind:type,title:type==='correcao'?'✍️ Correção no acompanhamento':type==='pendencia'?'⚠️ Nova pendência':'📌 Nova entrega / prazo',message:`${title}${dueDate?' · prazo '+fmtDate(dueDate):''}`,sourceId:savedId})}closeOverlay('activityOverlay');toast('Acompanhamento salvo.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou o acompanhamento.':'Erro ao salvar acompanhamento.')}
 }
 async function deleteActivity(){if(!editingActivityId||!confirm('Excluir este registro de acompanhamento?'))return;const a=state.activities.find(x=>x.id===editingActivityId);if(!a||!(isAdmin||isMe(a.ownerId)))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_activities',editingActivityId));closeOverlay('activityOverlay');toast('Registro excluído.')}catch(e){console.error(e);toast('Erro ao excluir.')}}
+
+
+/* ============ PAINEL DE GESTÃO / CHECK-IN / PRODUTOS / DOSSIÊ ============ */
+const PRODUCT_TYPES={artigo:'Artigo científico',resumo:'Resumo / evento',apresentacao:'Apresentação',relatorio:'Relatório',base:'Banco / base de dados',plataforma:'Software / plataforma',material:'Material didático / cartilha',evento:'Evento / oficina / extensão',tcc:'TCC / dissertação / tese',outro:'Outro produto'};
+function monthKey(d=new Date()){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')}
+function monthLabel(k){if(!k)return'';const [y,m]=k.split('-').map(Number);return new Date(y,m-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'})}
+function lastActivityMillis(memberId){return Math.max(0,...state.activities.filter(a=>a.ownerId===memberId).map(_activityTime))}
+function memberHealth(m){
+  const acts=state.activities.filter(a=>a.ownerId===m.id), now=Date.now();let points=0,reasons=[];
+  const overdue=acts.filter(_isOverdue);if(overdue.length){points+=4;reasons.push(`${overdue.length} item(ns) atrasado(s)`)}
+  const corrections=acts.filter(a=>a.type==='correcao'&&!_activityDone(a));if(corrections.length){points+=Math.min(3,corrections.length);reasons.push(`${corrections.length} correção(ões) pendente(s)`)}
+  const next=acts.filter(a=>!_activityDone(a)&&a.dueDate).map(a=>({a,di:dateInfo(a.dueDate)})).filter(x=>x.di&&x.di.diff>=0&&x.di.diff<=14);if(next.length){points+=2;reasons.push(`${next.length} prazo(s) em até 14 dias`)}
+  if(m.bolsista&&m.bolsaFim){const pi=trackPeriodInfo(m.bolsaInicio,m.bolsaFim);if(pi.days!==null&&pi.days>=0&&pi.days<=45){points+=2;reasons.push('bolsa encerrando em breve')}}
+  const lm=lastActivityMillis(m.id);if(m.status!=='egresso'&&lm&&now-lm>45*86400000){points+=1;reasons.push('sem atualização há mais de 45 dias')}
+  if(m.status!=='egresso'&&!(m.perguntaCientifica||'').trim()){points+=1;reasons.push('pergunta científica não preenchida')}
+  const level=points>=4?'red':points>=2?'yellow':'green';return {level,points,reasons:reasons.length?reasons:['em dia']};
+}
+function attentionItems(){
+  const members=(isAdmin?state.members.filter(m=>m.status!=='egresso'):state.members.filter(m=>m.id===myId));const out=[];const mk=monthKey();
+  members.forEach(m=>{
+    const acts=state.activities.filter(a=>a.ownerId===m.id);
+    acts.filter(_isOverdue).forEach(a=>out.push({memberId:m.id,who:m.nome,why:`Atrasado: ${a.title||ACTIVITY_TYPES[a.type]||'acompanhamento'}`,date:a.dueDate||'',sev:'critical',sort:0}));
+    acts.filter(a=>!_activityDone(a)&&a.dueDate).forEach(a=>{const di=dateInfo(a.dueDate);if(di&&di.diff>=0&&di.diff<=7)out.push({memberId:m.id,who:m.nome,why:`Prazo em ${di.diff===0?'hoje':di.diff+' dia(s)'}: ${a.title||ACTIVITY_TYPES[a.type]}`,date:a.dueDate,sev:di.diff<=2?'critical':'warn',sort:1+di.diff/10})});
+    const corr=acts.filter(a=>a.type==='correcao'&&!_activityDone(a));if(corr.length)out.push({memberId:m.id,who:m.nome,why:`${corr.length} correção(ões) ainda abertas`,date:corr[0]?.dueDate||'',sev:corr.some(_isOverdue)?'critical':'warn',sort:2});
+    if(m.bolsista&&m.bolsaFim){const pi=trackPeriodInfo(m.bolsaInicio,m.bolsaFim);if(pi.days!==null&&pi.days>=0&&pi.days<=45)out.push({memberId:m.id,who:m.nome,why:`Bolsa termina em ${_daysText(pi.days)}`,date:m.bolsaFim,sev:pi.days<=15?'critical':'warn',sort:2.5})}
+    const hasCheck=acts.some(a=>a.type==='checkin'&&a.checkinMonth===mk);if(m.status!=='egresso'&&!hasCheck)out.push({memberId:m.id,who:m.nome,why:`Check-in de ${monthLabel(mk)} ainda não preenchido`,date:'',sev:'warn',sort:4});
+  });
+  return out.sort((a,b)=>a.sort-b.sort||(a.date||'9999').localeCompare(b.date||'9999')).slice(0,40)
+}
+function updateAttentionBadge(){const b=$('#attentionBadge');if(!b)return;const n=attentionItems().filter(x=>x.sev==='critical').length;b.textContent=n>9?'9+':n;b.style.display=n?'grid':'none'}
+function focusMemberTrack(id){switchView('track');setTimeout(()=>{if($('#trackOwner')){$('#trackOwner').value=id;renderTrack();$('#viewTrack .track-scroll')?.scrollTo({top:0,behavior:'smooth'})}},30)}
+function renderPainel(){
+  if(!$('#dashKpis'))return;const scope=isAdmin?state.members.filter(m=>m.status!=='egresso'):state.members.filter(m=>m.id===myId);const att=attentionItems();const critical=att.filter(x=>x.sev==='critical').length;
+  const overdue=scope.reduce((n,m)=>n+state.activities.filter(a=>a.ownerId===m.id&&_isOverdue(a)).length,0);const corr=scope.reduce((n,m)=>n+state.activities.filter(a=>a.ownerId===m.id&&a.type==='correcao'&&!_activityDone(a)).length,0);const unread=state.notifications.filter(n=>!n.read).length;const products=scope.reduce((n,m)=>n+state.activities.filter(a=>a.ownerId===m.id&&a.type==='produto').length,0);
+  $('#dashGreeting').textContent=isAdmin?'Prazos, correções, bolsas, check-ins, produtos e Carbonautas que precisam de acompanhamento.':'Seu projeto, seus prazos, check-in, produtos e próximos passos em um só lugar.';
+  $('#dashKpis').innerHTML=`<div class="dash-kpi ${critical?'bad':'good'}"><div class="k-n">${critical}</div><div class="k-l">situações críticas</div></div><div class="dash-kpi ${overdue?'bad':'good'}"><div class="k-n">${overdue}</div><div class="k-l">itens atrasados</div></div><div class="dash-kpi ${corr?'warn':'good'}"><div class="k-n">${corr}</div><div class="k-l">correções abertas</div></div><div class="dash-kpi ${unread?'warn':'good'}"><div class="k-n">${unread}</div><div class="k-l">notificações não lidas</div></div><div class="dash-kpi"><div class="k-n">${products}</div><div class="k-l">produtos registrados</div></div>`;
+  $('#dashAttention').innerHTML=att.length?att.map(x=>`<div class="attention-item ${x.sev==='critical'?'critical':''}" onclick="focusMemberTrack('${x.memberId}')"><span class="attention-dot"></span><div><div class="attention-who">${esc(x.who)}</div><div class="attention-why">${esc(x.why)}</div></div><div class="attention-date">${x.date?fmtDate(x.date):''}</div></div>`).join(''):'<div class="dash-empty">✅ Nada crítico agora. Os projetos estão em dia.</div>';
+  $('#dashHealth').innerHTML=scope.length?scope.map(m=>{const h=memberHealth(m);return `<div class="health-row" onclick="focusMemberTrack('${m.id}')" style="cursor:pointer"><span class="health-dot ${h.level}"></span><div class="health-person"><b>${esc(m.nome)}</b><span>${esc(h.reasons.slice(0,2).join(' · '))}</span></div><span class="health-score">${h.level==='green'?'Em dia':h.level==='yellow'?'Atenção':'Intervir'}</span></div>`}).join(''):'<div class="dash-empty">Sem pessoas neste recorte.</div>';
+  const mk=monthKey(),target=isAdmin?(memberById(myId)||scope[0]):memberById(myId),myCheck=target&&state.activities.find(a=>a.ownerId===target.id&&a.type==='checkin'&&a.checkinMonth===mk);
+  $('#dashCheckin').innerHTML=target?`<div class="checkin-spot"><div class="checkin-month">${esc(monthLabel(mk))}</div><div class="checkin-title">${myCheck?'✅ Check-in preenchido':'Seu check-in está esperando'}</div><div class="checkin-note">${myCheck?esc((myCheck.checkinNext||myCheck.description||'Registrado.').slice(0,180)):'Registre o que fez, o que entregou, a principal dificuldade e o próximo passo.'}</div><div class="checkin-actions"><button class="btn primary" onclick="openCheckin('${target.id}')">${myCheck?'Ver / atualizar':'Preencher agora'}</button></div></div>`:'<div class="dash-empty">Vincule seu perfil para usar o check-in.</div>';
+  const prods=state.activities.filter(a=>a.type==='produto'&&scope.some(m=>m.id===a.ownerId)).sort((a,b)=>_activityTime(b)-_activityTime(a)).slice(0,6);$('#dashProducts').innerHTML=prods.length?prods.map(a=>`<div class="product-mini"><span class="product-type">${({artigo:'📄',resumo:'🧾',apresentacao:'🖥️',relatorio:'📋',base:'🗃️',plataforma:'💻',material:'📚',evento:'🎪',tcc:'🎓',outro:'🎯'})[a.productType]||'🎯'}</span><div class="product-main"><b>${esc(a.title||'Produto')}</b><span>${esc(a.ownerName||'')} ${a.dueDate?'· '+fmtDate(a.dueDate):''}</span></div><span class="product-status">${esc(ACTIVITY_STATUS[a.status]||a.status||'')}</span></div>`).join(''):'<div class="dash-empty">Nenhum produto registrado ainda.</div>';
+  $('#dashBackupBtn')?.style.setProperty('display',isAdmin?'inline-flex':'none');updateAttentionBadge();
+}
+function _fillOwnerSelect(selId,ownerPreset=''){const sel=$(selId),ordered=[...state.members].filter(m=>m.status!=='egresso').sort((a,b)=>a.nome.localeCompare(b.nome));sel.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');sel.value=ownerPreset||myId||ordered[0]?.id||''}
+function openCheckin(ownerPreset=''){if(!myId&&!isAdmin){toast('Vincule seu perfil ao login.');return}_fillOwnerSelect('#checkinOwner',ownerPreset);$('#checkinOwnerRow').style.display=isAdmin?'block':'none';const owner=isAdmin?$('#checkinOwner').value:myId,mk=monthKey();$('#checkinMonth').value=mk;const a=state.activities.find(x=>x.ownerId===owner&&x.type==='checkin'&&x.checkinMonth===mk);$('#checkinDid').value=a?.checkinDid||'';$('#checkinDelivered').value=a?.checkinDelivered||'';$('#checkinDifficulty').value=a?.checkinDifficulty||'';$('#checkinNext').value=a?.checkinNext||'';openOverlay('checkinOverlay')}
+function loadCheckinForSelection(){const owner=isAdmin?$('#checkinOwner').value:myId,mk=$('#checkinMonth').value||monthKey(),a=state.activities.find(x=>x.ownerId===owner&&x.type==='checkin'&&x.checkinMonth===mk);$('#checkinDid').value=a?.checkinDid||'';$('#checkinDelivered').value=a?.checkinDelivered||'';$('#checkinDifficulty').value=a?.checkinDifficulty||'';$('#checkinNext').value=a?.checkinNext||''}
+async function saveCheckin(){const ownerId=isAdmin?$('#checkinOwner').value:myId,mk=$('#checkinMonth').value||monthKey();if(!ownerId){toast('Selecione o Carbonauta.');return}const m=memberById(ownerId),did=$('#checkinDid').value.trim(),del=$('#checkinDelivered').value.trim(),dif=$('#checkinDifficulty').value.trim(),next=$('#checkinNext').value.trim();if(!did&&!del&&!dif&&!next){toast('Preencha ao menos uma informação do check-in.');return}const data={ownerId,ownerUid:(state.users||[]).find(u=>u.memberId===ownerId)?.uid||(ownerId===myId?(window.auth.currentUser?.uid||''):''),ownerName:m?.nome||'',type:'checkin',status:'concluido',title:`Check-in mensal · ${monthLabel(mk)}`,description:next||did,checkinMonth:mk,checkinDid:did,checkinDelivered:del,checkinDifficulty:dif,checkinNext:next,startDate:mk+'-01',progress:100,updatedAt:FB().serverTimestamp()};const existing=state.activities.find(x=>x.ownerId===ownerId&&x.type==='checkin'&&x.checkinMonth===mk);try{if(existing)await FB().setDoc(FB().doc(window.db,'rede_activities',existing.id),data,{merge:true});else await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});closeOverlay('checkinOverlay');toast('Check-in salvo.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou o check-in.':'Erro ao salvar check-in.') }}
+function openProduct(ownerPreset=''){if(!myId&&!isAdmin){toast('Vincule seu perfil ao login.');return}_fillOwnerSelect('#productOwner',ownerPreset);$('#productOwnerRow').style.display=isAdmin?'block':'none';$('#productType').value='artigo';$('#productTitle').value='';$('#productStatus').value='planejado';$('#productDue').value='';$('#productNotes').value='';openOverlay('productOverlay')}
+async function saveProduct(){const ownerId=isAdmin?$('#productOwner').value:myId,title=$('#productTitle').value.trim();if(!ownerId||!title){toast('Informe o Carbonauta e o produto.');return}const m=memberById(ownerId),ptype=$('#productType').value,data={ownerId,ownerUid:(state.users||[]).find(u=>u.memberId===ownerId)?.uid||(ownerId===myId?(window.auth.currentUser?.uid||''):''),ownerName:m?.nome||'',type:'produto',productType:ptype,status:$('#productStatus').value,title,description:$('#productNotes').value.trim(),dueDate:$('#productDue').value,startDate:new Date().toISOString().slice(0,10),progress:$('#productStatus').value==='concluido'?100:$('#productStatus').value==='revisao'?80:$('#productStatus').value==='andamento'?45:5,updatedAt:FB().serverTimestamp()};try{await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});closeOverlay('productOverlay');toast('Produto registrado.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou o produto.':'Erro ao registrar produto.')}}
+function dossierRowsFor(m){const acts=state.activities.filter(a=>a.ownerId===m.id).sort((a,b)=>_activityTime(b)-_activityTime(a)),repo=memberRepositoryItems(m.id),cron=buildCronoItems().filter(x=>x.ownerId===m.id);return {acts,repo,cron,checkins:acts.filter(a=>a.type==='checkin'),products:acts.filter(a=>a.type==='produto')}}
+function dossierHTML(m){const {acts,repo,cron,checkins,products}=dossierRowsFor(m),nv=NIVEIS[m.nivel]||{color:'#607d8b',short:m.nivel||''},h=memberHealth(m);const table=acts.length?`<table class="dossier-table"><thead><tr><th>Tipo</th><th>Registro</th><th>Status</th><th>Data/prazo</th></tr></thead><tbody>${acts.map(a=>`<tr><td>${esc(ACTIVITY_TYPES[a.type]||a.type)}</td><td><b>${esc(a.title||'')}</b>${a.description?'<br>'+esc(a.description):''}</td><td>${esc(ACTIVITY_STATUS[a.status]||a.status||'')}</td><td>${esc(a.dueDate?fmtDate(a.dueDate):a.startDate?fmtDate(a.startDate):'')}</td></tr>`).join('')}</tbody></table>`:'<div class="dash-empty">Sem registros.</div>';return `<article class="dossier-sheet"><div class="dossier-head"><div class="dossier-avatar" style="background:${nv.color}">${m.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m.nome)}</div><div><div class="dossier-name">${esc(m.nome)}</div><div class="dossier-meta">${esc(nv.short)}${m.programa?' · '+esc(m.programa):''}${m.bolsista?' · Bolsista':''} · Saúde: ${h.level==='green'?'em dia':h.level==='yellow'?'atenção':'intervenção'}</div></div></div><section class="dossier-section"><h3>★ Pergunta científica</h3><div class="dossier-question">${esc(m.perguntaCientifica||'Ainda não preenchida.')}</div></section><section class="dossier-section"><h3>Identidade do projeto</h3><table class="dossier-table"><tr><th>Objetivo</th><td>${esc(m.objetivoProjeto||'—')}</td></tr><tr><th>Público atendido</th><td>${esc(m.grupoAtendido||'—')}</td></tr><tr><th>Visibilidade</th><td>${esc(m.ideiaVisibilidade||'—')}</td></tr><tr><th>Outros</th><td>${esc(m.projetoOutros||'—')}</td></tr></table></section><section class="dossier-section"><h3>Acompanhamento (${acts.length})</h3>${table}</section><section class="dossier-section"><h3>Produtos (${products.length}) · Check-ins (${checkins.length}) · Repositório (${repo.length}) · Prazos (${cron.length})</h3><div class="dash-sub">O Excel do dossiê contém as tabelas completas de cada bloco.</div></section></article>`}
+function refreshDossierPerson(){const sel=$('#dossierPerson'),cur=sel.value;const list=(isAdmin?state.members:state.members.filter(m=>m.id===myId)).sort((a,b)=>a.nome.localeCompare(b.nome));sel.innerHTML=list.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');sel.value=list.some(m=>m.id===cur)?cur:(myId&&list.some(m=>m.id===myId)?myId:list[0]?.id||'')}
+function renderDossier(){const m=memberById($('#dossierPerson')?.value);if(!m)return;$('#dossierContent').innerHTML=dossierHTML(m)}
+function openDossier(memberId=''){refreshDossierPerson();if(memberId&&[...$('#dossierPerson').options].some(o=>o.value===memberId))$('#dossierPerson').value=memberId;renderDossier();openOverlay('dossierOverlay')}
+function dossierWorkbook(memberId){const m=memberById(memberId),{acts,repo,cron,checkins,products}=dossierRowsFor(m);const wb=XLSX.utils.book_new();const profile=[{Nome:m.nome,Nivel:NIVEIS[m.nivel]?.label||m.nivel,Programa:m.programa||'',Status:m.status||'',Bolsista:m.bolsista?'Sim':'Não','Pergunta científica':m.perguntaCientifica||'','Objetivo central':m.objetivoProjeto||'','Grupo atendido':m.grupoAtendido||'','Ideia de visibilidade':m.ideiaVisibilidade||'',Outros:m.projetoOutros||''}];XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(profile),'Perfil');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(acts.map(a=>({Tipo:ACTIVITY_TYPES[a.type]||a.type,Titulo:a.title||'',Status:ACTIVITY_STATUS[a.status]||a.status,Inicio:a.startDate||'',Prazo:a.dueDate||'',Descricao:a.description||''}))), 'Acompanhamento');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(products.map(a=>({Produto:a.title||'',Tipo:PRODUCT_TYPES[a.productType]||a.productType,Status:ACTIVITY_STATUS[a.status]||a.status,Prazo:a.dueDate||'',Observacoes:a.description||''}))), 'Produtos');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(checkins.map(a=>({Mes:a.checkinMonth||'',Fez:a.checkinDid||'',Entregou:a.checkinDelivered||'',Dificuldade:a.checkinDifficulty||'',Proximo:a.checkinNext||''}))), 'Checkins');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(repo.map(r=>({Titulo:r.title||'',Tipo:r.kind||'',Arquivo:r.fileName||'',URL:r.url||''}))), 'Repositorio');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(cron.map(c=>({Titulo:c.titulo||'',Data:c.data||'',Concluido:c.feito?'Sim':'Não'}))), 'Prazos');return wb}
+function exportDossierExcel(){const id=$('#dossierPerson').value,m=memberById(id);if(!m||!window.XLSX)return;XLSX.writeFile(dossierWorkbook(id),`Dossie_${slugify(m.nome)}.xlsx`)}
+function exportDossierCsv(){const id=$('#dossierPerson').value,m=memberById(id);if(!m)return;const {acts}=dossierRowsFor(m),rows=[['Nome','Tipo','Título','Status','Início','Prazo','Descrição'],...acts.map(a=>[m.nome,ACTIVITY_TYPES[a.type]||a.type,a.title||'',ACTIVITY_STATUS[a.status]||a.status,a.startDate||'',a.dueDate||'',a.description||''])];const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n');const b=new Blob([csv],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.csv`;a.click();URL.revokeObjectURL(u)}
+function exportDossierWord(){const m=memberById($('#dossierPerson').value);if(!m)return;const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Dossiê · ${esc(m.nome)}</title><style>body{font-family:Arial,sans-serif;margin:32px;color:#152b38}h1,h2,h3{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:11pt}td,th{border:1px solid #ddd;padding:7px;text-align:left}.dossier-question{padding:14px;background:#f2efff;border:1px solid #d7cdfa}</style></head><body><h1>Dossiê do Carbonauta</h1>${dossierHTML(m)}</body></html>`;const blob=new Blob(['\ufeff',html],{type:'application/msword'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.doc`;a.click();URL.revokeObjectURL(u)}
+function printDossier(){const m=memberById($('#dossierPerson').value);if(!m)return;const w=window.open('','_blank');w.document.write(`<html><head><title>Dossiê · ${esc(m.nome)}</title><style>body{font-family:Arial,sans-serif;margin:30px;color:#152b38}h1,h2,h3{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:12px}td,th{border-bottom:1px solid #ddd;padding:7px;text-align:left}.dossier-question{padding:14px;background:#f2efff;border:1px solid #d7cdfa;border-radius:10px}</style></head><body>${dossierHTML(m)}</body></html>`);w.document.close();setTimeout(()=>w.print(),350)}
+function exportGeneralBackup(){if(!isAdmin||!window.XLSX){toast('Backup geral disponível somente para o coordenador.');return}const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.members.map(m=>({id:m.id,nome:m.nome,nivel:m.nivel,programa:m.programa||'',status:m.status||'',bolsista:m.bolsista?'Sim':'Não',pergunta:m.perguntaCientifica||'',objetivo:m.objetivoProjeto||'',publico:m.grupoAtendido||'',visibilidade:m.ideiaVisibilidade||''}))), 'Pessoas');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.activities.map(a=>({id:a.id,ownerId:a.ownerId,ownerName:a.ownerName||'',tipo:a.type,status:a.status,titulo:a.title||'',descricao:a.description||'',inicio:a.startDate||'',prazo:a.dueDate||'',mes:a.checkinMonth||'',produto:a.productType||''}))), 'Acompanhamento');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.publicacoes.map(x=>({id:x.id,ownerUid:x.ownerUid||'',titulo:x.titulo||x.title||'',categoria:x.categoria||'',url:x.fileUrl||x.url||x.externalUrl||''}))), 'Repositorio');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(buildCronoItems().map(x=>({tipo:x.kind,titulo:x.titulo,data:x.data,owner:x.ownerName,concluido:x.feito?'Sim':'Não'}))), 'Cronograma');XLSX.writeFile(wb,`Carbonautas_backup_${new Date().toISOString().slice(0,10)}.xlsx`);toast('Backup Excel gerado.')}
 
 /* ============ FEED SOCIAL ============ */
 let postFileData='',postFileName='';
@@ -3640,7 +3798,7 @@ async function dedupeMembers(){
 
 /* ============ NOTIFICAÇÕES ============ */
 function notifMillis(n){return n?.ts?.toMillis?n.ts.toMillis():+new Date(n?.ts||0)}
-function notificationIcon(kind='atualizacao'){return ({ajuda_campo:'🌿',ajuda_lab:'🧪',ajuda_dados:'📊',ajuda_outro:'🆘',alerta:'⚠️',ideia:'💡',resenha:'😂',recado:'✈️',atualizacao:'📌',resultado:'✅',evento:'📅'})[kind]||'🔔'}
+function notificationIcon(kind='atualizacao'){return ({ajuda_campo:'🌿',ajuda_lab:'🧪',ajuda_dados:'📊',ajuda_outro:'🆘',alerta:'⚠️',ideia:'💡',resenha:'😂',recado:'✈️',atualizacao:'📌',resultado:'✅',evento:'📅',acompanhamento:'📌',correcao:'✍️',pendencia:'⚠️'})[kind]||'🔔'}
 function renderNotificationUI(){
   const unread=state.notifications.filter(n=>!n.read).length,b=$('#notifyBadge');
   if(b){b.textContent=unread>99?'99+':unread;b.style.display=unread?'grid':'none'}
@@ -3652,7 +3810,8 @@ function renderNotificationUI(){
 async function openNotification(id){
   const n=state.notifications.find(x=>x.id===id);if(!n)return;
   try{await FB().updateDoc(FB().doc(window.db,'rede_notifications',id),{read:true,readAt:FB().serverTimestamp()})}catch(e){console.warn(e)}
-  closeOverlay('notifyOverlay');switchView('mural');
+  closeOverlay('notifyOverlay');
+  if(n.sourceType==='acompanhamento'){switchView('track');setTimeout(()=>{if(n.ownerId&&$('#trackOwner')){$('#trackOwner').value=n.ownerId;renderTrack()}},40)} else switchView('mural');
 }
 async function markAllNotificationsRead(){
   const unread=state.notifications.filter(n=>!n.read);if(!unread.length){toast('Não há notificações novas.');return}
@@ -3746,8 +3905,9 @@ function switchView(v){
   document.body.dataset.view=v;
   $$('.view').forEach(el=>el.classList.remove('on'));
   $$('.tab').forEach(el=>el.classList.toggle('on',el.dataset.view===v));
-  const map={rede:'viewRede',crono:'viewCrono',track:'viewTrack',feed:'viewFeed',mensagens:'viewMensagens',mural:'viewMural',fotos:'viewFotos',pubs:'viewPubs'};
+  const map={painel:'viewPainel',rede:'viewRede',crono:'viewCrono',track:'viewTrack',feed:'viewFeed',mensagens:'viewMensagens',mural:'viewMural',fotos:'viewFotos',pubs:'viewPubs'};
   map[v] && $('#'+map[v]).classList.add('on');
+  if(v==='painel') renderPainel();
   if(v==='rede') renderAll();
   if(v==='crono') renderCrono();
   if(v==='track') renderTrack();
@@ -3848,9 +4008,21 @@ if($('#muralNewBtn')) $('#muralNewBtn').onclick=()=>openPostModal('atualizacao')
 if($('#muralDirectTopBtn')) $('#muralDirectTopBtn').onclick=openRecado;
 if($('#muralDirectBtn')) $('#muralDirectBtn').onclick=openRecado;
 
+$('#dashCheckinBtn').onclick=()=>openCheckin();
+$('#dashProductBtn').onclick=()=>openProduct();
+$('#dashDossierBtn').onclick=()=>openDossier();
+$('#dashNewTaskBtn').onclick=()=>openActivityPreset('pendencia');
+$('#dashProductsAllBtn').onclick=()=>switchView('track');
+$('#dashBackupBtn').onclick=exportGeneralBackup;
+$('#trackCheckinBtn').onclick=()=>openCheckin();
+$('#trackProductBtn').onclick=()=>openProduct();
+$('#trackDossierBtn').onclick=()=>openDossier();
+$('#checkinOwner').onchange=loadCheckinForSelection; $('#checkinMonth').onchange=loadCheckinForSelection; $('#saveCheckinBtn').onclick=saveCheckin;
+$('#saveProductBtn').onclick=saveProduct;
+$('#dossierPerson').onchange=renderDossier; $('#dossierExcelBtn').onclick=exportDossierExcel; $('#dossierCsvBtn').onclick=exportDossierCsv; $('#dossierWordBtn').onclick=exportDossierWord; $('#dossierPrintBtn').onclick=printDossier;
 $('#addActivityBtn').onclick=()=>openActivity(null);
 $('#trackOwner').onchange=renderTrack; $('#trackStatus').onchange=renderTrack; $('#trackMine').onchange=renderTrack;
-$('#activityProgress').oninput=e=>$('#activityProgressLabel').textContent=e.target.value+'%';
+$('#activityProgress').oninput=e=>$('#activityProgressLabel').textContent=e.target.value+'%'; $('#activityType').onchange=syncActivityTypeUi;
 $('#saveActivityBtn').onclick=saveActivity; $('#deleteActivityBtn').onclick=deleteActivity;
 $('#saveProjectProfileBtn').onclick=saveProjectProfile;
 if($('#newPostBtn')) $('#newPostBtn').onclick=()=>openPostModal('atualizacao'); if($('#muralPostBtn')) $('#muralPostBtn').onclick=()=>openPostModal('atualizacao'); $$('[data-mural-kind]').forEach(b=>b.onclick=()=>openMuralAction(b.dataset.muralKind)); $$('[data-mf]').forEach(b=>b.onclick=()=>{muralFilter=b.dataset.mf;$$('[data-mf]').forEach(x=>x.classList.toggle('on',x===b));renderMural();if($('#muralMsgs'))$('#muralMsgs').scrollTop=0;}); $('#postFilePick').onclick=()=>$('#postFile').click(); $('#postFile').onchange=e=>handlePostFile(e.target.files[0]); $('#savePostBtn').onclick=saveFeedPost;
