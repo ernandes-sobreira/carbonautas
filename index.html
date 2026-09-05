@@ -512,6 +512,8 @@
   .mural-recado-card{border:1px solid #D8D4F6;border-left:7px solid #7358D9;border-radius:20px;background:linear-gradient(135deg,#fff 0%,#FAF8FF 100%);padding:16px 18px;box-shadow:0 8px 22px rgba(55,39,111,.07)}.mural-recado-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.mural-recado-head .feed-av{width:42px;height:42px}.mural-recado-main{flex:1;min-width:160px}.mural-recado-name{font-size:15px;font-weight:900;color:#142D40}.mural-recado-time{font-size:11px;color:#7B8D98;margin-top:2px}.mural-recado-dest{font-size:11px;font-weight:900;border-radius:999px;padding:6px 10px;background:#EEE9FF;color:#5A3EB8;border:1px solid #D7CCFF}.mural-recado-prio{font-size:10px;font-weight:900;border-radius:999px;padding:5px 8px}.mural-recado-prio.alta{background:#FFE9ED;color:#B51F39}.mural-recado-prio.media{background:#FFF5DF;color:#8F6500}.mural-recado-prio.baixa{background:#EAF6EF;color:#267A45}.mural-recado-text{font-size:16px;line-height:1.6;color:#173247;background:#fff;border:1px solid #E5E0F7;border-radius:15px;padding:13px 15px;white-space:pre-wrap}.mural-recado-card .social-bar{justify-content:flex-start}.mural-recado-card .comments{border-top:0}
   @media(max-width:760px){.quick-wrap{width:min(100% - 20px,900px);padding-top:12px}.quick-head,.mural-board-head{padding:14px;flex-direction:column}.quick-head h2,.mural-board-head h2{font-size:22px}.quick-card{max-width:92%}.quick-composer .who{max-width:105px;padding:8px}.mural-board{padding:12px 10px 0}.mural-board-actions{width:100%;justify-content:flex-start}.mural-board-actions .btn{flex:1;justify-content:center}.mural-filterbar-pro{overflow-x:auto;flex-wrap:nowrap;padding-bottom:10px}.mural-filterbar-pro .mural-filter{white-space:nowrap}.quick-card .social-wrap{display:none}}
 
+  .mural-all-section{display:flex;flex-direction:column;gap:14px;margin-bottom:18px}.mural-all-title{position:sticky;top:0;z-index:3;display:flex;align-items:center;gap:8px;background:#EAF2F7;border:1px solid #C9DAE5;border-radius:12px;padding:9px 12px;font-size:12px;font-weight:900;color:#173247;text-transform:uppercase;letter-spacing:.04em}.mural-all-title span{margin-left:auto;background:#fff;border:1px solid #C9DAE5;border-radius:999px;padding:2px 8px;font-size:10px;color:#557080}
+
   /* Visualizador local de documentos */
   .file-preview-modal .modal-b{overflow:auto;background:#EEF3F8}
   .docx-preview{max-width:900px;margin:22px auto;background:#fff;padding:42px 54px;min-height:680px;box-shadow:0 2px 18px rgba(16,38,44,.12);color:#111;line-height:1.55}
@@ -3086,46 +3088,68 @@ function muralMatches(item){
   return k===filter;
 }
 function muralTime(item){
-  const t=item?.ts;
-  if(t?.toMillis) return t.toMillis();
-  if(t instanceof Date) return t.getTime();
-  if(typeof t==='number') return t;
-  const parsed=Date.parse(t||'');
-  return Number.isFinite(parsed)?parsed:0;
+  // Aceita Timestamp real do Firestore, objetos serializados e campos antigos.
+  const candidates=[item?.ts,item?.createdAt,item?.updatedAt,item?.timestamp,item?.date];
+  for(const t of candidates){
+    if(!t) continue;
+    if(typeof t?.toMillis==='function'){
+      const v=t.toMillis(); if(Number.isFinite(v)&&v>0) return v;
+    }
+    const sec=t?.seconds ?? t?._seconds;
+    if(Number.isFinite(Number(sec))){
+      const nano=Number(t?.nanoseconds ?? t?._nanoseconds ?? 0);
+      return Number(sec)*1000 + Math.floor(nano/1e6);
+    }
+    if(t instanceof Date){const v=t.getTime();if(Number.isFinite(v))return v;}
+    if(typeof t==='number'&&Number.isFinite(t)) return t;
+    if(typeof t==='string'){
+      const v=Date.parse(t); if(Number.isFinite(v)) return v;
+    }
+  }
+  return 0;
+}
+function muralItemHTML(item){
+  const ms=item.__ms||muralTime(item)||Date.now();
+  if(item.__type==='post'){
+    const m=memberForAuthor(item.authorId,item.authorName),can=isAdmin||isMe(item.authorId),pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.authorName||'Carbonauta',isImg=item.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(item.fileName||item.fileUrl)||item.mime?.startsWith('image/')),km=muralKindMeta(item.kind),dest=item.para?`<span class="mural-recado-dest">🔔 Para: ${esc(item.paraNome||memberById(item.para)?.nome||'Pessoa')}</span>`:`<span class="mural-recado-dest">🔔 Todo o grupo</span>`;
+    return `<article class="feed-card mural-post kind-${km.cls}" data-mural-id="${esc(item.id||'')}" data-mural-type="post"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div><div class="feed-author">${esc(nm)}</div><div class="feed-time">${fmtTime(ms)}</div></div><span class="feed-kind kind-${km.cls}">${km.icon} ${esc(km.label)}</span>${dest}${can?`<button class="mini-x" onclick="deleteFeedPost('${item.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${item.title?`<div class="feed-title">${esc(item.title)}</div>`:''}${item.text?`<div class="feed-text">${esc(item.text)}</div>`:''}${item.externalUrl?`<a class="feed-attachment" href="${esc(item.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${item.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(item.fileUrl)}'),decodeURIComponent('${encodeURIComponent(item.fileName||item.title||'Anexo')}'))">👁️ Visualizar · ${esc(item.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(item.fileUrl)}" alt="${esc(item.title||'Foto publicada')}">`:''}${socialBar('post',item.id)}${renderComments('post',item.id)}</article>`;
+  }
+  const m=memberForAuthor(item.authorId,item.author),can=isAdmin||isMe(item.authorId),pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.author||'Carbonauta',to=item.para?(item.paraNome||memberById(item.para)?.nome||'Pessoa'):'Todo o grupo',prio=item.prioridade||'media';
+  return `<article class="mural-recado-card" data-mural-id="${esc(item.id||'')}" data-mural-type="recado"><div class="mural-recado-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div class="mural-recado-main"><div class="mural-recado-name">${esc(nm)}</div><div class="mural-recado-time">${fmtTime(ms)}</div></div><span class="mural-recado-dest">✈️ Para: ${esc(to)}</span><span class="mural-recado-prio ${prio}">${prio==='alta'?'URGENTE':prio==='baixa'?'Baixa prioridade':'Importante'}</span>${can?`<button class="mini-x" onclick="deleteChatMsg('${item.id}')" title="Excluir">×</button>`:''}</div><div class="mural-recado-text">${esc(item.text)}</div>${socialBar('chat',item.id)}${renderComments('chat',item.id)}</article>`;
+}
+function muralSectionHTML(title,items){
+  if(!items.length)return '';
+  let html=`<div class="mural-all-section"><div class="mural-all-title">${title} <span>${items.length}</span></div>`;
+  let lastDay=null;
+  items.forEach(item=>{
+    const ms=item.__ms||muralTime(item)||Date.now(),dl=dayLabel(ms);
+    if(dl!==lastDay){html+=`<div class="day-sep">${dl}</div>`;lastDay=dl}
+    html+=muralItemHTML(item);
+  });
+  html+='</div>';
+  return html;
 }
 function renderMural(){
   const wrap=$('#muralMsgs'); if(!wrap)return;
+  const recadoItems=state.chat.filter(isRecado).map(c=>({...c,__type:'recado',__ms:muralTime(c)})).sort((a,b)=>(b.__ms||0)-(a.__ms||0));
+  const postItems=state.feed.map(p=>({...p,__type:'post',__ms:muralTime(p)})).sort((a,b)=>(b.__ms||0)-(a.__ms||0));
 
-  // Normaliza primeiro e só depois filtra. Isso evita uma publicação
-  // desaparecer quando “Tudo” mistura feed + mensagens direcionadas.
-  const recadoItems=state.chat
-    .filter(isRecado)
-    .map(c=>({...c,__type:'recado',__ms:muralTime(c)}));
-  const postItems=state.feed
-    .map(p=>({...p,__type:'post',__ms:muralTime(p)}));
-
-  const allItems=[...postItems,...recadoItems]
-    .sort((a,b)=>(b.__ms||0)-(a.__ms||0));
-  const list=allItems.filter(muralMatches);
-
-  if(!list.length){
-    wrap.innerHTML='<div class="mural-empty">Nada nesta categoria ainda. Use os botões acima para publicar.</div>';
+  if((muralFilter||'all')==='all'){
+    // Não mistura os dois tipos no mesmo loop. Cada bloco usa exatamente
+    // o mesmo renderer dos filtros individuais, evitando posts "fantasmas".
+    const html=muralSectionHTML('📌 Publicações do Mural',postItems)+muralSectionHTML('✈️ Mensagens direcionadas',recadoItems);
+    wrap.innerHTML=html||'<div class="mural-empty">Nada no Mural ainda.</div>';
     wrap.scrollTop=0;
     return;
   }
 
+  const allItems=[...postItems,...recadoItems].filter(muralMatches).sort((a,b)=>(b.__ms||0)-(a.__ms||0));
+  if(!allItems.length){wrap.innerHTML='<div class="mural-empty">Nada nesta categoria ainda. Use os botões acima para publicar.</div>';wrap.scrollTop=0;return;}
   let html='',lastDay=null;
-  list.forEach(item=>{
-    const ms=item.__ms||Date.now(),dl=dayLabel(ms);
+  allItems.forEach(item=>{
+    const ms=item.__ms||muralTime(item)||Date.now(),dl=dayLabel(ms);
     if(dl!==lastDay){html+=`<div class="day-sep">${dl}</div>`;lastDay=dl}
-
-    if(item.__type==='post'){
-      const m=memberForAuthor(item.authorId,item.authorName),can=isAdmin||isMe(item.authorId),pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.authorName||'Carbonauta',isImg=item.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(item.fileName||item.fileUrl)||item.mime?.startsWith('image/')),km=muralKindMeta(item.kind),dest=item.para?`<span class="mural-recado-dest">🔔 Para: ${esc(item.paraNome||memberById(item.para)?.nome||'Pessoa')}</span>`:`<span class="mural-recado-dest">🔔 Todo o grupo</span>`;
-      html+=`<article class="feed-card mural-post kind-${km.cls}" data-mural-id="${esc(item.id||'')}" data-mural-type="post"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div><div class="feed-author">${esc(nm)}</div><div class="feed-time">${fmtTime(ms)}</div></div><span class="feed-kind kind-${km.cls}">${km.icon} ${esc(km.label)}</span>${dest}${can?`<button class="mini-x" onclick="deleteFeedPost('${item.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${item.title?`<div class="feed-title">${esc(item.title)}</div>`:''}${item.text?`<div class="feed-text">${esc(item.text)}</div>`:''}${item.externalUrl?`<a class="feed-attachment" href="${esc(item.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${item.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(item.fileUrl)}'),decodeURIComponent('${encodeURIComponent(item.fileName||item.title||'Anexo')}'))">👁️ Visualizar · ${esc(item.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(item.fileUrl)}" alt="${esc(item.title||'Foto publicada')}">`:''}${socialBar('post',item.id)}${renderComments('post',item.id)}</article>`;
-    }else{
-      const m=memberForAuthor(item.authorId,item.author),can=isAdmin||isMe(item.authorId),pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.author||'Carbonauta',to=item.para?(item.paraNome||memberById(item.para)?.nome||'Pessoa'):'Todo o grupo',prio=item.prioridade||'media';
-      html+=`<article class="mural-recado-card" data-mural-id="${esc(item.id||'')}" data-mural-type="recado"><div class="mural-recado-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div class="mural-recado-main"><div class="mural-recado-name">${esc(nm)}</div><div class="mural-recado-time">${fmtTime(ms)}</div></div><span class="mural-recado-dest">✈️ Para: ${esc(to)}</span><span class="mural-recado-prio ${prio}">${prio==='alta'?'URGENTE':prio==='baixa'?'Baixa prioridade':'Importante'}</span>${can?`<button class="mini-x" onclick="deleteChatMsg('${item.id}')" title="Excluir">×</button>`:''}</div><div class="mural-recado-text">${esc(item.text)}</div>${socialBar('chat',item.id)}${renderComments('chat',item.id)}</article>`;
-    }
+    html+=muralItemHTML(item);
   });
   wrap.innerHTML=html;
 }
