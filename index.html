@@ -901,7 +901,13 @@
   .oo-setup-card{padding:18px;border:1px solid #d9e0ea;border-radius:18px;background:linear-gradient(145deg,#f8fbff,#f5f1ff);margin-bottom:14px}
   .oo-setup-card h3{margin:0 0 6px;font-size:17px}.oo-setup-card p{margin:0;color:var(--ink-3);font-size:12px;line-height:1.5}
   .oo-server-state{font-size:11px;color:var(--ink-3);margin-top:5px;word-break:break-all}
-  @media(max-width:700px){.oo-modal{width:100vw;height:100dvh;border-radius:0}.oo-modal .modal-h{padding:8px}.oo-modal .modal-h h2{font-size:14px}.oo-editor-host{min-height:0}.oo-statusbar{padding:7px 9px}.oo-modal .preview-actions .btn:not(.oo-save-btn){display:none}.oo-modal .preview-actions .oo-save-btn{display:inline-flex}}
+  .office-new-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+  .office-new-card{border:1px solid #d9e3ef;border-radius:18px;background:#fff;padding:18px 14px;text-align:left;cursor:pointer;transition:.18s;box-shadow:0 6px 18px rgba(15,39,55,.06)}
+  .office-new-card:hover,.office-new-card.on{transform:translateY(-2px);border-color:#7c3aed;box-shadow:0 10px 25px rgba(124,58,237,.14)}
+  .office-new-card .ico{font-size:30px;display:block;margin-bottom:7px}.office-new-card b{display:block;font-size:14px}.office-new-card small{display:block;color:var(--ink-3);margin-top:4px;line-height:1.35}
+  .office-edit-btn{background:linear-gradient(135deg,#14b8a6,#0ea5e9)!important;border-color:transparent!important;color:#fff!important;font-weight:800!important}
+  .office-version{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;background:#e9f8ff;color:#0b6380;font-size:10px;font-weight:800;margin-top:6px}
+  @media(max-width:700px){.oo-modal{width:100vw;height:100dvh;border-radius:0}.oo-modal .modal-h{padding:8px}.oo-modal .modal-h h2{font-size:14px}.oo-editor-host{min-height:0}.oo-statusbar{padding:7px 9px}.oo-modal .preview-actions .btn:not(.oo-save-btn){display:none}.oo-modal .preview-actions .oo-save-btn{display:inline-flex}.office-new-grid{grid-template-columns:1fr}.office-new-card{padding:14px}}
 
 </style>
 </head>
@@ -1279,6 +1285,7 @@
             <div class="sub">Documentos, projetos, apresentações, relatórios, planilhas, artigos e outros produtos de todos os Carbonautas.</div>
           </div>
           <div class="spacer"></div>
+          <button class="btn" type="button" id="newOfficeBtn">✨ Novo Word / Excel / PPT</button>
           <button class="btn primary" type="button" id="addPubBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Adicionar publicação
@@ -1319,15 +1326,15 @@
 <div class="overlay" id="onlyOfficeOverlay">
   <div class="modal oo-modal">
     <div class="modal-h">
-      <h2 id="ooTitle">Correção online</h2><div class="spacer"></div>
+      <h2 id="ooTitle">Editor online</h2><div class="spacer"></div>
       <div class="preview-actions">
-        <button class="btn oo-save-btn" id="ooSaveBtn" type="button">💾 Salvar nova versão no Carbonautas</button>
+        <button class="btn oo-save-btn" id="ooSaveBtn" type="button">💾 Salvar no Carbonautas</button>
         <button class="btn" id="ooConfigBtn" type="button">⚙️ Servidor</button>
         <button class="btn ghost" id="ooCloseBtn" type="button">Fechar</button>
       </div>
     </div>
     <div class="modal-b"><div id="onlyOfficeEditor" class="oo-editor-host"></div></div>
-    <div class="oo-statusbar"><span class="oo-pill" id="ooModePill">✍️ Controle de alterações</span><span id="ooStatus">Preparando editor…</span></div>
+    <div class="oo-statusbar"><span class="oo-pill" id="ooModePill">✏️ Edição online</span><span id="ooStatus">Preparando editor…</span></div>
   </div>
 </div>
 
@@ -1336,11 +1343,28 @@
   <div class="modal" style="max-width:620px">
     <div class="modal-h"><h2>Conectar editor gratuito</h2><div class="spacer"></div><button class="btn ghost" data-close="onlyOfficeSetupOverlay">Fechar</button></div>
     <div class="modal-b">
-      <div class="oo-setup-card"><h3>✅ ONLYOFFICE conectado</h3><p>O editor gratuito do Carbonautas está ligado ao servidor próprio <strong>docs.carbonautas.online</strong>. Arquivos DOCX em fluxo de correção podem ser abertos com comentários e controle de alterações.</p></div>
+      <div class="oo-setup-card"><h3>✅ ONLYOFFICE conectado</h3><p>O editor gratuito do Carbonautas está ligado ao servidor próprio <strong>docs.carbonautas.online</strong>. Word, Excel e PowerPoint podem ser editados online. Em arquivos DOCX enviados para correção, o revisor também pode usar comentários e controle de alterações.</p></div>
       <div class="fg"><label>Endereço do servidor ONLYOFFICE</label><input id="ooServerUrl" placeholder="https://docs.seudominio.com"><div class="oo-server-state">Use somente o endereço HTTPS, sem barra no final.</div></div>
       <div class="notice">Servidor padrão: <strong>https://docs.carbonautas.online</strong>. O JWT permanece somente no VPS e nunca é exposto no index.html.</div>
     </div>
     <div class="modal-f"><button class="btn" data-close="onlyOfficeSetupOverlay">Cancelar</button><button class="btn primary" id="ooSaveConfigBtn">Salvar endereço</button></div>
+  </div>
+</div>
+
+<!-- NEW OFFICE FILE -->
+<div class="overlay" id="newOfficeOverlay">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-h"><h2>✨ Criar arquivo de trabalho</h2><div class="spacer"></div><button class="btn ghost" data-close="newOfficeOverlay">Fechar</button></div>
+    <div class="modal-b">
+      <div class="notice"><b>Seu espaço de trabalho.</b> Crie um arquivo vazio e comece a escrever ou analisar diretamente no Carbonautas. Ele será salvo no seu Repositório.</div>
+      <div class="office-new-grid" id="officeNewGrid">
+        <button type="button" class="office-new-card on" data-office-type="docx"><span class="ico">📄</span><b>Documento Word</b><small>Artigo, relatório, projeto, texto científico.</small></button>
+        <button type="button" class="office-new-card" data-office-type="xlsx"><span class="ico">📊</span><b>Planilha Excel</b><small>Dados, fórmulas, tabelas, gráficos e análises.</small></button>
+        <button type="button" class="office-new-card" data-office-type="pptx"><span class="ico">📽️</span><b>Apresentação</b><small>Slides, aula, defesa, palestra ou congresso.</small></button>
+      </div>
+      <div class="fg"><label>Nome do arquivo</label><input id="officeNewTitle" placeholder="Ex.: Artigo sobre qualidade da água"></div>
+    </div>
+    <div class="modal-f"><button class="btn" data-close="newOfficeOverlay">Cancelar</button><button class="btn primary" id="officeNewCreateBtn" type="button">Criar e editar agora</button></div>
   </div>
 </div>
 
@@ -1783,7 +1807,7 @@
 <div class="toast" id="toast"></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp, addDoc, updateDoc, getDoc, limit, writeBatch }
+import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp, addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref as sRef, uploadString, getDownloadURL, deleteObject }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
@@ -1806,7 +1830,7 @@ window.auth = getAuth(app);
 window.secondaryAuth = getAuth(secondaryApp);
 window.fbFns = {
   collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp,
-  addDoc, updateDoc, getDoc, limit, writeBatch, sRef, uploadString, getDownloadURL, deleteObject,
+  addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion, sRef, uploadString, getDownloadURL, deleteObject,
   onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail
 };
 window.dispatchEvent(new Event('firebase-ready'));
@@ -1954,7 +1978,7 @@ function scholarshipHTML(m,compact=false){
 }
 function memberRepositoryItems(memberId){
   const out=[];
-  state.publicacoes.filter(p=>p.memberId===memberId).forEach(p=>out.push({source:'publicacao',id:p.id,title:p.titulo||p.fileName||'Documento',kind:(CATEGORIAS[p.categoria]?.label||p.categoriaOutro||p.categoria||'Publicação'),url:p.url||'',fileName:p.fileName||'',isFile:p.tipo==='arquivo',ts:p.ts,reviewFlow:!!p.reviewFlow,reviewVersion:p.reviewVersion||0,reviewStatus:p.reviewStatus||'',reviewReviewerId:p.reviewReviewerId||'',reviewReturnToId:p.reviewReturnToId||'',reviewNextRecipientId:p.reviewNextRecipientId||'',reviewNote:p.reviewNote||'',raw:p}));
+  state.publicacoes.filter(p=>p.memberId===memberId).forEach(p=>out.push({source:'publicacao',id:p.id,title:p.titulo||p.fileName||'Documento',kind:(CATEGORIAS[p.categoria]?.label||p.categoriaOutro||p.categoria||'Publicação'),url:p.url||'',fileName:p.fileName||'',isFile:p.tipo==='arquivo',ts:p.ts,reviewFlow:!!p.reviewFlow,reviewVersion:p.reviewVersion||0,reviewStatus:p.reviewStatus||'',reviewReviewerId:p.reviewReviewerId||'',reviewReturnToId:p.reviewReturnToId||'',reviewNextRecipientId:p.reviewNextRecipientId||'',reviewNote:p.reviewNote||'',onlineEditVersion:p.onlineEditVersion||1,raw:p}));
   state.activities.filter(a=>a.ownerId===memberId && (a.fileUrl||a.externalUrl)).forEach(a=>out.push({source:'atividade',id:a.id,title:a.title||'Registro de acompanhamento',kind:ACTIVITY_TYPES[a.type]||a.type||'Acompanhamento',url:a.fileUrl||a.externalUrl||'',fileName:a.fileName||'',isFile:!!a.fileUrl,ts:a.updatedAt||a.createdAt}));
   const m=memberById(memberId); (m?.resultados||[]).forEach((r,i)=>{if(r.url)out.push({source:'resultado',id:'r'+i,title:r.titulo||'Resultado / produto',kind:'Resultado / produto',url:r.url,fileName:'',isFile:false,ts:null})});
   return out.sort((a,b)=>{const ta=a.ts?.toMillis?a.ts.toMillis():0,tb=b.ts?.toMillis?b.ts.toMillis():0;return tb-ta});
@@ -1967,7 +1991,15 @@ function renderMemberRepository(){
   $('#repoScholar').innerHTML=scholarshipHTML(m);
   const list=memberRepositoryItems(m.id); $('#repoCount').textContent=list.length;
   const canAdd=isAdmin||isMe(m.id); $('#repoAddBtn').style.display=canAdd?'inline-flex':'none';
-  $('#repoList').innerHTML=list.length?list.map(it=>{const icon=it.reviewFlow?'✍️':(it.isFile?'📄':'🔗');const view=it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Visualizar</button><button class="btn review-download" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Baixar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;const rev=it.reviewFlow?reviewBadgeHTML(it.raw):'';const online=it.reviewFlow&&canActOnReview(it.raw)&&isOnlyOfficeDoc(it.raw)?`<button class="btn oo-online-btn" type="button" onclick="openOnlineCorrection('${it.id}')">${onlineCorrectionLabel(it.raw)}</button>`:'';const respond=it.reviewFlow&&canActOnReview(it.raw)?`<button class="btn review-action" type="button" onclick="openReviewResponse('${it.id}')">${reviewActionLabel(it.raw)}</button>`:'';return `<div class="repo-item"><div class="repo-icon">${icon}</div><div class="repo-main"><div class="repo-title">${esc(it.title)}</div><div class="repo-meta">${esc(it.kind)}</div>${rev}${it.reviewNote?`<div class="review-note">💬 ${esc(it.reviewNote)}</div>`:''}</div><div class="repo-actions">${view}${online}${respond}</div></div>`}).join(''):'<div class="repo-empty">Ainda não há documentos ou links registrados para esta pessoa.</div>';
+  $('#repoList').innerHTML=list.length?list.map(it=>{
+    const icon=it.reviewFlow?'✍️':(it.isFile?'📄':'🔗');
+    const view=it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Visualizar</button><button class="btn review-download" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Baixar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;
+    const rev=it.reviewFlow?reviewBadgeHTML(it.raw):'';
+    const online=it.source==='publicacao'?officeActionButtons(it.raw):'';
+    const respond=it.reviewFlow&&canActOnReview(it.raw)?`<button class="btn review-action" type="button" onclick="openReviewResponse('${it.id}')">${reviewActionLabel(it.raw)}</button>`:'';
+    const ver=!it.reviewFlow&&it.onlineEditVersion>1?`<span class="office-version">✏️ edição v${it.onlineEditVersion}</span>`:'';
+    return `<div class="repo-item"><div class="repo-icon">${icon}</div><div class="repo-main"><div class="repo-title">${esc(it.title)}</div><div class="repo-meta">${esc(it.kind)}</div>${ver}${rev}${it.reviewNote?`<div class="review-note">💬 ${esc(it.reviewNote)}</div>`:''}</div><div class="repo-actions">${view}${online}${respond}</div></div>`
+  }).join(''):'<div class="repo-empty">Ainda não há documentos ou links registrados para esta pessoa.</div>';
 }
 function fmtTime(ts){
   if(!ts) return '';
@@ -3647,12 +3679,13 @@ function renderPubs(){
           <span class="pub-author"><span class="d" style="background:${m?NIVEIS[m.nivel]?.color:'var(--ink-3)'}"></span>${esc(p.memberNome||(m?m.nome:'—'))}</span>
           ${dateLabel?`<span class="pub-date">${dateLabel}</span>`:''}
         </div>
+        ${!p.reviewFlow&&Number(p.onlineEditVersion||1)>1?`<span class="office-version">✏️ edição v${Number(p.onlineEditVersion||1)}</span>`:''}
         ${p.reviewFlow?reviewBadgeHTML(p):''}
         ${p.reviewNote?`<div class="review-note">💬 ${esc(p.reviewNote)}</div>`:''}
       </div>
       <div class="pub-act">
         ${p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Visualizar" style="padding:6px 9px">👁️</button><button type="button" class="btn review-download" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Baixar" style="padding:6px 9px">⬇</button>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}
-        ${p.reviewFlow&&canActOnReview(p)&&isOnlyOfficeDoc(p)?`<button type="button" class="btn oo-online-btn" onclick="openOnlineCorrection('${p.id}')">${onlineCorrectionLabel(p)}</button>`:''}
+        ${officeActionButtons(p,'compact')}
         ${p.reviewFlow&&canActOnReview(p)?`<button type="button" class="btn review-action" onclick="openReviewResponse('${p.id}')">${reviewActionLabel(p)}</button>`:''}
         ${canDel?`<button class="mini-x" onclick="deletePublicacao('${p.id}')" title="Excluir">×</button>`:''}
       </div>
@@ -3691,44 +3724,77 @@ function syncPubFinalidade(){
   }else{$$('input[name="pubTipo"]').forEach(r=>r.disabled=false)}
 }
 
-/* ============ ONLYOFFICE COMMUNITY — CORREÇÃO ONLINE ============ */
+/* ============ ONLYOFFICE COMMUNITY — ESPAÇO DE TRABALHO + CORREÇÃO ============ */
 const OO_SERVER_KEY='carbonautas_onlyoffice_server_v1';
 const OO_DEFAULT_SERVER='https://docs.carbonautas.online';
-let ooEditorInstance=null,ooSession=null,ooPendingPubId='';
+const OO_EXTS=new Set(['docx','xlsx','pptx']);
+let ooEditorInstance=null,ooSession=null,ooPendingPubId='',officeNewType='docx';
 function onlyOfficeBase(){return (localStorage.getItem(OO_SERVER_KEY)||OO_DEFAULT_SERVER).trim().replace(/\/+$/,'')}
-function isOnlyOfficeDoc(p){return !!(p&&p.tipo==='arquivo'&&inferFileExt(p.url||'',p.fileName||p.titulo||'')==='docx')}
-function onlineCorrectionLabel(p){return myId===p?.reviewReviewerId?'📝 Corrigir online':'📝 Revisar online'}
+function officeExt(p){return p?.tipo==='arquivo'?inferFileExt(p.url||'',p.fileName||p.titulo||''):''}
+function isOnlyOfficeEditable(p){return !!(p&&OO_EXTS.has(officeExt(p)))}
+function canPersonalEdit(p){
+  if(!p||!isOnlyOfficeEditable(p)||p.reviewFlow||!window.auth?.currentUser)return false;
+  const uid=window.auth.currentUser.uid;
+  return !!(isAdmin||p.memberId===myId||p.ownerUid===uid);
+}
+function onlineCorrectionLabel(p){
+  const ext=officeExt(p);
+  if(ext==='docx'&&myId===p?.reviewReviewerId)return '📝 Corrigir online';
+  return '✏️ Editar online';
+}
+function officeActionButtons(p,compact=''){
+  if(!isOnlyOfficeEditable(p))return '';
+  if(p.reviewFlow){
+    if(!canActOnReview(p))return '';
+    return `<button type="button" class="btn oo-online-btn" onclick="openOnlineCorrection('${p.id}')">${onlineCorrectionLabel(p)}</button>`;
+  }
+  if(canPersonalEdit(p))return `<button type="button" class="btn office-edit-btn" onclick="openOnlineEdit('${p.id}')">✏️ Editar</button>`;
+  return '';
+}
 function openOnlyOfficeSetup(){const u=onlyOfficeBase();if($('#ooServerUrl'))$('#ooServerUrl').value=u;openOverlay('onlyOfficeSetupOverlay')}
 function setOoStatus(msg){const el=$('#ooStatus');if(el)el.textContent=msg}
 function destroyOnlyOffice(){try{if(ooEditorInstance?.destroyEditor)ooEditorInstance.destroyEditor()}catch(e){console.warn(e)}ooEditorInstance=null}
 function loadOnlyOfficeApi(base){return new Promise((resolve,reject)=>{if(window.DocsAPI?.DocEditor)return resolve();const old=document.getElementById('onlyoffice-api-script');if(old){old.addEventListener('load',()=>resolve(),{once:true});old.addEventListener('error',()=>reject(new Error('Falha ao carregar a API do ONLYOFFICE.')),{once:true});return}const sc=document.createElement('script');sc.id='onlyoffice-api-script';sc.src=base+'/web-apps/apps/api/documents/api.js';sc.onload=()=>resolve();sc.onerror=()=>reject(new Error('Não consegui conectar ao servidor ONLYOFFICE.'));document.head.appendChild(sc)})}
+function officeKindLabel(ext){return ext==='xlsx'?'Planilha Excel':ext==='pptx'?'Apresentação PowerPoint':'Documento Word'}
 async function openOnlineCorrection(id){
   const p=state.publicacoes.find(x=>x.id===id);
   if(!p||!p.reviewFlow)return toast('Fluxo de correção não encontrado.');
   if(!canActOnReview(p))return toast('Este arquivo está com outra pessoa neste momento.');
-  if(!isOnlyOfficeDoc(p))return toast('A correção online com controle de alterações está habilitada para arquivos DOCX.');
-  const base=onlyOfficeBase();
-  if(!base){ooPendingPubId=id;openOnlyOfficeSetup();return}
-  await launchOnlyOffice(p,base);
+  if(!isOnlyOfficeEditable(p))return toast('A edição online aceita DOCX, XLSX e PPTX.');
+  const base=onlyOfficeBase();if(!base){ooPendingPubId=id;openOnlyOfficeSetup();return}
+  const mode=(officeExt(p)==='docx'&&myId===p.reviewReviewerId)?'review':'edit';
+  await launchOnlyOffice(p,base,{purpose:'review',mode});
 }
-async function launchOnlyOffice(p,base){
+async function openOnlineEdit(id){
+  const p=state.publicacoes.find(x=>x.id===id);
+  if(!p)return toast('Arquivo não encontrado.');
+  if(p.reviewFlow)return openOnlineCorrection(id);
+  if(!canPersonalEdit(p))return toast('Você pode editar seus próprios arquivos; o coordenador pode editar qualquer arquivo.');
+  const base=onlyOfficeBase();if(!base){ooPendingPubId=id;openOnlyOfficeSetup();return}
+  await launchOnlyOffice(p,base,{purpose:'personal',mode:'edit'});
+}
+async function launchOnlyOffice(p,base,opts={}){
+  const purpose=opts.purpose||'personal',mode=opts.mode||'edit',ext=officeExt(p);
   try{
     if(!window.auth?.currentUser)throw new Error('Entre novamente na plataforma.');
+    if(!OO_EXTS.has(ext))throw new Error('Formato não suportado para edição online.');
     destroyOnlyOffice();ooSession=null;
-    $('#ooTitle').textContent=(myId===p.reviewReviewerId?'Correção online · ':'Revisão online · ')+(p.titulo||p.fileName||'Documento');
-    $('#ooModePill').textContent=myId===p.reviewReviewerId?'✍️ Controle de alterações ligado':'📝 Edição + revisão';
+    const isReview=purpose==='review';
+    $('#ooTitle').textContent=(isReview?'Correção / revisão · ':'Editar · ')+(p.titulo||p.fileName||officeKindLabel(ext));
+    $('#ooModePill').textContent=mode==='review'?'✍️ Controle de alterações':'✏️ '+officeKindLabel(ext);
+    $('#ooSaveBtn').textContent=isReview?'💾 Salvar nova versão no Carbonautas':'💾 Salvar edição no Carbonautas';
     $('#onlyOfficeEditor').innerHTML='<div class="preview-loading">Conectando ao editor gratuito…</div>';
-    setOoStatus('Autenticando e preparando o documento…');openOverlay('onlyOfficeOverlay');
+    setOoStatus('Autenticando e preparando o arquivo…');openOverlay('onlyOfficeOverlay');
+    if(/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent||''))setOoStatus('No celular a Community pode abrir em modo limitado. Para edição completa, prefira computador.');
     const token=await window.auth.currentUser.getIdToken();
-    const mode=myId===p.reviewReviewerId?'review':'edit';
     const endpoint=base+'/carbonautas-api/api/editor-config/'+encodeURIComponent(p.id)+'?mode='+encodeURIComponent(mode);
     const r=await fetch(endpoint,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'}});
     const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||('Servidor respondeu '+r.status));
     await loadOnlyOfficeApi(base);
-    ooSession={key:data.sessionKey,pubId:p.id,p,base,mode,saved:false};
+    ooSession={key:data.sessionKey,pubId:p.id,p,base,mode,purpose,ext,saved:false};
     $('#onlyOfficeEditor').innerHTML='';
     const cfg=data.config||{};cfg.height='100%';cfg.width='100%';cfg.events={
-      onDocumentReady:()=>setOoStatus('Documento pronto. Faça as correções e depois clique em “Salvar nova versão no Carbonautas”.'),
+      onDocumentReady:()=>setOoStatus(isReview?'Documento pronto. Corrija e depois salve a nova versão.':'Arquivo pronto. Edite normalmente e depois clique em “Salvar edição no Carbonautas”.'),
       onError:e=>{console.error('ONLYOFFICE',e);setOoStatus('O editor informou um erro. Veja o console ou tente reabrir.')},
       onWarning:e=>console.warn('ONLYOFFICE warning',e)
     };
@@ -3744,39 +3810,78 @@ async function waitOnlineSaved(base,key,token){
   }
   throw new Error('O editor ainda não terminou de montar o arquivo. Tente salvar novamente em alguns segundos.');
 }
-async function saveOnlineCorrection(){
-  if(!ooSession||ooSession.saved)return;const btn=$('#ooSaveBtn');const p=state.publicacoes.find(x=>x.id===ooSession.pubId)||ooSession.p;
+function splitOfficeName(name,ext){const clean=(name||'arquivo').replace(new RegExp('\\.'+ext+'$','i'),'');return clean||'arquivo'}
+async function saveOnlineDocument(){
+  if(!ooSession||ooSession.saved)return;
+  const btn=$('#ooSaveBtn'),p=state.publicacoes.find(x=>x.id===ooSession.pubId)||ooSession.p;
   try{
-    btn.disabled=true;setOoStatus('Salvando o estado atual do Word…');toast('Salvando correção online…');
+    btn.disabled=true;setOoStatus('Salvando o estado atual do arquivo…');toast('Salvando edição online…');
     const token=await window.auth.currentUser.getIdToken();
     const force=await fetch(ooSession.base+'/carbonautas-api/api/session/'+encodeURIComponent(ooSession.key)+'/force-save',{method:'POST',headers:{Authorization:'Bearer '+token}});
     const fj=await force.json().catch(()=>({}));if(!force.ok)throw new Error(fj.error||'Não foi possível forçar o salvamento.');
-    setOoStatus('Gerando o DOCX corrigido…');await waitOnlineSaved(ooSession.base,ooSession.key,token);
+    setOoStatus('Gerando o arquivo atualizado…');await waitOnlineSaved(ooSession.base,ooSession.key,token);
     const fr=await fetch(ooSession.base+'/carbonautas-api/api/session/'+encodeURIComponent(ooSession.key)+'/file',{headers:{Authorization:'Bearer '+token}});
-    if(!fr.ok){const t=await fr.text();throw new Error(t||'Arquivo corrigido indisponível.')}
-    const blob=await fr.blob(),dataUrl=await blobToDataUrl(blob);
-    const nextVersion=reviewNextVersion(p),baseName=(p.fileName||p.titulo||'documento').replace(/\.docx$/i,'');
-    const fileName=`${baseName}_v${nextVersion}.docx`;
-    const {url}=await fbUploadFile('onlyoffice_'+p.memberId,dataUrl,fileName);
-    const f=FB(),ref=f.doc(f.collection(window.db,'rede_publicacoes')),actor=currentActor(),uid=window.auth.currentUser?.uid||'';
-    const reviewerId=p.reviewReviewerId,returnToId=p.reviewReturnToId,actingAsReviewer=(myId===reviewerId);
-    const nextRecipientId=actingAsReviewer?returnToId:reviewerId;
-    const status=actingAsReviewer?'correcao_devolvida':'nova_versao';
-    const baseTitle=p.reviewBaseTitle||p.titulo||'Documento';
-    await f.setDoc(ref,{memberId:p.memberId,ownerUid:uid,createdByUid:uid,memberNome:p.memberNome||memberById(p.memberId)?.nome||'',categoria:p.categoria||'outro',categoriaOutro:p.categoriaOutro||'',titulo:baseTitle,tipo:'arquivo',url,fileName,reviewFlow:true,reviewThreadId:p.reviewThreadId||p.id,reviewVersion:nextVersion,reviewStatus:status,reviewReviewerId:reviewerId,reviewReturnToId:returnToId,reviewNextRecipientId:nextRecipientId,reviewParentId:p.id,reviewSenderId:actor?.id||myId||'',reviewSenderName:actor?.name||'',reviewBaseTitle:baseTitle,reviewNote:actingAsReviewer?'Correção realizada online com controle de alterações.':'Nova versão revisada online.',editedOnline:true,ts:f.serverTimestamp()});
-    await createRepoNotification(nextRecipientId,{sourceId:ref.id,ownerId:p.memberId,title:actingAsReviewer?'✅ Correção online devolvida':'⬆️ Nova versão para revisar',message:`${baseTitle} · versão ${nextVersion} · editada no ONLYOFFICE`});
-    ooSession.saved=true;setOoStatus('Nova versão salva no Carbonautas e destinatário notificado.');toast('Nova versão salva e notificação enviada.');
-    setTimeout(()=>{destroyOnlyOffice();closeOverlay('onlyOfficeOverlay')},800);
-  }catch(e){console.error(e);setOoStatus(e.message||'Erro ao salvar.');toast(e.message||'Erro ao salvar a correção online.');}
+    if(!fr.ok){const t=await fr.text();throw new Error(t||'Arquivo editado indisponível.');}
+    const blob=await fr.blob(),dataUrl=await blobToDataUrl(blob),ext=ooSession.ext;
+    const f=FB(),actor=currentActor(),uid=window.auth.currentUser?.uid||'';
+    if(ooSession.purpose==='review'){
+      const nextVersion=reviewNextVersion(p),baseName=splitOfficeName(p.fileName||p.titulo||'documento',ext);
+      const fileName=`${baseName}_v${nextVersion}.${ext}`;
+      const {url}=await fbUploadFile('onlyoffice_'+p.memberId,dataUrl,fileName);
+      const ref=f.doc(f.collection(window.db,'rede_publicacoes'));
+      const reviewerId=p.reviewReviewerId,returnToId=p.reviewReturnToId,actingAsReviewer=(myId===reviewerId);
+      const nextRecipientId=actingAsReviewer?returnToId:reviewerId,status=actingAsReviewer?'correcao_devolvida':'nova_versao',baseTitle=p.reviewBaseTitle||p.titulo||'Documento';
+      await f.setDoc(ref,{memberId:p.memberId,ownerUid:uid,createdByUid:uid,memberNome:p.memberNome||memberById(p.memberId)?.nome||'',categoria:p.categoria||'outro',categoriaOutro:p.categoriaOutro||'',titulo:baseTitle,tipo:'arquivo',url,fileName,reviewFlow:true,reviewThreadId:p.reviewThreadId||p.id,reviewVersion:nextVersion,reviewStatus:status,reviewReviewerId:reviewerId,reviewReturnToId:returnToId,reviewNextRecipientId:nextRecipientId,reviewParentId:p.id,reviewSenderId:actor?.id||myId||'',reviewSenderName:actor?.name||'',reviewBaseTitle:baseTitle,reviewNote:actingAsReviewer?(ext==='docx'?'Correção realizada online com controle de alterações.':'Arquivo revisado online.'):'Nova versão revisada online.',editedOnline:true,ts:f.serverTimestamp()});
+      await createRepoNotification(nextRecipientId,{sourceId:ref.id,ownerId:p.memberId,title:actingAsReviewer?'✅ Correção online devolvida':'⬆️ Nova versão para revisar',message:`${baseTitle} · versão ${nextVersion} · editada no ONLYOFFICE`});
+      setOoStatus('Nova versão salva e destinatário notificado.');toast('Nova versão salva e notificação enviada.');
+    }else{
+      const currentV=Number(p.onlineEditVersion||1),nextV=currentV+1,baseName=splitOfficeName(p.fileName||p.titulo||'arquivo',ext),fileName=`${baseName}_v${nextV}.${ext}`;
+      const {url}=await fbUploadFile('onlyoffice_workspace_'+p.memberId,dataUrl,fileName);
+      const history={version:currentV,url:p.url||'',fileName:p.fileName||`${baseName}.${ext}`,savedAt:new Date().toISOString(),byUid:uid,byName:actor?.name||myName||''};
+      await f.updateDoc(f.doc(window.db,'rede_publicacoes',p.id),{url,fileName,onlineEditVersion:nextV,onlineEditHistory:f.arrayUnion(history),editedOnline:true,editedAt:f.serverTimestamp(),editedByUid:uid,editedByName:actor?.name||myName||''});
+      setOoStatus(`Edição v${nextV} salva. A versão anterior foi preservada no histórico.`);toast(`Edição v${nextV} salva no Repositório.`);
+    }
+    ooSession.saved=true;
+    setTimeout(()=>{destroyOnlyOffice();closeOverlay('onlyOfficeOverlay')},900);
+  }catch(e){console.error(e);setOoStatus(e.message||'Erro ao salvar.');toast(e.message||'Erro ao salvar a edição online.');}
   finally{btn.disabled=false}
 }
 
+function openNewOffice(){
+  if(!window.auth?.currentUser||!myId)return toast('Entre com seu perfil para criar um arquivo.');
+  officeNewType='docx';
+  $$('#officeNewGrid [data-office-type]').forEach((b,i)=>b.classList.toggle('on',i===0));
+  $('#officeNewTitle').value='';openOverlay('newOfficeOverlay');setTimeout(()=>$('#officeNewTitle')?.focus(),80);
+}
+async function createBlankOffice(){
+  const ext=officeNewType,title=($('#officeNewTitle')?.value||'').trim();
+  if(!title)return toast('Dê um nome ao arquivo.');
+  const base=onlyOfficeBase(),btn=$('#officeNewCreateBtn');
+  try{
+    btn.disabled=true;toast('Criando arquivo vazio…');
+    const token=await window.auth.currentUser.getIdToken();
+    const r=await fetch(base+'/carbonautas-api/api/new-file/'+ext,{headers:{Authorization:'Bearer '+token}});
+    if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.error||'Não consegui criar o arquivo vazio.');}
+    const blob=await r.blob(),dataUrl=await blobToDataUrl(blob),safeTitle=title.replace(/[\\/:*?"<>|]+/g,'-').trim();
+    const fileName=(new RegExp('\\.'+ext+'$','i').test(safeTitle)?safeTitle:safeTitle+'.'+ext);
+    const {url}=await fbUploadFile('office_workspace_'+myId,dataUrl,fileName);
+    const f=FB(),ref=f.doc(f.collection(window.db,'rede_publicacoes')),m=memberById(myId),uid=window.auth.currentUser.uid;
+    const categoria=ext==='xlsx'?'dados':ext==='pptx'?'apresentacao':'outro',categoriaOutro=ext==='docx'?'Documento de trabalho':'';
+    const data={memberId:myId,ownerUid:uid,createdByUid:uid,memberNome:m?.nome||myName||'',categoria,categoriaOutro,titulo:title,tipo:'arquivo',url,fileName,onlineEditVersion:1,createdInOffice:true,ts:f.serverTimestamp()};
+    await f.setDoc(ref,data);closeOverlay('newOfficeOverlay');toast('Arquivo criado. Abrindo editor…');
+    await launchOnlyOffice({...data,id:ref.id},base,{purpose:'personal',mode:'edit'});
+  }catch(e){console.error(e);toast(e.message||'Erro ao criar o arquivo.');}
+  finally{btn.disabled=false}
+}
 
-$('#ooSaveConfigBtn')?.addEventListener('click',async()=>{const v=($('#ooServerUrl')?.value||'').trim().replace(/\/+$/,'');if(!/^https:\/\//i.test(v)){toast('Informe um endereço HTTPS válido.');return}localStorage.setItem(OO_SERVER_KEY,v);closeOverlay('onlyOfficeSetupOverlay');toast('Servidor do editor salvo.');const id=ooPendingPubId;ooPendingPubId='';if(id)setTimeout(()=>openOnlineCorrection(id),150)});
+$('#newOfficeBtn')?.addEventListener('click',openNewOffice);
+$$('#officeNewGrid [data-office-type]').forEach(b=>b.addEventListener('click',()=>{officeNewType=b.dataset.officeType;$$('#officeNewGrid [data-office-type]').forEach(x=>x.classList.toggle('on',x===b))}));
+$('#officeNewCreateBtn')?.addEventListener('click',createBlankOffice);
+$('#ooSaveConfigBtn')?.addEventListener('click',async()=>{const v=($('#ooServerUrl')?.value||'').trim().replace(/\/+$/,'');if(!/^https:\/\//i.test(v)){toast('Informe um endereço HTTPS válido.');return}localStorage.setItem(OO_SERVER_KEY,v);closeOverlay('onlyOfficeSetupOverlay');toast('Servidor do editor salvo.');const id=ooPendingPubId;ooPendingPubId='';if(id)setTimeout(()=>openOnlineEdit(id),150)});
 $('#ooConfigBtn')?.addEventListener('click',openOnlyOfficeSetup);
-$('#ooSaveBtn')?.addEventListener('click',saveOnlineCorrection);
+$('#ooSaveBtn')?.addEventListener('click',saveOnlineDocument);
 $('#ooCloseBtn')?.addEventListener('click',()=>{if(confirm('Fechar o editor? Alterações que ainda não foram salvas no Carbonautas podem ser perdidas.')){destroyOnlyOffice();closeOverlay('onlyOfficeOverlay')}});
-window.openOnlineCorrection=openOnlineCorrection;window.openOnlyOfficeSetup=openOnlyOfficeSetup;
+window.openOnlineCorrection=openOnlineCorrection;window.openOnlineEdit=openOnlineEdit;window.openOnlyOfficeSetup=openOnlyOfficeSetup;window.openNewOffice=openNewOffice;
 
 async function downloadRepoFile(url,name='arquivo'){
   try{toast('Preparando download…');const r=await fetch(url);if(!r.ok)throw new Error('HTTP '+r.status);const b=await r.blob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name||'arquivo';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}catch(e){console.warn('Download direto falhou',e);window.open(url,'_blank','noopener');toast('Abri o arquivo em nova guia para baixar.')}
