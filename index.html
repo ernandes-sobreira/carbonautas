@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carbonautas · Science OS · P4</title>
+<title>Carbonautas · Science OS · P5</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P4">
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P4">
-<link rel="apple-touch-icon" href="./icon-192.png?v=P4">
+<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P5">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P5">
+<link rel="apple-touch-icon" href="./icon-192.png?v=P5">
 <meta name="theme-color" content="#08152B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -967,7 +967,7 @@
 <div class="auth-gate" id="authGate">
   <div class="auth-card">
     <div class="auth-brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P4" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P5" alt="Carbonautas · carbono em ligação"></div>
       <div><h2>Carbonautas</h2><p>Acompanhamento · projetos · rede</p></div>
     </div>
     <div class="auth-login" id="authLoginPane">
@@ -1003,7 +1003,7 @@
 </div>
 
 <div class="loading" id="loading">
-  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P4" alt="Carbonautas · carbono em ligação"></div>
+  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P5" alt="Carbonautas · carbono em ligação"></div>
   <p id="loadingMsg">Conectando à rede…</p>
 </div>
 
@@ -1015,7 +1015,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
     </button>
     <div class="brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P4" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P5" alt="Carbonautas · carbono em ligação"></div>
       <div>
         <h1>Carbonautas</h1>
         <div class="sub">LIPAN · LEFA · CELBE</div>
@@ -3920,16 +3920,25 @@ let ooEditorInstance=null,ooSession=null,ooPendingPubId='',officeNewType='docx';
 function onlyOfficeBase(){return (localStorage.getItem(OO_SERVER_KEY)||OO_DEFAULT_SERVER).trim().replace(/\/+$/,'')}
 function officeExt(p){
   if(!p||p.tipo!=='arquivo')return '';
-  let ext=inferFileExt(p.url||'',p.fileName||p.titulo||'');
-  if(!ext&&p.mimeType){const mt=String(p.mimeType).toLowerCase();if(mt.includes('wordprocessingml'))ext='docx';else if(mt.includes('spreadsheetml'))ext='xlsx';else if(mt.includes('presentationml'))ext='pptx';}
+  let ext=String(p.detectedExt||p.officeExt||'').toLowerCase();
+  if(!ext)ext=inferFileExt(p.url||'',p.fileName||p.titulo||'');
+  if(!ext){const mt=String(p.mimeType||p.mime||p.contentType||'').toLowerCase();if(mt.includes('wordprocessingml'))ext='docx';else if(mt.includes('spreadsheetml'))ext='xlsx';else if(mt.includes('presentationml'))ext='pptx';}
   return ext;
 }
 function isOnlyOfficeEditable(p){return !!(p&&OO_EXTS.has(officeExt(p)))}
-function officeFileChip(p){const ext=officeExt(p);if(!ext)return '';const map={docx:'WORD',xlsx:'EXCEL',pptx:'POWERPOINT'};return `<span class="file-type-chip">${map[ext]||ext.toUpperCase()} · editável</span>`}
-function canPersonalEdit(p){
-  if(!p||!isOnlyOfficeEditable(p)||p.reviewFlow||!window.auth?.currentUser)return false;
+function canPotentialOfficeEdit(p){
+  if(!p||p.tipo!=='arquivo'||!window.auth?.currentUser)return false;
+  const ext=officeExt(p);if(ext&&!OO_EXTS.has(ext))return false;
   const uid=window.auth.currentUser.uid;
+  if(p.reviewFlow)return canActOnReview(p);
   return !!(isAdmin||p.memberId===myId||p.ownerUid===uid);
+}
+function officeFileChip(p){const ext=officeExt(p);if(!ext&&canPotentialOfficeEdit(p))return `<span class="file-type-chip">OFFICE? · detectar ao abrir</span>`;if(!OO_EXTS.has(ext))return '';const map={docx:'WORD',xlsx:'EXCEL',pptx:'POWERPOINT'};return `<span class="file-type-chip">${map[ext]||ext.toUpperCase()} · editável</span>`}
+function canPersonalEdit(p){
+  if(!p||p.reviewFlow||!window.auth?.currentUser)return false;
+  const ext=officeExt(p);if(ext&&!OO_EXTS.has(ext))return false;
+  const uid=window.auth.currentUser.uid;
+  return !!(p.tipo==='arquivo'&&(isAdmin||p.memberId===myId||p.ownerUid===uid));
 }
 function onlineCorrectionLabel(p){
   const ext=officeExt(p);
@@ -3937,12 +3946,13 @@ function onlineCorrectionLabel(p){
   return '✏️ Editar online';
 }
 function officeActionButtons(p,compact=''){
-  if(!isOnlyOfficeEditable(p))return '';
+  if(!p||p.tipo!=='arquivo')return '';
+  const ext=officeExt(p);if(ext&&!OO_EXTS.has(ext))return '';
   if(p.reviewFlow){
     if(!canActOnReview(p))return '';
     return `<button type="button" class="btn oo-online-btn" onclick="openOnlineCorrection('${p.id}')">${onlineCorrectionLabel(p)}</button>`;
   }
-  if(canPersonalEdit(p))return `<button type="button" class="btn office-edit-btn" onclick="openOnlineEdit('${p.id}')">✏️ Editar</button>`;
+  if(canPersonalEdit(p))return `<button type="button" class="btn office-edit-btn" onclick="openOnlineEdit('${p.id}')">✏️ ${ext?'Editar':'Editar / detectar'}</button>`;
   return '';
 }
 function openOnlyOfficeSetup(){const u=onlyOfficeBase();if($('#ooServerUrl'))$('#ooServerUrl').value=u;openOverlay('onlyOfficeSetupOverlay')}
@@ -3954,9 +3964,8 @@ async function openOnlineCorrection(id){
   const p=state.publicacoes.find(x=>x.id===id);
   if(!p||!p.reviewFlow)return toast('Fluxo de correção não encontrado.');
   if(!canActOnReview(p))return toast('Este arquivo está com outra pessoa neste momento.');
-  if(!isOnlyOfficeEditable(p))return toast('A edição online aceita DOCX, XLSX e PPTX.');
+  const ext=officeExt(p),mode=(ext==='docx'&&myId===p.reviewReviewerId)?'review':'edit';
   const base=onlyOfficeBase();if(!base){ooPendingPubId=id;openOnlyOfficeSetup();return}
-  const mode=(officeExt(p)==='docx'&&myId===p.reviewReviewerId)?'review':'edit';
   await launchOnlyOffice(p,base,{purpose:'review',mode});
 }
 async function openOnlineEdit(id){
@@ -3968,22 +3977,25 @@ async function openOnlineEdit(id){
   await launchOnlyOffice(p,base,{purpose:'personal',mode:'edit'});
 }
 async function launchOnlyOffice(p,base,opts={}){
-  const purpose=opts.purpose||'personal',mode=opts.mode||'edit',ext=officeExt(p);
+  const purpose=opts.purpose||'personal',requestedMode=opts.mode||'edit';
   try{
     if(!window.auth?.currentUser)throw new Error('Entre novamente na plataforma.');
-    if(!OO_EXTS.has(ext))throw new Error('Formato não suportado para edição online.');
     destroyOnlyOffice();ooSession=null;
     const isReview=purpose==='review';
-    $('#ooTitle').textContent=(isReview?'Correção / revisão · ':'Editar · ')+(p.titulo||p.fileName||officeKindLabel(ext));
-    $('#ooModePill').textContent=mode==='review'?'✍️ Controle de alterações':'✏️ '+officeKindLabel(ext);
+    $('#ooTitle').textContent=(isReview?'Correção / revisão · ':'Editar · ')+(p.titulo||p.fileName||'Arquivo Office');
+    $('#ooModePill').textContent='🔎 Detectando formato…';
     $('#ooSaveBtn').textContent=isReview?'💾 Salvar nova versão no Carbonautas':'💾 Salvar edição no Carbonautas';
     $('#onlyOfficeEditor').innerHTML='<div class="preview-loading">Conectando ao editor gratuito…</div>';
     setOoStatus('Autenticando e preparando o arquivo…');openOverlay('onlyOfficeOverlay');
     if(/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent||''))setOoStatus('Modo desktop completo ativado no celular. Toque no documento e use a barra do ONLYOFFICE para editar.');
     const token=await window.auth.currentUser.getIdToken();
-    const endpoint=base+'/carbonautas-api/api/editor-config/'+encodeURIComponent(p.id)+'?mode='+encodeURIComponent(mode);
+    const endpoint=base+'/carbonautas-api/api/editor-config/'+encodeURIComponent(p.id)+'?mode='+encodeURIComponent(requestedMode);
     const r=await fetch(endpoint,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'}});
     const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||('Servidor respondeu '+r.status));
+    const ext=String(data.ext||officeExt(p)||'').toLowerCase();if(!OO_EXTS.has(ext))throw new Error('Este arquivo não é DOCX, XLSX ou PPTX editável.');
+    p.detectedExt=ext;if(data.fileName&&!p.fileName)p.fileName=data.fileName;
+    const mode=(isReview&&ext==='docx'&&myId===p.reviewReviewerId)?'review':'edit';
+    $('#ooModePill').textContent=mode==='review'?'✍️ Controle de alterações':'✏️ '+officeKindLabel(ext);
     await loadOnlyOfficeApi(base);
     ooSession={key:data.sessionKey,pubId:p.id,p,base,mode,purpose,ext,saved:false};
     $('#onlyOfficeEditor').innerHTML='';
@@ -4682,13 +4694,13 @@ async function openLabAnalyze(pubId){
   if(!window.auth?.currentUser)return toast('Entre primeiro.');const p=state.publicacoes.find(x=>x.id===pubId);if(!p)return toast('Base não encontrada.');labCurrentPubId=pubId;labSelectedMethod='diagnostic';fillAnalyzeContext(p);$('#labAnalyzeSource').innerHTML=`<span style="font-size:24px">📊</span><div><b>${esc(p.titulo||p.fileName||'Base')}</b><div class="lab-muted">Auditando estrutura e variáveis…</div></div>`;$('#labInspectKpis').innerHTML='';$('#labAnalyzeMethods').innerHTML=labMethodsHTML();$('#labAnalysisControls').innerHTML='<div class="lab-empty">Lendo a base…</div>';openOverlay('labAnalyzeOverlay');
   try{const ins=await loadLabInspect(pubId);$('#labAnalyzeSource').innerHTML=`<span style="font-size:24px">📊</span><div><b>${esc(p.titulo||p.fileName||'Base')}</b><div class="lab-muted">${ins.rows.toLocaleString('pt-BR')} linhas · ${ins.columns} variáveis · ${ins.numeric.length} numéricas</div></div>`;$('#labInspectKpis').innerHTML=`<div class="lab-kpi"><span>Linhas</span><b>${ins.rows.toLocaleString('pt-BR')}</b></div><div class="lab-kpi"><span>Variáveis</span><b>${ins.columns}</b></div><div class="lab-kpi"><span>Numéricas</span><b>${ins.numeric.length}</b></div><div class="lab-kpi"><span>Ausentes</span><b>${ins.missingTotal}</b></div>`;renderLabControls()}catch(e){console.error(e);$('#labAnalysisControls').innerHTML=`<div class="lab-empty">⚠️ ${esc(e.message)}</div>`}
 }
-function collectLabOptions(){const vars=$$('[data-lab-var]:checked').map(x=>x.value),o={analysis:labSelectedMethod,variables:vars};if($('#labY'))o.y=$('#labY').value;if($('#labGroup'))o.group=$('#labGroup').value;if($('#labTime'))o.time=$('#labTime').value;if($('#labCorrelation'))o.correlation=$('#labCorrelation').value;if($('#labFamily'))o.family=$('#labFamily').value;if($('#labK'))o.k=Number($('#labK').value||3);return o}
+function collectLabOptions(){const vars=Array.from($$('[data-lab-var]:checked')).map(x=>x.value),o={analysis:labSelectedMethod,variables:vars};if($('#labY'))o.y=$('#labY').value;if($('#labGroup'))o.group=$('#labGroup').value;if($('#labTime'))o.time=$('#labTime').value;if($('#labCorrelation'))o.correlation=$('#labCorrelation').value;if($('#labFamily'))o.family=$('#labFamily').value;if($('#labK'))o.k=Number($('#labK').value||3);return o}
 async function persistAnalyzeContext(){
   const p=state.publicacoes.find(x=>x.id===labCurrentPubId);if(!p)throw new Error('Base não encontrada.');
   const ctx=contextPayload('labAnalyze',p),err=validateScientificContext(ctx);if(err)throw new Error(err);
   Object.assign(p,ctx,{labDataset:true,memberId:ctx.labContextType==='project'?ctx.labMemberId:(p.memberId||myId),memberNome:ctx.labContextType==='project'?ctx.labMemberNome:(p.memberNome||myName||'')});
   refreshLabContextStatus(p);renderLab();
-  try{await FB().updateDoc(FB().doc(window.db,'rede_publicacoes',labCurrentPubId),{...ctx,memberId:p.memberId,memberNome:p.memberNome,labDataset:true})}catch(e){console.warn('Persistência cliente do vínculo adiada para o servidor P4:',e)}
+  try{await FB().updateDoc(FB().doc(window.db,'rede_publicacoes',labCurrentPubId),{...ctx,memberId:p.memberId,memberNome:p.memberNome,labDataset:true})}catch(e){console.warn('Persistência cliente do vínculo adiada para o servidor P5:',e)}
   return ctx;
 }
 async function runLabAnalysis(){
@@ -4724,7 +4736,7 @@ async function checkScienceEngine(){
     const office=Array.isArray(j.office)&&j.office.length>=3;
     const lab=Array.isArray(j.lab)&&j.lab.length>0;
     el.classList.remove('offline');el.classList.add('online');
-    el.innerHTML=`<span class="engine-dot"></span><span>${office?'Office':''}${office&&lab?' + ':''}${lab?'Lab':''} ${j.version==='P4'?'P4 pronto':'online'}</span>`;
+    el.innerHTML=`<span class="engine-dot"></span><span>${office?'Office':''}${office&&lab?' + ':''}${lab?'Lab':''} ${j.version==='P5'?'P5 pronto':(j.version==='P4'?'P4':'online')}</span>`;
   }catch(e){
     el.classList.remove('online');el.classList.add('offline');
     el.innerHTML='<span class="engine-dot"></span><span>motor offline</span>';
@@ -4990,7 +5002,7 @@ window.CARBONAUTAS_BUILD='PREDATOR-P3-20260906';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P4-20260906',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P5-20260906',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -5002,7 +5014,7 @@ waitFirebase().then(startAuth);
 <script id="carbonautas-dynamic-favicon">
 (()=>{
   const link=document.getElementById('dynamicFavicon'); if(!link)return;
-  const img=new Image(); img.src='./icon-192.png?v=P4';
+  const img=new Image(); img.src='./icon-192.png?v=P5';
   img.onload=()=>{
     const c=document.createElement('canvas'),ctx=c.getContext('2d'); c.width=c.height=64; let phase=0,last=0;
     const draw=(ts)=>{

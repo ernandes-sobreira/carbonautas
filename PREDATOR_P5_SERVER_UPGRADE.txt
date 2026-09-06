@@ -1,0 +1,1101 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd /opt/carbonautas-bridge
+
+printf '
+=== CARBONAUTAS PREDATOR P5 ===
+'
+cp -f server.js server.js.bak-p5-$(date +%Y%m%d-%H%M%S) 2>/dev/null || true
+cp -f lab_engine.py lab_engine.py.bak-p5-$(date +%Y%m%d-%H%M%S) 2>/dev/null || true
+
+cat > server.js <<'NODE'
+const express = require('express');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+const { spawn } = require('child_process');
+
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+
+const ROOT = '/opt/carbonautas-bridge';
+const SAVED = path.join(ROOT, 'saved');
+const TEMPLATES = path.join(ROOT, 'templates');
+fs.mkdirSync(SAVED, { recursive: true });
+fs.mkdirSync(TEMPLATES, { recursive: true });
+const LAB_TMP = path.join(ROOT, 'lab_tmp');
+const LAB_RUNS = path.join(ROOT, 'lab_runs');
+const LAB_ENGINE = path.join(ROOT, 'lab_engine.py');
+const LAB_PYTHON = '/opt/carbonautas-lab/bin/python';
+fs.mkdirSync(LAB_TMP, { recursive: true });
+fs.mkdirSync(LAB_RUNS, { recursive: true });
+
+const serviceAccount = require(path.join(ROOT, 'firebase-service-account.json'));
+initializeApp({ credential: cert(serviceAccount) });
+const db = getFirestore();
+const auth = getAuth();
+
+const OO_SECRET = fs.readFileSync('/opt/onlyoffice/jwt_secret', 'utf8').trim();
+const PUBLIC_BASE = 'https://docs.carbonautas.online';
+const OO_INTERNAL = 'http://127.0.0.1:8080';
+const SUPPORTED = new Set(['docx','xlsx','pptx']);
+const DOC_TYPES = {docx:'word', xlsx:'cell', pptx:'slide'};
+const MIME = {
+  docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+};
+const TEMPLATE_URLS = {
+  docx:'https://raw.githubusercontent.com/ONLYOFFICE/document-templates/master/new/default/new.docx',
+  xlsx:'https://raw.githubusercontent.com/ONLYOFFICE/document-templates/master/new/default/new.xlsx',
+  pptx:'https://raw.githubusercontent.com/ONLYOFFICE/document-templates/master/new/default/new.pptx'
+};
+
+const sessions = new Map();
+const app = express();
+app.set('trust proxy', 1);
+app.use(cors({
+  origin: [
+    'https://ernandes-sobreira.github.io',
+    'https://carbonautas.online',
+    'https://www.carbonautas.online'
+  ],
+  methods: ['GET','POST','OPTIONS'],
+  allowedHeaders: ['Authorization','Content-Type']
+}));
+app.use(express.json({limit:'2mb'}));
+
+function bearer(req){
+  const h=req.get('authorization')||'';
+  return h.startsWith('Bearer ')?h.slice(7):'';
+}
+async function requireUser(req,res,next){
+  try{
+    const token=bearer(req);
+    if(!token)return res.status(401).json({error:'Login necessário.'});
+    const decoded=await auth.verifyIdToken(token);
+    const snap=await db.collection('rede_users').doc(decoded.uid).get();
+    if(!snap.exists)return res.status(403).json({error:'Perfil Carbonautas não encontrado.'});
+    req.user={uid:decoded.uid,email:decoded.email||'',...snap.data()};
+    next();
+  }catch(e){
+    console.error('AUTH:',e.message);
+    res.status(401).json({error:'Sessão inválida. Entre novamente.'});
+  }
+}
+function isCoordinator(user){
+  return user.role==='coordinator' ||
+    user.memberId==='seed-ernandes-sobreira-oliveira-junior' ||
+    user.email==='ernandes.sobreira@gmail.com';
+}
+function fileExt(name,url=''){
+  const source=(name||'').split('?')[0] || (url||'').split('?')[0];
+  const m=source.toLowerCase().match(/\.([a-z0-9]+)$/);
+  if(m)return m[1];
+  try{
+    const u=new URL(url);
+    const mm=u.pathname.toLowerCase().match(/\.([a-z0-9]+)$/);
+    return mm?mm[1]:'';
+  }catch{return ''}
+}
+
+function extFromMime(mt=''){
+  mt=String(mt).toLowerCase().split(';')[0].trim();
+  if(mt.includes('wordprocessingml'))return 'docx';
+  if(mt.includes('spreadsheetml'))return 'xlsx';
+  if(mt.includes('presentationml'))return 'pptx';
+  return '';
+}
+function filenameFromDisposition(v=''){
+  const star=String(v).match(/filename\*=UTF-8''([^;]+)/i);if(star){try{return decodeURIComponent(star[1].replace(/^"|"$/g,''))}catch{}}
+  const m=String(v).match(/filename="?([^";]+)"?/i);return m?m[1].trim():'';
+}
+async function resolveOfficeFile(p){
+  let ext=String(p.detectedExt||p.officeExt||'').toLowerCase();
+  let fileName=p.fileName||'';
+  if(!ext)ext=fileExt(fileName||p.titulo||'',p.url||'');
+  if(!ext)ext=extFromMime(p.mimeType||p.mime||p.contentType||'');
+  if((!ext||!fileName)&&/^https?:\/\//i.test(p.url||'')){
+    try{
+      const r=await fetch(p.url,{method:'HEAD',redirect:'follow'});
+      if(r.ok){
+        if(!ext)ext=extFromMime(r.headers.get('content-type')||'');
+        if(!fileName)fileName=filenameFromDisposition(r.headers.get('content-disposition')||'');
+      }
+    }catch(e){console.warn('PROBE HEAD:',e.message)}
+  }
+  // Alguns serviços não respondem HEAD corretamente; um GET mínimo ainda revela Content-Type.
+  if(!ext&&/^https?:\/\//i.test(p.url||'')){
+    try{
+      const r=await fetch(p.url,{headers:{Range:'bytes=0-31'},redirect:'follow'});
+      if(r.ok||r.status===206)ext=extFromMime(r.headers.get('content-type')||'');
+      try{r.body?.cancel?.()}catch{}
+    }catch(e){console.warn('PROBE GET:',e.message)}
+  }
+  return {ext,fileName:fileName||p.titulo||('arquivo'+(ext?'.'+ext:''))};
+}
+function ownedSession(req,res){
+  const s=sessions.get(req.params.key);
+  if(!s){res.status(404).json({error:'Sessão não encontrada. Reabra o documento.'});return null;}
+  if(s.uid!==req.user.uid){res.status(403).json({error:'Esta sessão pertence a outro usuário.'});return null;}
+  return s;
+}
+function normalizeDownloadUrl(u){
+  try{
+    const x=new URL(u);
+    if(['127.0.0.1','localhost','onlyoffice'].includes(x.hostname))return OO_INTERNAL+x.pathname+x.search;
+    return u;
+  }catch{return u}
+}
+async function saveFromOnlyOffice(s,u){
+  const r=await fetch(normalizeDownloadUrl(u));
+  if(!r.ok)throw new Error('ONLYOFFICE não entregou o arquivo salvo: HTTP '+r.status);
+  const buf=Buffer.from(await r.arrayBuffer());
+  const out=path.join(SAVED,s.key+'.'+s.ext);
+  fs.writeFileSync(out,buf,{mode:0o600});
+  s.filePath=out;s.ready=true;s.error='';s.savedAt=Date.now();
+}
+async function ensureTemplate(ext){
+  if(!SUPPORTED.has(ext))throw new Error('Formato de modelo não suportado.');
+  const out=path.join(TEMPLATES,'new.'+ext);
+  if(fs.existsSync(out)&&fs.statSync(out).size>1000)return out;
+  const r=await fetch(TEMPLATE_URLS[ext]);
+  if(!r.ok)throw new Error('Não consegui obter o modelo vazio: HTTP '+r.status);
+  fs.writeFileSync(out,Buffer.from(await r.arrayBuffer()),{mode:0o600});
+  return out;
+}
+
+app.get('/health',(req,res)=>res.json({ok:true,service:'carbonautas-bridge',version:'P5',office:['docx','xlsx','pptx'],mobileDesktop:true,legacyProbe:true,lab:['diagnostic','descriptive','correlation','regression','ttest','anova','kruskal','pca','timeseries','glm','mixed','cluster']}));
+
+app.get('/api/new-file/:ext',requireUser,async(req,res)=>{
+  try{
+    const ext=String(req.params.ext||'').toLowerCase();
+    if(!SUPPORTED.has(ext))return res.status(400).json({error:'Use DOCX, XLSX ou PPTX.'});
+    const file=await ensureTemplate(ext);
+    res.type(MIME[ext]);
+    res.setHeader('Content-Disposition',`attachment; filename="novo.${ext}"`);
+    res.sendFile(file);
+  }catch(e){console.error('TEMPLATE:',e);res.status(500).json({error:e.message});}
+});
+
+app.post('/api/file-probe/:pubId',requireUser,async(req,res)=>{
+  try{
+    const snap=await db.collection('rede_publicacoes').doc(req.params.pubId).get();
+    if(!snap.exists)return res.status(404).json({error:'Arquivo não encontrado.'});
+    const p=snap.data();if(p.tipo!=='arquivo')return res.status(400).json({error:'O item não é um arquivo.'});
+    const coord=isCoordinator(req.user),owner=coord||p.ownerUid===req.user.uid||p.memberId===req.user.memberId;
+    const review=!!(p.reviewFlow&&(p.reviewNextRecipientId===req.user.memberId||coord));
+    if(!(p.reviewFlow?review:owner))return res.status(403).json({error:'Sem permissão para editar este arquivo.'});
+    const info=await resolveOfficeFile(p);
+    if(info.ext&&SUPPORTED.has(info.ext)){
+      const patch={detectedExt:info.ext};if(!p.fileName&&info.fileName)patch.fileName=info.fileName;
+      await snap.ref.set(patch,{merge:true});
+      return res.json({ok:true,editable:true,ext:info.ext,fileName:info.fileName});
+    }
+    res.json({ok:true,editable:false,ext:info.ext||'',fileName:info.fileName||'',message:'Formato não reconhecido como DOCX/XLSX/PPTX.'});
+  }catch(e){console.error('FILE PROBE:',e);res.status(500).json({error:e.message});}
+});
+
+app.post('/api/editor-config/:pubId',requireUser,async(req,res)=>{
+  try{
+    const pubSnap=await db.collection('rede_publicacoes').doc(req.params.pubId).get();
+    if(!pubSnap.exists)return res.status(404).json({error:'Documento não encontrado.'});
+    const p=pubSnap.data();
+    if(p.tipo!=='arquivo')return res.status(400).json({error:'Este item não é um arquivo.'});
+    const memberId=req.user.memberId;
+    const coord=isCoordinator(req.user);
+    const ownerAccess=coord || p.ownerUid===req.user.uid || p.memberId===memberId;
+    const reviewAccess=!!(p.reviewFlow && (p.reviewNextRecipientId===memberId || coord));
+    if(p.reviewFlow){
+      if(!reviewAccess)return res.status(403).json({error:'Este arquivo está com outra pessoa neste momento.'});
+    }else if(!ownerAccess){
+      return res.status(403).json({error:'Você não tem permissão para editar este arquivo.'});
+    }
+    if(!/^https?:\/\//i.test(p.url||''))return res.status(400).json({error:'O arquivo não possui URL válida.'});
+    const info=await resolveOfficeFile(p),ext=info.ext,fileName=info.fileName;
+    if(!SUPPORTED.has(ext))return res.status(400).json({error:'Não reconheci este arquivo legado como DOCX, XLSX ou PPTX. Se ele for Office, reenvie-o uma vez para recuperar o metadado.'});
+    const metadataPatch={detectedExt:ext};if(!p.fileName&&fileName)metadataPatch.fileName=fileName;
+    await pubSnap.ref.set(metadataPatch,{merge:true});
+
+    const requested=req.query.mode==='review'?'review':'edit';
+    const actingReviewer=memberId===p.reviewReviewerId;
+    const reviewOnly=!!(p.reviewFlow && ext==='docx' && requested==='review' && actingReviewer);
+    const key=crypto.createHash('sha256').update(
+      req.params.pubId+':'+req.user.uid+':'+Date.now()+':'+crypto.randomBytes(8).toString('hex')
+    ).digest('hex').slice(0,40);
+    sessions.set(key,{key,uid:req.user.uid,memberId,pubId:req.params.pubId,ext,fileName,ready:false,error:'',filePath:'',createdAt:Date.now()});
+
+    const displayName=req.user.nome||req.user.name||req.user.email||'Carbonauta';
+    // Community Edition não possui o editor web móvel. Usamos deliberadamente
+    // a interface desktop também no celular: o editor permanece gratuito e editável.
+    const customization={autosave:true,forcesave:true,uiTheme:'theme-system'};
+    if(ext==='docx')customization.review={trackChanges:reviewOnly,showReviewChanges:true,reviewDisplay:'markup'};
+    const config={
+      documentType:DOC_TYPES[ext],
+      type:'desktop',
+      document:{
+        fileType:ext,key,title:fileName,url:p.url,
+        permissions:{edit:true,review:ext==='docx',comment:true,download:true,print:true,copy:true}
+      },
+      editorConfig:{
+        mode:'edit',lang:'pt',
+        callbackUrl:PUBLIC_BASE+'/carbonautas-api/callback/'+key,
+        user:{id:req.user.uid,name:displayName},
+        customization
+      }
+    };
+    config.token=jwt.sign(config,OO_SECRET,{algorithm:'HS256'});
+    res.json({sessionKey:key,config,ext,fileName});
+  }catch(e){console.error('CONFIG:',e);res.status(500).json({error:'Falha ao preparar o editor: '+e.message});}
+});
+
+app.post('/callback/:key',async(req,res)=>{
+  const s=sessions.get(req.params.key);
+  if(!s)return res.json({error:0});
+  try{
+    if(req.body.token)jwt.verify(req.body.token,OO_SECRET,{algorithms:['HS256']});
+    const status=Number(req.body.status);
+    if((status===2||status===6)&&req.body.url)await saveFromOnlyOffice(s,req.body.url);
+    else if(status===3||status===7){s.error='ONLYOFFICE informou erro ao salvar.';s.ready=false;}
+    res.json({error:0});
+  }catch(e){console.error('CALLBACK:',e);s.error=e.message;s.ready=false;res.status(500).json({error:1});}
+});
+
+app.post('/api/session/:key/force-save',requireUser,async(req,res)=>{
+  const s=ownedSession(req,res);if(!s)return;
+  try{
+    s.ready=false;s.error='';
+    const payload={c:'forcesave',key:s.key,userdata:'carbonautas'};
+    const body={...payload,token:jwt.sign(payload,OO_SECRET,{algorithm:'HS256'})};
+    const r=await fetch(OO_INTERNAL+'/coauthoring/CommandService.ashx',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)
+    });
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok||Number(j.error)!==0)throw new Error('ONLYOFFICE recusou o salvamento. Erro '+String(j.error??r.status));
+    res.json({ok:true});
+  }catch(e){console.error('FORCESAVE:',e);res.status(500).json({error:e.message});}
+});
+app.get('/api/session/:key/status',requireUser,(req,res)=>{
+  const s=ownedSession(req,res);if(!s)return;
+  res.json({ready:!!s.ready,error:s.error||'',savedAt:s.savedAt||null,ext:s.ext});
+});
+app.get('/api/session/:key/file',requireUser,(req,res)=>{
+  const s=ownedSession(req,res);if(!s)return;
+  if(!s.ready||!s.filePath||!fs.existsSync(s.filePath))return res.status(409).send('Arquivo ainda não está pronto.');
+  res.type(MIME[s.ext]||'application/octet-stream');
+  res.setHeader('Content-Disposition',`attachment; filename="carbonautas-editado.${s.ext}"`);
+  res.sendFile(s.filePath);
+});
+
+
+/* ======================= LABORATÓRIO DE DADOS ======================= */
+const LAB_EXTS = new Set(['csv','xlsx','xls']);
+const LAB_METHOD_LABELS = {
+  diagnostic:'Diagnóstico automático', descriptive:'Estatística descritiva', correlation:'Correlação',
+  regression:'Regressão linear', ttest:'Teste t de Welch', anova:'ANOVA + Tukey', kruskal:'Kruskal-Wallis',
+  pca:'PCA', timeseries:'Tendência temporal', glm:'GLM', mixed:'Modelo misto', cluster:'Cluster k-means'
+};
+function labAccess(p,user){
+  return isCoordinator(user) || p.ownerUid===user.uid || p.memberId===user.memberId || p.labMemberId===user.memberId;
+}
+async function getLabPublication(pubId,user){
+  const snap=await db.collection('rede_publicacoes').doc(pubId).get();
+  if(!snap.exists){const e=new Error('Base de dados não encontrada.');e.status=404;throw e;}
+  const p={...snap.data(),id:snap.id};
+  if(!labAccess(p,user)){const e=new Error('Você não tem acesso a esta base.');e.status=403;throw e;}
+  if(p.tipo!=='arquivo'){const e=new Error('O item selecionado não é um arquivo de dados.');e.status=400;throw e;}
+  const ext=fileExt(p.fileName||p.titulo||'',p.url||'');
+  if(!LAB_EXTS.has(ext)){const e=new Error('O Laboratório aceita CSV e Excel (XLSX/XLS).');e.status=400;throw e;}
+  if(!/^https?:\/\//i.test(p.url||'')){const e=new Error('A base não possui URL válida.');e.status=400;throw e;}
+  return {...p,ext};
+}
+function safeDatasetUrl(raw){
+  const u=new URL(raw);
+  const ok=u.hostname==='firebasestorage.googleapis.com' || u.hostname==='storage.googleapis.com';
+  if(!ok)throw new Error('Por segurança, o Laboratório processa arquivos armazenados no Firebase Storage.');
+  return u.toString();
+}
+async function downloadLabDataset(p,target){
+  const r=await fetch(safeDatasetUrl(p.url));
+  if(!r.ok)throw new Error('Não consegui baixar a base do Firebase: HTTP '+r.status);
+  const size=Number(r.headers.get('content-length')||0);
+  if(size>50*1024*1024)throw new Error('Base maior que 50 MB. Divida ou filtre antes desta versão do Laboratório.');
+  const buf=Buffer.from(await r.arrayBuffer());
+  if(buf.length>50*1024*1024)throw new Error('Base maior que 50 MB.');
+  fs.writeFileSync(target,buf,{mode:0o600});
+}
+function runLabPython(payload,timeoutMs=150000){
+  return new Promise((resolve,reject)=>{
+    const cp=spawn(LAB_PYTHON,[LAB_ENGINE],{cwd:ROOT,stdio:['pipe','pipe','pipe']});
+    let out='',err='';
+    const timer=setTimeout(()=>{cp.kill('SIGKILL');reject(new Error('A análise ultrapassou o tempo máximo. Reduza a base ou simplifique o modelo.'));},timeoutMs);
+    cp.stdout.on('data',d=>{out+=d.toString();if(out.length>20*1024*1024){cp.kill('SIGKILL');}});
+    cp.stderr.on('data',d=>{err+=d.toString();if(err.length>4*1024*1024)err=err.slice(-4*1024*1024);});
+    cp.on('error',e=>{clearTimeout(timer);reject(e);});
+    cp.on('close',code=>{
+      clearTimeout(timer);
+      let j;try{j=JSON.parse(out.trim());}catch{j=null;}
+      if(code!==0 || !j?.ok){console.error('LAB PY:',err.slice(-2500));return reject(new Error(j?.error||'Falha no motor estatístico.'));}
+      resolve(j);
+    });
+    cp.stdin.end(JSON.stringify(payload));
+  });
+}
+function labRunMetaPath(runId){return path.join(LAB_RUNS,runId,'meta.json');}
+function readLabRun(runId){
+  if(!/^[a-f0-9]{12,40}$/i.test(runId))return null;
+  const f=labRunMetaPath(runId);if(!fs.existsSync(f))return null;
+  try{return JSON.parse(fs.readFileSync(f,'utf8'));}catch{return null;}
+}
+function canReadLabRun(meta,user){return !!(meta && (isCoordinator(user)||meta.ownerUid===user.uid||meta.labMemberId===user.memberId));}
+
+function normalizeLabContext(raw,p,user){
+  const allowed=new Set(['project','article','product','independent','exploratory']);
+  const type=allowed.has(String(raw?.labContextType||raw?.type||'')) ? String(raw.labContextType||raw.type) : (p.labContextType||'project');
+  const memberId= type==='project' ? String(raw?.labMemberId||raw?.memberId||p.labMemberId||p.memberId||user.memberId||'') : String(p.memberId||user.memberId||'');
+  const memberName=String(raw?.labMemberNome||raw?.memberName||p.labMemberNome||p.memberNome||user.nome||'');
+  const project=String(raw?.labProject||raw?.project||p.labProject||'').trim();
+  const chapter= type==='project' ? String(raw?.labChapter||raw?.chapter||p.labChapter||'').trim() : '';
+  if(type==='project'){
+    if(!memberId) throw Object.assign(new Error('Selecione o aluno/responsável do projeto.'),{status:400});
+    if(!project) throw Object.assign(new Error('Informe o projeto ao qual esta base pertence.'),{status:400});
+    if(!chapter) throw Object.assign(new Error('Informe o capítulo/etapa ao qual esta base pertence.'),{status:400});
+  } else if(['article','product','independent'].includes(type) && !project){
+    throw Object.assign(new Error('Informe o nome do artigo, produto ou pesquisa.'),{status:400});
+  }
+  return {labContextType:type,labMemberId:memberId,labMemberNome:memberName,labProject:project,labChapter:chapter};
+}
+
+app.get('/api/lab/inspect/:pubId',requireUser,async(req,res)=>{
+  const tempKey=crypto.randomBytes(10).toString('hex');const dir=path.join(LAB_TMP,tempKey);fs.mkdirSync(dir,{recursive:true});
+  try{
+    const p=await getLabPublication(req.params.pubId,req.user);const input=path.join(dir,'base.'+p.ext);await downloadLabDataset(p,input);
+    const j=await runLabPython({action:'inspect',input,outdir:dir},90000);
+    res.json({ok:true,dataset:{id:p.id,title:p.titulo||p.fileName,fileName:p.fileName||'',contextType:p.labContextType||'',memberId:p.labMemberId||p.memberId||'',project:p.labProject||'',chapter:p.labChapter||''},...j});
+  }catch(e){console.error('LAB INSPECT:',e);res.status(e.status||500).json({error:e.message});}
+  finally{try{fs.rmSync(dir,{recursive:true,force:true});}catch{}}
+});
+
+app.post('/api/lab/analyze/:pubId',requireUser,async(req,res)=>{
+  try{
+    const p=await getLabPublication(req.params.pubId,req.user);const body=req.body||{};const options=body.options||body;const method=String(options.analysis||'diagnostic');
+    if(!LAB_METHOD_LABELS[method])return res.status(400).json({error:'Método estatístico não reconhecido.'});
+    // O contexto enviado pela tela é a fonte de verdade desta execução.
+    // O servidor o valida e persiste com Admin SDK, evitando falhas por regra/latência do cliente.
+    const ctx=normalizeLabContext(body.context||{},p,req.user);
+    await db.collection('rede_publicacoes').doc(p.id).set({...ctx,labDataset:true,memberId:ctx.labContextType==='project'?ctx.labMemberId:(p.memberId||req.user.memberId||''),memberNome:ctx.labContextType==='project'?ctx.labMemberNome:(p.memberNome||req.user.nome||'')},{merge:true});
+    Object.assign(p,ctx);
+    const runId=crypto.randomBytes(10).toString('hex');const dir=path.join(LAB_RUNS,runId);fs.mkdirSync(dir,{recursive:true,mode:0o700});
+    const input=path.join(dir,'base_original.'+p.ext);await downloadLabDataset(p,input);
+    const j=await runLabPython({action:'analyze',input,outdir:dir,options},180000);
+    const result=j.result||{};
+    const meta={runId,ownerUid:req.user.uid,ownerMemberId:req.user.memberId||'',ownerName:req.user.nome||req.user.email||'Carbonauta',datasetId:p.id,datasetTitle:p.titulo||p.fileName||'Base',labMemberId:p.labMemberId||p.memberId||'',labContextType:p.labContextType||'',labProject:p.labProject||'',labChapter:p.labChapter||'',method,methodLabel:LAB_METHOD_LABELS[method],createdAt:new Date().toISOString(),result};
+    fs.writeFileSync(labRunMetaPath(runId),JSON.stringify(meta,null,2),{mode:0o600});
+    const memberId=ctx.labContextType==='project'?(ctx.labMemberId||p.memberId||req.user.memberId||''):(p.memberId||req.user.memberId||'');
+    const memberNome=ctx.labContextType==='project'?(ctx.labMemberNome||p.memberNome||req.user.nome||''):(p.memberNome||req.user.nome||'');
+    const doc={memberId,ownerUid:req.user.uid,createdByUid:req.user.uid,memberNome,categoria:'outro',categoriaOutro:'Análise estatística',titulo:(result.title||LAB_METHOD_LABELS[method])+' · '+(p.titulo||p.fileName||'Base'),tipo:'analise',url:'',fileName:'',labRun:true,labRunId:runId,labDatasetId:p.id,labMethod:method,labMethodLabel:LAB_METHOD_LABELS[method],labContextType:p.labContextType||'',labMemberId:memberId,labMemberNome:memberNome,labProject:p.labProject||'',labChapter:p.labChapter||'',labResultTitle:result.title||'',labWarnings:(result.warnings||[]).slice(0,12),labFigures:(result.figures||[]).map(x=>x.label),ts:FieldValue.serverTimestamp()};
+    const ref=await db.collection('rede_publicacoes').add(doc);
+    res.json({ok:true,runId,publicationId:ref.id,result});
+  }catch(e){console.error('LAB ANALYZE:',e);res.status(e.status||500).json({error:e.message});}
+});
+
+app.get('/api/lab/run/:runId',requireUser,(req,res)=>{
+  const meta=readLabRun(req.params.runId);if(!meta)return res.status(404).json({error:'Análise não encontrada no servidor.'});
+  if(!canReadLabRun(meta,req.user))return res.status(403).json({error:'Sem acesso a esta análise.'});
+  res.json({ok:true,meta});
+});
+app.get('/api/lab/run/:runId/file/:name',requireUser,(req,res)=>{
+  const meta=readLabRun(req.params.runId);if(!meta)return res.status(404).json({error:'Análise não encontrada.'});
+  if(!canReadLabRun(meta,req.user))return res.status(403).json({error:'Sem acesso a esta análise.'});
+  const name=path.basename(req.params.name);const file=path.join(LAB_RUNS,req.params.runId,name);const root=path.join(LAB_RUNS,req.params.runId)+path.sep;
+  if(!file.startsWith(root)||!fs.existsSync(file))return res.status(404).json({error:'Arquivo não encontrado.'});
+  res.download(file,name);
+});
+
+setInterval(()=>{
+  const cutoff=Date.now()-12*60*60*1000;
+  for(const [key,s] of sessions){
+    if(s.createdAt<cutoff){try{if(s.filePath)fs.unlinkSync(s.filePath)}catch{}sessions.delete(key);}
+  }
+},60*60*1000).unref();
+
+app.listen(3000,'127.0.0.1',()=>console.log('Carbonautas bridge P5 em 127.0.0.1:3000 · Office legado + Laboratório Estatístico'));
+NODE
+
+cat > lab_engine.py <<'PYENGINE'
+#!/usr/bin/env python3
+import sys, json, os, math, re, traceback, platform
+from pathlib import Path
+import numpy as np
+import pandas as pd
+import scipy
+from scipy import stats
+import statsmodels
+import statsmodels.api as sm
+import statsmodels.formula.api as smf
+from statsmodels.stats.diagnostic import het_breuschpagan
+from statsmodels.stats.stattools import durbin_watson
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+import sklearn
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+np.seterr(all='ignore')
+
+PUB = {
+    'font.family': 'DejaVu Sans',
+    'font.size': 8.5,
+    'axes.titlesize': 9.5,
+    'axes.labelsize': 8.5,
+    'xtick.labelsize': 7.5,
+    'ytick.labelsize': 7.5,
+    'legend.fontsize': 7.5,
+    'axes.linewidth': 0.8,
+    'lines.linewidth': 1.4,
+    'savefig.transparent': False,
+    'figure.facecolor': 'white',
+    'axes.facecolor': 'white',
+}
+plt.rcParams.update(PUB)
+PALETTE = ['#0072B2','#D55E00','#009E73','#CC79A7','#E69F00','#56B4E9','#000000','#999999']
+
+
+def sanitize(v):
+    if isinstance(v, (np.integer,)): return int(v)
+    if isinstance(v, (np.floating,)): return None if not np.isfinite(v) else float(v)
+    if isinstance(v, (np.bool_,)): return bool(v)
+    if isinstance(v, pd.Timestamp): return v.isoformat()
+    if isinstance(v, float): return None if not math.isfinite(v) else v
+    if pd.isna(v) if not isinstance(v,(list,dict,tuple,str)) else False: return None
+    return v
+
+
+def clean_records(df, limit=500):
+    if df is None: return []
+    d = df.head(limit).copy()
+    out=[]
+    for rec in d.to_dict(orient='records'):
+        out.append({str(k):sanitize(v) for k,v in rec.items()})
+    return out
+
+
+def _unique_name(name, used):
+    base = re.sub(r'\s+', ' ', str(name or '').strip()) or 'Variável'
+    out = base; i = 2
+    while out in used:
+        out = f'{base}_{i}'; i += 1
+    used.add(out)
+    return out
+
+
+def _infer_sidra_first_dimension(title):
+    txt = str(title or '').strip()
+    m = re.search(r'\bsegundo\s+(?:os|as|o|a)?\s*(.+)$', txt, flags=re.I)
+    if m:
+        v = re.sub(r'[\.;:]+$', '', m.group(1)).strip()
+        if v: return v
+    return 'Localidade'
+
+
+def _read_sidra_like_excel(path):
+    """Converte exportações SIDRA/IBGE com cabeçalhos em várias linhas para formato tidy.
+    Mantém as dimensões do cabeçalho (ex.: Ano x Idade) e cria uma coluna numérica de valor.
+    Retorna None quando a planilha não tem a assinatura esperada.
+    """
+    raw = pd.read_excel(path, sheet_name=0, header=None, dtype=object)
+    if raw.empty: return None
+    raw = raw.replace(r'^\s*$', np.nan, regex=True)
+    first_col = raw.iloc[:,0].astype(str).fillna('')
+    title = str(raw.iat[0,0] if raw.shape[0] else '')
+    source_rows = [i for i,v in enumerate(first_col) if str(v).strip().lower().startswith('fonte:')]
+    var_rows = [i for i,v in enumerate(first_col) if str(v).strip().lower().startswith('variável -')]
+    looks_sidra = ('tabela ' in title.lower() or 'sidra' in title.lower()) and (source_rows or var_rows)
+    if not looks_sidra: return None
+    source_row = source_rows[0] if source_rows else len(raw)
+    var_row = var_rows[0] if var_rows else 1
+
+    # Encontra a primeira linha de dados: precisa ter identificador na primeira coluna e algum número depois.
+    data_start = None
+    for i in range(var_row+1, source_row):
+        row = raw.iloc[i]
+        first = row.iloc[0]
+        if pd.isna(first): continue
+        nums = 0
+        for v in row.iloc[1:]:
+            if isinstance(v, (int,float,np.integer,np.floating)) and not pd.isna(v): nums += 1
+            elif isinstance(v,str):
+                z=v.strip().replace('.','').replace(',','.')
+                try: float(z); nums += 1
+                except: pass
+        if nums:
+            data_start = i; break
+    if data_start is None: return None
+
+    data_block = raw.iloc[data_start:source_row].copy()
+    data_block = data_block.dropna(how='all')
+    if data_block.empty: return None
+
+    # Colunas de valor: maioria dos dados é numérica (ou há ao menos um valor numérico quando só existe uma linha).
+    value_cols=[]
+    for j in range(raw.shape[1]):
+        vals=data_block.iloc[:,j]
+        converted=pd.to_numeric(vals.astype(str).str.strip().str.replace('.','',regex=False).str.replace(',','.',regex=False),errors='coerce')
+        nonempty=vals.notna().sum()
+        ratio=(converted.notna().sum()/nonempty) if nonempty else 0
+        if converted.notna().sum() and (ratio>=.6 or (len(data_block)<=3 and ratio>=.34)):
+            value_cols.append(j)
+    # A primeira coluna quase sempre é dimensão geográfica; não a trate como valor.
+    value_cols=[j for j in value_cols if j!=0]
+    if not value_cols: return None
+    row_dim_cols=[j for j in range(min(value_cols)) if j not in value_cols]
+    if not row_dim_cols: row_dim_cols=[0]
+
+    header = raw.iloc[var_row+1:data_start].copy()
+    # Espalha rótulos oriundos de células mescladas horizontalmente.
+    header = header.ffill(axis=1)
+
+    metric = str(raw.iat[var_row,0] if var_row < raw.shape[0] else 'Valor')
+    metric = re.sub(r'^\s*Variável\s*-\s*','',metric,flags=re.I).strip()
+    metric = re.sub(r'\s*\([^)]*\)\s*$','',metric).strip() or 'Valor'
+
+    used=set(); row_names={}
+    for pos,j in enumerate(row_dim_cols):
+        candidates=[]
+        for i in range(data_start-1,var_row,-1):
+            v=raw.iat[i,j]
+            if not pd.isna(v):
+                t=str(v).strip()
+                if t and not re.match(r'^\d{4}$',t): candidates.append(t)
+        if candidates:
+            name=candidates[0]
+        elif j==0:
+            name=_infer_sidra_first_dimension(title)
+        else:
+            name=f'Dimensão {pos+1}'
+        row_names[j]=_unique_name(name,used)
+
+    records=[]
+    for _,drow in data_block.iterrows():
+        base={}
+        for j in row_dim_cols:
+            v=drow.iloc[j]
+            base[row_names[j]]=None if pd.isna(v) else v
+        for j in value_cols:
+            rawv=drow.iloc[j]
+            if pd.isna(rawv): continue
+            if isinstance(rawv,str):
+                num=pd.to_numeric(pd.Series([rawv.strip().replace('.','').replace(',','.')]),errors='coerce').iloc[0]
+            else: num=pd.to_numeric(pd.Series([rawv]),errors='coerce').iloc[0]
+            if pd.isna(num): continue
+            rec=dict(base)
+            stack=[]
+            for i in range(header.shape[0]):
+                v=header.iloc[i,j]
+                if not pd.isna(v):
+                    t=str(v).strip()
+                    if t and (not stack or t!=stack[-1]): stack.append(t)
+            # Ex.: "Ano x Idade" + [2022, Total] -> Ano=2022, Idade=Total
+            if stack:
+                dims=[x.strip() for x in re.split(r'\s+[xX×]\s+',stack[0]) if x.strip()]
+                values=stack[1:]
+                if len(dims)>1:
+                    for k,dn in enumerate(dims):
+                        rec[_unique_name(dn,used) if dn not in rec and dn in used else dn] = values[k] if k < len(values) else None
+                else:
+                    # Cabeçalho simples: preserve como categoria quando houver um valor abaixo.
+                    if len(stack)>=2:
+                        dn=stack[0]
+                        if dn not in rec: rec[dn]=stack[-1]
+            rec[metric]=float(num) if isinstance(num,(float,np.floating)) else int(num)
+            records.append(rec)
+    if not records: return None
+    df=pd.DataFrame(records)
+    # Remove colunas totalmente vazias e evita nomes duplicados.
+    df=df.dropna(axis=1,how='all')
+    df.attrs['source_format']='SIDRA/IBGE'
+    return df
+
+
+def read_dataset(path):
+    p = str(path)
+    ext = Path(p).suffix.lower()
+    if ext in ['.xlsx','.xlsm','.xls']:
+        # Primeiro tenta reconhecer planilhas institucionais com cabeçalho multinível (ex.: SIDRA/IBGE).
+        try:
+            sidra=_read_sidra_like_excel(p)
+        except Exception:
+            sidra=None
+        if sidra is not None and not sidra.empty:
+            df=sidra
+        else:
+            df = pd.read_excel(p, sheet_name=0)
+    else:
+        last=None
+        for enc in ['utf-8-sig','utf-8','latin1']:
+            try:
+                df = pd.read_csv(p, sep=None, engine='python', encoding=enc)
+                break
+            except Exception as e: last=e
+        else: raise last
+    # nomes únicos e legíveis
+    cols=[]; used=set()
+    for i,c in enumerate(df.columns):
+        name=str(c).strip() if str(c).strip() and not str(c).lower().startswith('unnamed:') else f'var_{i+1}'
+        cols.append(_unique_name(name,used))
+    df.columns=cols
+    # Tenta números brasileiros e números armazenados como texto sem destruir colunas categóricas.
+    for c in df.columns:
+        if df[c].dtype == object:
+            s = df[c].astype(str).str.strip()
+            converted = pd.to_numeric(s.str.replace('.', '', regex=False).str.replace(',', '.', regex=False), errors='coerce')
+            valid_orig = s.replace({'':'nan','NA':'nan','NaN':'nan','None':'nan','<NA>':'nan'}).ne('nan').sum()
+            if valid_orig and converted.notna().sum() / valid_orig >= .70:
+                df[c] = converted
+    # elimina linhas/colunas completamente vazias
+    df=df.dropna(axis=0,how='all').dropna(axis=1,how='all')
+    return df
+
+
+def numeric_cols(df): return [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
+def categorical_cols(df): return [c for c in df.columns if c not in numeric_cols(df)]
+
+
+def ensure_cols(df, cols):
+    for c in cols:
+        if c and c not in df.columns: raise ValueError(f'Variável não encontrada: {c}')
+
+
+def fmt_p(p):
+    if p is None or not np.isfinite(p): return '—'
+    return '<0.001' if p < .001 else f'{p:.3f}'
+
+
+def save_figure(fig, outdir, stem, label):
+    out=[]
+    for ext in ['png','svg','pdf']:
+        fp=Path(outdir)/f'{stem}.{ext}'
+        kw={'bbox_inches':'tight'}
+        if ext=='png': kw['dpi']=600
+        fig.savefig(fp, **kw)
+        out.append({'name':fp.name,'format':ext})
+    plt.close(fig)
+    return {'stem':stem,'label':label,'files':out}
+
+
+def write_table(df, outdir, stem, label):
+    csv=Path(outdir)/f'{stem}.csv'
+    xlsx=Path(outdir)/f'{stem}.xlsx'
+    df.to_csv(csv,index=False,encoding='utf-8-sig')
+    try: df.to_excel(xlsx,index=False)
+    except Exception: xlsx=None
+    files=[{'name':csv.name,'format':'csv'}]
+    if xlsx: files.append({'name':xlsx.name,'format':'xlsx'})
+    return {'name':stem,'label':label,'columns':[str(c) for c in df.columns],'rows':clean_records(df,200),'files':files}
+
+
+def base_result(title, method):
+    return {'title':title,'method':method,'metrics':[],'warnings':[],'notes':[],'tables':[],'figures':[],'files':[],'recommendations':[]}
+
+
+def inspect(df):
+    n=len(df); p=len(df.columns)
+    miss=df.isna().sum()
+    num=numeric_cols(df); cat=categorical_cols(df)
+    cols=[]
+    for c in df.columns:
+        vals=df[c]
+        cols.append({'name':c,'dtype':'numeric' if c in num else 'categorical','missing':int(vals.isna().sum()),'missingPct':float(vals.isna().mean()*100),'unique':int(vals.nunique(dropna=True))})
+    suggestions=[]
+    varied_num=[c for c in num if df[c].nunique(dropna=True)>=3]
+    varied_cat=[c for c in cat if df[c].nunique(dropna=True)>=2]
+    if n < 3:
+        suggestions += ['A base tem menos de 3 observações. Use diagnóstico/descritiva; inferência estatística não é defensável nesta forma.']
+    if n>=3 and len(varied_num)>=2:
+        suggestions += ['Correlação e regressão são candidatas porque há pelo menos duas variáveis numéricas com variação.']
+    if n>=max(5,len(varied_num)+1) and len(varied_num)>=2:
+        suggestions += ['PCA é possível, mas confirme escala, colinearidade e razão observações/variáveis.']
+    if n>=4 and varied_cat and varied_num:
+        suggestions += ['Comparações entre grupos podem ser avaliadas após checar número de grupos, independência e distribuição.']
+    temporal=[c for c in df.columns if ('date' in c.lower() or 'ano' in c.lower() or 'year' in c.lower() or 'tempo' in c.lower()) and df[c].nunique(dropna=True)>=4]
+    if temporal and varied_num:
+        suggestions += ['Há série temporal potencial; tendência/autocorrelação devem ser avaliadas antes de modelar.']
+    return {'rows':n,'columns':p,'numeric':num,'categorical':cat,'columnInfo':cols,'preview':clean_records(df,8),'missingTotal':int(miss.sum()),'suggestions':suggestions}
+
+
+def analysis_diagnostic(df, opt, outdir):
+    r=base_result('Diagnóstico automático da base','Diagnóstico de qualidade, distribuição e estrutura')
+    ins=inspect(df)
+    r['metrics']=[{'label':'Linhas','value':ins['rows']},{'label':'Variáveis','value':ins['columns']},{'label':'Numéricas','value':len(ins['numeric'])},{'label':'Valores ausentes','value':ins['missingTotal']}]
+    rows=[]
+    for c in df.columns:
+        s=df[c]
+        row={'Variável':c,'Tipo':'Numérica' if c in ins['numeric'] else 'Categórica','N válido':int(s.notna().sum()),'Ausentes':int(s.isna().sum()),'% ausente':round(float(s.isna().mean()*100),2),'Únicos':int(s.nunique(dropna=True))}
+        if c in ins['numeric']:
+            x=pd.to_numeric(s,errors='coerce').dropna()
+            row.update({'Média':float(x.mean()) if len(x) else np.nan,'DP':float(x.std(ddof=1)) if len(x)>1 else np.nan,'Mediana':float(x.median()) if len(x) else np.nan,'Min':float(x.min()) if len(x) else np.nan,'Max':float(x.max()) if len(x) else np.nan})
+        rows.append(row)
+    tab=pd.DataFrame(rows)
+    r['tables'].append(write_table(tab,outdir,'diagnostico_variaveis','Diagnóstico por variável'))
+    if ins['numeric']:
+        miss_pct=(df.isna().mean()*100).sort_values(ascending=False)
+        fig,ax=plt.subplots(figsize=(6.6,3.3))
+        idx=np.arange(len(miss_pct))
+        ax.bar(idx,miss_pct.values,color=PALETTE[0],width=.72)
+        ax.set_ylabel('Valores ausentes (%)'); ax.set_xticks(idx); ax.set_xticklabels(miss_pct.index,rotation=45,ha='right')
+        ax.spines[['top','right']].set_visible(False); ax.set_title('Completude da base')
+        r['figures'].append(save_figure(fig,outdir,'fig_completude','Completude por variável'))
+    if ins['missingTotal']>0: r['warnings'].append(f'A base contém {ins["missingTotal"]} valores ausentes. Analise o padrão de ausência antes de modelar.')
+    if len(df)<30: r['warnings'].append('Amostra pequena: inferências e testes de normalidade têm baixa potência.')
+    r['recommendations']=ins['suggestions']
+    return r
+
+
+def analysis_descriptive(df,opt,outdir):
+    vars=opt.get('variables') or numeric_cols(df)
+    vars=[v for v in vars if v in numeric_cols(df)]
+    if not vars: raise ValueError('Selecione ao menos uma variável numérica.')
+    r=base_result('Estatística descritiva','Resumo robusto + distribuição')
+    rows=[]
+    for c in vars:
+        x=df[c].dropna().astype(float)
+        q1,q3=x.quantile([.25,.75]) if len(x) else (np.nan,np.nan)
+        rows.append({'Variável':c,'N':len(x),'Média':x.mean(),'DP':x.std(ddof=1),'Mediana':x.median(),'Q1':q1,'Q3':q3,'IQR':q3-q1,'Min':x.min(),'Max':x.max(),'CV (%)':(x.std(ddof=1)/abs(x.mean())*100) if len(x)>1 and x.mean()!=0 else np.nan})
+    r['tables'].append(write_table(pd.DataFrame(rows),outdir,'estatistica_descritiva','Estatística descritiva'))
+    nplot=min(len(vars),6); fig,axs=plt.subplots(1,nplot,figsize=(max(3.2,2.1*nplot),3.2),squeeze=False)
+    for i,c in enumerate(vars[:nplot]):
+        ax=axs[0,i]; x=df[c].dropna().astype(float)
+        parts=ax.violinplot(x,positions=[0],showmeans=False,showmedians=True,widths=.7)
+        for body in parts['bodies']: body.set_facecolor(PALETTE[0]); body.set_alpha(.25); body.set_edgecolor(PALETTE[0])
+        jitter=np.linspace(-.12,.12,len(x)) if len(x) else []
+        if len(x)>1000: x=x.sample(1000,random_state=1); jitter=np.random.default_rng(1).normal(0,.06,len(x))
+        ax.scatter(jitter,x,s=8,alpha=.45,color=PALETTE[0],edgecolors='none'); ax.set_xticks([]); ax.set_title(c); ax.spines[['top','right','bottom']].set_visible(False)
+    fig.suptitle('Distribuição das variáveis',y=1.02)
+    r['figures'].append(save_figure(fig,outdir,'fig_distribuicoes','Distribuições e observações individuais'))
+    return r
+
+
+def analysis_correlation(df,opt,outdir):
+    vars=opt.get('variables') or numeric_cols(df)
+    vars=[v for v in vars if v in numeric_cols(df)]
+    if len(vars)<2: raise ValueError('Selecione ao menos duas variáveis numéricas.')
+    method=opt.get('correlation','pearson')
+    if method not in ['pearson','spearman']: method='pearson'
+    d=df[vars].copy()
+    corr=d.corr(method=method)
+    pmat=pd.DataFrame(np.nan,index=vars,columns=vars)
+    for i,a in enumerate(vars):
+        for j,b in enumerate(vars):
+            if a==b:
+                pmat.loc[a,b]=0.0
+                continue
+            pair=d[[a,b]].dropna()
+            if len(pair)>=3:
+                rr,pp=(stats.pearsonr(pair[a],pair[b]) if method=='pearson' else stats.spearmanr(pair[a],pair[b]))
+                pmat.loc[a,b]=float(pp)
+    r=base_result('Matriz de correlação',f'Correlação de {method.capitalize()}')
+    ctab=corr.reset_index().rename(columns={'index':'Variável'})
+    r['tables'].append(write_table(ctab,outdir,'correlacao_coeficientes','Coeficientes de correlação'))
+    ptab=pmat.reset_index().rename(columns={'index':'Variável'})
+    r['tables'].append(write_table(ptab,outdir,'correlacao_pvalores','Valores de p'))
+    fig,ax=plt.subplots(figsize=(max(4.2,.55*len(vars)+2),max(3.8,.5*len(vars)+1.5)))
+    im=ax.imshow(corr.values,vmin=-1,vmax=1,cmap='RdBu_r',aspect='auto')
+    ax.set_xticks(range(len(vars)));ax.set_yticks(range(len(vars)));ax.set_xticklabels(vars,rotation=45,ha='right');ax.set_yticklabels(vars)
+    for i in range(len(vars)):
+        for j in range(len(vars)):
+            v=corr.iloc[i,j]; ax.text(j,i,f'{v:.2f}',ha='center',va='center',fontsize=7,color='white' if abs(v)>.55 else 'black')
+    cb=fig.colorbar(im,ax=ax,fraction=.046,pad=.04);cb.set_label('r')
+    ax.set_title(f'Correlação de {method.capitalize()}')
+    r['figures'].append(save_figure(fig,outdir,'fig_correlacao','Mapa de calor da correlação'))
+    return r
+
+
+def _reg_data(df,y,xs):
+    ensure_cols(df,[y]+xs); d=df[[y]+xs].dropna().copy()
+    for c in [y]+xs:
+        if c not in numeric_cols(d): raise ValueError(f'A regressão requer variável numérica: {c}')
+    return d
+
+
+def analysis_regression(df,opt,outdir):
+    y=opt.get('y'); xs=opt.get('variables') or ([opt.get('x')] if opt.get('x') else [])
+    xs=[x for x in xs if x and x!=y]
+    if not y or not xs: raise ValueError('Escolha a variável resposta e pelo menos um preditor.')
+    d=_reg_data(df,y,xs)
+    X=sm.add_constant(d[xs],has_constant='add'); model=sm.OLS(d[y],X).fit()
+    r=base_result('Regressão linear','OLS com diagnóstico de resíduos e colinearidade')
+    r['metrics']=[{'label':'N','value':int(model.nobs)},{'label':'R²','value':round(float(model.rsquared),4)},{'label':'R² ajustado','value':round(float(model.rsquared_adj),4)},{'label':'AIC','value':round(float(model.aic),2)},{'label':'BIC','value':round(float(model.bic),2)}]
+    ci=model.conf_int(); rows=[]
+    for term in model.params.index:
+        rows.append({'Termo':term,'Estimativa':model.params[term],'Erro padrão':model.bse[term],'t':model.tvalues[term],'p':model.pvalues[term],'IC95% inferior':ci.loc[term,0],'IC95% superior':ci.loc[term,1]})
+    r['tables'].append(write_table(pd.DataFrame(rows),outdir,'regressao_coeficientes','Coeficientes do modelo'))
+    resid=model.resid; fitted=model.fittedvalues
+    sh_p=np.nan
+    if 3<=len(resid)<=5000:
+        sh_p=stats.shapiro(resid).pvalue
+        if sh_p<.05:r['warnings'].append(f'Resíduos desviam da normalidade (Shapiro-Wilk p={fmt_p(sh_p)}). Avalie QQ-plot e robustez.')
+    bp=het_breuschpagan(resid,model.model.exog); bp_p=bp[1]
+    if bp_p<.05:r['warnings'].append(f'Indício de heterocedasticidade (Breusch-Pagan p={fmt_p(bp_p)}). Considere erros-padrão robustos/transformação.')
+    dw=float(durbin_watson(resid));
+    if dw<1.5 or dw>2.5:r['warnings'].append(f'Durbin-Watson={dw:.2f}; pode haver autocorrelação residual se os dados forem ordenados/temporais.')
+    diag=pd.DataFrame([{'Shapiro p':sh_p,'Breusch-Pagan p':bp_p,'Durbin-Watson':dw}])
+    if len(xs)>1:
+        vx=sm.add_constant(d[xs],has_constant='add')
+        vifs=[]
+        for i,c in enumerate(vx.columns):
+            if c=='const': continue
+            vifs.append({'Variável':c,'VIF':variance_inflation_factor(vx.values,i)})
+        vdf=pd.DataFrame(vifs); r['tables'].append(write_table(vdf,outdir,'regressao_vif','Colinearidade (VIF)'))
+        if (vdf['VIF']>5).any(): r['warnings'].append('Há VIF > 5, sugerindo colinearidade relevante entre preditores.')
+    r['tables'].append(write_table(diag,outdir,'regressao_diagnostico','Diagnósticos do modelo'))
+    if len(xs)==1:
+        x=xs[0];fig,ax=plt.subplots(figsize=(4.1,3.3));ax.scatter(d[x],d[y],s=18,alpha=.65,color=PALETTE[0],edgecolors='white',linewidths=.25)
+        xx=np.linspace(d[x].min(),d[x].max(),150);Xp=sm.add_constant(pd.DataFrame({x:xx}),has_constant='add');pred=model.get_prediction(Xp).summary_frame(alpha=.05)
+        ax.plot(xx,pred['mean'],color=PALETTE[1],lw=1.6);ax.fill_between(xx,pred['mean_ci_lower'].to_numpy(),pred['mean_ci_upper'].to_numpy(),color=PALETTE[1],alpha=.14,lw=0)
+        ax.set_xlabel(x);ax.set_ylabel(y);ax.spines[['top','right']].set_visible(False);ax.set_title(f'{y} ~ {x}\nR²={model.rsquared:.3f}, p={fmt_p(model.f_pvalue)}')
+        r['figures'].append(save_figure(fig,outdir,'fig_regressao','Relação observada, ajuste e IC95%'))
+    fig,axs=plt.subplots(1,2,figsize=(7,3.1));axs[0].scatter(fitted,resid,s=14,alpha=.6,color=PALETTE[0]);axs[0].axhline(0,color='black',lw=.8);axs[0].set_xlabel('Valores ajustados');axs[0].set_ylabel('Resíduos');axs[0].spines[['top','right']].set_visible(False)
+    sm.qqplot(resid,line='45',ax=axs[1],markerfacecolor=PALETTE[0],markeredgecolor='none',alpha=.6);axs[1].set_title('QQ-plot dos resíduos');fig.tight_layout()
+    r['figures'].append(save_figure(fig,outdir,'fig_regressao_diagnosticos','Diagnósticos visuais do modelo'))
+    return r
+
+
+def analysis_group_test(df,opt,outdir,kind):
+    y=opt.get('y');g=opt.get('group');ensure_cols(df,[y,g]);d=df[[y,g]].dropna();
+    if y not in numeric_cols(d):raise ValueError('A variável resposta deve ser numérica.')
+    groups=[(str(name),sub[y].astype(float).values) for name,sub in d.groupby(g,dropna=True)]
+    if len(groups)<2:raise ValueError('A variável de grupo precisa ter ao menos dois grupos.')
+    labels=[x[0] for x in groups]; arrays=[x[1] for x in groups]
+    if kind=='ttest':
+        if len(groups)!=2:raise ValueError('O teste t/Welch requer exatamente dois grupos.')
+        levp=stats.levene(*arrays,center='median').pvalue if min(map(len,arrays))>=2 else np.nan
+        stat,p=stats.ttest_ind(*arrays,equal_var=False,nan_policy='omit')
+        n1,n2=len(arrays[0]),len(arrays[1]);m1,m2=np.mean(arrays[0]),np.mean(arrays[1]);s1,s2=np.var(arrays[0],ddof=1),np.var(arrays[1],ddof=1)
+        sp=math.sqrt(((n1-1)*s1+(n2-1)*s2)/(n1+n2-2)) if n1+n2>2 else np.nan;dcohen=(m1-m2)/sp if sp and np.isfinite(sp) and sp>0 else np.nan
+        J=1-3/(4*(n1+n2)-9) if n1+n2>2 else 1;hedges=dcohen*J
+        r=base_result('Comparação entre dois grupos','Teste t de Welch (padrão robusto a variâncias diferentes)')
+        r['metrics']=[{'label':'t','value':round(float(stat),4)},{'label':'p','value':fmt_p(p)},{'label':'Hedges g','value':round(float(hedges),3) if np.isfinite(hedges) else '—'},{'label':'Levene p','value':fmt_p(levp)}]
+        if np.isfinite(levp) and levp<.05:r['warnings'].append('As variâncias diferem entre grupos; foi usado Welch, que é apropriado nessa situação.')
+    elif kind=='anova':
+        levp=stats.levene(*arrays,center='median').pvalue if min(map(len,arrays))>=2 else np.nan
+        F,p=stats.f_oneway(*arrays)
+        r=base_result('Comparação de múltiplos grupos','ANOVA de uma via + Tukey HSD')
+        r['metrics']=[{'label':'F','value':round(float(F),4)},{'label':'p','value':fmt_p(p)},{'label':'Grupos','value':len(groups)},{'label':'Levene p','value':fmt_p(levp)}]
+        if levp<.05:r['warnings'].append('Heterogeneidade de variâncias detectada. Interprete a ANOVA clássica com cautela; considere Welch/Kruskal.')
+        if len(d)>=3:
+            tuk=pairwise_tukeyhsd(d[y].astype(float),d[g].astype(str));td=pd.DataFrame(tuk._results_table.data[1:],columns=tuk._results_table.data[0]);r['tables'].append(write_table(td,outdir,'anova_tukey','Pós-teste de Tukey'))
+    else:
+        H,p=stats.kruskal(*arrays,nan_policy='omit');r=base_result('Comparação não paramétrica','Kruskal-Wallis + comparações Mann-Whitney com Holm')
+        r['metrics']=[{'label':'H','value':round(float(H),4)},{'label':'p','value':fmt_p(p)},{'label':'Grupos','value':len(groups)}]
+        pairs=[]
+        raw=[]
+        for i in range(len(groups)):
+            for j in range(i+1,len(groups)):
+                u,pp=stats.mannwhitneyu(arrays[i],arrays[j],alternative='two-sided'); raw.append(pp);pairs.append([labels[i],labels[j],u,pp])
+        order=np.argsort(raw);m=len(raw);adj=[None]*m;running=0
+        for rank,idx in enumerate(order):
+            val=min(1,raw[idx]*(m-rank));running=max(running,val);adj[idx]=running
+        pdf=pd.DataFrame([{'Grupo 1':a,'Grupo 2':b,'U':u,'p':p0,'p Holm':pa} for (a,b,u,p0),pa in zip(pairs,adj)])
+        r['tables'].append(write_table(pdf,outdir,'kruskal_poshoc','Comparações par-a-par'))
+    summary=d.groupby(g)[y].agg(['count','mean','std','median']).reset_index();r['tables'].append(write_table(summary,outdir,'grupos_resumo','Resumo por grupo'))
+    fig,ax=plt.subplots(figsize=(max(4.2,.75*len(groups)+2.2),3.4));positions=np.arange(len(groups));
+    bp=ax.boxplot(arrays,positions=positions,widths=.5,patch_artist=True,showfliers=False)
+    for i,box in enumerate(bp['boxes']):box.set_facecolor(PALETTE[i%len(PALETTE)]);box.set_alpha(.25);box.set_edgecolor(PALETTE[i%len(PALETTE)])
+    rng=np.random.default_rng(4)
+    for i,a in enumerate(arrays):
+        sample=a if len(a)<=1200 else rng.choice(a,1200,replace=False);ax.scatter(rng.normal(i,.06,len(sample)),sample,s=9,alpha=.45,color=PALETTE[i%len(PALETTE)],edgecolors='none')
+    ax.set_xticks(positions);ax.set_xticklabels(labels,rotation=30,ha='right');ax.set_ylabel(y);ax.set_xlabel(g);ax.spines[['top','right']].set_visible(False);ax.set_title(r['title'])
+    r['figures'].append(save_figure(fig,outdir,'fig_grupos','Distribuição por grupo e observações individuais'))
+    return r
+
+
+def analysis_pca(df,opt,outdir):
+    vars=opt.get('variables') or numeric_cols(df);vars=[v for v in vars if v in numeric_cols(df)]
+    if len(vars)<2:raise ValueError('PCA requer pelo menos duas variáveis numéricas.')
+    d=df[vars].dropna();
+    if len(d)<3:raise ValueError('Poucas linhas completas para PCA.')
+    Z=StandardScaler().fit_transform(d);ncomp=min(len(vars),max(2,min(6,len(d)-1)));pca=PCA(n_components=ncomp).fit(Z);scores=pca.transform(Z);load=pca.components_.T
+    r=base_result('Análise de Componentes Principais (PCA)','PCA com padronização z-score')
+    r['metrics']=[{'label':'N completo','value':len(d)},{'label':'Variáveis','value':len(vars)},{'label':'PC1','value':f'{pca.explained_variance_ratio_[0]*100:.1f}%'},{'label':'PC2','value':f'{pca.explained_variance_ratio_[1]*100:.1f}%'}]
+    ev=pd.DataFrame({'Componente':[f'PC{i+1}' for i in range(ncomp)],'Variância explicada (%)':pca.explained_variance_ratio_*100,'Variância acumulada (%)':np.cumsum(pca.explained_variance_ratio_)*100});r['tables'].append(write_table(ev,outdir,'pca_variancia','Variância explicada'))
+    ldf=pd.DataFrame(load[:,:min(4,ncomp)],index=vars,columns=[f'PC{i+1}' for i in range(min(4,ncomp))]).reset_index().rename(columns={'index':'Variável'});r['tables'].append(write_table(ldf,outdir,'pca_loadings','Cargas das variáveis'))
+    sdf=pd.DataFrame(scores[:,:min(4,ncomp)],columns=[f'PC{i+1}' for i in range(min(4,ncomp))]);r['tables'].append(write_table(sdf,outdir,'pca_scores','Escores das observações'))
+    fig,ax=plt.subplots(figsize=(4.7,4.0));ax.scatter(scores[:,0],scores[:,1],s=16,alpha=.55,color=PALETTE[0],edgecolors='none')
+    scale=max(np.nanstd(scores[:,0]),np.nanstd(scores[:,1]))*2.2
+    for i,v in enumerate(vars):
+        ax.arrow(0,0,load[i,0]*scale,load[i,1]*scale,color=PALETTE[1],alpha=.75,width=.004,head_width=.07,length_includes_head=True);ax.text(load[i,0]*scale*1.08,load[i,1]*scale*1.08,v,fontsize=7,ha='center')
+    ax.axhline(0,color='.75',lw=.6);ax.axvline(0,color='.75',lw=.6);ax.set_xlabel(f'PC1 ({pca.explained_variance_ratio_[0]*100:.1f}%)');ax.set_ylabel(f'PC2 ({pca.explained_variance_ratio_[1]*100:.1f}%)');ax.spines[['top','right']].set_visible(False);ax.set_title('PCA · escores e cargas')
+    r['figures'].append(save_figure(fig,outdir,'fig_pca_biplot','PCA: escores e cargas'))
+    return r
+
+
+def mann_kendall(x):
+    a=np.asarray(x,dtype=float);a=a[np.isfinite(a)];n=len(a);S=0
+    for k in range(n-1):S+=np.sign(a[k+1:]-a[k]).sum()
+    unique,counts=np.unique(a,return_counts=True);varS=(n*(n-1)*(2*n+5)-np.sum(counts*(counts-1)*(2*counts+5)))/18
+    if S>0:z=(S-1)/math.sqrt(varS)
+    elif S<0:z=(S+1)/math.sqrt(varS)
+    else:z=0
+    p=2*(1-stats.norm.cdf(abs(z)));tau=S/(.5*n*(n-1)) if n>1 else np.nan
+    return S,varS,z,p,tau
+
+
+def analysis_timeseries(df,opt,outdir):
+    t=opt.get('time');y=opt.get('y');ensure_cols(df,[t,y]);d=df[[t,y]].dropna().copy();
+    if y not in numeric_cols(d):raise ValueError('A variável resposta deve ser numérica.')
+    # Coerce time to datetime when possible, otherwise numeric/order.
+    dt=pd.to_datetime(d[t],errors='coerce')
+    if dt.notna().mean()>=.8:
+        d['_t']=dt;d=d.dropna(subset=['_t']).sort_values('_t');xnum=(d['_t']-d['_t'].min()).dt.total_seconds()/86400; xlabel=t
+    else:
+        xnum=pd.to_numeric(d[t],errors='coerce');d=d.loc[xnum.notna()].copy();xnum=xnum.loc[xnum.notna()];d=d.iloc[np.argsort(xnum.values)];xnum=np.sort(xnum.values);xlabel=t
+    yy=d[y].astype(float).values
+    if len(yy)<4:raise ValueError('A série temporal precisa de pelo menos quatro observações.')
+    slope,intercept,lo,hi=stats.theilslopes(yy,np.asarray(xnum,dtype=float),.95);S,varS,z,p,tau=mann_kendall(yy)
+    lr=stats.linregress(np.asarray(xnum,dtype=float),yy)
+    r=base_result('Tendência temporal','Mann-Kendall + inclinação de Sen + tendência linear')
+    r['metrics']=[{'label':'N','value':len(yy)},{'label':'Kendall τ','value':round(float(tau),3)},{'label':'Mann-Kendall p','value':fmt_p(p)},{'label':'Sen slope','value':round(float(slope),5)},{'label':'R² linear','value':round(float(lr.rvalue**2),3)}]
+    if p<.05:r['notes'].append('Há evidência de tendência monotônica pelo teste de Mann-Kendall.')
+    else:r['notes'].append('Não há evidência estatística de tendência monotônica ao nível de 5%.')
+    tab=pd.DataFrame([{'Mann-Kendall S':S,'z':z,'p':p,'Kendall tau':tau,'Sen slope':slope,'Sen IC95% inferior':lo,'Sen IC95% superior':hi,'Slope linear':lr.slope,'p linear':lr.pvalue,'R2 linear':lr.rvalue**2}]);r['tables'].append(write_table(tab,outdir,'tendencia_resultados','Resultados da tendência'))
+    fig,ax=plt.subplots(figsize=(6.2,3.3));xplot=d['_t'] if '_t' in d else xnum;ax.plot(xplot,yy,'o-',ms=3.2,lw=.9,color=PALETTE[0],alpha=.78);xx=np.asarray(xnum,dtype=float);ax.plot(xplot,intercept+slope*xx,color=PALETTE[1],lw=1.6,label='Sen');ax.set_xlabel(xlabel);ax.set_ylabel(y);ax.spines[['top','right']].set_visible(False);ax.legend(frameon=False);ax.set_title(f'Tendência · τ={tau:.2f}, p={fmt_p(p)}')
+    r['figures'].append(save_figure(fig,outdir,'fig_tendencia','Série temporal e tendência de Sen'))
+    return r
+
+
+def analysis_glm(df,opt,outdir):
+    y=opt.get('y');xs=opt.get('variables') or ([opt.get('x')] if opt.get('x') else []);xs=[x for x in xs if x and x!=y];family=str(opt.get('family','gaussian')).lower()
+    if not y or not xs:raise ValueError('Escolha resposta e preditores.')
+    d=_reg_data(df,y,xs)
+    fam={'gaussian':sm.families.Gaussian(),'binomial':sm.families.Binomial(),'poisson':sm.families.Poisson()}.get(family)
+    if fam is None:raise ValueError('Família GLM disponível: gaussian, binomial ou poisson.')
+    if family=='binomial':
+        vals=sorted(d[y].unique());
+        if len(vals)!=2:raise ValueError('GLM binomial requer resposta com exatamente dois valores.')
+        if set(vals)!={0,1}:d[y]=d[y].map({vals[0]:0,vals[1]:1})
+    X=sm.add_constant(d[xs],has_constant='add');model=sm.GLM(d[y],X,family=fam).fit()
+    r=base_result(f'GLM · {family.capitalize()}',f'Modelo linear generalizado ({family})')
+    r['metrics']=[{'label':'N','value':int(model.nobs)},{'label':'AIC','value':round(float(model.aic),2)},{'label':'Deviance','value':round(float(model.deviance),3)},{'label':'Pearson χ²','value':round(float(model.pearson_chi2),3)}]
+    ci=model.conf_int();rows=[]
+    for term in model.params.index:rows.append({'Termo':term,'Estimativa':model.params[term],'Erro padrão':model.bse[term],'z':model.tvalues[term],'p':model.pvalues[term],'IC95% inferior':ci.loc[term,0],'IC95% superior':ci.loc[term,1]})
+    r['tables'].append(write_table(pd.DataFrame(rows),outdir,'glm_coeficientes','Coeficientes do GLM'))
+    if family=='poisson' and model.pearson_chi2/model.df_resid>1.5:r['warnings'].append('Há indício de sobredispersão no Poisson. Considere binomial negativa.')
+    return r
+
+
+def analysis_mixed(df,opt,outdir):
+    y=opt.get('y');group=opt.get('group');xs=opt.get('variables') or ([opt.get('x')] if opt.get('x') else []);xs=[x for x in xs if x and x!=y and x!=group]
+    if not y or not group or not xs:raise ValueError('Modelo misto requer resposta, grupo aleatório e pelo menos um preditor fixo.')
+    ensure_cols(df,[y,group]+xs);d=df[[y,group]+xs].dropna().copy()
+    for c in [y]+xs:
+        if c not in numeric_cols(d):raise ValueError(f'Nesta versão, resposta e efeitos fixos devem ser numéricos: {c}')
+    # Rename to safe tokens for formula.
+    rename={y:'Y',group:'G'};rename.update({c:f'X{i+1}' for i,c in enumerate(xs)});dd=d.rename(columns=rename)
+    formula='Y ~ '+' + '.join(rename[c] for c in xs)
+    model=smf.mixedlm(formula,dd,groups=dd['G']).fit(reml=True,method='lbfgs')
+    r=base_result('Modelo linear misto','MixedLM com intercepto aleatório por grupo')
+    r['metrics']=[{'label':'N','value':len(dd)},{'label':'Grupos','value':dd['G'].nunique()},{'label':'LogLik','value':round(float(model.llf),2)},{'label':'Convergiu','value':'Sim' if model.converged else 'Não'}]
+    ci=model.conf_int();rows=[]
+    for term,val in model.params.items():rows.append({'Termo':term,'Estimativa':val,'Erro padrão':model.bse.get(term,np.nan),'p':model.pvalues.get(term,np.nan),'IC95% inferior':ci.loc[term,0] if term in ci.index else np.nan,'IC95% superior':ci.loc[term,1] if term in ci.index else np.nan})
+    r['tables'].append(write_table(pd.DataFrame(rows),outdir,'misto_coeficientes','Coeficientes do modelo misto'))
+    if not model.converged:r['warnings'].append('O modelo não convergiu; simplifique a estrutura ou revise escala/colinearidade.')
+    return r
+
+
+def analysis_cluster(df,opt,outdir):
+    vars=opt.get('variables') or numeric_cols(df);vars=[v for v in vars if v in numeric_cols(df)];k=int(opt.get('k') or 3)
+    if len(vars)<2:raise ValueError('Cluster requer pelo menos duas variáveis numéricas.')
+    d=df[vars].dropna();
+    if len(d)<max(6,k+2):raise ValueError('Poucas observações completas para cluster.')
+    k=max(2,min(k,8,len(d)-1));Z=StandardScaler().fit_transform(d);km=KMeans(n_clusters=k,n_init=20,random_state=12).fit(Z);sil=silhouette_score(Z,km.labels_) if len(set(km.labels_))>1 else np.nan
+    pca=PCA(n_components=2).fit_transform(Z);r=base_result('Agrupamento multivariado',f'K-means (k={k}) com padronização z-score')
+    r['metrics']=[{'label':'N','value':len(d)},{'label':'Variáveis','value':len(vars)},{'label':'Clusters','value':k},{'label':'Silhouette','value':round(float(sil),3)}]
+    out=d.copy();out['cluster']=km.labels_+1;r['tables'].append(write_table(out.reset_index(drop=True),outdir,'cluster_classificacao','Classificação das observações'))
+    fig,ax=plt.subplots(figsize=(4.8,3.8));
+    for lab in sorted(set(km.labels_)):
+        ix=km.labels_==lab;ax.scatter(pca[ix,0],pca[ix,1],s=18,alpha=.65,label=f'Cluster {lab+1}',color=PALETTE[lab%len(PALETTE)],edgecolors='none')
+    ax.set_xlabel('PC1');ax.set_ylabel('PC2');ax.spines[['top','right']].set_visible(False);ax.legend(frameon=False,ncol=2);ax.set_title(f'K-means · silhouette={sil:.2f}')
+    r['figures'].append(save_figure(fig,outdir,'fig_cluster','Clusters projetados em PCA'))
+    return r
+
+
+def create_repro_files(df,opt,result,outdir,input_path):
+    meta={'generatedBy':'Carbonautas Lab','python':platform.python_version(),'pandas':pd.__version__,'numpy':np.__version__,'scipy':scipy.__version__,'statsmodels':statsmodels.__version__,'sklearn':sklearn.__version__,'matplotlib':matplotlib.__version__,'analysis':opt.get('analysis'),'options':opt,'inputFile':Path(input_path).name}
+    Path(outdir,'reproducibilidade.json').write_text(json.dumps(meta,ensure_ascii=False,indent=2),encoding='utf-8')
+    result['files'].append({'name':'reproducibilidade.json','label':'Metadados de reprodutibilidade','format':'json'})
+    methods=[f"Análise: {result.get('title','')}",f"Método: {result.get('method','')}",f"N original: {len(df)}",f"Software: Python {meta['python']}; pandas {meta['pandas']}; scipy {meta['scipy']}; statsmodels {meta['statsmodels']}; scikit-learn {meta['sklearn']}; matplotlib {meta['matplotlib']}.","Figuras exportadas em PNG 600 dpi, SVG e PDF vetorial."]
+    Path(outdir,'metodos_estatisticos.txt').write_text('\n'.join(methods)+'\n',encoding='utf-8')
+    result['files'].append({'name':'metodos_estatisticos.txt','label':'Texto metodológico e versões','format':'txt'})
+    script=f'''# Script de reprodução gerado pelo Carbonautas Lab\n# Entrada esperada: {Path(input_path).name}\n# Análise: {opt.get('analysis')}\n# Opções: {json.dumps(opt,ensure_ascii=False)}\n# O motor completo e as versões estão em reproducibilidade.json.\n'''
+    Path(outdir,'reproduzir_analise.py').write_text(script,encoding='utf-8');result['files'].append({'name':'reproduzir_analise.py','label':'Checkpoint de reprodução','format':'py'})
+
+
+def run(payload):
+    path=payload['input'];outdir=payload['outdir'];opt=payload.get('options') or {};Path(outdir).mkdir(parents=True,exist_ok=True)
+    df=read_dataset(path)
+    if len(df)>250000:raise ValueError('A base excede 250 mil linhas nesta versão do laboratório. Divida ou filtre antes da análise.')
+    action=payload.get('action','analyze')
+    if action=='inspect':return {'inspect':inspect(df)}
+    a=opt.get('analysis','diagnostic')
+    funcs={
+        'diagnostic':analysis_diagnostic,
+        'descriptive':analysis_descriptive,
+        'correlation':analysis_correlation,
+        'regression':analysis_regression,
+        'ttest':lambda d,o,p:analysis_group_test(d,o,p,'ttest'),
+        'anova':lambda d,o,p:analysis_group_test(d,o,p,'anova'),
+        'kruskal':lambda d,o,p:analysis_group_test(d,o,p,'kruskal'),
+        'pca':analysis_pca,
+        'timeseries':analysis_timeseries,
+        'glm':analysis_glm,
+        'mixed':analysis_mixed,
+        'cluster':analysis_cluster,
+    }
+    if a not in funcs:raise ValueError('Método não implementado: '+a)
+    result=funcs[a](df,opt,outdir)
+    create_repro_files(df,opt,result,outdir,path)
+    result['inspect']=inspect(df)
+    Path(outdir,'resultado.json').write_text(json.dumps(result,ensure_ascii=False,indent=2,default=sanitize),encoding='utf-8')
+    return {'result':result}
+
+if __name__=='__main__':
+    try:
+        payload=json.loads(sys.stdin.read());print(json.dumps({'ok':True,**run(payload)},ensure_ascii=False,default=sanitize))
+    except Exception as e:
+        traceback.print_exc(file=sys.stderr);print(json.dumps({'ok':False,'error':str(e)},ensure_ascii=False));sys.exit(1)
+
+PYENGINE
+
+chmod 600 server.js lab_engine.py
+node --check server.js
+/opt/carbonautas-lab/bin/python -m py_compile lab_engine.py
+
+systemctl restart carbonautas-bridge
+sleep 3
+
+echo '=== P5 HEALTH ==='
+curl -fsS http://127.0.0.1:3000/health
+echo
+
+echo '=== TESTE MOTOR ESTATISTICO ==='
+mkdir -p /tmp/carbonautas-p5-test
+cat > /tmp/carbonautas-p5-test/base.csv <<'CSV'
+grupo,x,y
+A,1,2
+A,2,4
+B,3,7
+B,4,8
+CSV
+printf '%s' '{"action":"inspect","input":"/tmp/carbonautas-p5-test/base.csv","outdir":"/tmp/carbonautas-p5-test"}' | /opt/carbonautas-lab/bin/python lab_engine.py
+rm -rf /tmp/carbonautas-p5-test
+
+echo
+echo 'PREDATOR P5 CONCLUIDO'

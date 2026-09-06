@@ -1,4 +1,4 @@
-const CACHE='carbonautas-predator-p4-20260906';
+const CACHE='carbonautas-predator-p5-20260906';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#061a28;color:white"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
 
 self.addEventListener('install',event=>{ self.skipWaiting(); });
