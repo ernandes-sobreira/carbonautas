@@ -929,6 +929,35 @@
   @media(max-width:900px){.lab-pipeline{grid-template-columns:repeat(2,1fr)}.lab-grid{grid-template-columns:1fr}.lab-result-grid{grid-template-columns:1fr}.lab-figure-grid{grid-template-columns:1fr}.lab-method-grid{grid-template-columns:1fr 1fr}}
   @media(max-width:700px){.lab-wrap{padding:12px 12px 80px}.lab-hero{border-radius:20px;padding:17px;display:block}.lab-hero h2{font-size:26px}.lab-hero-actions{margin-top:13px}.lab-pipeline{grid-template-columns:1fr 1fr}.lab-step:nth-child(5){grid-column:1/-1}.lab-panel{border-radius:18px;padding:12px}.lab-data-card,.lab-run-card{align-items:flex-start}.lab-data-card .btn,.lab-run-card .btn{padding:7px 9px}.lab-kpis{grid-template-columns:1fr 1fr}.lab-result-modal{width:100vw;height:100dvh;border-radius:0}.lab-result-scroll{padding:10px}.lab-figure-grid{grid-template-columns:1fr}}
 
+
+
+  /* ===== PREDATOR BUILD · navegação inequívoca + Science Dock ===== */
+  .build-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;background:#071b29;color:#c9f8ff;border:1px solid #28556b;font:800 9px/1 'Space Grotesk';letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+  .build-chip::before{content:"●";color:#34d399;font-size:9px}
+  .science-dock{position:relative;overflow:hidden;margin:0 0 18px;padding:17px;border-radius:20px;background:linear-gradient(135deg,#061a28 0%,#0d3248 55%,#123e52 100%);color:#fff;box-shadow:0 14px 34px rgba(4,25,39,.16)}
+  .science-dock::after{content:"";position:absolute;width:240px;height:240px;border-radius:50%;right:-90px;top:-120px;background:radial-gradient(circle,rgba(0,215,255,.24),transparent 68%);pointer-events:none}
+  .science-dock-head{position:relative;z-index:1;display:flex;align-items:flex-start;gap:12px;margin-bottom:13px}.science-dock-head .spacer{flex:1}.science-dock-title{font-family:'Fraunces';font-size:19px;font-weight:700}.science-dock-sub{font-size:11px;color:#b9d3df;margin-top:3px;line-height:1.4}
+  .science-dock-grid{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  .science-action{appearance:none;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.075);color:#fff;border-radius:14px;padding:12px 10px;text-align:left;cursor:pointer;transition:.16s;min-height:76px}.science-action:hover{transform:translateY(-1px);background:rgba(255,255,255,.13);border-color:rgba(255,255,255,.25)}.science-action .sa-icon{font-size:23px;display:block;margin-bottom:5px}.science-action b{display:block;font-size:12px}.science-action small{display:block;font-size:9.5px;color:#b9d3df;margin-top:2px;line-height:1.25}.science-action.lab{background:linear-gradient(135deg,rgba(0,184,217,.24),rgba(88,214,199,.12));border-color:rgba(88,214,199,.46)}
+  .engine-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);font-size:9.5px;font-weight:800;color:#d9eaf2}.engine-dot{width:8px;height:8px;border-radius:50%;background:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.12)}.engine-pill.online .engine-dot{background:#34d399;box-shadow:0 0 0 3px rgba(52,211,153,.15)}.engine-pill.offline .engine-dot{background:#fb7185}
+  .pub-act{flex-wrap:wrap;justify-content:flex-end;max-width:330px}
+  .office-edit-btn,.oo-online-btn{min-height:34px!important;padding:7px 10px!important;box-shadow:0 5px 14px rgba(14,165,233,.18)}
+  .file-type-chip{display:inline-flex;align-items:center;border-radius:999px;padding:3px 7px;margin-top:5px;font-size:9px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;background:#edf4f7;color:#4e6877;border:1px solid #d2e0e7}
+  .lab-fab-global{display:none}
+
+  @media(max-width:760px){
+    .tabs{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:6px!important;padding:8px!important;top:68px!important;max-height:calc(100vh - 90px);overflow-y:auto;background:#0a2435!important}
+    .tabs .tab{min-width:0!important;flex:none!important;display:flex!important;flex-direction:column!important;gap:4px!important;padding:10px 4px!important;border-radius:12px!important;font-size:9px!important}
+    .tabs .tab span.tl{display:block!important;font-size:8.5px!important;line-height:1.05!important;white-space:normal!important;text-align:center!important;color:inherit!important}
+    .tabs .tab svg{width:20px!important;height:20px!important}
+    .tabs .tab[data-view="lab"]{background:linear-gradient(135deg,#0aa9c2,#54d9c8)!important;color:#041923!important;box-shadow:0 8px 18px rgba(0,184,217,.22)}
+    .tabs .tab[data-view="lab"] span.tl{font-weight:900!important}
+    .science-dock{margin:2px 0 15px;padding:14px;border-radius:18px}.science-dock-head{align-items:center}.science-dock-title{font-size:17px}.science-dock-sub{font-size:10px}.science-dock-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.science-action{min-height:74px;padding:11px 10px}.science-action b{font-size:11px}.science-action small{font-size:9px}
+    .view-head #newOfficeBtn{display:none!important}
+    .pub-row{align-items:flex-start;flex-wrap:wrap}.pub-body{flex:1 1 calc(100% - 26px)}.pub-act{width:100%;max-width:none!important;justify-content:flex-start;padding-left:44px;margin-top:-3px}.pub-act .btn{min-height:36px}.pub-act .mini-x{margin-left:auto}
+    .lab-fab-global{display:flex;position:fixed;z-index:78;right:14px;bottom:78px;align-items:center;gap:7px;border:0;border-radius:999px;padding:11px 14px;background:linear-gradient(135deg,#00b8d9,#58d6c7);color:#06202a;font-weight:950;font-size:11px;box-shadow:0 14px 30px rgba(0,94,124,.30);cursor:pointer}.lab-fab-global span:first-child{font-size:19px}.lab-fab-global:active{transform:scale(.97)}
+  }
+
 </style>
 </head>
 <body data-view="painel">
@@ -1366,6 +1395,20 @@
             Adicionar publicação
           </button>
         </div>
+        <section class="science-dock" id="scienceDock">
+          <div class="science-dock-head">
+            <div><div class="science-dock-title">⚡ Science Dock</div><div class="science-dock-sub">Crie, edite e analise sem sair do Carbonautas.</div></div>
+            <div class="spacer"></div>
+            <span class="engine-pill" id="scienceEngineStatus"><span class="engine-dot"></span><span>checando motor…</span></span>
+            <span class="build-chip">Predator P3</span>
+          </div>
+          <div class="science-dock-grid">
+            <button class="science-action" type="button" onclick="openNewOfficeType('docx')"><span class="sa-icon">📄</span><b>Novo Word</b><small>Artigo, relatório, tese ou capítulo.</small></button>
+            <button class="science-action" type="button" onclick="openNewOfficeType('xlsx')"><span class="sa-icon">📊</span><b>Novo Excel</b><small>Planilha editável no navegador.</small></button>
+            <button class="science-action" type="button" onclick="openNewOfficeType('pptx')"><span class="sa-icon">📽️</span><b>Novo PowerPoint</b><small>Apresentação criada no Repositório.</small></button>
+            <button class="science-action lab" type="button" onclick="switchView('lab')"><span class="sa-icon">🧪</span><b>Laboratório</b><small>Python científico · figuras publicáveis.</small></button>
+          </div>
+        </section>
         <div class="crono-filters">
           <select class="mini" id="pubCategoria" style="width:auto"><option value="">Todas as categorias</option></select>
           <select class="mini" id="pubPessoa" style="width:auto"><option value="">Todas as pessoas</option></select>
@@ -1376,6 +1419,8 @@
     </div>
   </div>
 </div>
+
+<button class="lab-fab-global" id="labFabGlobal" type="button" onclick="switchView('lab')" aria-label="Abrir Laboratório de Dados"><span>🧪</span><span>LAB</span></button>
 
 <!-- PEOPLE MANAGER -->
 <div class="overlay" id="peopleOverlay">
@@ -3820,6 +3865,7 @@ function renderPubs(){
         ${p.reviewFlow?reviewBadgeHTML(p):''}
         ${p.reviewNote?`<div class="review-note">💬 ${esc(p.reviewNote)}</div>`:''}
         ${scientificContextHTML(p)}
+        ${officeFileChip(p)}
       </div>
       <div class="pub-act">
         ${p.labRun?`<button type="button" class="btn primary" onclick="openLabRun('${p.labRunId}')">📈 Resultados</button>`:p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Visualizar" style="padding:6px 9px">👁️</button><button type="button" class="btn review-download" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Baixar" style="padding:6px 9px">⬇</button>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}
@@ -3869,8 +3915,14 @@ const OO_DEFAULT_SERVER='https://docs.carbonautas.online';
 const OO_EXTS=new Set(['docx','xlsx','pptx']);
 let ooEditorInstance=null,ooSession=null,ooPendingPubId='',officeNewType='docx';
 function onlyOfficeBase(){return (localStorage.getItem(OO_SERVER_KEY)||OO_DEFAULT_SERVER).trim().replace(/\/+$/,'')}
-function officeExt(p){return p?.tipo==='arquivo'?inferFileExt(p.url||'',p.fileName||p.titulo||''):''}
+function officeExt(p){
+  if(!p||p.tipo!=='arquivo')return '';
+  let ext=inferFileExt(p.url||'',p.fileName||p.titulo||'');
+  if(!ext&&p.mimeType){const mt=String(p.mimeType).toLowerCase();if(mt.includes('wordprocessingml'))ext='docx';else if(mt.includes('spreadsheetml'))ext='xlsx';else if(mt.includes('presentationml'))ext='pptx';}
+  return ext;
+}
 function isOnlyOfficeEditable(p){return !!(p&&OO_EXTS.has(officeExt(p)))}
+function officeFileChip(p){const ext=officeExt(p);if(!ext)return '';const map={docx:'WORD',xlsx:'EXCEL',pptx:'POWERPOINT'};return `<span class="file-type-chip">${map[ext]||ext.toUpperCase()} · editável</span>`}
 function canPersonalEdit(p){
   if(!p||!isOnlyOfficeEditable(p)||p.reviewFlow||!window.auth?.currentUser)return false;
   const uid=window.auth.currentUser.uid;
@@ -3992,6 +4044,14 @@ function openNewOffice(){
   $$('#officeNewGrid [data-office-type]').forEach((b,i)=>b.classList.toggle('on',i===0));
   $('#officeNewTitle').value='';$('#officeContextType').value='independent';labFillMemberSelect('#officeContextMember',myId);$('#officeContextProject').value='';$('#officeContextChapter').value='';updateContextUI('office');openOverlay('newOfficeOverlay');setTimeout(()=>$('#officeNewTitle')?.focus(),80);
 }
+function openNewOfficeType(ext){
+  openNewOffice();
+  officeNewType=OO_EXTS.has(ext)?ext:'docx';
+  setTimeout(()=>{
+    $$('#officeNewGrid [data-office-type]').forEach(x=>x.classList.toggle('on',x.dataset.officeType===officeNewType));
+  },0);
+}
+
 async function createBlankOffice(){
   const ext=officeNewType,title=($('#officeNewTitle')?.value||'').trim();
   if(!title)return toast('Dê um nome ao arquivo.');
@@ -4615,6 +4675,23 @@ async function openLabRun(runId){try{toast('Abrindo resultados…');const r=awai
 
 $('#labUploadBtn')?.addEventListener('click',openLabUpload);$('#labUploadSaveBtn')?.addEventListener('click',saveLabDataset);$('#labNewArticleBtn')?.addEventListener('click',()=>{openNewOffice();setTimeout(()=>{$('#officeNewTitle').value='Novo manuscrito';$('#officeContextType').value='article';updateContextUI('office')},50)});$('#labContextType')?.addEventListener('change',()=>updateContextUI('lab'));$('#labAnalyzeContextType')?.addEventListener('change',()=>updateContextUI('labAnalyze'));$('#labRunBtn')?.addEventListener('click',runLabAnalysis);$('#labAnalyzeMethods')?.addEventListener('click',e=>{const b=e.target.closest('[data-lab-method]');if(!b)return;labSelectedMethod=b.dataset.labMethod;$$('#labAnalyzeMethods [data-lab-method]').forEach(x=>x.classList.toggle('on',x===b));renderLabControls()});
 
+
+async function checkScienceEngine(){
+  const el=$('#scienceEngineStatus');
+  if(!el)return;
+  try{
+    const r=await fetch(onlyOfficeBase()+'/carbonautas-api/health',{cache:'no-store'});
+    const j=await r.json();
+    const office=Array.isArray(j.office)&&j.office.length>=3;
+    const lab=Array.isArray(j.lab)&&j.lab.length>0;
+    el.classList.remove('offline');el.classList.add('online');
+    el.innerHTML=`<span class="engine-dot"></span><span>${office?'Office':''}${office&&lab?' + ':''}${lab?'Lab':''} online</span>`;
+  }catch(e){
+    el.classList.remove('online');el.classList.add('offline');
+    el.innerHTML='<span class="engine-dot"></span><span>motor offline</span>';
+  }
+}
+
 /* ============ OVERLAYS ============ */
 function openOverlay(id){$('#'+id).classList.add('open')}
 function closeOverlay(id){$('#'+id).classList.remove('open')}
@@ -4631,12 +4708,12 @@ function switchView(v){
   if(v==='rede') renderAll();
   if(v==='crono') renderCrono();
   if(v==='track') renderTrack();
-  if(v==='lab') renderLab();
+  if(v==='lab'){ renderLab(); checkScienceEngine(); }
   if(v==='feed') renderFeed();
   if(v==='mensagens'){renderMensagens();markQuickSeen();}
   if(v==='mural'){ renderMural(); markChatSeen(); }
   if(v==='fotos') renderFotos();
-  if(v==='pubs') renderPubs();
+  if(v==='pubs'){ renderPubs(); checkScienceEngine(); }
   $('#side').classList.remove('open');
 }
 
@@ -4870,7 +4947,15 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));}
+window.CARBONAUTAS_BUILD='PREDATOR-P3-20260906';
+if('serviceWorker' in navigator){
+  window.addEventListener('load',async()=>{
+    try{
+      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P3-20260906',{updateViaCache:'none'});
+      await reg.update();
+    }catch(e){console.warn('SW update',e)}
+  });
+}
 refreshIdentityUI();
 waitFirebase().then(startAuth);
 </script>
