@@ -909,6 +909,26 @@
   .office-version{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;background:#e9f8ff;color:#0b6380;font-size:10px;font-weight:800;margin-top:6px}
   @media(max-width:700px){.oo-modal{width:100vw;height:100dvh;border-radius:0}.oo-modal .modal-h{padding:8px}.oo-modal .modal-h h2{font-size:14px}.oo-editor-host{min-height:0}.oo-statusbar{padding:7px 9px}.oo-modal .preview-actions .btn:not(.oo-save-btn){display:none}.oo-modal .preview-actions .oo-save-btn{display:inline-flex}.office-new-grid{grid-template-columns:1fr}.office-new-card{padding:14px}}
 
+
+
+  /* ===== LABORATÓRIO DE DADOS ===== */
+  .lab-scroll{height:100%;overflow:auto;background:linear-gradient(180deg,#f7fbff 0,#f4f7fb 55%,#eef4f7 100%)}
+  .lab-wrap{max-width:1240px;margin:0 auto;padding:22px 22px 80px}
+  .lab-hero{position:relative;overflow:hidden;border-radius:26px;padding:24px;background:linear-gradient(135deg,#071e2b 0%,#0d4050 55%,#183b66 100%);color:#fff;box-shadow:0 16px 44px rgba(8,31,43,.18);display:flex;gap:18px;align-items:center}
+  .lab-hero:after{content:'';position:absolute;right:-80px;top:-120px;width:330px;height:330px;border-radius:50%;background:radial-gradient(circle,rgba(70,230,220,.32),rgba(121,75,255,.06) 55%,transparent 70%);pointer-events:none}
+  .lab-hero h2{font:800 32px/1.05 Georgia,serif;margin:0 0 7px}.lab-hero p{margin:0;color:#c7dde7;max-width:760px;line-height:1.45}.lab-hero .lab-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:6px 10px;font-size:11px;font-weight:850;margin-bottom:10px}
+  .lab-hero-actions{display:flex;gap:8px;flex-wrap:wrap;position:relative;z-index:2}.lab-hero .btn{border-color:rgba(255,255,255,.22);background:rgba(255,255,255,.1);color:#fff}.lab-hero .btn.primary{background:linear-gradient(135deg,#18c6b5,#30a3f0);border:0}
+  .lab-pipeline{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin:15px 0}.lab-step{background:#fff;border:1px solid #dce8ee;border-radius:18px;padding:13px;box-shadow:0 5px 15px rgba(20,50,65,.045)}.lab-step b{display:block;font-size:12px;color:#193847}.lab-step small{display:block;color:#6f838e;margin-top:4px;line-height:1.35}.lab-step .n{width:27px;height:27px;border-radius:9px;background:#e9f8f7;color:#0b7c72;display:grid;place-items:center;font-weight:900;margin-bottom:8px}
+  .lab-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(300px,.75fr);gap:14px}.lab-panel{background:#fff;border:1px solid #dce7ed;border-radius:22px;padding:16px;box-shadow:0 7px 20px rgba(18,51,66,.05)}.lab-panel-head{display:flex;gap:10px;align-items:center;margin-bottom:12px}.lab-panel h3{margin:0;font:800 18px/1.1 Georgia,serif;color:#183441}.lab-muted{color:#72858f;font-size:12px;line-height:1.4}
+  .lab-data-list,.lab-run-list{display:flex;flex-direction:column;gap:9px}.lab-data-card,.lab-run-card{border:1px solid #dce7ed;border-radius:16px;padding:12px;display:flex;gap:11px;align-items:center;background:#fff;transition:.15s}.lab-data-card:hover,.lab-run-card:hover{border-color:#82c9c5;box-shadow:0 6px 18px rgba(12,92,99,.08)}.lab-data-ico{width:42px;height:42px;border-radius:13px;background:linear-gradient(135deg,#dff8f5,#e8efff);display:grid;place-items:center;font-size:21px;flex:0 0 auto}.lab-data-main{min-width:0;flex:1}.lab-data-title{font-weight:850;color:#173541;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.lab-data-meta{font-size:11px;color:#73858d;margin-top:3px;display:flex;gap:6px;flex-wrap:wrap}.lab-context-pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;background:#f0efff;color:#5d42b8;border:1px solid #ddd7ff;padding:3px 7px;font-size:10px;font-weight:800;margin:3px 4px 0 0}.lab-context-pill.project{background:#eaf8f5;color:#08786e;border-color:#c7eee7}.lab-context-pill.chapter{background:#fff5db;color:#8b6512;border-color:#f2dfaa}.lab-context-pill.article{background:#e9f3ff;color:#286ca2;border-color:#cfe5fb}
+  .lab-method-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.lab-method{border:1px solid #dce7ed;background:#fff;border-radius:14px;padding:10px;text-align:left;cursor:pointer;min-height:72px}.lab-method.on{border-color:#17a99c;background:#effbf9;box-shadow:0 0 0 2px rgba(23,169,156,.08)}.lab-method b{display:block;font-size:11px;color:#183a46}.lab-method small{display:block;font-size:9.5px;color:#71838c;margin-top:3px;line-height:1.3}.lab-method .mi{font-size:18px;margin-bottom:4px;display:block}
+  .lab-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}.lab-kpi{background:#f7fafc;border:1px solid #e0e9ee;border-radius:14px;padding:10px}.lab-kpi span{display:block;font-size:9.5px;color:#73858e;text-transform:uppercase;font-weight:800;letter-spacing:.04em}.lab-kpi b{display:block;font-size:19px;margin-top:3px;color:#143844}
+  .lab-variable-box{border:1px solid #dce7ed;border-radius:14px;padding:10px;max-height:180px;overflow:auto;background:#fbfdfe}.lab-var-check{display:flex;align-items:center;gap:7px;padding:5px 2px;font-size:12px;color:#314c58}.lab-var-check input{width:16px;height:16px}
+  .lab-result-modal{width:min(1180px,96vw);height:min(92dvh,920px)}.lab-result-scroll{overflow:auto;height:100%;padding:16px}.lab-result-hero{border-radius:20px;padding:17px;background:linear-gradient(135deg,#0c3340,#16495a);color:#fff}.lab-result-hero h2{margin:0;font:800 25px Georgia,serif}.lab-result-hero p{color:#c6dde5;margin:6px 0 0}.lab-result-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}.lab-result-card{border:1px solid #dce7ed;background:#fff;border-radius:18px;padding:13px}.lab-result-card h4{margin:0 0 9px;color:#183946}.lab-warning{border-left:4px solid #e69f00;background:#fff8e7;padding:9px 10px;border-radius:9px;margin:6px 0;font-size:12px;color:#71500a}.lab-note{border-left:4px solid #0aa89d;background:#eefaf8;padding:9px 10px;border-radius:9px;margin:6px 0;font-size:12px;color:#155b56}.lab-figure-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}.lab-figure{border:1px solid #dce7ed;border-radius:16px;padding:10px;background:#fff}.lab-figure img{display:block;width:100%;max-height:360px;object-fit:contain;background:#fff;border-radius:9px}.lab-figure-title{font-weight:850;font-size:12px;margin:8px 0;color:#173946}.lab-downloads{display:flex;gap:5px;flex-wrap:wrap}.lab-table-wrap{overflow:auto;max-height:300px;border:1px solid #e1e8ec;border-radius:12px}.lab-table{border-collapse:collapse;width:100%;font-size:10.5px}.lab-table th,.lab-table td{padding:6px 7px;border-bottom:1px solid #edf1f3;text-align:left;white-space:nowrap}.lab-table th{position:sticky;top:0;background:#f4f8fa;color:#39515c;z-index:1}.lab-source-banner{display:flex;gap:9px;align-items:center;border:1px solid #cce6e4;background:#f1fbfa;border-radius:15px;padding:10px;margin-bottom:11px}.lab-source-banner b{font-size:12px}.lab-empty{padding:24px;text-align:center;color:#75868e;border:1px dashed #ccdce3;border-radius:16px;background:#fbfdfe}.lab-status{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:850;border-radius:999px;padding:4px 7px;background:#eaf8f5;color:#08766d}.lab-ai-card{background:linear-gradient(145deg,#111f31,#2e245b);color:#fff;border:0}.lab-ai-card h3{color:#fff}.lab-ai-card .lab-muted{color:#c8c4df}.lab-ai-chip{display:inline-flex;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:750;margin:3px 3px 0 0}
+  .scientific-context{margin-top:6px;display:flex;flex-wrap:wrap;gap:2px}
+  @media(max-width:900px){.lab-pipeline{grid-template-columns:repeat(2,1fr)}.lab-grid{grid-template-columns:1fr}.lab-result-grid{grid-template-columns:1fr}.lab-figure-grid{grid-template-columns:1fr}.lab-method-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:700px){.lab-wrap{padding:12px 12px 80px}.lab-hero{border-radius:20px;padding:17px;display:block}.lab-hero h2{font-size:26px}.lab-hero-actions{margin-top:13px}.lab-pipeline{grid-template-columns:1fr 1fr}.lab-step:nth-child(5){grid-column:1/-1}.lab-panel{border-radius:18px;padding:12px}.lab-data-card,.lab-run-card{align-items:flex-start}.lab-data-card .btn,.lab-run-card .btn{padding:7px 9px}.lab-kpis{grid-template-columns:1fr 1fr}.lab-result-modal{width:100vw;height:100dvh;border-radius:0}.lab-result-scroll{padding:10px}.lab-figure-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body data-view="painel">
@@ -987,6 +1007,10 @@
       <button class="tab" data-view="track">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-7"/></svg>
         <span class="tl">Acompanhamento</span>
+      </button>
+      <button class="tab" data-view="lab" title="Laboratório de Dados">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6"/><path d="M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3"/><path d="M8 15h8"/></svg>
+        <span class="tl">Lab de Dados</span>
       </button>
       <button class="tab" data-view="mensagens">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a3 3 0 0 1-3 3H8l-5 3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>
@@ -1275,6 +1299,57 @@
     </div>
   </div>
 
+  <!-- ============ VIEW: LABORATÓRIO DE DADOS ============ -->
+  <div class="view" id="viewLab">
+    <div class="lab-scroll"><div class="lab-wrap">
+      <div class="lab-hero">
+        <div style="position:relative;z-index:2;flex:1">
+          <div class="lab-badge">🧪 CARBONAUTAS SCIENCE ENGINE · Python científico · R-ready</div>
+          <h2>Laboratório de Dados</h2>
+          <p>Da base bruta à figura publicável: vínculo científico, diagnóstico, estatística, modelos, figuras vetoriais e rastreabilidade para tese, artigo ou produto.</p>
+        </div>
+        <div class="lab-hero-actions">
+          <button class="btn" type="button" id="labNewArticleBtn">📄 Novo manuscrito</button>
+          <button class="btn primary" type="button" id="labUploadBtn">＋ Enviar base</button>
+        </div>
+      </div>
+      <div class="lab-pipeline">
+        <div class="lab-step"><span class="n">1</span><b>Vínculo científico</b><small>Aluno → projeto → capítulo, ou artigo/produto independente.</small></div>
+        <div class="lab-step"><span class="n">2</span><b>Auditoria da base</b><small>Tipos, ausências, distribuição, inconsistências e tamanho amostral.</small></div>
+        <div class="lab-step"><span class="n">3</span><b>Análise robusta</b><small>Testes clássicos, GLM, mistos, PCA, tendências e agrupamentos.</small></div>
+        <div class="lab-step"><span class="n">4</span><b>Figura científica</b><small>PNG 600 dpi + SVG + PDF vetorial, pronta para publicação.</small></div>
+        <div class="lab-step"><span class="n">5</span><b>Reprodutibilidade</b><small>Tabelas, métodos, versões do software e checkpoint de script.</small></div>
+      </div>
+      <div class="lab-grid">
+        <section class="lab-panel">
+          <div class="lab-panel-head"><div><h3>📊 Bases disponíveis</h3><div class="lab-muted">CSV e Excel do Repositório. Bases enviadas aqui recebem vínculo científico obrigatório.</div></div><div class="spacer"></div><span class="lab-status" id="labDatasetCount">0 bases</span></div>
+          <div class="lab-data-list" id="labDatasetList"></div>
+        </section>
+        <aside style="display:flex;flex-direction:column;gap:14px">
+          <section class="lab-panel">
+            <div class="lab-panel-head"><div><h3>⚙️ Motor estatístico</h3><div class="lab-muted">Análises disponíveis nesta versão.</div></div></div>
+            <div class="lab-method-grid" id="labMethodPreview">
+              <div class="lab-method"><span class="mi">🔎</span><b>Diagnóstico</b><small>Qualidade e estrutura da base.</small></div>
+              <div class="lab-method"><span class="mi">📐</span><b>Regressão / GLM</b><small>OLS, binomial, Poisson.</small></div>
+              <div class="lab-method"><span class="mi">🧬</span><b>Modelos mistos</b><small>Intercepto aleatório por grupo.</small></div>
+              <div class="lab-method"><span class="mi">🧭</span><b>PCA / Cluster</b><small>Estrutura multivariada.</small></div>
+              <div class="lab-method"><span class="mi">📅</span><b>Tendências</b><small>Mann-Kendall + Sen.</small></div>
+              <div class="lab-method"><span class="mi">⚖️</span><b>Grupos</b><small>Welch, ANOVA, Tukey, Kruskal.</small></div>
+            </div>
+          </section>
+          <section class="lab-panel lab-ai-card">
+            <div class="lab-panel-head"><div><h3>🤖 Consultor científico</h3><div class="lab-muted">O sistema já sugere caminhos com base nos tipos de variáveis e nos pressupostos. IA generativa poderá ser conectada depois sem misturar cálculo com interpretação.</div></div></div>
+            <span class="lab-ai-chip">Escolha de teste</span><span class="lab-ai-chip">Pressupostos</span><span class="lab-ai-chip">Métodos</span><span class="lab-ai-chip">Legenda de figura</span><span class="lab-ai-chip">Interpretação cautelosa</span>
+          </section>
+        </aside>
+      </div>
+      <section class="lab-panel" style="margin-top:14px">
+        <div class="lab-panel-head"><div><h3>🧾 Análises e produtos gerados</h3><div class="lab-muted">Cada execução fica vinculada à base e ao seu contexto científico.</div></div><div class="spacer"></div><span class="lab-status" id="labRunCount">0 análises</span></div>
+        <div class="lab-run-list" id="labRunList"></div>
+      </section>
+    </div></div>
+  </div>
+
   <!-- ============ VIEW: PUBLICAÇÕES ============ -->
   <div class="view" id="viewPubs">
     <div class="crono-scroll">
@@ -1363,8 +1438,62 @@
         <button type="button" class="office-new-card" data-office-type="pptx"><span class="ico">📽️</span><b>Apresentação</b><small>Slides, aula, defesa, palestra ou congresso.</small></button>
       </div>
       <div class="fg"><label>Nome do arquivo</label><input id="officeNewTitle" placeholder="Ex.: Artigo sobre qualidade da água"></div>
+      <div class="grid2" style="margin-top:10px">
+        <div class="fg"><label>Vincular este arquivo a</label><select id="officeContextType"><option value="independent">Trabalho independente</option><option value="project">Projeto / capítulo de aluno</option><option value="article">Artigo científico</option><option value="product">Produto técnico/científico</option><option value="exploratory">Exploração / rascunho</option></select></div>
+        <div class="fg" id="officeContextMemberWrap" style="display:none"><label>Aluno / responsável</label><select id="officeContextMember"></select></div>
+        <div class="fg"><label id="officeContextProjectLabel">Nome do trabalho / projeto</label><input id="officeContextProject" placeholder="Ex.: Artigo sobre qualidade da água"></div>
+        <div class="fg" id="officeContextChapterWrap" style="display:none"><label>Capítulo / etapa</label><input id="officeContextChapter" placeholder="Ex.: Capítulo 2 · Resultados"></div>
+      </div>
     </div>
     <div class="modal-f"><button class="btn" data-close="newOfficeOverlay">Cancelar</button><button class="btn primary" id="officeNewCreateBtn" type="button">Criar e editar agora</button></div>
+  </div>
+</div>
+
+<!-- LAB · ENVIAR BASE -->
+<div class="overlay" id="labUploadOverlay">
+  <div class="modal" style="max-width:760px">
+    <div class="modal-h"><h2>🧪 Enviar base ao Laboratório</h2><div class="spacer"></div><button class="btn ghost" data-close="labUploadOverlay">Fechar</button></div>
+    <div class="modal-b">
+      <div class="notice"><b>Rastreabilidade obrigatória.</b> A base será guardada no Repositório e ligada ao contexto científico informado abaixo.</div>
+      <div class="fg"><label>Arquivo de dados</label><input id="labUploadFile" type="file" accept=".csv,.xlsx,.xls"><div class="hint">CSV ou Excel. Limite atual do motor: 50 MB / 250 mil linhas.</div></div>
+      <div class="fg"><label>Título da base</label><input id="labUploadTitle" placeholder="Ex.: Temperatura, fumaça e sintomas · 2024–2026"></div>
+      <div class="grid2">
+        <div class="fg"><label>Este dado pertence a</label><select id="labContextType"><option value="project">Projeto / capítulo de aluno</option><option value="article">Artigo científico</option><option value="product">Produto técnico/científico</option><option value="independent">Pesquisa independente</option><option value="exploratory">Análise exploratória</option></select></div>
+        <div class="fg" id="labContextMemberWrap"><label>Aluno / responsável</label><select id="labContextMember"></select></div>
+        <div class="fg"><label id="labContextProjectLabel">Projeto</label><input id="labContextProject" placeholder="Título do projeto"></div>
+        <div class="fg" id="labContextChapterWrap"><label>Capítulo da tese/dissertação/TCC</label><input id="labContextChapter" placeholder="Ex.: Capítulo 2 · Exposição e vulnerabilidade"></div>
+      </div>
+    </div>
+    <div class="modal-f"><button class="btn" data-close="labUploadOverlay">Cancelar</button><button class="btn primary" id="labUploadSaveBtn" type="button">Enviar e abrir no Lab</button></div>
+  </div>
+</div>
+
+<!-- LAB · ANALISAR -->
+<div class="overlay" id="labAnalyzeOverlay">
+  <div class="modal" style="max-width:900px">
+    <div class="modal-h"><h2>🧪 Nova análise</h2><div class="spacer"></div><button class="btn ghost" data-close="labAnalyzeOverlay">Fechar</button></div>
+    <div class="modal-b">
+      <div class="lab-source-banner" id="labAnalyzeSource"><span style="font-size:24px">📊</span><div><b>Carregando base…</b><div class="lab-muted">Aguarde a auditoria inicial.</div></div></div>
+      <div id="labInspectKpis" class="lab-kpis"></div>
+      <div class="grid2" style="margin:9px 0 12px">
+        <div class="fg"><label>Vínculo científico</label><select id="labAnalyzeContextType"><option value="project">Projeto / capítulo de aluno</option><option value="article">Artigo científico</option><option value="product">Produto técnico/científico</option><option value="independent">Pesquisa independente</option><option value="exploratory">Análise exploratória</option></select></div>
+        <div class="fg" id="labAnalyzeMemberWrap"><label>Aluno / responsável</label><select id="labAnalyzeMember"></select></div>
+        <div class="fg"><label id="labAnalyzeProjectLabel">Projeto</label><input id="labAnalyzeProject"></div>
+        <div class="fg" id="labAnalyzeChapterWrap"><label>Capítulo / etapa</label><input id="labAnalyzeChapter"></div>
+      </div>
+      <div class="fg"><label>Escolha o método</label><div class="lab-method-grid" id="labAnalyzeMethods"></div></div>
+      <div id="labAnalysisControls"></div>
+      <div id="labAnalysisAdvice" class="notice" style="margin-top:10px;display:none"></div>
+    </div>
+    <div class="modal-f"><button class="btn" data-close="labAnalyzeOverlay">Cancelar</button><button class="btn primary" id="labRunBtn" type="button">▶ Executar análise</button></div>
+  </div>
+</div>
+
+<!-- LAB · RESULTADOS -->
+<div class="overlay" id="labResultOverlay">
+  <div class="modal lab-result-modal">
+    <div class="modal-h"><h2>Resultados · Carbonautas Lab</h2><div class="spacer"></div><button class="btn ghost" data-close="labResultOverlay">Fechar</button></div>
+    <div class="modal-b" style="padding:0;overflow:hidden"><div class="lab-result-scroll" id="labResultBody"></div></div>
   </div>
 </div>
 
@@ -1868,6 +1997,14 @@ const CATEGORIAS = {
   dados:            {label:'Dados / planilha',          color:'#1E88C7'},
   outro:            {label:'Outro',                    color:'#7c8b90'},
 };
+const LAB_CONTEXT_LABELS={project:'Projeto / capítulo',article:'Artigo científico',product:'Produto',independent:'Pesquisa independente',exploratory:'Exploratória'};
+function scientificContextHTML(p){
+  if(!p)return '';
+  const type=p.labContextType||'', project=p.labProject||'', chapter=p.labChapter||'', member=p.labMemberNome||memberById(p.labMemberId||'')?.nome||'';
+  if(!type&&!project&&!chapter)return '';
+  const cls=type==='project'?'project':type==='article'?'article':'';
+  return `<div class="scientific-context"><span class="lab-context-pill ${cls}">🔗 ${esc(LAB_CONTEXT_LABELS[type]||'Contexto')}</span>${member&&type==='project'?`<span class="lab-context-pill project">👤 ${esc(member)}</span>`:''}${project?`<span class="lab-context-pill ${cls}">📌 ${esc(project)}</span>`:''}${chapter?`<span class="lab-context-pill chapter">📖 ${esc(chapter)}</span>`:''}</div>`;
+}
 const P = 'https://ernandes-sobreira.github.io/';
 const DEFAULT_PIN = '2024';
 
@@ -1993,12 +2130,12 @@ function renderMemberRepository(){
   const canAdd=isAdmin||isMe(m.id); $('#repoAddBtn').style.display=canAdd?'inline-flex':'none';
   $('#repoList').innerHTML=list.length?list.map(it=>{
     const icon=it.reviewFlow?'✍️':(it.isFile?'📄':'🔗');
-    const view=it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Visualizar</button><button class="btn review-download" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Baixar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;
+    const view=it.raw?.labRun?`<button class="btn primary" type="button" onclick="openLabRun('${it.raw.labRunId}')">📈 Resultados</button>`:it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Visualizar</button><button class="btn review-download" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Baixar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;
     const rev=it.reviewFlow?reviewBadgeHTML(it.raw):'';
     const online=it.source==='publicacao'?officeActionButtons(it.raw):'';
     const respond=it.reviewFlow&&canActOnReview(it.raw)?`<button class="btn review-action" type="button" onclick="openReviewResponse('${it.id}')">${reviewActionLabel(it.raw)}</button>`:'';
     const ver=!it.reviewFlow&&it.onlineEditVersion>1?`<span class="office-version">✏️ edição v${it.onlineEditVersion}</span>`:'';
-    return `<div class="repo-item"><div class="repo-icon">${icon}</div><div class="repo-main"><div class="repo-title">${esc(it.title)}</div><div class="repo-meta">${esc(it.kind)}</div>${ver}${rev}${it.reviewNote?`<div class="review-note">💬 ${esc(it.reviewNote)}</div>`:''}</div><div class="repo-actions">${view}${online}${respond}</div></div>`
+    return `<div class="repo-item"><div class="repo-icon">${icon}</div><div class="repo-main"><div class="repo-title">${esc(it.title)}</div><div class="repo-meta">${esc(it.kind)}</div>${ver}${rev}${it.reviewNote?`<div class="review-note">💬 ${esc(it.reviewNote)}</div>`:''}${it.raw?scientificContextHTML(it.raw):''}</div><div class="repo-actions">${view}${it.raw?labRepoButton(it.raw):''}${online}${respond}</div></div>`
   }).join(''):'<div class="repo-empty">Ainda não há documentos ou links registrados para esta pessoa.</div>';
 }
 function fmtTime(ts){
@@ -2136,7 +2273,7 @@ function subscribeAll(){
   // PUBLICAÇÕES
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_publicacoes'),f.orderBy('ts','desc')),snap=>{
     state.publicacoes=snap.docs.map(d=>({...d.data(),id:d.id}));
-    if(currentView==='pubs') renderPubs(); if(currentView==='painel') renderPainel(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
+    if(currentView==='pubs') renderPubs(); if(currentView==='lab') renderLab(); if(currentView==='painel') renderPainel(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
   }));
   // ACOMPANHAMENTO
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_activities'),f.orderBy('updatedAt','desc')),snap=>{
@@ -3682,9 +3819,11 @@ function renderPubs(){
         ${!p.reviewFlow&&Number(p.onlineEditVersion||1)>1?`<span class="office-version">✏️ edição v${Number(p.onlineEditVersion||1)}</span>`:''}
         ${p.reviewFlow?reviewBadgeHTML(p):''}
         ${p.reviewNote?`<div class="review-note">💬 ${esc(p.reviewNote)}</div>`:''}
+        ${scientificContextHTML(p)}
       </div>
       <div class="pub-act">
-        ${p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Visualizar" style="padding:6px 9px">👁️</button><button type="button" class="btn review-download" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Baixar" style="padding:6px 9px">⬇</button>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}
+        ${p.labRun?`<button type="button" class="btn primary" onclick="openLabRun('${p.labRunId}')">📈 Resultados</button>`:p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Visualizar" style="padding:6px 9px">👁️</button><button type="button" class="btn review-download" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Baixar" style="padding:6px 9px">⬇</button>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}
+        ${labRepoButton(p)}
         ${officeActionButtons(p,'compact')}
         ${p.reviewFlow&&canActOnReview(p)?`<button type="button" class="btn review-action" onclick="openReviewResponse('${p.id}')">${reviewActionLabel(p)}</button>`:''}
         ${canDel?`<button class="mini-x" onclick="deletePublicacao('${p.id}')" title="Excluir">×</button>`:''}
@@ -3851,7 +3990,7 @@ function openNewOffice(){
   if(!window.auth?.currentUser||!myId)return toast('Entre com seu perfil para criar um arquivo.');
   officeNewType='docx';
   $$('#officeNewGrid [data-office-type]').forEach((b,i)=>b.classList.toggle('on',i===0));
-  $('#officeNewTitle').value='';openOverlay('newOfficeOverlay');setTimeout(()=>$('#officeNewTitle')?.focus(),80);
+  $('#officeNewTitle').value='';$('#officeContextType').value='independent';labFillMemberSelect('#officeContextMember',myId);$('#officeContextProject').value='';$('#officeContextChapter').value='';updateContextUI('office');openOverlay('newOfficeOverlay');setTimeout(()=>$('#officeNewTitle')?.focus(),80);
 }
 async function createBlankOffice(){
   const ext=officeNewType,title=($('#officeNewTitle')?.value||'').trim();
@@ -3867,7 +4006,8 @@ async function createBlankOffice(){
     const {url}=await fbUploadFile('office_workspace_'+myId,dataUrl,fileName);
     const f=FB(),ref=f.doc(f.collection(window.db,'rede_publicacoes')),m=memberById(myId),uid=window.auth.currentUser.uid;
     const categoria=ext==='xlsx'?'dados':ext==='pptx'?'apresentacao':'outro',categoriaOutro=ext==='docx'?'Documento de trabalho':'';
-    const data={memberId:myId,ownerUid:uid,createdByUid:uid,memberNome:m?.nome||myName||'',categoria,categoriaOutro,titulo:title,tipo:'arquivo',url,fileName,onlineEditVersion:1,createdInOffice:true,ts:f.serverTimestamp()};
+    const ctx=contextPayload('office');if(!ctx.labProject)ctx.labProject=title;const ctxErr=validateScientificContext(ctx);if(ctxErr)throw new Error(ctxErr);const linkedMemberId=ctx.labContextType==='project'?ctx.labMemberId:myId,linkedMember=memberById(linkedMemberId)||m;
+    const data={memberId:linkedMemberId,ownerUid:uid,createdByUid:uid,memberNome:linkedMember?.nome||myName||'',categoria,categoriaOutro,titulo:title,tipo:'arquivo',url,fileName,onlineEditVersion:1,createdInOffice:true,...ctx,ts:f.serverTimestamp()};
     await f.setDoc(ref,data);closeOverlay('newOfficeOverlay');toast('Arquivo criado. Abrindo editor…');
     await launchOnlyOffice({...data,id:ref.id},base,{purpose:'personal',mode:'edit'});
   }catch(e){console.error(e);toast(e.message||'Erro ao criar o arquivo.');}
@@ -3877,6 +4017,7 @@ async function createBlankOffice(){
 $('#newOfficeBtn')?.addEventListener('click',openNewOffice);
 $$('#officeNewGrid [data-office-type]').forEach(b=>b.addEventListener('click',()=>{officeNewType=b.dataset.officeType;$$('#officeNewGrid [data-office-type]').forEach(x=>x.classList.toggle('on',x===b))}));
 $('#officeNewCreateBtn')?.addEventListener('click',createBlankOffice);
+$('#officeContextType')?.addEventListener('change',()=>updateContextUI('office'));
 $('#ooSaveConfigBtn')?.addEventListener('click',async()=>{const v=($('#ooServerUrl')?.value||'').trim().replace(/\/+$/,'');if(!/^https:\/\//i.test(v)){toast('Informe um endereço HTTPS válido.');return}localStorage.setItem(OO_SERVER_KEY,v);closeOverlay('onlyOfficeSetupOverlay');toast('Servidor do editor salvo.');const id=ooPendingPubId;ooPendingPubId='';if(id)setTimeout(()=>openOnlineEdit(id),150)});
 $('#ooConfigBtn')?.addEventListener('click',openOnlyOfficeSetup);
 $('#ooSaveBtn')?.addEventListener('click',saveOnlineDocument);
@@ -4387,6 +4528,93 @@ async function openWhats(){
   else toast('Recado copiado. Salve o link do grupo para abrir direto.');
 }
 
+
+/* ============ LABORATÓRIO DE DADOS ============ */
+const LAB_API_BASE=()=>onlyOfficeBase()+'/carbonautas-api';
+const LAB_METHODS={
+  diagnostic:{icon:'🔎',label:'Diagnóstico automático',sub:'Qualidade, ausências e estrutura'},
+  descriptive:{icon:'📊',label:'Descritiva',sub:'Resumo robusto e distribuições'},
+  correlation:{icon:'🧩',label:'Correlação',sub:'Pearson/Spearman + heatmap'},
+  regression:{icon:'📐',label:'Regressão linear',sub:'OLS + pressupostos + VIF'},
+  ttest:{icon:'⚖️',label:'Welch t',sub:'Dois grupos + efeito'},
+  anova:{icon:'🧪',label:'ANOVA + Tukey',sub:'Múltiplos grupos'},
+  kruskal:{icon:'〰️',label:'Kruskal-Wallis',sub:'Não paramétrico + Holm'},
+  pca:{icon:'🧭',label:'PCA',sub:'Estrutura multivariada'},
+  timeseries:{icon:'📅',label:'Tendência',sub:'Mann-Kendall + Sen'},
+  glm:{icon:'🧮',label:'GLM',sub:'Gaussian / Binomial / Poisson'},
+  mixed:{icon:'🧬',label:'Modelo misto',sub:'Intercepto aleatório'},
+  cluster:{icon:'🫧',label:'Cluster',sub:'K-means + silhouette'}
+};
+let labDatasetFileData='',labDatasetFileName='',labCurrentPubId='',labInspectCache={},labSelectedMethod='diagnostic',labCurrentRunId='',labObjectUrls=[];
+function isLabDataFile(p){if(!p||p.tipo!=='arquivo')return false;const ext=inferFileExt(p.url||'',p.fileName||p.titulo||'');return ['csv','xlsx','xls'].includes(ext)}
+function labRepoButton(p){return isLabDataFile(p)?`<button type="button" class="btn" onclick="openLabAnalyze('${p.id}')" title="Analisar no Laboratório" style="padding:6px 9px">🧪</button>`:''}
+function labDatasets(){return state.publicacoes.filter(isLabDataFile)}
+function labRuns(){return state.publicacoes.filter(p=>p.labRun&&p.labRunId)}
+function labFillMemberSelect(id,value=''){
+  const el=$(id);if(!el)return;const ordered=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome));el.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');
+  const v=value&&memberById(value)?value:(myId&&memberById(myId)?myId:(ordered[0]?.id||''));el.value=v;
+}
+function updateContextUI(prefix){
+  const type=$('#'+prefix+'ContextType')?.value||'project', projectLabel=$('#'+prefix+'ContextProjectLabel'),memberWrap=$('#'+prefix+'ContextMemberWrap'),chapterWrap=$('#'+prefix+'ContextChapterWrap');
+  if(memberWrap)memberWrap.style.display=type==='project'?'block':'none';if(chapterWrap)chapterWrap.style.display=type==='project'?'block':'none';
+  if(projectLabel)projectLabel.textContent=type==='project'?'Projeto':type==='article'?'Artigo / manuscrito':type==='product'?'Produto':'Nome do trabalho / pesquisa';
+}
+function contextPayload(prefix){
+  const type=$('#'+prefix+'ContextType')?.value||'independent',mid=type==='project'?($('#'+prefix+'ContextMember')?.value||''):'';
+  const m=memberById(mid);return {labContextType:type,labMemberId:mid,labMemberNome:m?.nome||'',labProject:($('#'+prefix+'ContextProject')?.value||'').trim(),labChapter:type==='project'?($('#'+prefix+'ContextChapter')?.value||'').trim():''};
+}
+function validateScientificContext(ctx){
+  if(ctx.labContextType==='project'&&(!ctx.labMemberId||!ctx.labProject||!ctx.labChapter))return 'Para projeto de aluno, informe aluno, projeto e capítulo/etapa.';
+  if(['article','product','independent'].includes(ctx.labContextType)&&!ctx.labProject)return 'Informe o nome do artigo, produto ou pesquisa.';
+  return '';
+}
+function renderLab(){
+  const datasets=labDatasets(),runs=labRuns();$('#labDatasetCount').textContent=`${datasets.length} base${datasets.length===1?'':'s'}`;$('#labRunCount').textContent=`${runs.length} análise${runs.length===1?'':'s'}`;
+  const dl=$('#labDatasetList');if(dl)dl.innerHTML=datasets.length?datasets.map(p=>{const m=memberById(p.memberId);const ext=inferFileExt(p.url||'',p.fileName||p.titulo||'').toUpperCase();return `<div class="lab-data-card"><div class="lab-data-ico">${ext==='CSV'?'🧾':'📊'}</div><div class="lab-data-main"><div class="lab-data-title">${esc(p.titulo||p.fileName||'Base de dados')}</div><div class="lab-data-meta"><span>${esc(ext)}</span><span>·</span><span>${esc(p.memberNome||m?.nome||'')}</span>${p.labDataset?'<span>· Base vinculada</span>':''}</div>${scientificContextHTML(p)}</div><button class="btn primary" type="button" onclick="openLabAnalyze('${p.id}')">Analisar</button></div>`}).join(''):'<div class="lab-empty">Nenhuma base CSV/Excel no Repositório. Envie a primeira base e vincule ao projeto/capítulo.</div>';
+  const rl=$('#labRunList');if(rl)rl.innerHTML=runs.length?runs.map(p=>`<div class="lab-run-card"><div class="lab-data-ico">📈</div><div class="lab-data-main"><div class="lab-data-title">${esc(p.titulo||p.labMethodLabel||'Análise')}</div><div class="lab-data-meta"><span>${esc(p.labMethodLabel||p.labMethod||'Método')}</span>${p.labDatasetId?'<span>· execução rastreável</span>':''}</div>${scientificContextHTML(p)}${(p.labWarnings||[]).length?`<div style="font-size:10px;color:#97680d;margin-top:5px">⚠ ${esc(p.labWarnings[0])}</div>`:''}</div><button class="btn" type="button" onclick="openLabRun('${p.labRunId}')">Abrir resultados</button></div>`).join(''):'<div class="lab-empty">As análises executadas aparecerão aqui com tabelas, figuras e arquivos de reprodutibilidade.</div>';
+}
+function openLabUpload(){
+  if(!window.auth?.currentUser||!myId)return toast('Entre com seu perfil primeiro.');labDatasetFileData='';labDatasetFileName='';$('#labUploadFile').value='';$('#labUploadTitle').value='';$('#labContextType').value='project';labFillMemberSelect('#labContextMember',myId);$('#labContextProject').value=memberById(myId)?.tema||'';$('#labContextChapter').value='';updateContextUI('lab');openOverlay('labUploadOverlay');
+}
+$('#labUploadFile')?.addEventListener('change',e=>{const file=e.target.files?.[0];if(!file)return;const ext=(file.name.split('.').pop()||'').toLowerCase();if(!['csv','xlsx','xls'].includes(ext)){toast('Envie CSV ou Excel.');e.target.value='';return}if(file.size>50*1024*1024){toast('Arquivo maior que 50 MB.');e.target.value='';return}labDatasetFileName=file.name;if(!$('#labUploadTitle').value)$('#labUploadTitle').value=file.name.replace(/\.(csv|xlsx|xls)$/i,'');const r=new FileReader();r.onload=ev=>labDatasetFileData=ev.target.result;r.readAsDataURL(file)});
+async function saveLabDataset(){
+  const title=$('#labUploadTitle').value.trim(),ctx=contextPayload('lab'),err=validateScientificContext(ctx),btn=$('#labUploadSaveBtn');if(!labDatasetFileData||!labDatasetFileName)return toast('Escolha a base CSV/Excel.');if(!title)return toast('Dê um título à base.');if(err)return toast(err);
+  try{btn.disabled=true;toast('Enviando base ao Repositório…');const memberId=ctx.labContextType==='project'?ctx.labMemberId:myId,m=memberById(memberId),uid=window.auth.currentUser.uid;const {url}=await fbUploadFile('lab_'+memberId,labDatasetFileData,labDatasetFileName);const f=FB(),ref=f.doc(f.collection(window.db,'rede_publicacoes'));const data={memberId,ownerUid:uid,createdByUid:uid,memberNome:m?.nome||myName||'',categoria:'dados',categoriaOutro:'',titulo:title,tipo:'arquivo',url,fileName:labDatasetFileName,labDataset:true,...ctx,ts:f.serverTimestamp()};await f.setDoc(ref,data);closeOverlay('labUploadOverlay');toast('Base vinculada e salva no Repositório.');switchView('lab');setTimeout(()=>openLabAnalyze(ref.id),250)}catch(e){console.error(e);toast(e.message||'Erro ao enviar a base.')}finally{btn.disabled=false}
+}
+async function labFetch(path,opts={}){const token=await window.auth.currentUser.getIdToken();const headers={...(opts.headers||{}),Authorization:'Bearer '+token};if(opts.body&&!headers['Content-Type'])headers['Content-Type']='application/json';const r=await fetch(LAB_API_BASE()+path,{...opts,headers});if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.error||`Erro HTTP ${r.status}`)}return r}
+async function loadLabInspect(pubId,force=false){if(labInspectCache[pubId]&&!force)return labInspectCache[pubId];const r=await labFetch('/api/lab/inspect/'+pubId);const j=await r.json();labInspectCache[pubId]=j.inspect;return j.inspect}
+function labMethodsHTML(){return Object.entries(LAB_METHODS).map(([k,v])=>`<button type="button" class="lab-method ${k===labSelectedMethod?'on':''}" data-lab-method="${k}"><span class="mi">${v.icon}</span><b>${v.label}</b><small>${v.sub}</small></button>`).join('')}
+function optList(cols,selected=''){return `<option value="">Selecione…</option>${cols.map(c=>`<option value="${esc(c)}" ${c===selected?'selected':''}>${esc(c)}</option>`).join('')}`}
+function varChecks(cols,selected=[]){return `<div class="lab-variable-box">${cols.map((c,i)=>`<label class="lab-var-check"><input type="checkbox" data-lab-var value="${esc(c)}" ${selected.includes(c)||(!selected.length&&i<6)?'checked':''}> ${esc(c)}</label>`).join('')}</div>`}
+function renderLabControls(){
+  const ins=labInspectCache[labCurrentPubId];if(!ins)return;const n=ins.numeric||[],c=ins.categorical||[],all=(ins.columnInfo||[]).map(x=>x.name),m=labSelectedMethod;let h='';
+  if(['descriptive','correlation','pca','cluster'].includes(m))h=`<div class="fg"><label>Variáveis numéricas</label>${varChecks(n)}</div>`;
+  if(m==='correlation')h+=`<div class="fg"><label>Coeficiente</label><select id="labCorrelation"><option value="pearson">Pearson</option><option value="spearman">Spearman</option></select></div>`;
+  if(['regression','glm','mixed'].includes(m)){h=`<div class="grid2"><div class="fg"><label>Variável resposta (Y)</label><select id="labY">${optList(n)}</select></div>${m==='mixed'?`<div class="fg"><label>Grupo aleatório</label><select id="labGroup">${optList(all)}</select></div>`:''}</div><div class="fg"><label>Preditores</label>${varChecks(n)}</div>`;if(m==='glm')h+=`<div class="fg"><label>Família</label><select id="labFamily"><option value="gaussian">Gaussian</option><option value="binomial">Binomial (0/1)</option><option value="poisson">Poisson (contagem)</option></select></div>`;}
+  if(['ttest','anova','kruskal'].includes(m))h=`<div class="grid2"><div class="fg"><label>Resposta numérica</label><select id="labY">${optList(n)}</select></div><div class="fg"><label>Variável de grupo</label><select id="labGroup">${optList(all)}</select></div></div>`;
+  if(m==='timeseries')h=`<div class="grid2"><div class="fg"><label>Tempo / data / ano</label><select id="labTime">${optList(all)}</select></div><div class="fg"><label>Resposta numérica</label><select id="labY">${optList(n)}</select></div></div>`;
+  if(m==='cluster')h+=`<div class="fg"><label>Número de clusters (k)</label><input id="labK" type="number" min="2" max="8" value="3"></div>`;
+  if(m==='diagnostic')h='<div class="notice"><b>Automático.</b> O motor audita tipos, ausências, distribuição e estrutura e sugere próximos passos.</div>';
+  $('#labAnalysisControls').innerHTML=h;const advice=$('#labAnalysisAdvice');const sug=ins.suggestions||[];advice.style.display=sug.length?'block':'none';advice.innerHTML=sug.length?'<b>💡 O que a estrutura da base sugere</b><br>'+sug.map(x=>'• '+esc(x)).join('<br>'):'';
+}
+function fillAnalyzeContext(p){const type=p.labContextType||'project';$('#labAnalyzeContextType').value=type;labFillMemberSelect('#labAnalyzeMember',p.labMemberId||p.memberId||myId);$('#labAnalyzeProject').value=p.labProject||memberById(p.labMemberId||p.memberId||'')?.tema||'';$('#labAnalyzeChapter').value=p.labChapter||'';updateContextUI('labAnalyze')}
+async function openLabAnalyze(pubId){
+  if(!window.auth?.currentUser)return toast('Entre primeiro.');const p=state.publicacoes.find(x=>x.id===pubId);if(!p)return toast('Base não encontrada.');labCurrentPubId=pubId;labSelectedMethod='diagnostic';fillAnalyzeContext(p);$('#labAnalyzeSource').innerHTML=`<span style="font-size:24px">📊</span><div><b>${esc(p.titulo||p.fileName||'Base')}</b><div class="lab-muted">Auditando estrutura e variáveis…</div></div>`;$('#labInspectKpis').innerHTML='';$('#labAnalyzeMethods').innerHTML=labMethodsHTML();$('#labAnalysisControls').innerHTML='<div class="lab-empty">Lendo a base…</div>';openOverlay('labAnalyzeOverlay');
+  try{const ins=await loadLabInspect(pubId);$('#labAnalyzeSource').innerHTML=`<span style="font-size:24px">📊</span><div><b>${esc(p.titulo||p.fileName||'Base')}</b><div class="lab-muted">${ins.rows.toLocaleString('pt-BR')} linhas · ${ins.columns} variáveis · ${ins.numeric.length} numéricas</div></div>`;$('#labInspectKpis').innerHTML=`<div class="lab-kpi"><span>Linhas</span><b>${ins.rows.toLocaleString('pt-BR')}</b></div><div class="lab-kpi"><span>Variáveis</span><b>${ins.columns}</b></div><div class="lab-kpi"><span>Numéricas</span><b>${ins.numeric.length}</b></div><div class="lab-kpi"><span>Ausentes</span><b>${ins.missingTotal}</b></div>`;renderLabControls()}catch(e){console.error(e);$('#labAnalysisControls').innerHTML=`<div class="lab-empty">⚠️ ${esc(e.message)}</div>`}
+}
+function collectLabOptions(){const vars=$$('[data-lab-var]:checked').map(x=>x.value),o={analysis:labSelectedMethod,variables:vars};if($('#labY'))o.y=$('#labY').value;if($('#labGroup'))o.group=$('#labGroup').value;if($('#labTime'))o.time=$('#labTime').value;if($('#labCorrelation'))o.correlation=$('#labCorrelation').value;if($('#labFamily'))o.family=$('#labFamily').value;if($('#labK'))o.k=Number($('#labK').value||3);return o}
+async function persistAnalyzeContext(){const ctx=contextPayload('labAnalyze'),err=validateScientificContext(ctx);if(err)throw new Error(err);const p=state.publicacoes.find(x=>x.id===labCurrentPubId);if(!p)throw new Error('Base não encontrada.');const memberId=ctx.labContextType==='project'?ctx.labMemberId:(p.memberId||myId),m=memberById(memberId);await FB().updateDoc(FB().doc(window.db,'rede_publicacoes',labCurrentPubId),{...ctx,memberId,memberNome:m?.nome||p.memberNome||'',labDataset:true});return ctx}
+async function runLabAnalysis(){const btn=$('#labRunBtn');try{btn.disabled=true;await persistAnalyzeContext();const opts=collectLabOptions();toast('Executando análise no servidor…');const r=await labFetch('/api/lab/analyze/'+labCurrentPubId,{method:'POST',body:JSON.stringify(opts)});const j=await r.json();closeOverlay('labAnalyzeOverlay');await showLabResult(j.runId,j.result);toast('Análise concluída e registrada no Repositório.')}catch(e){console.error(e);toast(e.message||'Erro na análise.')}finally{btn.disabled=false}}
+function fmtLabValue(v){if(v===null||v===undefined)return '—';if(typeof v==='number')return Math.abs(v)>=1000?v.toLocaleString('pt-BR',{maximumFractionDigits:2}):v.toLocaleString('pt-BR',{maximumFractionDigits:4});return String(v)}
+function labTableHTML(t){const rows=t.rows||[],cols=t.columns||[];if(!rows.length)return '<div class="lab-empty">Tabela salva para download.</div>';return `<div class="lab-table-wrap"><table class="lab-table"><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.slice(0,80).map(r=>`<tr>${cols.map(c=>`<td>${esc(fmtLabValue(r[c]))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
+async function labGetBlob(runId,name){const r=await labFetch('/api/lab/run/'+runId+'/file/'+encodeURIComponent(name));return await r.blob()}
+async function labDownload(runId,name){try{const b=await labGetBlob(runId,name),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}catch(e){toast(e.message)}}
+async function hydrateLabFigures(runId,result){labObjectUrls.forEach(URL.revokeObjectURL);labObjectUrls=[];for(const fig of (result.figures||[])){const png=fig.files?.find(f=>f.format==='png');if(!png)continue;try{const b=await labGetBlob(runId,png.name),u=URL.createObjectURL(b);labObjectUrls.push(u);const img=document.querySelector(`[data-lab-fig="${CSS.escape(fig.stem)}"]`);if(img)img.src=u}catch(e){console.warn(e)}}}
+async function showLabResult(runId,result){labCurrentRunId=runId;const metrics=(result.metrics||[]).map(x=>`<div class="lab-kpi"><span>${esc(x.label)}</span><b>${esc(fmtLabValue(x.value))}</b></div>`).join('');const warnings=(result.warnings||[]).map(x=>`<div class="lab-warning">⚠️ ${esc(x)}</div>`).join('');const notes=(result.notes||[]).map(x=>`<div class="lab-note">✓ ${esc(x)}</div>`).join('');const recs=(result.recommendations||[]).map(x=>`<div class="lab-note">💡 ${esc(x)}</div>`).join('');const figs=(result.figures||[]).map(f=>`<div class="lab-figure"><img data-lab-fig="${esc(f.stem)}" alt="${esc(f.label)}"><div class="lab-figure-title">${esc(f.label)}</div><div class="lab-downloads">${(f.files||[]).map(q=>`<button class="btn" type="button" onclick="labDownload('${runId}','${esc(q.name)}')">⬇ ${q.format.toUpperCase()}</button>`).join('')}</div></div>`).join('');const tables=(result.tables||[]).map(t=>`<div class="lab-result-card"><h4>${esc(t.label||t.name)}</h4>${labTableHTML(t)}<div class="lab-downloads" style="margin-top:8px">${(t.files||[]).map(q=>`<button class="btn" onclick="labDownload('${runId}','${esc(q.name)}')">⬇ ${q.format.toUpperCase()}</button>`).join('')}</div></div>`).join('');const files=(result.files||[]).map(f=>`<button class="btn" type="button" onclick="labDownload('${runId}','${esc(f.name)}')">⬇ ${esc(f.label||f.name)}</button>`).join('');$('#labResultBody').innerHTML=`<div class="lab-result-hero"><h2>${esc(result.title||'Resultados')}</h2><p>${esc(result.method||'')}</p></div>${metrics?`<div class="lab-kpis">${metrics}</div>`:''}${warnings||notes||recs?`<div class="lab-result-card" style="margin-top:12px"><h4>Leitura crítica</h4>${warnings}${notes}${recs}</div>`:''}${figs?`<div class="lab-result-card" style="margin-top:12px"><h4>Figuras científicas · PNG 600 dpi + vetores</h4><div class="lab-figure-grid">${figs}</div></div>`:''}<div class="lab-result-grid">${tables}</div>${files?`<div class="lab-result-card" style="margin-top:12px"><h4>Reprodutibilidade</h4><div class="lab-downloads">${files}</div></div>`:''}`;openOverlay('labResultOverlay');await hydrateLabFigures(runId,result)}
+async function openLabRun(runId){try{toast('Abrindo resultados…');const r=await labFetch('/api/lab/run/'+runId),j=await r.json();await showLabResult(runId,j.meta.result)}catch(e){toast(e.message||'Não consegui abrir a análise.')}}
+
+$('#labUploadBtn')?.addEventListener('click',openLabUpload);$('#labUploadSaveBtn')?.addEventListener('click',saveLabDataset);$('#labNewArticleBtn')?.addEventListener('click',()=>{openNewOffice();setTimeout(()=>{$('#officeNewTitle').value='Novo manuscrito';$('#officeContextType').value='article';updateContextUI('office')},50)});$('#labContextType')?.addEventListener('change',()=>updateContextUI('lab'));$('#labAnalyzeContextType')?.addEventListener('change',()=>updateContextUI('labAnalyze'));$('#labRunBtn')?.addEventListener('click',runLabAnalysis);$('#labAnalyzeMethods')?.addEventListener('click',e=>{const b=e.target.closest('[data-lab-method]');if(!b)return;labSelectedMethod=b.dataset.labMethod;$$('#labAnalyzeMethods [data-lab-method]').forEach(x=>x.classList.toggle('on',x===b));renderLabControls()});
+
 /* ============ OVERLAYS ============ */
 function openOverlay(id){$('#'+id).classList.add('open')}
 function closeOverlay(id){$('#'+id).classList.remove('open')}
@@ -4397,12 +4625,13 @@ function switchView(v){
   document.body.dataset.view=v;
   $$('.view').forEach(el=>el.classList.remove('on'));
   $$('.tab').forEach(el=>el.classList.toggle('on',el.dataset.view===v));
-  const map={painel:'viewPainel',rede:'viewRede',crono:'viewCrono',track:'viewTrack',feed:'viewFeed',mensagens:'viewMensagens',mural:'viewMural',fotos:'viewFotos',pubs:'viewPubs'};
+  const map={painel:'viewPainel',rede:'viewRede',crono:'viewCrono',track:'viewTrack',lab:'viewLab',feed:'viewFeed',mensagens:'viewMensagens',mural:'viewMural',fotos:'viewFotos',pubs:'viewPubs'};
   map[v] && $('#'+map[v]).classList.add('on');
   if(v==='painel') renderPainel();
   if(v==='rede') renderAll();
   if(v==='crono') renderCrono();
   if(v==='track') renderTrack();
+  if(v==='lab') renderLab();
   if(v==='feed') renderFeed();
   if(v==='mensagens'){renderMensagens();markQuickSeen();}
   if(v==='mural'){ renderMural(); markChatSeen(); }
