@@ -231,6 +231,13 @@
   .repo-summary{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.repo-count{font-family:'Space Grotesk';font-size:22px;font-weight:700;color:#1434A4}
   .repo-list{display:flex;flex-direction:column;gap:8px}.repo-item{display:flex;gap:10px;align-items:center;border:1px solid #C8D7E4;background:#fff;border-radius:12px;padding:10px 11px}
   .repo-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#EAF2FF;font-size:17px;flex:0 0 auto}.repo-main{min-width:0;flex:1}.repo-title{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.repo-meta{font-size:11px;color:var(--ink-3);margin-top:2px}.repo-actions{display:flex;gap:5px;flex-wrap:wrap}.repo-empty{padding:24px;text-align:center;color:var(--ink-3);border:1px dashed #BFCED8;border-radius:12px;background:#F8FBFD}
+  .review-badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 8px;font-size:10.5px;font-weight:900;border:1px solid #D8C4FF;background:#F2EBFF;color:#6840B7}
+  .review-badge.waiting{border-color:#FFD58A;background:#FFF5DF;color:#925E00}.review-badge.returned{border-color:#A9E2C0;background:#EBF9F0;color:#197345}
+  .review-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px}.review-note{font-size:11px;color:var(--ink-2);margin-top:5px;line-height:1.4}
+  .review-callout{border:1px solid #D6C4FF;background:linear-gradient(135deg,#F8F4FF,#EEF8FF);border-radius:14px;padding:12px 13px;margin-top:8px}.review-callout b{color:#5332A8}.review-callout .hint{margin-top:4px}
+  .review-action{background:#6D46DB!important;border-color:#6D46DB!important;color:#fff!important}.review-action:hover{background:#5935C3!important;border-color:#5935C3!important}
+  .review-download{background:#EAF6FF!important;border-color:#B8DDF3!important;color:#075985!important}
+
 
   /* ===== Cronograma ===== */
   .crono-scroll{flex:1;overflow-y:auto}
@@ -881,6 +888,21 @@
     .brand h1{font-size:18px}
   }
 
+
+  /* ONLYOFFICE Community — editor online de correções */
+  .oo-modal{width:min(98vw,1500px);max-width:none;height:min(94vh,980px);display:flex;flex-direction:column;overflow:hidden}
+  .oo-modal .modal-h{flex:0 0 auto}
+  .oo-modal .modal-b{padding:0;flex:1;min-height:0;background:#10151f;position:relative}
+  .oo-editor-host{width:100%;height:100%;min-height:520px;background:#fff}
+  .oo-statusbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 12px;background:#111827;color:#dce7f7;font-size:12px;border-top:1px solid rgba(255,255,255,.1)}
+  .oo-statusbar b{color:#fff}.oo-pill{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:5px 9px;background:rgba(255,255,255,.07)}
+  .oo-save-btn{background:linear-gradient(135deg,#7c3aed,#ec4899)!important;border-color:transparent!important;color:white!important;font-weight:800!important}
+  .oo-online-btn{background:linear-gradient(135deg,#0ea5e9,#7c3aed)!important;border-color:transparent!important;color:#fff!important;font-weight:800!important;box-shadow:0 7px 18px rgba(59,130,246,.18)}
+  .oo-setup-card{padding:18px;border:1px solid #d9e0ea;border-radius:18px;background:linear-gradient(145deg,#f8fbff,#f5f1ff);margin-bottom:14px}
+  .oo-setup-card h3{margin:0 0 6px;font-size:17px}.oo-setup-card p{margin:0;color:var(--ink-3);font-size:12px;line-height:1.5}
+  .oo-server-state{font-size:11px;color:var(--ink-3);margin-top:5px;word-break:break-all}
+  @media(max-width:700px){.oo-modal{width:100vw;height:100dvh;border-radius:0}.oo-modal .modal-h{padding:8px}.oo-modal .modal-h h2{font-size:14px}.oo-editor-host{min-height:0}.oo-statusbar{padding:7px 9px}.oo-modal .preview-actions .btn:not(.oo-save-btn){display:none}.oo-modal .preview-actions .oo-save-btn{display:inline-flex}}
+
 </style>
 </head>
 <body data-view="painel">
@@ -1292,6 +1314,36 @@
   </div>
 </div>
 
+
+<!-- ONLYOFFICE ONLINE EDITOR -->
+<div class="overlay" id="onlyOfficeOverlay">
+  <div class="modal oo-modal">
+    <div class="modal-h">
+      <h2 id="ooTitle">Correção online</h2><div class="spacer"></div>
+      <div class="preview-actions">
+        <button class="btn oo-save-btn" id="ooSaveBtn" type="button">💾 Salvar nova versão no Carbonautas</button>
+        <button class="btn" id="ooConfigBtn" type="button">⚙️ Servidor</button>
+        <button class="btn ghost" id="ooCloseBtn" type="button">Fechar</button>
+      </div>
+    </div>
+    <div class="modal-b"><div id="onlyOfficeEditor" class="oo-editor-host"></div></div>
+    <div class="oo-statusbar"><span class="oo-pill" id="ooModePill">✍️ Controle de alterações</span><span id="ooStatus">Preparando editor…</span></div>
+  </div>
+</div>
+
+<!-- ONLYOFFICE SETUP -->
+<div class="overlay" id="onlyOfficeSetupOverlay">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-h"><h2>Conectar editor gratuito</h2><div class="spacer"></div><button class="btn ghost" data-close="onlyOfficeSetupOverlay">Fechar</button></div>
+    <div class="modal-b">
+      <div class="oo-setup-card"><h3>✅ ONLYOFFICE conectado</h3><p>O editor gratuito do Carbonautas está ligado ao servidor próprio <strong>docs.carbonautas.online</strong>. Arquivos DOCX em fluxo de correção podem ser abertos com comentários e controle de alterações.</p></div>
+      <div class="fg"><label>Endereço do servidor ONLYOFFICE</label><input id="ooServerUrl" placeholder="https://docs.seudominio.com"><div class="oo-server-state">Use somente o endereço HTTPS, sem barra no final.</div></div>
+      <div class="notice">Servidor padrão: <strong>https://docs.carbonautas.online</strong>. O JWT permanece somente no VPS e nunca é exposto no index.html.</div>
+    </div>
+    <div class="modal-f"><button class="btn" data-close="onlyOfficeSetupOverlay">Cancelar</button><button class="btn primary" id="ooSaveConfigBtn">Salvar endereço</button></div>
+  </div>
+</div>
+
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox">
   <button class="lb-x" id="lbClose">×</button>
@@ -1629,7 +1681,7 @@
 <!-- PUBLICATION MODAL -->
 <div class="overlay" id="pubOverlay">
   <div class="modal" style="max-width:480px">
-    <div class="modal-h"><h2>Adicionar documento ao repositório</h2><div class="spacer"></div><button class="btn ghost" data-close="pubOverlay">Fechar</button></div>
+    <div class="modal-h"><h2 id="pubModalTitle">Adicionar documento ao repositório</h2><div class="spacer"></div><button class="btn ghost" data-close="pubOverlay">Fechar</button></div>
     <div class="modal-b">
       <div class="fg" id="pubAutorRow"><label>Autor(a)</label><select id="pubAutor"></select></div>
       <div class="fg"><label>Categoria</label>
@@ -1651,6 +1703,17 @@
       </div>
       <div class="fg" id="pubOutroRow" style="display:none"><label>Especifique</label><input id="pubOutroTxt" placeholder="Qual tipo de produto?"></div>
       <div class="fg"><label>Título</label><input id="pubTitulo" placeholder="Título do trabalho"></div>
+      <div class="fg" id="pubFinalidadeRow"><label>Finalidade</label>
+        <select id="pubFinalidade">
+          <option value="guardar">📚 Guardar no repositório</option>
+          <option value="correcao">✍️ Enviar para correção</option>
+        </select>
+      </div>
+      <div id="pubReviewFields" style="display:none">
+        <div class="review-callout" id="pubReviewInfo"><b>✍️ Fluxo de correção</b><div class="hint">O arquivo original fica preservado. A pessoa escolhida recebe uma notificação e poderá devolver uma nova versão.</div></div>
+        <div class="fg" id="pubReviewerRow"><label>Quem deve corrigir / ler?</label><select id="pubReviewer"></select></div>
+        <div class="fg"><label id="pubReviewNoteLabel">Orientação para a correção (opcional)</label><textarea id="pubReviewNote" style="min-height:90px" placeholder="Ex.: revisar introdução, conferir referências e devolver com comentários."></textarea></div>
+      </div>
       <div class="fg">
         <label>Conteúdo</label>
         <div style="display:flex;gap:14px;margin-bottom:8px">
@@ -1891,7 +1954,7 @@ function scholarshipHTML(m,compact=false){
 }
 function memberRepositoryItems(memberId){
   const out=[];
-  state.publicacoes.filter(p=>p.memberId===memberId).forEach(p=>out.push({source:'publicacao',id:p.id,title:p.titulo||p.fileName||'Documento',kind:(CATEGORIAS[p.categoria]?.label||p.categoriaOutro||p.categoria||'Publicação'),url:p.url||'',fileName:p.fileName||'',isFile:p.tipo==='arquivo',ts:p.ts}));
+  state.publicacoes.filter(p=>p.memberId===memberId).forEach(p=>out.push({source:'publicacao',id:p.id,title:p.titulo||p.fileName||'Documento',kind:(CATEGORIAS[p.categoria]?.label||p.categoriaOutro||p.categoria||'Publicação'),url:p.url||'',fileName:p.fileName||'',isFile:p.tipo==='arquivo',ts:p.ts,reviewFlow:!!p.reviewFlow,reviewVersion:p.reviewVersion||0,reviewStatus:p.reviewStatus||'',reviewReviewerId:p.reviewReviewerId||'',reviewReturnToId:p.reviewReturnToId||'',reviewNextRecipientId:p.reviewNextRecipientId||'',reviewNote:p.reviewNote||'',raw:p}));
   state.activities.filter(a=>a.ownerId===memberId && (a.fileUrl||a.externalUrl)).forEach(a=>out.push({source:'atividade',id:a.id,title:a.title||'Registro de acompanhamento',kind:ACTIVITY_TYPES[a.type]||a.type||'Acompanhamento',url:a.fileUrl||a.externalUrl||'',fileName:a.fileName||'',isFile:!!a.fileUrl,ts:a.updatedAt||a.createdAt}));
   const m=memberById(memberId); (m?.resultados||[]).forEach((r,i)=>{if(r.url)out.push({source:'resultado',id:'r'+i,title:r.titulo||'Resultado / produto',kind:'Resultado / produto',url:r.url,fileName:'',isFile:false,ts:null})});
   return out.sort((a,b)=>{const ta=a.ts?.toMillis?a.ts.toMillis():0,tb=b.ts?.toMillis?b.ts.toMillis():0;return tb-ta});
@@ -1904,7 +1967,7 @@ function renderMemberRepository(){
   $('#repoScholar').innerHTML=scholarshipHTML(m);
   const list=memberRepositoryItems(m.id); $('#repoCount').textContent=list.length;
   const canAdd=isAdmin||isMe(m.id); $('#repoAddBtn').style.display=canAdd?'inline-flex':'none';
-  $('#repoList').innerHTML=list.length?list.map(it=>{const icon=it.isFile?'📄':'🔗';const action=it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Visualizar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;return `<div class="repo-item"><div class="repo-icon">${icon}</div><div class="repo-main"><div class="repo-title">${esc(it.title)}</div><div class="repo-meta">${esc(it.kind)}</div></div><div class="repo-actions">${action}</div></div>`}).join(''):'<div class="repo-empty">Ainda não há documentos ou links registrados para esta pessoa.</div>';
+  $('#repoList').innerHTML=list.length?list.map(it=>{const icon=it.reviewFlow?'✍️':(it.isFile?'📄':'🔗');const view=it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Visualizar</button><button class="btn review-download" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Baixar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;const rev=it.reviewFlow?reviewBadgeHTML(it.raw):'';const online=it.reviewFlow&&canActOnReview(it.raw)&&isOnlyOfficeDoc(it.raw)?`<button class="btn oo-online-btn" type="button" onclick="openOnlineCorrection('${it.id}')">${onlineCorrectionLabel(it.raw)}</button>`:'';const respond=it.reviewFlow&&canActOnReview(it.raw)?`<button class="btn review-action" type="button" onclick="openReviewResponse('${it.id}')">${reviewActionLabel(it.raw)}</button>`:'';return `<div class="repo-item"><div class="repo-icon">${icon}</div><div class="repo-main"><div class="repo-title">${esc(it.title)}</div><div class="repo-meta">${esc(it.kind)}</div>${rev}${it.reviewNote?`<div class="review-note">💬 ${esc(it.reviewNote)}</div>`:''}</div><div class="repo-actions">${view}${online}${respond}</div></div>`}).join(''):'<div class="repo-empty">Ainda não há documentos ou links registrados para esta pessoa.</div>';
 }
 function fmtTime(ts){
   if(!ts) return '';
@@ -3571,7 +3634,7 @@ function renderPubs(){
     const cfg=CATEGORIAS[p.categoria]||CATEGORIAS.outro;
     const catLabel = p.categoria==='outro' && p.categoriaOutro ? p.categoriaOutro : cfg.label;
     const m=memberById(p.memberId);
-    const canDel = isAdmin || canEditMember(p.memberId);
+    const canDel = isAdmin || (p.reviewFlow ? p.ownerUid===(window.auth.currentUser?.uid||'') : canEditMember(p.memberId));
     const dt = p.ts?.toMillis?new Date(p.ts.toMillis()):null;
     const dateLabel = dt ? dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}) : '';
     const abrirLabel = p.tipo==='arquivo' ? 'Visualizar arquivo' : 'Abrir link';
@@ -3584,16 +3647,146 @@ function renderPubs(){
           <span class="pub-author"><span class="d" style="background:${m?NIVEIS[m.nivel]?.color:'var(--ink-3)'}"></span>${esc(p.memberNome||(m?m.nome:'—'))}</span>
           ${dateLabel?`<span class="pub-date">${dateLabel}</span>`:''}
         </div>
+        ${p.reviewFlow?reviewBadgeHTML(p):''}
+        ${p.reviewNote?`<div class="review-note">💬 ${esc(p.reviewNote)}</div>`:''}
       </div>
       <div class="pub-act">
-        ${p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Visualizar" style="padding:6px 9px">👁️</button><a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir/baixar" style="padding:6px 9px">↗</a>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}
+        ${p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Visualizar" style="padding:6px 9px">👁️</button><button type="button" class="btn review-download" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Baixar" style="padding:6px 9px">⬇</button>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}
+        ${p.reviewFlow&&canActOnReview(p)&&isOnlyOfficeDoc(p)?`<button type="button" class="btn oo-online-btn" onclick="openOnlineCorrection('${p.id}')">${onlineCorrectionLabel(p)}</button>`:''}
+        ${p.reviewFlow&&canActOnReview(p)?`<button type="button" class="btn review-action" onclick="openReviewResponse('${p.id}')">${reviewActionLabel(p)}</button>`:''}
         ${canDel?`<button class="mini-x" onclick="deletePublicacao('${p.id}')" title="Excluir">×</button>`:''}
       </div>
     </div>`;
   }).join('');
 }
-let pubTipo='link', pubFileData='', pubFileName='';
-async function openPubModal(presetMemberId=null){
+let pubTipo='link', pubFileData='', pubFileName='', pubReviewContext=null;
+function reviewStatusLabel(p){
+  if(!p?.reviewFlow)return '';
+  if(p.reviewStatus==='correcao_devolvida')return 'Correção devolvida';
+  if(p.reviewStatus==='nova_versao')return 'Nova versão enviada';
+  return 'Aguardando correção';
+}
+function reviewBadgeHTML(p){
+  if(!p?.reviewFlow)return '';
+  const st=reviewStatusLabel(p),cls=p.reviewStatus==='correcao_devolvida'?'returned':'waiting';
+  const reviewer=memberById(p.reviewReviewerId),next=memberById(p.reviewNextRecipientId);
+  return `<div class="review-meta"><span class="review-badge ${cls}">✍️ v${p.reviewVersion||1} · ${esc(st)}</span>${reviewer?`<span class="review-badge">👤 Revisor: ${esc(reviewer.nome)}</span>`:''}${next?`<span class="review-badge ${cls}">🔔 Agora com: ${esc(next.nome)}</span>`:''}</div>`;
+}
+function canActOnReview(p){return !!(p?.reviewFlow&&myId&&p.reviewNextRecipientId===myId)}
+function reviewActionLabel(p){return myId===p?.reviewReviewerId?'✍️ Devolver correção':'⬆️ Enviar nova versão'}
+function reviewThreadItems(threadId){return state.publicacoes.filter(x=>x.reviewFlow&&x.reviewThreadId===threadId)}
+function reviewNextVersion(p){return Math.max(0,...reviewThreadItems(p.reviewThreadId||p.id).map(x=>Number(x.reviewVersion)||0))+1}
+function populatePubReviewer(selected=''){
+  const sel=$('#pubReviewer');if(!sel)return;const actor=currentActor();
+  const members=state.members.filter(m=>m.status!=='inativo'&&m.id!==actor?.id).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  sel.innerHTML='<option value="">Selecione quem vai receber</option>'+members.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');
+  if(selected&&members.some(m=>m.id===selected))sel.value=selected;
+}
+function syncPubFinalidade(){
+  const correction=$('#pubFinalidade')?.value==='correcao'||!!pubReviewContext;
+  $('#pubReviewFields').style.display=correction?'block':'none';
+  if(correction){
+    pubTipo='arquivo';$$('input[name="pubTipo"]').forEach(r=>{r.checked=r.value==='arquivo';r.disabled=!!pubReviewContext});
+    $('#pubUrl').style.display='none';$('#pubFileArea').style.display='block';
+  }else{$$('input[name="pubTipo"]').forEach(r=>r.disabled=false)}
+}
+
+/* ============ ONLYOFFICE COMMUNITY — CORREÇÃO ONLINE ============ */
+const OO_SERVER_KEY='carbonautas_onlyoffice_server_v1';
+const OO_DEFAULT_SERVER='https://docs.carbonautas.online';
+let ooEditorInstance=null,ooSession=null,ooPendingPubId='';
+function onlyOfficeBase(){return (localStorage.getItem(OO_SERVER_KEY)||OO_DEFAULT_SERVER).trim().replace(/\/+$/,'')}
+function isOnlyOfficeDoc(p){return !!(p&&p.tipo==='arquivo'&&inferFileExt(p.url||'',p.fileName||p.titulo||'')==='docx')}
+function onlineCorrectionLabel(p){return myId===p?.reviewReviewerId?'📝 Corrigir online':'📝 Revisar online'}
+function openOnlyOfficeSetup(){const u=onlyOfficeBase();if($('#ooServerUrl'))$('#ooServerUrl').value=u;openOverlay('onlyOfficeSetupOverlay')}
+function setOoStatus(msg){const el=$('#ooStatus');if(el)el.textContent=msg}
+function destroyOnlyOffice(){try{if(ooEditorInstance?.destroyEditor)ooEditorInstance.destroyEditor()}catch(e){console.warn(e)}ooEditorInstance=null}
+function loadOnlyOfficeApi(base){return new Promise((resolve,reject)=>{if(window.DocsAPI?.DocEditor)return resolve();const old=document.getElementById('onlyoffice-api-script');if(old){old.addEventListener('load',()=>resolve(),{once:true});old.addEventListener('error',()=>reject(new Error('Falha ao carregar a API do ONLYOFFICE.')),{once:true});return}const sc=document.createElement('script');sc.id='onlyoffice-api-script';sc.src=base+'/web-apps/apps/api/documents/api.js';sc.onload=()=>resolve();sc.onerror=()=>reject(new Error('Não consegui conectar ao servidor ONLYOFFICE.'));document.head.appendChild(sc)})}
+async function openOnlineCorrection(id){
+  const p=state.publicacoes.find(x=>x.id===id);
+  if(!p||!p.reviewFlow)return toast('Fluxo de correção não encontrado.');
+  if(!canActOnReview(p))return toast('Este arquivo está com outra pessoa neste momento.');
+  if(!isOnlyOfficeDoc(p))return toast('A correção online com controle de alterações está habilitada para arquivos DOCX.');
+  const base=onlyOfficeBase();
+  if(!base){ooPendingPubId=id;openOnlyOfficeSetup();return}
+  await launchOnlyOffice(p,base);
+}
+async function launchOnlyOffice(p,base){
+  try{
+    if(!window.auth?.currentUser)throw new Error('Entre novamente na plataforma.');
+    destroyOnlyOffice();ooSession=null;
+    $('#ooTitle').textContent=(myId===p.reviewReviewerId?'Correção online · ':'Revisão online · ')+(p.titulo||p.fileName||'Documento');
+    $('#ooModePill').textContent=myId===p.reviewReviewerId?'✍️ Controle de alterações ligado':'📝 Edição + revisão';
+    $('#onlyOfficeEditor').innerHTML='<div class="preview-loading">Conectando ao editor gratuito…</div>';
+    setOoStatus('Autenticando e preparando o documento…');openOverlay('onlyOfficeOverlay');
+    const token=await window.auth.currentUser.getIdToken();
+    const mode=myId===p.reviewReviewerId?'review':'edit';
+    const endpoint=base+'/carbonautas-api/api/editor-config/'+encodeURIComponent(p.id)+'?mode='+encodeURIComponent(mode);
+    const r=await fetch(endpoint,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'}});
+    const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||('Servidor respondeu '+r.status));
+    await loadOnlyOfficeApi(base);
+    ooSession={key:data.sessionKey,pubId:p.id,p,base,mode,saved:false};
+    $('#onlyOfficeEditor').innerHTML='';
+    const cfg=data.config||{};cfg.height='100%';cfg.width='100%';cfg.events={
+      onDocumentReady:()=>setOoStatus('Documento pronto. Faça as correções e depois clique em “Salvar nova versão no Carbonautas”.'),
+      onError:e=>{console.error('ONLYOFFICE',e);setOoStatus('O editor informou um erro. Veja o console ou tente reabrir.')},
+      onWarning:e=>console.warn('ONLYOFFICE warning',e)
+    };
+    ooEditorInstance=new window.DocsAPI.DocEditor('onlyOfficeEditor',cfg);
+  }catch(e){console.error(e);setOoStatus(e.message||'Falha ao abrir o editor.');toast(e.message||'Não foi possível abrir o editor online.')}
+}
+async function blobToDataUrl(blob){return new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=()=>reject(fr.error||new Error('Falha ao ler arquivo.'));fr.readAsDataURL(blob)})}
+async function waitOnlineSaved(base,key,token){
+  for(let i=0;i<30;i++){
+    await new Promise(r=>setTimeout(r,i?1000:500));
+    const s=await fetch(base+'/carbonautas-api/api/session/'+encodeURIComponent(key)+'/status',{headers:{Authorization:'Bearer '+token}});
+    if(s.ok){const j=await s.json();if(j.ready)return j;if(j.error)throw new Error(j.error)}
+  }
+  throw new Error('O editor ainda não terminou de montar o arquivo. Tente salvar novamente em alguns segundos.');
+}
+async function saveOnlineCorrection(){
+  if(!ooSession||ooSession.saved)return;const btn=$('#ooSaveBtn');const p=state.publicacoes.find(x=>x.id===ooSession.pubId)||ooSession.p;
+  try{
+    btn.disabled=true;setOoStatus('Salvando o estado atual do Word…');toast('Salvando correção online…');
+    const token=await window.auth.currentUser.getIdToken();
+    const force=await fetch(ooSession.base+'/carbonautas-api/api/session/'+encodeURIComponent(ooSession.key)+'/force-save',{method:'POST',headers:{Authorization:'Bearer '+token}});
+    const fj=await force.json().catch(()=>({}));if(!force.ok)throw new Error(fj.error||'Não foi possível forçar o salvamento.');
+    setOoStatus('Gerando o DOCX corrigido…');await waitOnlineSaved(ooSession.base,ooSession.key,token);
+    const fr=await fetch(ooSession.base+'/carbonautas-api/api/session/'+encodeURIComponent(ooSession.key)+'/file',{headers:{Authorization:'Bearer '+token}});
+    if(!fr.ok){const t=await fr.text();throw new Error(t||'Arquivo corrigido indisponível.')}
+    const blob=await fr.blob(),dataUrl=await blobToDataUrl(blob);
+    const nextVersion=reviewNextVersion(p),baseName=(p.fileName||p.titulo||'documento').replace(/\.docx$/i,'');
+    const fileName=`${baseName}_v${nextVersion}.docx`;
+    const {url}=await fbUploadFile('onlyoffice_'+p.memberId,dataUrl,fileName);
+    const f=FB(),ref=f.doc(f.collection(window.db,'rede_publicacoes')),actor=currentActor(),uid=window.auth.currentUser?.uid||'';
+    const reviewerId=p.reviewReviewerId,returnToId=p.reviewReturnToId,actingAsReviewer=(myId===reviewerId);
+    const nextRecipientId=actingAsReviewer?returnToId:reviewerId;
+    const status=actingAsReviewer?'correcao_devolvida':'nova_versao';
+    const baseTitle=p.reviewBaseTitle||p.titulo||'Documento';
+    await f.setDoc(ref,{memberId:p.memberId,ownerUid:uid,createdByUid:uid,memberNome:p.memberNome||memberById(p.memberId)?.nome||'',categoria:p.categoria||'outro',categoriaOutro:p.categoriaOutro||'',titulo:baseTitle,tipo:'arquivo',url,fileName,reviewFlow:true,reviewThreadId:p.reviewThreadId||p.id,reviewVersion:nextVersion,reviewStatus:status,reviewReviewerId:reviewerId,reviewReturnToId:returnToId,reviewNextRecipientId:nextRecipientId,reviewParentId:p.id,reviewSenderId:actor?.id||myId||'',reviewSenderName:actor?.name||'',reviewBaseTitle:baseTitle,reviewNote:actingAsReviewer?'Correção realizada online com controle de alterações.':'Nova versão revisada online.',editedOnline:true,ts:f.serverTimestamp()});
+    await createRepoNotification(nextRecipientId,{sourceId:ref.id,ownerId:p.memberId,title:actingAsReviewer?'✅ Correção online devolvida':'⬆️ Nova versão para revisar',message:`${baseTitle} · versão ${nextVersion} · editada no ONLYOFFICE`});
+    ooSession.saved=true;setOoStatus('Nova versão salva no Carbonautas e destinatário notificado.');toast('Nova versão salva e notificação enviada.');
+    setTimeout(()=>{destroyOnlyOffice();closeOverlay('onlyOfficeOverlay')},800);
+  }catch(e){console.error(e);setOoStatus(e.message||'Erro ao salvar.');toast(e.message||'Erro ao salvar a correção online.');}
+  finally{btn.disabled=false}
+}
+
+
+$('#ooSaveConfigBtn')?.addEventListener('click',async()=>{const v=($('#ooServerUrl')?.value||'').trim().replace(/\/+$/,'');if(!/^https:\/\//i.test(v)){toast('Informe um endereço HTTPS válido.');return}localStorage.setItem(OO_SERVER_KEY,v);closeOverlay('onlyOfficeSetupOverlay');toast('Servidor do editor salvo.');const id=ooPendingPubId;ooPendingPubId='';if(id)setTimeout(()=>openOnlineCorrection(id),150)});
+$('#ooConfigBtn')?.addEventListener('click',openOnlyOfficeSetup);
+$('#ooSaveBtn')?.addEventListener('click',saveOnlineCorrection);
+$('#ooCloseBtn')?.addEventListener('click',()=>{if(confirm('Fechar o editor? Alterações que ainda não foram salvas no Carbonautas podem ser perdidas.')){destroyOnlyOffice();closeOverlay('onlyOfficeOverlay')}});
+window.openOnlineCorrection=openOnlineCorrection;window.openOnlyOfficeSetup=openOnlyOfficeSetup;
+
+async function downloadRepoFile(url,name='arquivo'){
+  try{toast('Preparando download…');const r=await fetch(url);if(!r.ok)throw new Error('HTTP '+r.status);const b=await r.blob(),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name||'arquivo';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}catch(e){console.warn('Download direto falhou',e);window.open(url,'_blank','noopener');toast('Abri o arquivo em nova guia para baixar.')}
+}
+function openReviewResponse(id){const p=state.publicacoes.find(x=>x.id===id);if(!p||!p.reviewFlow)return;openPubModal(p.memberId,{...p,id})}
+async function createRepoNotification(recipientId,meta={}){
+  if(!recipientId||recipientId===myId)return;const me=currentActor(),f=FB();
+  try{await f.addDoc(f.collection(window.db,'rede_notifications'),{recipientId,senderId:me?.id||myId||'',senderUid:window.auth.currentUser?.uid||'',senderName:me?.name||'Carbonauta',kind:'correcao',title:meta.title||'✍️ Arquivo para correção',message:(meta.message||'').slice(0,240),sourceType:'repositorio_correcao',sourceId:meta.sourceId||'',ownerId:meta.ownerId||'',read:false,ts:f.serverTimestamp()})}catch(e){console.warn('Não foi possível criar a notificação de correção',e)}
+}
+async function openPubModal(presetMemberId=null,reviewContext=null){
   try{
     if(!window.auth?.currentUser){
       toast('Entre na plataforma para adicionar documentos.');
@@ -3631,18 +3824,31 @@ async function openPubModal(presetMemberId=null){
       sel.value=resolved.id;
     }
 
-    $('#pubCategoriaSel').value='artigo';
-    $('#pubOutroRow').style.display='none';
-    $('#pubOutroTxt').value='';
-    $('#pubTitulo').value='';
+    pubReviewContext=reviewContext||null;
+    if(reviewContext)$('#pubAutorRow').style.display='none';
+    $('#pubCategoriaSel').value=reviewContext?.categoria||'artigo';
+    $('#pubOutroRow').style.display=reviewContext?.categoria==='outro'?'block':'none';
+    $('#pubOutroTxt').value=reviewContext?.categoriaOutro||'';
+    $('#pubTitulo').value=reviewContext?.reviewBaseTitle||reviewContext?.titulo||'';
     $('#pubUrl').value='';
-    pubTipo='link'; pubFileData=''; pubFileName='';
-    $$('input[name="pubTipo"]').forEach(r=>r.checked=r.value==='link');
-    $('#pubUrl').style.display='block';
-    $('#pubFileArea').style.display='none';
+    $('#pubFinalidade').value=reviewContext?'correcao':'guardar';
+    $('#pubFinalidadeRow').style.display=reviewContext?'none':'block';
+    $('#pubReviewerRow').style.display=reviewContext?'none':'block';
+    $('#pubReviewNote').value='';
+    $('#pubReviewNoteLabel').textContent=reviewContext?(myId===reviewContext.reviewReviewerId?'Resposta / observações da correção':'O que mudou nesta nova versão?'):'Orientação para a correção (opcional)';
+    $('#pubReviewNote').placeholder=reviewContext?(myId===reviewContext.reviewReviewerId?'Ex.: corrigi comentários no texto e deixei observações na versão devolvida.':'Ex.: incorporei as correções e ajustei a discussão.'):'Ex.: revisar introdução, conferir referências e devolver com comentários.';
+    $('#pubReviewInfo').innerHTML=reviewContext?`<b>✍️ ${myId===reviewContext.reviewReviewerId?'Devolver correção':'Enviar nova versão'}</b><div class="hint">Versão ${reviewNextVersion(reviewContext)} do fluxo. O arquivo anterior continuará disponível.</div>`:'<b>✍️ Fluxo de correção</b><div class="hint">O arquivo original fica preservado. A pessoa escolhida recebe uma notificação e poderá devolver uma nova versão.</div>';
+    populatePubReviewer(reviewContext?.reviewReviewerId||'');
+    pubTipo=reviewContext?'arquivo':'link'; pubFileData=''; pubFileName='';
+    $$('input[name="pubTipo"]').forEach(r=>{r.checked=r.value===pubTipo;r.disabled=!!reviewContext});
+    $('#pubUrl').style.display=pubTipo==='link'?'block':'none';
+    $('#pubFileArea').style.display=pubTipo==='arquivo'?'block':'none';
     $('#pubFileName').textContent='Nenhum arquivo escolhido. Máximo 15 MB.';
+    $('#pubModalTitle').textContent=reviewContext?(myId===reviewContext.reviewReviewerId?'Devolver arquivo corrigido':'Enviar nova versão'):'Adicionar documento ao repositório';
+    $('#savePubBtn').textContent=reviewContext?(myId===reviewContext.reviewReviewerId?'Devolver correção':'Enviar nova versão'):'Salvar';
+    syncPubFinalidade();
     openOverlay('pubOverlay');
-    setTimeout(()=>$('#pubTitulo')?.focus(),50);
+    setTimeout(()=>reviewContext?$('#pubFilePick')?.focus():$('#pubTitulo')?.focus(),50);
   }catch(e){
     console.error('Erro ao abrir o repositório',e);
     toast('Não consegui abrir o formulário do repositório. Recarregue a página e tente novamente.');
@@ -3657,18 +3863,22 @@ function handlePubFile(file){
 }
 async function savePublicacao(){
   const resolved=resolveCurrentMember();
-  const autorId = isAdmin? $('#pubAutor').value : (resolved?.id||myId);
+  const autorId = pubReviewContext?.memberId || (isAdmin? $('#pubAutor').value : (resolved?.id||myId));
   const categoria=$('#pubCategoriaSel').value;
   const categoriaOutro=$('#pubOutroTxt').value.trim();
   const titulo=$('#pubTitulo').value.trim();
+  const finalidade=pubReviewContext?'correcao':$('#pubFinalidade').value;
+  const reviewNote=$('#pubReviewNote').value.trim();
   if(!autorId){toast('Selecione o autor.');return}
   if(!titulo){toast('Escreva o título.');return}
   if(categoria==='outro' && !categoriaOutro){toast('Especifique a categoria.');return}
+  if(finalidade==='correcao'&&!pubReviewContext&&!$('#pubReviewer').value){toast('Selecione quem deve receber o arquivo para correção.');return}
+  if(finalidade==='correcao')pubTipo='arquivo';
 
   let url='', tipoFinal=pubTipo;
   try{
     if(pubTipo==='arquivo'){
-      if(!pubFileData){toast('Escolha um arquivo.');return}
+      if(!pubFileData){toast('Escolha o arquivo que será enviado.');return}
       toast('Enviando arquivo…');
       const {url:u}=await fbUploadFile('pub_'+autorId,pubFileData,pubFileName);
       url=u;
@@ -3676,15 +3886,32 @@ async function savePublicacao(){
       url=$('#pubUrl').value.trim();
       if(!url){toast('Cole o link.');return}
     }
-    const m=memberById(autorId);
-    await FB().addDoc(FB().collection(window.db,'rede_publicacoes'),{
-      memberId:autorId, ownerUid:(autorId===myId ? (window.auth.currentUser?.uid||'') : ((state.users||[]).find(u=>u.memberId===autorId)?.uid||'')), createdByUid:(window.auth.currentUser?.uid||''), memberNome: m?m.nome:'', categoria, categoriaOutro, titulo, tipo:tipoFinal, url, fileName:pubTipo==='arquivo'?pubFileName:'',
-      ts: FB().serverTimestamp()
-    });
-    closeOverlay('pubOverlay'); toast('Publicação adicionada.');
+    const m=memberById(autorId),actor=currentActor(),uid=window.auth.currentUser?.uid||'';
+    if(finalidade==='correcao'){
+      const f=FB(),ref=f.doc(f.collection(window.db,'rede_publicacoes'));
+      let reviewThreadId=ref.id,reviewVersion=1,reviewReviewerId=$('#pubReviewer').value,reviewReturnToId=actor?.id||myId||'',reviewNextRecipientId=reviewReviewerId,reviewStatus='aguardando_correcao',baseTitle=titulo,parentId='';
+      if(pubReviewContext){
+        reviewThreadId=pubReviewContext.reviewThreadId||pubReviewContext.id;
+        reviewVersion=reviewNextVersion(pubReviewContext);
+        reviewReviewerId=pubReviewContext.reviewReviewerId;
+        reviewReturnToId=pubReviewContext.reviewReturnToId;
+        parentId=pubReviewContext.id;
+        const actingAsReviewer=(myId===reviewReviewerId);
+        reviewNextRecipientId=actingAsReviewer?reviewReturnToId:reviewReviewerId;
+        reviewStatus=actingAsReviewer?'correcao_devolvida':'nova_versao';
+        baseTitle=pubReviewContext.reviewBaseTitle||pubReviewContext.titulo||titulo;
+      }
+      await f.setDoc(ref,{memberId:autorId,ownerUid:uid,createdByUid:uid,memberNome:m?m.nome:'',categoria,categoriaOutro,titulo:baseTitle,tipo:'arquivo',url,fileName:pubFileName,reviewFlow:true,reviewThreadId,reviewVersion,reviewStatus,reviewReviewerId,reviewReturnToId,reviewNextRecipientId,reviewParentId:parentId,reviewSenderId:actor?.id||myId||'',reviewSenderName:actor?.name||'',reviewBaseTitle:baseTitle,reviewNote,ts:f.serverTimestamp()});
+      const next=memberById(reviewNextRecipientId);
+      await createRepoNotification(reviewNextRecipientId,{sourceId:ref.id,ownerId:autorId,title:reviewVersion===1?'✍️ Arquivo para correção':(reviewStatus==='correcao_devolvida'?'✅ Correção devolvida':'⬆️ Nova versão para revisar'),message:`${baseTitle} · versão ${reviewVersion}${reviewNote?' · '+reviewNote:''}${next?' · agora com '+next.nome:''}`});
+      closeOverlay('pubOverlay');pubReviewContext=null;toast(reviewVersion===1?'Arquivo enviado para correção e destinatário notificado.':reviewStatus==='correcao_devolvida'?'Correção devolvida e autor notificado.':'Nova versão enviada e revisor notificado.');
+    }else{
+      await FB().addDoc(FB().collection(window.db,'rede_publicacoes'),{memberId:autorId,ownerUid:(autorId===myId ? uid : ((state.users||[]).find(u=>u.memberId===autorId)?.uid||'')),createdByUid:uid,memberNome:m?m.nome:'',categoria,categoriaOutro,titulo,tipo:tipoFinal,url,fileName:pubTipo==='arquivo'?pubFileName:'',ts:FB().serverTimestamp()});
+      closeOverlay('pubOverlay');toast('Publicação adicionada.');
+    }
   }catch(e){
     console.error('Erro ao salvar publicação',e);
-    if(e?.code==='permission-denied') toast('O Firestore bloqueou o repositório. Ajuste a regra rede_publicacoes.');
+    if(e?.code==='permission-denied') toast('O Firestore bloqueou o repositório. Verifique a regra rede_publicacoes.');
     else if(String(e?.code||'').includes('storage')) toast('O Storage bloqueou o envio do arquivo.');
     else toast(e?.message||'Erro ao salvar a publicação.');
   }
@@ -3851,7 +4078,7 @@ function dossierHTML(m){const {acts,repo,cron,checkins,products}=dossierRowsFor(
 function refreshDossierPerson(){const sel=$('#dossierPerson'),cur=sel.value;const list=(isAdmin?state.members:state.members.filter(m=>m.id===myId)).sort((a,b)=>a.nome.localeCompare(b.nome));sel.innerHTML=list.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');sel.value=list.some(m=>m.id===cur)?cur:(myId&&list.some(m=>m.id===myId)?myId:list[0]?.id||'')}
 function renderDossier(){const m=memberById($('#dossierPerson')?.value);if(!m)return;$('#dossierContent').innerHTML=dossierHTML(m)}
 function openDossier(memberId=''){refreshDossierPerson();if(memberId&&[...$('#dossierPerson').options].some(o=>o.value===memberId))$('#dossierPerson').value=memberId;renderDossier();openOverlay('dossierOverlay')}
-function dossierWorkbook(memberId){const m=memberById(memberId),{acts,repo,cron,checkins,products}=dossierRowsFor(m);const wb=XLSX.utils.book_new();const profile=[{Nome:m.nome,Nivel:NIVEIS[m.nivel]?.label||m.nivel,Programa:m.programa||'',Status:m.status||'',Bolsista:m.bolsista?'Sim':'Não','Pergunta científica':m.perguntaCientifica||'','Objetivo central':m.objetivoProjeto||'','Grupo atendido':m.grupoAtendido||'','Ideia de visibilidade':m.ideiaVisibilidade||'',Outros:m.projetoOutros||''}];XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(profile),'Perfil');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(acts.map(a=>({Tipo:ACTIVITY_TYPES[a.type]||a.type,Titulo:a.title||'',Status:ACTIVITY_STATUS[a.status]||a.status,Inicio:a.startDate||'',Prazo:a.dueDate||'',Descricao:a.description||''}))), 'Acompanhamento');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(products.map(a=>({Produto:a.title||'',Tipo:PRODUCT_TYPES[a.productType]||a.productType,Status:ACTIVITY_STATUS[a.status]||a.status,Prazo:a.dueDate||'',Observacoes:a.description||''}))), 'Produtos');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(checkins.map(a=>({Mes:a.checkinMonth||'',Fez:a.checkinDid||'',Entregou:a.checkinDelivered||'',Dificuldade:a.checkinDifficulty||'',Proximo:a.checkinNext||''}))), 'Checkins');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(repo.map(r=>({Titulo:r.title||'',Tipo:r.kind||'',Arquivo:r.fileName||'',URL:r.url||''}))), 'Repositorio');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(cron.map(c=>({Titulo:c.titulo||'',Data:c.data||'',Concluido:c.feito?'Sim':'Não'}))), 'Prazos');return wb}
+function dossierWorkbook(memberId){const m=memberById(memberId),{acts,repo,cron,checkins,products}=dossierRowsFor(m);const wb=XLSX.utils.book_new();const profile=[{Nome:m.nome,Nivel:NIVEIS[m.nivel]?.label||m.nivel,Programa:m.programa||'',Status:m.status||'',Bolsista:m.bolsista?'Sim':'Não','Pergunta científica':m.perguntaCientifica||'','Objetivo central':m.objetivoProjeto||'','Grupo atendido':m.grupoAtendido||'','Ideia de visibilidade':m.ideiaVisibilidade||'',Outros:m.projetoOutros||''}];XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(profile),'Perfil');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(acts.map(a=>({Tipo:ACTIVITY_TYPES[a.type]||a.type,Titulo:a.title||'',Status:ACTIVITY_STATUS[a.status]||a.status,Inicio:a.startDate||'',Prazo:a.dueDate||'',Descricao:a.description||''}))), 'Acompanhamento');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(products.map(a=>({Produto:a.title||'',Tipo:PRODUCT_TYPES[a.productType]||a.productType,Status:ACTIVITY_STATUS[a.status]||a.status,Prazo:a.dueDate||'',Observacoes:a.description||''}))), 'Produtos');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(checkins.map(a=>({Mes:a.checkinMonth||'',Fez:a.checkinDid||'',Entregou:a.checkinDelivered||'',Dificuldade:a.checkinDifficulty||'',Proximo:a.checkinNext||''}))), 'Checkins');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(repo.map(r=>({Titulo:r.title||'',Tipo:r.kind||'',Arquivo:r.fileName||'',URL:r.url||'',Correcao:r.reviewFlow?'Sim':'Não',Versao:r.reviewVersion||'',Status:r.reviewStatus||''}))), 'Repositorio');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(cron.map(c=>({Titulo:c.titulo||'',Data:c.data||'',Concluido:c.feito?'Sim':'Não'}))), 'Prazos');return wb}
 function exportDossierExcel(){const id=$('#dossierPerson').value,m=memberById(id);if(!m||!window.XLSX)return;XLSX.writeFile(dossierWorkbook(id),`Dossie_${slugify(m.nome)}.xlsx`)}
 function exportDossierCsv(){const id=$('#dossierPerson').value,m=memberById(id);if(!m)return;const {acts}=dossierRowsFor(m),rows=[['Nome','Tipo','Título','Status','Início','Prazo','Descrição'],...acts.map(a=>[m.nome,ACTIVITY_TYPES[a.type]||a.type,a.title||'',ACTIVITY_STATUS[a.status]||a.status,a.startDate||'',a.dueDate||'',a.description||''])];const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n');const b=new Blob([csv],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.csv`;a.click();URL.revokeObjectURL(u)}
 function exportDossierWord(){const m=memberById($('#dossierPerson').value);if(!m)return;const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Dossiê · ${esc(m.nome)}</title><style>body{font-family:Arial,sans-serif;margin:32px;color:#152b38}h1,h2,h3{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:11pt}td,th{border:1px solid #ddd;padding:7px;text-align:left}.dossier-question{padding:14px;background:#f2efff;border:1px solid #d7cdfa}</style></head><body><h1>Dossiê do Carbonauta</h1>${dossierHTML(m)}</body></html>`;const blob=new Blob(['\ufeff',html],{type:'application/msword'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.doc`;a.click();URL.revokeObjectURL(u)}
@@ -3958,7 +4185,7 @@ async function dedupeMembers(){
 
 /* ============ NOTIFICAÇÕES ============ */
 function notifMillis(n){return n?.ts?.toMillis?n.ts.toMillis():+new Date(n?.ts||0)}
-function notificationIcon(kind='atualizacao'){return ({ajuda_campo:'🌿',ajuda_lab:'🧪',ajuda_dados:'📊',ajuda_outro:'🆘',alerta:'⚠️',ideia:'💡',resenha:'😂',recado:'✈️',atualizacao:'📌',resultado:'✅',evento:'📅',acompanhamento:'📌',correcao:'✍️',pendencia:'⚠️'})[kind]||'🔔'}
+function notificationIcon(kind='atualizacao'){return ({ajuda_campo:'🌿',ajuda_lab:'🧪',ajuda_dados:'📊',ajuda_outro:'🆘',alerta:'⚠️',ideia:'💡',resenha:'😂',recado:'✈️',atualizacao:'📌',resultado:'✅',evento:'📅',acompanhamento:'📌',correcao:'✍️',pendencia:'⚠️',repositorio_correcao:'✍️'})[kind]||'🔔'}
 function renderNotificationUI(){
   const unread=state.notifications.filter(n=>!n.read).length,b=$('#notifyBadge');
   if(b){b.textContent=unread>99?'99+':unread;b.style.display=unread?'grid':'none'}
@@ -3971,7 +4198,7 @@ async function openNotification(id){
   const n=state.notifications.find(x=>x.id===id);if(!n)return;
   try{await FB().updateDoc(FB().doc(window.db,'rede_notifications',id),{read:true,readAt:FB().serverTimestamp()})}catch(e){console.warn(e)}
   closeOverlay('notifyOverlay');
-  if(n.sourceType==='acompanhamento'){switchView('track');setTimeout(()=>{if(n.ownerId&&$('#trackOwner')){$('#trackOwner').value=n.ownerId;renderTrack()}},40)} else switchView('mural');
+  if(n.sourceType==='acompanhamento'){switchView('track');setTimeout(()=>{if(n.ownerId&&$('#trackOwner')){$('#trackOwner').value=n.ownerId;renderTrack()}},40)} else if(n.sourceType==='repositorio_correcao'){switchView('pubs');setTimeout(()=>{if(n.ownerId&&$('#pubPessoa')){$('#pubPessoa').value=n.ownerId;renderPubs()}},50)} else switchView('mural');
 }
 async function markAllNotificationsRead(){
   const unread=state.notifications.filter(n=>!n.read);if(!unread.length){toast('Não há notificações novas.');return}
@@ -3989,7 +4216,7 @@ function updateNotificationPermissionHint(){
 function showDeviceNotification(n){
   if(!('Notification' in window)||Notification.permission!=='granted')return;
   if(document.visibilityState==='visible'&&currentView==='mural')return;
-  try{const note=new Notification(n.title||'Carbonautas',{body:n.message||'Nova mensagem no Mural',icon:'./icons/icon-192.png',badge:'./icons/icon-192.png',tag:'carbonautas-'+(n.sourceId||n.id)});note.onclick=()=>{window.focus();switchView('mural');note.close()}}catch(e){console.warn('Notificação nativa falhou',e)}
+  try{const note=new Notification(n.title||'Carbonautas',{body:n.message||'Nova notificação',icon:'./icons/icon-192.png',badge:'./icons/icon-192.png',tag:'carbonautas-'+(n.sourceId||n.id)});note.onclick=()=>{window.focus();if(n.sourceType==='repositorio_correcao')switchView('pubs');else if(n.sourceType==='acompanhamento')switchView('track');else switchView('mural');note.close()}}catch(e){console.warn('Notificação nativa falhou',e)}
 }
 async function createMuralNotifications(dest,meta={}){
   const me=currentActor();if(!me?.id)return;
@@ -4262,6 +4489,8 @@ $$('input[name="pubTipo"]').forEach(r=>r.onchange=e=>{
 $('#pubFilePick').onclick=()=>$('#pubFile').click();
 $('#pubFile').onchange=e=>handlePubFile(e.target.files[0]);
 $('#savePubBtn').onclick=savePublicacao;
+if($('#pubFinalidade'))$('#pubFinalidade').onchange=syncPubFinalidade;
+$$('[data-close="pubOverlay"]').forEach(b=>b.addEventListener('click',()=>{pubReviewContext=null;$$('input[name="pubTipo"]').forEach(r=>r.disabled=false)}));
 $('#repoAddBtn').onclick=async()=>{const id=repoMemberId;if(!(isAdmin||isMe(id))){toast('Sem permissão para adicionar documentos para esta pessoa.');return}closeOverlay('repoOverlay');await openPubModal(id)};
 
 $$('[data-close]').forEach(b=>b.onclick=()=>closeOverlay(b.dataset.close));
