@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carbonautas · Science OS · P5</title>
+<title>Carbonautas · Science OS · P6</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P5">
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P5">
-<link rel="apple-touch-icon" href="./icon-192.png?v=P5">
+<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P6">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P6">
+<link rel="apple-touch-icon" href="./icon-192.png?v=P6">
 <meta name="theme-color" content="#08152B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -960,6 +960,65 @@
     .lab-fab-global{display:flex;position:fixed;z-index:78;right:14px;bottom:78px;align-items:center;gap:7px;border:0;border-radius:999px;padding:11px 14px;background:linear-gradient(135deg,#00b8d9,#58d6c7);color:#06202a;font-weight:950;font-size:11px;box-shadow:0 14px 30px rgba(0,94,124,.30);cursor:pointer}.lab-fab-global span:first-child{font-size:19px}.lab-fab-global:active{transform:scale(.97)}
   }
 
+
+  /* ===== PREDATOR P6 · LAB MOBILE + WORKBOOK BROWSER ===== */
+  #viewLab,.lab-scroll,.lab-wrap,.lab-grid,.lab-panel,.lab-data-list,.lab-run-list,.lab-data-card,.lab-run-card,.lab-data-main{min-width:0;max-width:100%}
+  #viewLab{overflow:hidden}.lab-scroll{overflow-x:hidden}.lab-wrap{overflow-x:hidden}
+  .lab-data-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  .lab-data-actions .btn{min-height:34px;padding:7px 10px;white-space:nowrap}
+  .lab-delete-btn{border-color:#f1b3bb!important;color:#a82c3b!important;background:#fff7f8!important}
+  .lab-sheetbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0;padding:10px;border:1px solid #d7e5eb;border-radius:14px;background:#f8fbfc}
+  .lab-sheetbar label{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:#607985}
+  .lab-sheetbar select{max-width:340px;min-width:180px}
+  .lab-preview-mini{margin:10px 0;border:1px solid #dce7ed;border-radius:14px;overflow:hidden;background:#fff}
+  .lab-preview-mini .head{display:flex;gap:8px;align-items:center;padding:9px 11px;background:#f4f8fa;border-bottom:1px solid #e1e9ed;font-size:11px;color:#536d79}
+  .lab-preview-tablewrap{overflow:auto;max-width:100%;max-height:260px;-webkit-overflow-scrolling:touch}
+  .lab-preview-table{border-collapse:collapse;width:max-content;min-width:100%;font-size:10.5px;background:white}
+  .lab-preview-table th,.lab-preview-table td{padding:7px 8px;border-right:1px solid #edf2f4;border-bottom:1px solid #edf2f4;white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis}
+  .lab-preview-table th{position:sticky;top:0;background:#eef5f7;z-index:1;color:#31505d;font-weight:900}
+  .lab-browser-modal{max-width:1180px;width:min(96vw,1180px);height:min(92dvh,900px);display:flex;flex-direction:column;overflow:hidden}
+  .lab-browser-modal .modal-b{padding:12px;flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+  .lab-browser-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:9px}
+  .lab-browser-table{flex:1;min-height:0;overflow:auto;border:1px solid #dce7ed;border-radius:14px;background:#fff;-webkit-overflow-scrolling:touch}
+  .lab-browser-table table{border-collapse:collapse;width:max-content;min-width:100%;font-size:11px}
+  .lab-browser-table th,.lab-browser-table td{padding:7px 8px;border-right:1px solid #edf2f4;border-bottom:1px solid #edf2f4;white-space:nowrap;max-width:360px;overflow:hidden;text-overflow:ellipsis}
+  .lab-browser-table th{position:sticky;top:0;background:#eaf3f6;color:#274855;z-index:2}
+  .lab-sheet-cardline{font-size:10.5px;color:#667d87;margin-top:2px}
+  @media(max-width:700px){
+    body{overflow-x:hidden}
+    .lab-wrap{padding-left:10px!important;padding-right:10px!important}
+    .lab-hero{padding:14px!important;border-radius:17px!important;display:block!important}
+    .lab-hero-actions{margin-top:10px!important;display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important}
+    .lab-hero-actions .btn{width:100%!important;justify-content:center!important}
+    .lab-pipeline{grid-template-columns:1fr!important;gap:8px!important}
+    .lab-grid{grid-template-columns:1fr!important;gap:10px!important}
+    .lab-panel{padding:11px!important;border-radius:17px!important}
+    .lab-panel-head{align-items:flex-start!important;flex-wrap:wrap!important}
+    .lab-data-card,.lab-run-card{display:grid!important;grid-template-columns:42px minmax(0,1fr)!important;align-items:start!important;padding:10px!important;gap:9px!important}
+    .lab-data-actions{grid-column:1/-1!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%!important}
+    .lab-data-actions .btn{width:100%!important;justify-content:center!important;padding:8px 6px!important}
+    .lab-method-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+    .lab-method{min-width:0!important;padding:9px!important;min-height:84px!important}
+    .lab-method b{font-size:12px!important;overflow-wrap:anywhere}
+    .lab-method small{font-size:10px!important}
+    .lab-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    #labAnalyzeOverlay{padding:0!important;align-items:stretch!important;overflow:hidden!important}
+    #labAnalyzeOverlay .modal{width:100vw!important;max-width:none!important;height:100dvh!important;border-radius:0!important;margin:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+    #labAnalyzeOverlay .modal-h{padding:10px 12px!important;flex:0 0 auto}
+    #labAnalyzeOverlay .modal-b{padding:10px 12px!important;flex:1!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important}
+    #labAnalyzeOverlay .modal-f{padding:8px 10px!important;position:sticky!important;bottom:0!important;background:#fff!important;z-index:8!important;flex:0 0 auto}
+    #labAnalyzeOverlay .grid2{grid-template-columns:1fr!important}
+    .lab-sheetbar{display:grid!important;grid-template-columns:1fr!important;padding:8px!important}
+    .lab-sheetbar select{max-width:none!important;width:100%!important;min-width:0!important}
+    .lab-browser-modal{width:100vw!important;height:100dvh!important;border-radius:0!important}
+    .lab-browser-modal .modal-h{padding:10px!important}.lab-browser-modal .modal-b{padding:8px!important}
+    .lab-browser-toolbar{display:grid!important;grid-template-columns:1fr 1fr!important}
+    .lab-browser-toolbar select{grid-column:1/-1!important;width:100%!important}
+    .lab-browser-toolbar .btn{width:100%!important;justify-content:center!important;padding:8px 6px!important}
+    .lab-result-grid,.lab-figure-grid{grid-template-columns:1fr!important}
+    .lab-ai-card{overflow:hidden!important}
+  }
+
 </style>
 </head>
 <body data-view="painel">
@@ -967,7 +1026,7 @@
 <div class="auth-gate" id="authGate">
   <div class="auth-card">
     <div class="auth-brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P5" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P6" alt="Carbonautas · carbono em ligação"></div>
       <div><h2>Carbonautas</h2><p>Acompanhamento · projetos · rede</p></div>
     </div>
     <div class="auth-login" id="authLoginPane">
@@ -1003,7 +1062,7 @@
 </div>
 
 <div class="loading" id="loading">
-  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P5" alt="Carbonautas · carbono em ligação"></div>
+  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P6" alt="Carbonautas · carbono em ligação"></div>
   <p id="loadingMsg">Conectando à rede…</p>
 </div>
 
@@ -1015,7 +1074,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
     </button>
     <div class="brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P5" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P6" alt="Carbonautas · carbono em ligação"></div>
       <div>
         <h1>Carbonautas</h1>
         <div class="sub">LIPAN · LEFA · CELBE</div>
@@ -1522,6 +1581,8 @@
     <div class="modal-b">
       <div class="lab-source-banner" id="labAnalyzeSource"><span style="font-size:24px">📊</span><div><b>Carregando base…</b><div class="lab-muted">Aguarde a auditoria inicial.</div></div></div>
       <div id="labInspectKpis" class="lab-kpis"></div>
+      <div id="labWorkbookToolbar"></div>
+      <div id="labQuickPreview"></div>
       <div class="grid2" style="margin:9px 0 12px">
         <div class="fg"><label>Vínculo científico</label><select id="labAnalyzeContextType"><option value="project">Projeto / capítulo de aluno</option><option value="article">Artigo científico</option><option value="product">Produto técnico/científico</option><option value="independent">Pesquisa independente</option><option value="exploratory">Análise exploratória</option></select></div>
         <div class="fg" id="labAnalyzeMemberWrap"><label>Aluno / responsável</label><select id="labAnalyzeMember"></select></div>
@@ -1534,6 +1595,22 @@
       <div id="labAnalysisAdvice" class="notice" style="margin-top:10px;display:none"></div>
     </div>
     <div class="modal-f"><button class="btn" data-close="labAnalyzeOverlay">Cancelar</button><button class="btn primary" id="labRunBtn" type="button">▶ Executar análise</button></div>
+  </div>
+</div>
+
+<!-- LAB · VISUALIZAR DADOS / ABAS -->
+<div class="overlay" id="labDataOverlay">
+  <div class="modal lab-browser-modal">
+    <div class="modal-h"><h2 id="labDataTitle">📊 Dados da base</h2><div class="spacer"></div><button class="btn ghost" data-close="labDataOverlay">Fechar</button></div>
+    <div class="modal-b">
+      <div class="lab-browser-toolbar">
+        <select id="labDataSheet"></select>
+        <button class="btn" id="labDataExcelBtn" type="button">✏️ Abrir no Excel</button>
+        <button class="btn primary" id="labDataAnalyzeBtn" type="button">🧪 Analisar esta aba</button>
+      </div>
+      <div id="labDataSummary" class="lab-muted" style="margin:0 2px 8px"></div>
+      <div class="lab-browser-table" id="labDataTable"></div>
+    </div>
   </div>
 </div>
 
@@ -4604,7 +4681,7 @@ async function openWhats(){
 }
 
 
-/* ============ LABORATÓRIO DE DADOS ============ */
+/* ============ LABORATÓRIO DE DADOS · PREDATOR P6 ============ */
 const LAB_API_BASE=()=>onlyOfficeBase()+'/carbonautas-api';
 const LAB_METHODS={
   diagnostic:{icon:'🔎',label:'Diagnóstico automático',sub:'Qualidade, ausências e estrutura'},
@@ -4620,112 +4697,57 @@ const LAB_METHODS={
   mixed:{icon:'🧬',label:'Modelo misto',sub:'Intercepto aleatório'},
   cluster:{icon:'🫧',label:'Cluster',sub:'K-means + silhouette'}
 };
-let labDatasetFileData='',labDatasetFileName='',labCurrentPubId='',labInspectCache={},labSelectedMethod='diagnostic',labCurrentRunId='',labObjectUrls=[];
+let labDatasetFileData='',labDatasetFileName='',labCurrentPubId='',labInspectCache={},labActiveInspect=null,labActiveWorkbook=null,labCurrentSheet='',labSelectedMethod='diagnostic',labCurrentRunId='',labObjectUrls=[],labDataPubId='';
 function isLabDataFile(p){if(!p||p.tipo!=='arquivo')return false;const ext=inferFileExt(p.url||'',p.fileName||p.titulo||'');return ['csv','xlsx','xls'].includes(ext)}
 function labRepoButton(p){return isLabDataFile(p)?`<button type="button" class="btn" onclick="openLabAnalyze('${p.id}')" title="Analisar no Laboratório" style="padding:6px 9px">🧪</button>`:''}
 function labDatasets(){return state.publicacoes.filter(isLabDataFile)}
 function labRuns(){return state.publicacoes.filter(p=>p.labRun&&p.labRunId)}
-function labFillMemberSelect(id,value=''){
-  const el=$(id);if(!el)return;const ordered=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome));el.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');
-  const v=value&&memberById(value)?value:(myId&&memberById(myId)?myId:(ordered[0]?.id||''));el.value=v;
-}
-function updateContextUI(prefix){
-  const type=$('#'+prefix+'ContextType')?.value||'project', projectLabel=$('#'+prefix+'ContextProjectLabel'),memberWrap=$('#'+prefix+'ContextMemberWrap'),chapterWrap=$('#'+prefix+'ContextChapterWrap');
-  if(memberWrap)memberWrap.style.display=type==='project'?'block':'none';if(chapterWrap)chapterWrap.style.display=type==='project'?'block':'none';
-  if(projectLabel)projectLabel.textContent=type==='project'?'Projeto':type==='article'?'Artigo / manuscrito':type==='product'?'Produto':'Nome do trabalho / pesquisa';
-}
-function contextPayload(prefix,fallback={}){
-  const type=$('#'+prefix+'ContextType')?.value||fallback.labContextType||'independent';
-  const selectedMid=type==='project'?($('#'+prefix+'ContextMember')?.value||''):'';
-  const mid=type==='project'?(selectedMid||fallback.labMemberId||fallback.memberId||myId||''):'';
-  const m=memberById(mid);
-  const project=($('#'+prefix+'ContextProject')?.value||'').trim() || String(fallback.labProject||'').trim() || (type==='project'?String(m?.tema||'').trim():'');
-  const chapter=type==='project'?((($('#'+prefix+'ContextChapter')?.value||'').trim()) || String(fallback.labChapter||'').trim()):'';
-  return {labContextType:type,labMemberId:mid,labMemberNome:m?.nome||fallback.labMemberNome||fallback.memberNome||'',labProject:project,labChapter:chapter};
-}
-function validateScientificContext(ctx){
-  if(ctx.labContextType==='project'&&(!ctx.labMemberId||!ctx.labProject||!ctx.labChapter))return 'O vínculo científico precisa de responsável, projeto e capítulo/etapa.';
-  if(['article','product','independent'].includes(ctx.labContextType)&&!ctx.labProject)return 'Informe o nome do artigo, produto ou pesquisa.';
-  return '';
-}
-function labContextStatusHTML(ctx){
-  const err=validateScientificContext(ctx);
-  if(err)return `<span class="ctx-dot"></span><div><b>Vínculo incompleto</b>${esc(err)}</div>`;
-  const who=ctx.labContextType==='project'?(ctx.labMemberNome||memberById(ctx.labMemberId)?.nome||'Responsável'):({article:'Artigo científico',product:'Produto técnico/científico',independent:'Pesquisa independente',exploratory:'Análise exploratória'}[ctx.labContextType]||'Trabalho');
-  const trail=[who,ctx.labProject,ctx.labChapter].filter(Boolean).map(esc).join(' → ');
-  return `<span class="ctx-dot"></span><div><b>Vínculo científico confirmado</b>${trail}</div>`;
-}
-function refreshLabContextStatus(p={}){
-  const el=$('#labContextStatus');if(!el)return;
-  const ctx=contextPayload('labAnalyze',p);const bad=!!validateScientificContext(ctx);
-  el.classList.toggle('bad',bad);el.innerHTML=labContextStatusHTML(ctx);
-}
+function labCanDelete(p){const uid=window.auth?.currentUser?.uid||'';return !!(isAdmin||p.ownerUid===uid||p.createdByUid===uid)}
+function labCanOpenExcel(p){return inferFileExt(p.url||'',p.fileName||p.titulo||'')==='xlsx'}
+function labFillMemberSelect(id,value=''){const el=$(id);if(!el)return;const ordered=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome));el.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');const v=value&&memberById(value)?value:(myId&&memberById(myId)?myId:(ordered[0]?.id||''));el.value=v}
+function updateContextUI(prefix){const type=$('#'+prefix+'ContextType')?.value||'project',projectLabel=$('#'+prefix+'ContextProjectLabel'),memberWrap=$('#'+prefix+'ContextMemberWrap'),chapterWrap=$('#'+prefix+'ContextChapterWrap');if(memberWrap)memberWrap.style.display=type==='project'?'block':'none';if(chapterWrap)chapterWrap.style.display=type==='project'?'block':'none';if(projectLabel)projectLabel.textContent=type==='project'?'Projeto':type==='article'?'Artigo / manuscrito':type==='product'?'Produto':'Nome do trabalho / pesquisa'}
+function contextPayload(prefix,fallback={}){const type=$('#'+prefix+'ContextType')?.value||fallback.labContextType||'independent';const selectedMid=type==='project'?($('#'+prefix+'ContextMember')?.value||''):'';const mid=type==='project'?(selectedMid||fallback.labMemberId||fallback.memberId||myId||''):'';const m=memberById(mid);const project=($('#'+prefix+'ContextProject')?.value||'').trim()||String(fallback.labProject||'').trim()||(type==='project'?String(m?.tema||'').trim():'');const chapter=type==='project'?((($('#'+prefix+'ContextChapter')?.value||'').trim())||String(fallback.labChapter||'').trim()):'';return {labContextType:type,labMemberId:mid,labMemberNome:m?.nome||fallback.labMemberNome||fallback.memberNome||'',labProject:project,labChapter:chapter}}
+function validateScientificContext(ctx){if(ctx.labContextType==='project'&&(!ctx.labMemberId||!ctx.labProject||!ctx.labChapter))return 'O vínculo científico precisa de responsável, projeto e capítulo/etapa.';if(['article','product','independent'].includes(ctx.labContextType)&&!ctx.labProject)return 'Informe o nome do artigo, produto ou pesquisa.';return ''}
+function labContextStatusHTML(ctx){const err=validateScientificContext(ctx);if(err)return `<span class="ctx-dot"></span><div><b>Vínculo incompleto</b>${esc(err)}</div>`;const who=ctx.labContextType==='project'?(ctx.labMemberNome||memberById(ctx.labMemberId)?.nome||'Responsável'):({article:'Artigo científico',product:'Produto técnico/científico',independent:'Pesquisa independente',exploratory:'Análise exploratória'}[ctx.labContextType]||'Trabalho');const trail=[who,ctx.labProject,ctx.labChapter].filter(Boolean).map(esc).join(' → ');return `<span class="ctx-dot"></span><div><b>Vínculo científico confirmado</b>${trail}</div>`}
+function refreshLabContextStatus(p={}){const el=$('#labContextStatus');if(!el)return;const ctx=contextPayload('labAnalyze',p),bad=!!validateScientificContext(ctx);el.classList.toggle('bad',bad);el.innerHTML=labContextStatusHTML(ctx)}
 function renderLab(){
   const datasets=labDatasets(),runs=labRuns();$('#labDatasetCount').textContent=`${datasets.length} base${datasets.length===1?'':'s'}`;$('#labRunCount').textContent=`${runs.length} análise${runs.length===1?'':'s'}`;
-  const dl=$('#labDatasetList');if(dl)dl.innerHTML=datasets.length?datasets.map(p=>{const m=memberById(p.memberId);const ext=inferFileExt(p.url||'',p.fileName||p.titulo||'').toUpperCase();return `<div class="lab-data-card"><div class="lab-data-ico">${ext==='CSV'?'🧾':'📊'}</div><div class="lab-data-main"><div class="lab-data-title">${esc(p.titulo||p.fileName||'Base de dados')}</div><div class="lab-data-meta"><span>${esc(ext)}</span><span>·</span><span>${esc(p.memberNome||m?.nome||'')}</span>${p.labDataset?'<span>· Base vinculada</span>':''}</div>${scientificContextHTML(p)}</div><button class="btn primary" type="button" onclick="openLabAnalyze('${p.id}')">Analisar</button></div>`}).join(''):'<div class="lab-empty">Nenhuma base CSV/Excel no Repositório. Envie a primeira base e vincule ao projeto/capítulo.</div>';
-  const rl=$('#labRunList');if(rl)rl.innerHTML=runs.length?runs.map(p=>`<div class="lab-run-card"><div class="lab-data-ico">📈</div><div class="lab-data-main"><div class="lab-data-title">${esc(p.titulo||p.labMethodLabel||'Análise')}</div><div class="lab-data-meta"><span>${esc(p.labMethodLabel||p.labMethod||'Método')}</span>${p.labDatasetId?'<span>· execução rastreável</span>':''}</div>${scientificContextHTML(p)}${(p.labWarnings||[]).length?`<div style="font-size:10px;color:#97680d;margin-top:5px">⚠ ${esc(p.labWarnings[0])}</div>`:''}</div><button class="btn" type="button" onclick="openLabRun('${p.labRunId}')">Abrir resultados</button></div>`).join(''):'<div class="lab-empty">As análises executadas aparecerão aqui com tabelas, figuras e arquivos de reprodutibilidade.</div>';
+  const dl=$('#labDatasetList');
+  if(dl)dl.innerHTML=datasets.length?datasets.map(p=>{const m=memberById(p.memberId),ext=inferFileExt(p.url||'',p.fileName||p.titulo||'').toUpperCase();const excel=labCanOpenExcel(p);return `<div class="lab-data-card"><div class="lab-data-ico">${ext==='CSV'?'🧾':'📊'}</div><div class="lab-data-main"><div class="lab-data-title">${esc(p.titulo||p.fileName||'Base de dados')}</div><div class="lab-data-meta"><span>${esc(ext)}</span><span>·</span><span>${esc(p.memberNome||m?.nome||'')}</span>${p.labDataset?'<span>· Base vinculada</span>':''}</div>${scientificContextHTML(p)}</div><div class="lab-data-actions"><button class="btn" type="button" onclick="openLabData('${p.id}')">👁 Ver dados</button>${excel?`<button class="btn" type="button" onclick="openOnlineEdit('${p.id}')">✏️ Excel</button>`:''}<button class="btn primary" type="button" onclick="openLabAnalyze('${p.id}')">🧪 Analisar</button>${labCanDelete(p)?`<button class="btn lab-delete-btn" type="button" onclick="deleteLabDataset('${p.id}')">🗑 Excluir</button>`:''}</div></div>`}).join(''):'<div class="lab-empty">Nenhuma base CSV/Excel no Repositório. Envie a primeira base e vincule ao projeto/capítulo.</div>';
+  const rl=$('#labRunList');if(rl)rl.innerHTML=runs.length?runs.map(p=>`<div class="lab-run-card"><div class="lab-data-ico">📈</div><div class="lab-data-main"><div class="lab-data-title">${esc(p.titulo||p.labMethodLabel||'Análise')}</div><div class="lab-data-meta"><span>${esc(p.labMethodLabel||p.labMethod||'Método')}</span>${p.labDatasetSheet?`<span>· aba ${esc(p.labDatasetSheet)}</span>`:''}${p.labDatasetId?'<span>· execução rastreável</span>':''}</div>${scientificContextHTML(p)}${(p.labWarnings||[]).length?`<div style="font-size:10px;color:#97680d;margin-top:5px">⚠ ${esc(p.labWarnings[0])}</div>`:''}</div><div class="lab-data-actions"><button class="btn" type="button" onclick="openLabRun('${p.labRunId}')">Abrir resultados</button></div></div>`).join(''):'<div class="lab-empty">As análises executadas aparecerão aqui com tabelas, figuras e arquivos de reprodutibilidade.</div>';
 }
-function openLabUpload(){
-  if(!window.auth?.currentUser||!myId)return toast('Entre com seu perfil primeiro.');labDatasetFileData='';labDatasetFileName='';$('#labUploadFile').value='';$('#labUploadTitle').value='';$('#labContextType').value='project';labFillMemberSelect('#labContextMember',myId);$('#labContextProject').value=memberById(myId)?.tema||'';$('#labContextChapter').value='';updateContextUI('lab');openOverlay('labUploadOverlay');
-}
+function openLabUpload(){if(!window.auth?.currentUser||!myId)return toast('Entre com seu perfil primeiro.');labDatasetFileData='';labDatasetFileName='';$('#labUploadFile').value='';$('#labUploadTitle').value='';$('#labContextType').value='project';labFillMemberSelect('#labContextMember',myId);$('#labContextProject').value=memberById(myId)?.tema||'';$('#labContextChapter').value='';updateContextUI('lab');openOverlay('labUploadOverlay')}
 $('#labUploadFile')?.addEventListener('change',e=>{const file=e.target.files?.[0];if(!file)return;const ext=(file.name.split('.').pop()||'').toLowerCase();if(!['csv','xlsx','xls'].includes(ext)){toast('Envie CSV ou Excel.');e.target.value='';return}if(file.size>50*1024*1024){toast('Arquivo maior que 50 MB.');e.target.value='';return}labDatasetFileName=file.name;if(!$('#labUploadTitle').value)$('#labUploadTitle').value=file.name.replace(/\.(csv|xlsx|xls)$/i,'');const r=new FileReader();r.onload=ev=>labDatasetFileData=ev.target.result;r.readAsDataURL(file)});
-async function saveLabDataset(){
-  const title=$('#labUploadTitle').value.trim(),ctx=contextPayload('lab'),err=validateScientificContext(ctx),btn=$('#labUploadSaveBtn');if(!labDatasetFileData||!labDatasetFileName)return toast('Escolha a base CSV/Excel.');if(!title)return toast('Dê um título à base.');if(err)return toast(err);
-  try{btn.disabled=true;toast('Enviando base ao Repositório…');const memberId=ctx.labContextType==='project'?ctx.labMemberId:myId,m=memberById(memberId),uid=window.auth.currentUser.uid;const {url}=await fbUploadFile('lab_'+memberId,labDatasetFileData,labDatasetFileName);const f=FB(),ref=f.doc(f.collection(window.db,'rede_publicacoes'));const data={memberId,ownerUid:uid,createdByUid:uid,memberNome:m?.nome||myName||'',categoria:'dados',categoriaOutro:'',titulo:title,tipo:'arquivo',url,fileName:labDatasetFileName,labDataset:true,...ctx,ts:f.serverTimestamp()};await f.setDoc(ref,data);closeOverlay('labUploadOverlay');toast('Base vinculada e salva no Repositório.');switchView('lab');setTimeout(()=>openLabAnalyze(ref.id),250)}catch(e){console.error(e);toast(e.message||'Erro ao enviar a base.')}finally{btn.disabled=false}
-}
-async function labFetch(path,opts={}){const token=await window.auth.currentUser.getIdToken();const headers={...(opts.headers||{}),Authorization:'Bearer '+token};if(opts.body&&!headers['Content-Type'])headers['Content-Type']='application/json';const r=await fetch(LAB_API_BASE()+path,{...opts,headers});if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.error||`Erro HTTP ${r.status}`)}return r}
-async function loadLabInspect(pubId,force=false){if(labInspectCache[pubId]&&!force)return labInspectCache[pubId];const r=await labFetch('/api/lab/inspect/'+pubId);const j=await r.json();labInspectCache[pubId]=j.inspect;return j.inspect}
+async function saveLabDataset(){const title=$('#labUploadTitle').value.trim(),ctx=contextPayload('lab'),err=validateScientificContext(ctx),btn=$('#labUploadSaveBtn');if(!labDatasetFileData||!labDatasetFileName)return toast('Escolha a base CSV/Excel.');if(!title)return toast('Dê um título à base.');if(err)return toast(err);try{btn.disabled=true;toast('Enviando base ao Repositório…');const memberId=ctx.labContextType==='project'?ctx.labMemberId:myId,m=memberById(memberId),uid=window.auth.currentUser.uid;const {url}=await fbUploadFile('lab_'+memberId,labDatasetFileData,labDatasetFileName);const f=FB(),ref=f.doc(f.collection(window.db,'rede_publicacoes'));const data={memberId,ownerUid:uid,createdByUid:uid,memberNome:m?.nome||myName||'',categoria:'dados',categoriaOutro:'',titulo:title,tipo:'arquivo',url,fileName:labDatasetFileName,labDataset:true,...ctx,ts:f.serverTimestamp()};await f.setDoc(ref,data);closeOverlay('labUploadOverlay');toast('Base vinculada e salva no Repositório.');switchView('lab');setTimeout(()=>openLabData(ref.id),300)}catch(e){console.error(e);toast(e.message||'Erro ao enviar a base.')}finally{btn.disabled=false}}
+async function labFetch(path,opts={}){const token=await window.auth.currentUser.getIdToken();const headers={...(opts.headers||{}),Authorization:'Bearer '+token};if(opts.body&&!headers['Content-Type'])headers['Content-Type']='application/json';const r=await fetch(LAB_API_BASE()+path,{...opts,headers,cache:'no-store'});if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.error||`Erro HTTP ${r.status}`)}return r}
+function labInspectKey(pubId,sheet=''){return pubId+'::'+String(sheet||'AUTO')}
+async function loadLabInspect(pubId,force=false,sheet=''){const key=labInspectKey(pubId,sheet);if(labInspectCache[key]&&!force)return labInspectCache[key];const q=sheet?'?sheet='+encodeURIComponent(sheet):'';const r=await labFetch('/api/lab/inspect/'+pubId+q),j=await r.json();const pack={inspect:j.inspect,workbook:j.workbook||{isWorkbook:false,sheets:[],bestSheet:'CSV'},dataset:j.dataset};labInspectCache[key]=pack;return pack}
 function labMethodsHTML(){return Object.entries(LAB_METHODS).map(([k,v])=>`<button type="button" class="lab-method ${k===labSelectedMethod?'on':''}" data-lab-method="${k}"><span class="mi">${v.icon}</span><b>${v.label}</b><small>${v.sub}</small></button>`).join('')}
 function optList(cols,selected=''){return `<option value="">Selecione…</option>${cols.map(c=>`<option value="${esc(c)}" ${c===selected?'selected':''}>${esc(c)}</option>`).join('')}`}
 function varChecks(cols,selected=[]){return `<div class="lab-variable-box">${cols.map((c,i)=>`<label class="lab-var-check"><input type="checkbox" data-lab-var value="${esc(c)}" ${selected.includes(c)||(!selected.length&&i<6)?'checked':''}> ${esc(c)}</label>`).join('')}</div>`}
-function renderLabControls(){
-  const ins=labInspectCache[labCurrentPubId];if(!ins)return;const n=ins.numeric||[],c=ins.categorical||[],all=(ins.columnInfo||[]).map(x=>x.name),m=labSelectedMethod;let h='';
-  if(['descriptive','correlation','pca','cluster'].includes(m))h=`<div class="fg"><label>Variáveis numéricas</label>${varChecks(n)}</div>`;
-  if(m==='correlation')h+=`<div class="fg"><label>Coeficiente</label><select id="labCorrelation"><option value="pearson">Pearson</option><option value="spearman">Spearman</option></select></div>`;
-  if(['regression','glm','mixed'].includes(m)){h=`<div class="grid2"><div class="fg"><label>Variável resposta (Y)</label><select id="labY">${optList(n)}</select></div>${m==='mixed'?`<div class="fg"><label>Grupo aleatório</label><select id="labGroup">${optList(all)}</select></div>`:''}</div><div class="fg"><label>Preditores</label>${varChecks(n)}</div>`;if(m==='glm')h+=`<div class="fg"><label>Família</label><select id="labFamily"><option value="gaussian">Gaussian</option><option value="binomial">Binomial (0/1)</option><option value="poisson">Poisson (contagem)</option></select></div>`;}
-  if(['ttest','anova','kruskal'].includes(m))h=`<div class="grid2"><div class="fg"><label>Resposta numérica</label><select id="labY">${optList(n)}</select></div><div class="fg"><label>Variável de grupo</label><select id="labGroup">${optList(all)}</select></div></div>`;
-  if(m==='timeseries')h=`<div class="grid2"><div class="fg"><label>Tempo / data / ano</label><select id="labTime">${optList(all)}</select></div><div class="fg"><label>Resposta numérica</label><select id="labY">${optList(n)}</select></div></div>`;
-  if(m==='cluster')h+=`<div class="fg"><label>Número de clusters (k)</label><input id="labK" type="number" min="2" max="8" value="3"></div>`;
-  if(m==='diagnostic')h='<div class="notice"><b>Automático.</b> O motor audita tipos, ausências, distribuição e estrutura e sugere próximos passos.</div>';
-  $('#labAnalysisControls').innerHTML=h;const advice=$('#labAnalysisAdvice');const sug=ins.suggestions||[];advice.style.display=sug.length?'block':'none';advice.innerHTML=sug.length?'<b>💡 O que a estrutura da base sugere</b><br>'+sug.map(x=>'• '+esc(x)).join('<br>'):'';
-}
+function labSheetOptions(wb,selected){return (wb?.sheets||[]).map(s=>`<option value="${esc(s.name)}" ${s.name===selected?'selected':''}>${esc(s.name)} · ${s.rows}×${s.columns} · ${s.numericCount} num.</option>`).join('')}
+function labPreviewHTML(ins,limit=8){const rows=(ins?.preview||[]).slice(0,limit),cols=(ins?.columnInfo||[]).map(x=>x.name);if(!cols.length)return '<div class="lab-empty">Esta aba não contém uma tabela reconhecível.</div>';return `<div class="lab-preview-mini"><div class="head"><b>Prévia da aba</b><span>${esc(ins.sheetName||'')}</span><span>· ${ins.rows} linhas</span><span>· ${ins.numeric.length} numéricas</span></div><div class="lab-preview-tablewrap"><table class="lab-preview-table"><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(c=>`<td title="${esc(String(r[c]??''))}">${esc(fmtLabValue(r[c]))}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`}
+function applyLabInspect(pack,p){labActiveInspect=pack.inspect;labActiveWorkbook=pack.workbook;labCurrentSheet=pack.inspect?.sheetName||pack.workbook?.bestSheet||'';const ins=labActiveInspect;$('#labAnalyzeSource').innerHTML=`<span style="font-size:24px">📊</span><div><b>${esc(p.titulo||p.fileName||'Base')}</b><div class="lab-muted">Aba: <b>${esc(labCurrentSheet||'CSV')}</b> · ${ins.rows.toLocaleString('pt-BR')} linhas · ${ins.columns} variáveis · ${ins.numeric.length} numéricas</div></div>`;$('#labInspectKpis').innerHTML=`<div class="lab-kpi"><span>Linhas</span><b>${ins.rows.toLocaleString('pt-BR')}</b></div><div class="lab-kpi"><span>Variáveis</span><b>${ins.columns}</b></div><div class="lab-kpi"><span>Numéricas</span><b>${ins.numeric.length}</b></div><div class="lab-kpi"><span>Ausentes</span><b>${ins.missingTotal}</b></div>`;const wb=pack.workbook||{};$('#labWorkbookToolbar').innerHTML=wb.isWorkbook&&wb.sheets?.length>1?`<div class="lab-sheetbar"><label>📚 Aba a analisar</label><select id="labSheetSelect" onchange="changeLabAnalyzeSheet(this.value)">${labSheetOptions(wb,labCurrentSheet)}</select><button class="btn" type="button" onclick="openLabData('${p.id}','${encodeURIComponent(labCurrentSheet)}')">👁 Ver dados</button>${labCanOpenExcel(p)?`<button class="btn" type="button" onclick="openOnlineEdit('${p.id}')">✏️ Abrir Excel</button>`:''}</div>`:`<div class="lab-sheetbar"><span class="lab-muted">Fonte analisada: <b>${esc(labCurrentSheet||'CSV')}</b></span><button class="btn" type="button" onclick="openLabData('${p.id}','${encodeURIComponent(labCurrentSheet)}')">👁 Ver dados</button>${labCanOpenExcel(p)?`<button class="btn" type="button" onclick="openOnlineEdit('${p.id}')">✏️ Abrir Excel</button>`:''}</div>`;$('#labQuickPreview').innerHTML=labPreviewHTML(ins,6);renderLabControls()}
+async function changeLabAnalyzeSheet(sheet){try{$('#labAnalysisControls').innerHTML='<div class="lab-empty">Lendo a aba selecionada…</div>';const p=state.publicacoes.find(x=>x.id===labCurrentPubId);const pack=await loadLabInspect(labCurrentPubId,false,sheet);applyLabInspect(pack,p)}catch(e){toast(e.message)}}
+function renderLabControls(){const ins=labActiveInspect;if(!ins)return;const n=ins.numeric||[],all=(ins.columnInfo||[]).map(x=>x.name),m=labSelectedMethod;let h='';if(['descriptive','correlation','pca','cluster'].includes(m))h=`<div class="fg"><label>Variáveis numéricas</label>${varChecks(n)}</div>`;if(m==='correlation')h+=`<div class="fg"><label>Coeficiente</label><select id="labCorrelation"><option value="pearson">Pearson</option><option value="spearman">Spearman</option></select></div>`;if(['regression','glm','mixed'].includes(m)){h=`<div class="grid2"><div class="fg"><label>Variável resposta (Y)</label><select id="labY">${optList(n)}</select></div>${m==='mixed'?`<div class="fg"><label>Grupo aleatório</label><select id="labGroup">${optList(all)}</select></div>`:''}</div><div class="fg"><label>Preditores</label>${varChecks(n)}</div>`;if(m==='glm')h+=`<div class="fg"><label>Família</label><select id="labFamily"><option value="gaussian">Gaussian</option><option value="binomial">Binomial (0/1)</option><option value="poisson">Poisson (contagem)</option></select></div>`}if(['ttest','anova','kruskal'].includes(m))h=`<div class="grid2"><div class="fg"><label>Resposta numérica</label><select id="labY">${optList(n)}</select></div><div class="fg"><label>Variável de grupo</label><select id="labGroup">${optList(all)}</select></div></div>`;if(m==='timeseries')h=`<div class="grid2"><div class="fg"><label>Tempo / data / ano</label><select id="labTime">${optList(all)}</select></div><div class="fg"><label>Resposta numérica</label><select id="labY">${optList(n)}</select></div></div>`;if(m==='cluster')h+=`<div class="fg"><label>Número de clusters (k)</label><input id="labK" type="number" min="2" max="8" value="3"></div>`;if(m==='diagnostic')h='<div class="notice"><b>Automático.</b> O motor audita a aba selecionada, tipos, ausências e estrutura e sugere próximos passos.</div>';$('#labAnalysisControls').innerHTML=h;const advice=$('#labAnalysisAdvice'),sug=ins.suggestions||[];advice.style.display=sug.length?'block':'none';advice.innerHTML=sug.length?'<b>💡 O que esta aba sugere</b><br>'+sug.map(x=>'• '+esc(x)).join('<br>'):''}
 function fillAnalyzeContext(p){const type=p.labContextType||'project';$('#labAnalyzeContextType').value=type;labFillMemberSelect('#labAnalyzeMember',p.labMemberId||p.memberId||myId);const mid=$('#labAnalyzeMember').value||p.labMemberId||p.memberId||myId;$('#labAnalyzeProject').value=p.labProject||memberById(mid)?.tema||p.titulo||'';$('#labAnalyzeChapter').value=p.labChapter||'';updateContextUI('labAnalyze');refreshLabContextStatus(p)}
-async function openLabAnalyze(pubId){
-  if(!window.auth?.currentUser)return toast('Entre primeiro.');const p=state.publicacoes.find(x=>x.id===pubId);if(!p)return toast('Base não encontrada.');labCurrentPubId=pubId;labSelectedMethod='diagnostic';fillAnalyzeContext(p);$('#labAnalyzeSource').innerHTML=`<span style="font-size:24px">📊</span><div><b>${esc(p.titulo||p.fileName||'Base')}</b><div class="lab-muted">Auditando estrutura e variáveis…</div></div>`;$('#labInspectKpis').innerHTML='';$('#labAnalyzeMethods').innerHTML=labMethodsHTML();$('#labAnalysisControls').innerHTML='<div class="lab-empty">Lendo a base…</div>';openOverlay('labAnalyzeOverlay');
-  try{const ins=await loadLabInspect(pubId);$('#labAnalyzeSource').innerHTML=`<span style="font-size:24px">📊</span><div><b>${esc(p.titulo||p.fileName||'Base')}</b><div class="lab-muted">${ins.rows.toLocaleString('pt-BR')} linhas · ${ins.columns} variáveis · ${ins.numeric.length} numéricas</div></div>`;$('#labInspectKpis').innerHTML=`<div class="lab-kpi"><span>Linhas</span><b>${ins.rows.toLocaleString('pt-BR')}</b></div><div class="lab-kpi"><span>Variáveis</span><b>${ins.columns}</b></div><div class="lab-kpi"><span>Numéricas</span><b>${ins.numeric.length}</b></div><div class="lab-kpi"><span>Ausentes</span><b>${ins.missingTotal}</b></div>`;renderLabControls()}catch(e){console.error(e);$('#labAnalysisControls').innerHTML=`<div class="lab-empty">⚠️ ${esc(e.message)}</div>`}
-}
-function collectLabOptions(){const vars=Array.from($$('[data-lab-var]:checked')).map(x=>x.value),o={analysis:labSelectedMethod,variables:vars};if($('#labY'))o.y=$('#labY').value;if($('#labGroup'))o.group=$('#labGroup').value;if($('#labTime'))o.time=$('#labTime').value;if($('#labCorrelation'))o.correlation=$('#labCorrelation').value;if($('#labFamily'))o.family=$('#labFamily').value;if($('#labK'))o.k=Number($('#labK').value||3);return o}
-async function persistAnalyzeContext(){
-  const p=state.publicacoes.find(x=>x.id===labCurrentPubId);if(!p)throw new Error('Base não encontrada.');
-  const ctx=contextPayload('labAnalyze',p),err=validateScientificContext(ctx);if(err)throw new Error(err);
-  Object.assign(p,ctx,{labDataset:true,memberId:ctx.labContextType==='project'?ctx.labMemberId:(p.memberId||myId),memberNome:ctx.labContextType==='project'?ctx.labMemberNome:(p.memberNome||myName||'')});
-  refreshLabContextStatus(p);renderLab();
-  try{await FB().updateDoc(FB().doc(window.db,'rede_publicacoes',labCurrentPubId),{...ctx,memberId:p.memberId,memberNome:p.memberNome,labDataset:true})}catch(e){console.warn('Persistência cliente do vínculo adiada para o servidor P5:',e)}
-  return ctx;
-}
-async function runLabAnalysis(){
-  const btn=$('#labRunBtn');
-  try{
-    btn.disabled=true;
-    const p=state.publicacoes.find(x=>x.id===labCurrentPubId);if(!p)throw new Error('Base não encontrada.');
-    const ctx=await persistAnalyzeContext();
-    const options=collectLabOptions();
-    toast('Executando análise no motor científico…');
-    const r=await labFetch('/api/lab/analyze/'+labCurrentPubId,{method:'POST',body:JSON.stringify({options,context:ctx})});
-    const j=await r.json();
-    closeOverlay('labAnalyzeOverlay');await showLabResult(j.runId,j.result);toast('Análise concluída, vinculada e registrada no Repositório.');
-  }catch(e){console.error(e);refreshLabContextStatus(state.publicacoes.find(x=>x.id===labCurrentPubId)||{});toast(e.message||'Erro na análise.')}finally{btn.disabled=false}
-}
+async function openLabAnalyze(pubId,sheet=''){if(!window.auth?.currentUser)return toast('Entre primeiro.');const p=state.publicacoes.find(x=>x.id===pubId);if(!p)return toast('Base não encontrada.');labCurrentPubId=pubId;labSelectedMethod='diagnostic';labActiveInspect=null;labActiveWorkbook=null;labCurrentSheet=decodeURIComponent(sheet||'');fillAnalyzeContext(p);$('#labAnalyzeSource').innerHTML=`<span style="font-size:24px">📊</span><div><b>${esc(p.titulo||p.fileName||'Base')}</b><div class="lab-muted">Lendo a estrutura do arquivo…</div></div>`;$('#labInspectKpis').innerHTML='';$('#labWorkbookToolbar').innerHTML='';$('#labQuickPreview').innerHTML='';$('#labAnalyzeMethods').innerHTML=labMethodsHTML();$('#labAnalysisControls').innerHTML='<div class="lab-empty">Lendo a base…</div>';openOverlay('labAnalyzeOverlay');try{const pack=await loadLabInspect(pubId,false,labCurrentSheet);applyLabInspect(pack,p)}catch(e){console.error(e);$('#labAnalysisControls').innerHTML=`<div class="lab-empty">⚠️ ${esc(e.message)}</div>`}}
+function collectLabOptions(){const vars=Array.from($$('[data-lab-var]:checked')).map(x=>x.value),o={analysis:labSelectedMethod,variables:vars,sheet:labCurrentSheet};if($('#labY'))o.y=$('#labY').value;if($('#labGroup'))o.group=$('#labGroup').value;if($('#labTime'))o.time=$('#labTime').value;if($('#labCorrelation'))o.correlation=$('#labCorrelation').value;if($('#labFamily'))o.family=$('#labFamily').value;if($('#labK'))o.k=Number($('#labK').value||3);return o}
+async function persistAnalyzeContext(){const p=state.publicacoes.find(x=>x.id===labCurrentPubId);if(!p)throw new Error('Base não encontrada.');const ctx=contextPayload('labAnalyze',p),err=validateScientificContext(ctx);if(err)throw new Error(err);Object.assign(p,ctx,{labDataset:true,memberId:ctx.labContextType==='project'?ctx.labMemberId:(p.memberId||myId),memberNome:ctx.labContextType==='project'?ctx.labMemberNome:(p.memberNome||myName||'')});refreshLabContextStatus(p);renderLab();try{await FB().updateDoc(FB().doc(window.db,'rede_publicacoes',labCurrentPubId),{...ctx,memberId:p.memberId,memberNome:p.memberNome,labDataset:true})}catch(e){console.warn('Persistência cliente do vínculo será garantida pelo servidor P6:',e)}return ctx}
+async function runLabAnalysis(){const btn=$('#labRunBtn');try{btn.disabled=true;const p=state.publicacoes.find(x=>x.id===labCurrentPubId);if(!p)throw new Error('Base não encontrada.');if(!labActiveInspect)throw new Error('A aba ainda não foi lida.');const ctx=await persistAnalyzeContext(),options=collectLabOptions();toast(`Executando ${LAB_METHODS[labSelectedMethod]?.label||'análise'} na aba ${labCurrentSheet||'CSV'}…`);const r=await labFetch('/api/lab/analyze/'+labCurrentPubId,{method:'POST',body:JSON.stringify({options,context:ctx})}),j=await r.json();closeOverlay('labAnalyzeOverlay');await showLabResult(j.runId,j.result);toast('Análise concluída, vinculada e registrada no Repositório.')}catch(e){console.error(e);refreshLabContextStatus(state.publicacoes.find(x=>x.id===labCurrentPubId)||{});toast(e.message||'Erro na análise.')}finally{btn.disabled=false}}
 function fmtLabValue(v){if(v===null||v===undefined)return '—';if(typeof v==='number')return Math.abs(v)>=1000?v.toLocaleString('pt-BR',{maximumFractionDigits:2}):v.toLocaleString('pt-BR',{maximumFractionDigits:4});return String(v)}
 function labTableHTML(t){const rows=t.rows||[],cols=t.columns||[];if(!rows.length)return '<div class="lab-empty">Tabela salva para download.</div>';return `<div class="lab-table-wrap"><table class="lab-table"><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.slice(0,80).map(r=>`<tr>${cols.map(c=>`<td>${esc(fmtLabValue(r[c]))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`}
 async function labGetBlob(runId,name){const r=await labFetch('/api/lab/run/'+runId+'/file/'+encodeURIComponent(name));return await r.blob()}
 async function labDownload(runId,name){try{const b=await labGetBlob(runId,name),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000)}catch(e){toast(e.message)}}
 async function hydrateLabFigures(runId,result){labObjectUrls.forEach(URL.revokeObjectURL);labObjectUrls=[];for(const fig of (result.figures||[])){const png=fig.files?.find(f=>f.format==='png');if(!png)continue;try{const b=await labGetBlob(runId,png.name),u=URL.createObjectURL(b);labObjectUrls.push(u);const img=document.querySelector(`[data-lab-fig="${CSS.escape(fig.stem)}"]`);if(img)img.src=u}catch(e){console.warn(e)}}}
-async function showLabResult(runId,result){labCurrentRunId=runId;const metrics=(result.metrics||[]).map(x=>`<div class="lab-kpi"><span>${esc(x.label)}</span><b>${esc(fmtLabValue(x.value))}</b></div>`).join('');const warnings=(result.warnings||[]).map(x=>`<div class="lab-warning">⚠️ ${esc(x)}</div>`).join('');const notes=(result.notes||[]).map(x=>`<div class="lab-note">✓ ${esc(x)}</div>`).join('');const recs=(result.recommendations||[]).map(x=>`<div class="lab-note">💡 ${esc(x)}</div>`).join('');const figs=(result.figures||[]).map(f=>`<div class="lab-figure"><img data-lab-fig="${esc(f.stem)}" alt="${esc(f.label)}"><div class="lab-figure-title">${esc(f.label)}</div><div class="lab-downloads">${(f.files||[]).map(q=>`<button class="btn" type="button" onclick="labDownload('${runId}','${esc(q.name)}')">⬇ ${q.format.toUpperCase()}</button>`).join('')}</div></div>`).join('');const tables=(result.tables||[]).map(t=>`<div class="lab-result-card"><h4>${esc(t.label||t.name)}</h4>${labTableHTML(t)}<div class="lab-downloads" style="margin-top:8px">${(t.files||[]).map(q=>`<button class="btn" onclick="labDownload('${runId}','${esc(q.name)}')">⬇ ${q.format.toUpperCase()}</button>`).join('')}</div></div>`).join('');const files=(result.files||[]).map(f=>`<button class="btn" type="button" onclick="labDownload('${runId}','${esc(f.name)}')">⬇ ${esc(f.label||f.name)}</button>`).join('');$('#labResultBody').innerHTML=`<div class="lab-result-hero"><h2>${esc(result.title||'Resultados')}</h2><p>${esc(result.method||'')}</p></div>${metrics?`<div class="lab-kpis">${metrics}</div>`:''}${warnings||notes||recs?`<div class="lab-result-card" style="margin-top:12px"><h4>Leitura crítica</h4>${warnings}${notes}${recs}</div>`:''}${figs?`<div class="lab-result-card" style="margin-top:12px"><h4>Figuras científicas · PNG 600 dpi + vetores</h4><div class="lab-figure-grid">${figs}</div></div>`:''}<div class="lab-result-grid">${tables}</div>${files?`<div class="lab-result-card" style="margin-top:12px"><h4>Reprodutibilidade</h4><div class="lab-downloads">${files}</div></div>`:''}`;openOverlay('labResultOverlay');await hydrateLabFigures(runId,result)}
+async function showLabResult(runId,result){labCurrentRunId=runId;const metrics=(result.metrics||[]).map(x=>`<div class="lab-kpi"><span>${esc(x.label)}</span><b>${esc(fmtLabValue(x.value))}</b></div>`).join(''),warnings=(result.warnings||[]).map(x=>`<div class="lab-warning">⚠️ ${esc(x)}</div>`).join(''),notes=(result.notes||[]).map(x=>`<div class="lab-note">✓ ${esc(x)}</div>`).join(''),recs=(result.recommendations||[]).map(x=>`<div class="lab-note">💡 ${esc(x)}</div>`).join(''),figs=(result.figures||[]).map(f=>`<div class="lab-figure"><img data-lab-fig="${esc(f.stem)}" alt="${esc(f.label)}"><div class="lab-figure-title">${esc(f.label)}</div><div class="lab-downloads">${(f.files||[]).map(q=>`<button class="btn" type="button" onclick="labDownload('${runId}','${esc(q.name)}')">⬇ ${q.format.toUpperCase()}</button>`).join('')}</div></div>`).join(''),tables=(result.tables||[]).map(t=>`<div class="lab-result-card"><h4>${esc(t.label||t.name)}</h4>${labTableHTML(t)}<div class="lab-downloads" style="margin-top:8px">${(t.files||[]).map(q=>`<button class="btn" onclick="labDownload('${runId}','${esc(q.name)}')">⬇ ${q.format.toUpperCase()}</button>`).join('')}</div></div>`).join(''),files=(result.files||[]).map(f=>`<button class="btn" type="button" onclick="labDownload('${runId}','${esc(f.name)}')">⬇ ${esc(f.label||f.name)}</button>`).join('');$('#labResultBody').innerHTML=`<div class="lab-result-hero"><h2>${esc(result.title||'Resultados')}</h2><p>${esc(result.method||'')}${result.sheetName?` · aba ${esc(result.sheetName)}`:''}</p></div>${metrics?`<div class="lab-kpis">${metrics}</div>`:''}${warnings||notes||recs?`<div class="lab-result-card" style="margin-top:12px"><h4>Leitura crítica</h4>${warnings}${notes}${recs}</div>`:''}${figs?`<div class="lab-result-card" style="margin-top:12px"><h4>Figuras científicas · PNG 600 dpi + vetores</h4><div class="lab-figure-grid">${figs}</div></div>`:''}<div class="lab-result-grid">${tables}</div>${files?`<div class="lab-result-card" style="margin-top:12px"><h4>Reprodutibilidade</h4><div class="lab-downloads">${files}</div></div>`:''}`;openOverlay('labResultOverlay');await hydrateLabFigures(runId,result)}
 async function openLabRun(runId){try{toast('Abrindo resultados…');const r=await labFetch('/api/lab/run/'+runId),j=await r.json();await showLabResult(runId,j.meta.result)}catch(e){toast(e.message||'Não consegui abrir a análise.')}}
+function fullPreviewTable(ins){const rows=ins?.preview||[],cols=(ins?.columnInfo||[]).map(x=>x.name);if(!cols.length)return '<div class="lab-empty">Nenhuma tabela reconhecida nesta aba.</div>';return `<table><thead><tr><th>#</th>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td>${cols.map(c=>`<td title="${esc(String(r[c]??''))}">${esc(fmtLabValue(r[c]))}</td>`).join('')}</tr>`).join('')}</tbody></table>`}
+async function openLabData(pubId,sheetEncoded=''){const p=state.publicacoes.find(x=>x.id===pubId);if(!p)return toast('Base não encontrada.');labDataPubId=pubId;const sheet=decodeURIComponent(sheetEncoded||'');$('#labDataTitle').textContent='📊 '+(p.titulo||p.fileName||'Dados da base');$('#labDataTable').innerHTML='<div class="lab-empty">Lendo as abas e dados…</div>';openOverlay('labDataOverlay');try{const pack=await loadLabInspect(pubId,false,sheet);renderLabDataPack(pack,p)}catch(e){$('#labDataTable').innerHTML=`<div class="lab-empty">⚠️ ${esc(e.message)}</div>`}}
+function renderLabDataPack(pack,p){const ins=pack.inspect,wb=pack.workbook||{},sheet=ins.sheetName||wb.bestSheet||'CSV';$('#labDataSheet').innerHTML=labSheetOptions(wb,sheet)||`<option value="${esc(sheet)}">${esc(sheet)}</option>`;$('#labDataSheet').disabled=!(wb.isWorkbook&&wb.sheets?.length>1);$('#labDataSummary').innerHTML=`Aba <b>${esc(sheet)}</b> · ${ins.rows.toLocaleString('pt-BR')} linhas · ${ins.columns} variáveis · ${ins.numeric.length} numéricas · ${ins.missingTotal} ausentes${ins.sourceFormat?` · ${esc(ins.sourceFormat)}`:''}. Prévia das primeiras ${Math.min(60,ins.preview?.length||0)} linhas.`;$('#labDataTable').innerHTML=fullPreviewTable(ins);$('#labDataExcelBtn').style.display=labCanOpenExcel(p)?'inline-flex':'none';$('#labDataAnalyzeBtn').onclick=()=>{closeOverlay('labDataOverlay');openLabAnalyze(p.id,encodeURIComponent(sheet))};$('#labDataSheet').onchange=async()=>{try{$('#labDataTable').innerHTML='<div class="lab-empty">Lendo aba…</div>';const next=await loadLabInspect(p.id,false,$('#labDataSheet').value);renderLabDataPack(next,p)}catch(e){toast(e.message)}};$('#labDataExcelBtn').onclick=()=>openOnlineEdit(p.id)}
+async function deleteLabDataset(pubId){const p=state.publicacoes.find(x=>x.id===pubId);if(!p)return;if(!confirm(`Excluir a base “${p.titulo||p.fileName||'selecionada'}”?\n\nO arquivo será removido do Storage e do Repositório. Análises já produzidas serão preservadas para reprodutibilidade.`))return;try{toast('Excluindo base…');await labFetch('/api/lab/dataset/'+pubId,{method:'DELETE'});state.publicacoes=state.publicacoes.filter(x=>x.id!==pubId);Object.keys(labInspectCache).filter(k=>k.startsWith(pubId+'::')).forEach(k=>delete labInspectCache[k]);renderLab();if(currentView==='pubs')renderPubs();toast('Base excluída. As análises históricas foram preservadas.')}catch(e){toast(e.message||'Não foi possível excluir a base.')}}
 
 $('#labUploadBtn')?.addEventListener('click',openLabUpload);$('#labUploadSaveBtn')?.addEventListener('click',saveLabDataset);$('#labNewArticleBtn')?.addEventListener('click',()=>{openNewOffice();setTimeout(()=>{$('#officeNewTitle').value='Novo manuscrito';$('#officeContextType').value='article';updateContextUI('office')},50)});$('#labContextType')?.addEventListener('change',()=>updateContextUI('lab'));$('#labAnalyzeContextType')?.addEventListener('change',()=>{updateContextUI('labAnalyze');refreshLabContextStatus(state.publicacoes.find(x=>x.id===labCurrentPubId)||{})});['labAnalyzeMember','labAnalyzeProject','labAnalyzeChapter'].forEach(id=>$('#'+id)?.addEventListener(id==='labAnalyzeMember'?'change':'input',()=>refreshLabContextStatus(state.publicacoes.find(x=>x.id===labCurrentPubId)||{})));$('#labRunBtn')?.addEventListener('click',runLabAnalysis);$('#labAnalyzeMethods')?.addEventListener('click',e=>{const b=e.target.closest('[data-lab-method]');if(!b)return;labSelectedMethod=b.dataset.labMethod;$$('#labAnalyzeMethods [data-lab-method]').forEach(x=>x.classList.toggle('on',x===b));renderLabControls()});
-
 
 async function checkScienceEngine(){
   const el=$('#scienceEngineStatus');
@@ -4736,7 +4758,7 @@ async function checkScienceEngine(){
     const office=Array.isArray(j.office)&&j.office.length>=3;
     const lab=Array.isArray(j.lab)&&j.lab.length>0;
     el.classList.remove('offline');el.classList.add('online');
-    el.innerHTML=`<span class="engine-dot"></span><span>${office?'Office':''}${office&&lab?' + ':''}${lab?'Lab':''} ${j.version==='P5'?'P5 pronto':(j.version==='P4'?'P4':'online')}</span>`;
+    el.innerHTML=`<span class="engine-dot"></span><span>${office?'Office':''}${office&&lab?' + ':''}${lab?'Lab':''} ${j.version==='P6'?'P6 pronto':(j.version==='P5'?'P5':(j.version==='P4'?'P4':'online'))}</span>`;
   }catch(e){
     el.classList.remove('online');el.classList.add('offline');
     el.innerHTML='<span class="engine-dot"></span><span>motor offline</span>';
@@ -4998,11 +5020,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='PREDATOR-P3-20260906';
+window.CARBONAUTAS_BUILD='PREDATOR-P6-20260906';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P5-20260906',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P6-20260906',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -5014,7 +5036,7 @@ waitFirebase().then(startAuth);
 <script id="carbonautas-dynamic-favicon">
 (()=>{
   const link=document.getElementById('dynamicFavicon'); if(!link)return;
-  const img=new Image(); img.src='./icon-192.png?v=P5';
+  const img=new Image(); img.src='./icon-192.png?v=P6';
   img.onload=()=>{
     const c=document.createElement('canvas'),ctx=c.getContext('2d'); c.width=c.height=64; let phase=0,last=0;
     const draw=(ts)=>{
