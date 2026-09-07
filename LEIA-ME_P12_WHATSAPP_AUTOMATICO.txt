@@ -1,0 +1,35 @@
+CARBONAUTAS P12 — WHATSAPP AUTOMÁTICO + ROTEAMENTO INDIVIDUAL
+Data: 2026-09-07
+
+ALTERAÇÕES DA P12
+- Mantém a remoção do botão flutuante LAB da P11.
+- Perfil passa a ter Telefone/WhatsApp + consentimento explícito.
+- Somente a própria pessoa pode ativar/desativar o recebimento automático pelo WhatsApp.
+- O antigo botão manual "Abrir WhatsApp" do Recado foi retirado da interface.
+- Recados e demais eventos continuam criando rede_notifications.
+- O serviço do VPS transforma cada rede_notification em mensagem oficial do WhatsApp.
+
+GARANTIA DE DESTINATÁRIO
+O backend NUNCA recebe "all" como telefone.
+Cada documento de rede_notifications possui um único recipientId.
+Quando a UI marca "Todo o grupo", ela cria um documento separado por integrante.
+Antes do WhatsApp, o VPS valida a origem da notificação e só então procura o telefone daquele recipientId.
+
+EXEMPLOS
+- Direcionado para Josy -> só recipientId da Josy -> só telefone da Josy.
+- Ernandes edita arquivo da Josy -> recipientId do proprietário Josy -> só Josy.
+- Todo o grupo -> uma notificação por integrante ativo -> uma mensagem individual para cada opt-in.
+
+PRIVACIDADE DO CHAT
+Mensagem privada não é copiada para o WhatsApp.
+O WhatsApp informa somente quem enviou e que existe uma mensagem privada.
+
+FIRESTORE RULES
+As regras P10 já publicadas continuam compatíveis com a P12.
+Não é necessário republicar Firestore Rules apenas por causa desta atualização.
+O daemon do VPS usa Firebase Admin e grava status de entrega sem expor permissões ao frontend.
+
+VPS
+Veja a pasta vps-whatsapp/.
+O token da Meta deve ficar SOMENTE em /opt/carbonautas-whatsapp/.env com permissão 600.
+A service account existente continua em /opt/carbonautas-bridge/firebase-service-account.json e não deve ser copiada para o GitHub.

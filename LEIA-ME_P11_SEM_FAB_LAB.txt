@@ -1,0 +1,9 @@
+CARBONAUTAS P11 — remoção do botão LAB flutuante
+
+Alteração pequena e rastreável:
+- removido o botão flutuante LAB do canto inferior direito;
+- o Laboratório continua disponível normalmente pelo MENU principal;
+- nenhuma função do Laboratório foi removida;
+- cache/versão PWA atualizado para P11.
+
+WhatsApp automático NÃO foi ativado neste pacote. Esse recurso exige integração server-side com a WhatsApp Business Platform/Cloud API, credenciais da Meta e consentimento explícito dos destinatários. Não é seguro colocar token da Meta no frontend/GitHub Pages.

@@ -1,0 +1,42 @@
+CARBONAUTAS P12 — CHECKLIST PARA FINALIZAR HOJE
+
+A. GITHUB / PWA
+[ ] Substituir index.html
+[ ] Substituir manifest.webmanifest
+[ ] Substituir sw.js
+[ ] Confirmar versão P12 no menu
+
+B. PERFIL / CONSENTIMENTO
+[ ] Cada pessoa entra no próprio perfil
+[ ] Confere o telefone com DDI + DDD
+[ ] Marca "Quero receber no WhatsApp os avisos do Carbonautas destinados a mim"
+[ ] Salva
+
+C. META / WHATSAPP BUSINESS PLATFORM
+[ ] Criar/adicionar WhatsApp ao app Meta
+[ ] Usar número dedicado ao Carbonautas
+[ ] Obter Phone Number ID
+[ ] Criar token permanente com whatsapp_business_messaging
+[ ] Criar template carbonautas_aviso (Utility, pt_BR)
+[ ] Aguardar aprovação do template
+
+D. VPS
+[ ] Enviar CARBONAUTAS_P12_VPS_WHATSAPP_20260907.zip ao VPS
+[ ] Descompactar
+[ ] Executar sudo bash vps-whatsapp/install.sh
+[ ] Executar sudo /opt/carbonautas-whatsapp/configure.sh
+[ ] Verificar: systemctl status carbonautas-whatsapp
+[ ] Ver logs: journalctl -u carbonautas-whatsapp -f
+
+E. TESTES DE ROTEAMENTO
+[ ] Ernandes -> Josy: somente Josy recebe
+[ ] Editar arquivo da Josy: somente Josy recebe
+[ ] Mensagem privada Ernandes -> Josy: somente Josy recebe, sem copiar o texto privado para o WhatsApp
+[ ] Mural direcionado para Josy: somente Josy recebe
+[ ] Mural/recado "Todo o grupo": todos os integrantes ativos com opt-in recebem individualmente
+[ ] Pessoa sem opt-in: recebe no sino do Carbonautas, NÃO recebe WhatsApp
+
+F. SEGURANÇA
+[ ] .env no VPS com chmod 600
+[ ] Token Meta nunca no GitHub
+[ ] firebase-service-account.json nunca no GitHub
