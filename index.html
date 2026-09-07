@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carbonautas · Science OS · P12</title>
+<title>Carbonautas · Science OS · P13</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P12">
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P12">
-<link rel="apple-touch-icon" href="./icon-192.png?v=P12">
+<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P13">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P13">
+<link rel="apple-touch-icon" href="./icon-192.png?v=P13">
 <meta name="theme-color" content="#08152B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1092,6 +1092,25 @@
   .app-version{margin-left:8px;border:1px solid #303039;background:#111114;color:#7eeaf2;border-radius:999px;padding:4px 7px;font-size:9px;font-weight:900;letter-spacing:.06em}
   @media(max-width:760px){.private-wrap{height:calc(100dvh - 116px);padding:8px}.private-head{margin:0 4px 8px}.private-head h2{font-size:22px}.private-head p{display:none}.private-lock{font-size:9px;padding:6px 8px}.private-shell{height:calc(100% - 44px);grid-template-columns:1fr;border-radius:18px}.private-list-pane{border-right:0}.private-chat-pane{display:none}.private-shell.chat-open .private-list-pane{display:none}.private-shell.chat-open .private-chat-pane{display:flex}.private-back{display:inline-grid;place-items:center}.private-messages{padding:14px 10px}.private-msg{max-width:86%}.private-msg-actions{opacity:.75}.private-bubble{font-size:14px}.private-composer-zone{padding:8px}.private-composer{grid-template-columns:40px minmax(0,1fr) 40px}.private-emoji-toggle,.private-send{width:40px;height:40px}.private-list-top{padding:12px}.private-thread-list{padding:5px}}
 
+
+  /* ===== P13 · dossiês, múltiplos arquivos e acesso seletivo ===== */
+  .repo-package-zone{display:flex;flex-direction:column;gap:10px;margin:10px 0 16px}
+  .repo-package-card{border:1px solid #c9d9e4;border-radius:16px;background:linear-gradient(135deg,#fff,#f5fbff);padding:13px 14px;display:flex;gap:12px;align-items:flex-start;box-shadow:0 8px 24px rgba(22,48,62,.06)}
+  .repo-package-icon{width:44px;height:44px;border-radius:13px;background:#e8f4ff;display:grid;place-items:center;font-size:23px;flex:0 0 auto}
+  .repo-package-main{min-width:0;flex:1}.repo-package-title{font-weight:900;color:#173544;font-size:14px}.repo-package-meta{font-size:11px;color:#6d808a;margin-top:4px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  .repo-access-chip{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:3px 7px;background:#eef5f8;color:#395866;font-weight:800;font-size:10px}
+  .repo-access-chip.private{background:#fff1d6;color:#745212}.repo-access-chip.selected{background:#eeeaff;color:#51408f}.repo-access-chip.group{background:#e8fbf0;color:#19653b}
+  .repo-package-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .repo-package-head{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}
+  .repo-package-file{border:1px solid #d8e4ea;background:#fff;border-radius:13px;padding:11px 12px;display:flex;gap:10px;align-items:center;margin-bottom:8px}
+  .repo-package-file .pf-ico{font-size:21px;width:30px;text-align:center}.repo-package-file .pf-main{min-width:0;flex:1}.repo-package-file .pf-name{font-weight:800;word-break:break-word}.repo-package-file .pf-meta{font-size:10px;color:#768a94;margin-top:3px}
+  .repo-upload-pick{border:1px dashed #a9beca;border-radius:13px;padding:12px;background:#f9fcfe}.repo-upload-list{margin-top:8px;display:flex;flex-direction:column;gap:5px;max-height:170px;overflow:auto}
+  .repo-upload-file{font-size:11px;background:#fff;border:1px solid #dbe7ed;border-radius:9px;padding:7px 9px;display:flex;justify-content:space-between;gap:10px}
+  .repo-access-grid{display:grid;grid-template-columns:1fr;gap:7px}.repo-access-option{border:1px solid #d5e1e7;border-radius:12px;padding:9px 10px;background:#fff;display:flex;gap:8px;align-items:flex-start}
+  .repo-access-option input{margin-top:3px}.repo-access-option b{display:block;font-size:12px}.repo-access-option small{display:block;color:#71828b;margin-top:2px;line-height:1.3}
+  .repo-share-people{border:1px solid #dbe7ed;border-radius:12px;padding:9px;max-height:220px;overflow:auto;background:#fbfdff}.repo-share-person{display:flex;align-items:center;gap:8px;padding:7px 5px;border-bottom:1px solid #edf3f6;font-size:12px}.repo-share-person:last-child{border-bottom:0}
+  @media(max-width:760px){.repo-package-card{flex-wrap:wrap}.repo-package-actions{width:100%;justify-content:flex-start}.repo-package-file{align-items:flex-start;flex-wrap:wrap}.repo-package-file .repo-package-actions{padding-left:40px}}
+
 </style>
 </head>
 <body data-view="painel">
@@ -1099,7 +1118,7 @@
 <div class="auth-gate" id="authGate">
   <div class="auth-card">
     <div class="auth-brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P12" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P13" alt="Carbonautas · carbono em ligação"></div>
       <div><h2>Carbonautas</h2><p>Acompanhamento · projetos · rede</p></div>
     </div>
     <div class="auth-login" id="authLoginPane">
@@ -1135,7 +1154,7 @@
 </div>
 
 <div class="loading" id="loading">
-  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P12" alt="Carbonautas · carbono em ligação"></div>
+  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P13" alt="Carbonautas · carbono em ligação"></div>
   <p id="loadingMsg">Conectando à rede…</p>
 </div>
 
@@ -1147,7 +1166,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
     </button>
     <div class="brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P12" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P13" alt="Carbonautas · carbono em ligação"></div>
       <div>
         <h1>Carbonautas</h1>
         <div class="sub">LIPAN · LEFA · CELBE</div>
@@ -1211,7 +1230,7 @@
     <button class="btn ghost" id="adminBtn" title="Modo coordenador">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="lockIcon"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
     </button>
-    <button class="btn" id="recadoBtn" title="Recado">
+    <button class="btn" id="recadoBtn" title="Recado via WhatsApp">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
       <span class="bl">Recado</span>
     </button>
@@ -1226,7 +1245,7 @@
     <aside class="app-menu-drawer" id="appMenuDrawer" role="dialog" aria-modal="true" aria-label="Navegação do Carbonautas">
       <div class="app-menu-head">
         <div class="app-menu-brand">
-          <img src="./icon-192.png?v=P12" alt="" class="app-menu-logo">
+          <img src="./icon-192.png?v=P13" alt="" class="app-menu-logo">
           <div><b>Carbonautas</b><small>Escolha onde quer ir</small></div>
         </div>
         <button type="button" class="app-menu-close" id="appMenuClose" aria-label="Fechar menu">×</button>
@@ -1243,7 +1262,7 @@
         <button type="button" class="app-nav-card c-pink" data-app-view="fotos"><span class="app-nav-icon">📸</span><b>Fotos</b><small>Registros das ações</small></button>
         <button type="button" class="app-nav-card c-lime" data-app-view="pubs"><span class="app-nav-icon">📚</span><b>Repositório</b><small>Arquivos, Office e produtos</small></button>
       </div>
-      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P12</span></div>
+      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P13</span></div>
     </aside>
   </div>
 
@@ -1596,6 +1615,7 @@
           </div>
           <div class="spacer"></div>
           <button class="btn" type="button" id="newOfficeBtn">✨ Novo Word / Excel / PPT</button>
+          <button class="btn" type="button" id="addRepoPackageBtn">📦 Enviar arquivo(s) com acesso</button>
           <button class="btn primary" type="button" id="addPubBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Adicionar publicação
@@ -1620,6 +1640,7 @@
           <select class="mini" id="pubPessoa" style="width:auto"><option value="">Todas as pessoas</option></select>
           <label class="toggle"><input type="checkbox" id="pubMine"> Só as minhas</label>
         </div>
+        <div id="repoPackageList" class="repo-package-zone"></div>
         <div id="pubList"></div>
       </div>
     </div>
@@ -1820,8 +1841,7 @@
         <div class="fg bolsa-field"><label>Início da bolsa</label><input type="date" id="mBolsaInicio"></div>
         <div class="fg bolsa-field"><label>Fim previsto da bolsa</label><input type="date" id="mBolsaFim"></div>
         <div class="fg"><label>Origem ou instituição parceira</label><input id="mOrigem" placeholder="Ex.: Holanda, Radboud"></div>
-        <div class="fg"><label>Telefone / WhatsApp</label><input id="mTelefone" inputmode="tel" autocomplete="tel" placeholder="Ex.: 5565999998888"><div class="hint" style="margin-top:5px">Use DDI + DDD + número. Ex.: 55 65 99999-8888.</div></div>
-        <div class="fg" style="grid-column:1/-1"><label>Notificações automáticas no WhatsApp</label><label class="toggle" style="padding:10px 0 4px;justify-content:flex-start;align-items:flex-start;gap:9px"><input type="checkbox" id="mWhatsappOptIn" style="margin-top:2px"> Quero receber no WhatsApp os avisos do Carbonautas destinados a mim.</label><div class="hint" id="mWhatsappOptHint" style="margin-top:4px;line-height:1.45">Ao ativar, você confirma que informou este número e autoriza o Carbonautas a enviar mensagens de serviço sobre conversas, documentos, tarefas, correções e recados. Você pode desativar quando quiser. Somente a própria pessoa pode ativar esta opção.</div></div>
+        <div class="fg"><label>Telefone (para recado direto)</label><input id="mTelefone" placeholder="Ex.: 5565999998888"></div>
       </div>
       <div class="fg full"><label>Tema de pesquisa</label><textarea id="mTema" placeholder="Descreva o objeto de estudo"></textarea></div>
       <div class="fg full">
@@ -2158,6 +2178,56 @@
   </div>
 </div>
 
+
+<!-- P13 · DOSSIÊ / MÚLTIPLOS ARQUIVOS -->
+<div class="overlay" id="repoPackageUploadOverlay">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-h"><h2>📦 Enviar arquivos com acesso controlado</h2><div class="spacer"></div><button class="btn ghost" data-close="repoPackageUploadOverlay">Fechar</button></div>
+    <div class="modal-b">
+      <div class="notice" style="margin-bottom:12px"><strong>Um propósito, vários arquivos.</strong> Ideal para inscrição de bolsa, processo seletivo, prestação de contas, documentos de projeto ou qualquer conjunto que precise ficar organizado.</div>
+      <div class="fg" id="repoPackageOwnerRow"><label>Proprietário(a) / a quem pertence</label><select id="repoPackageOwner"></select></div>
+      <div class="fg"><label>Nome do conjunto</label><input id="repoPackageTitle" placeholder="Ex.: Inscrição de bolsa 2027 · Josy"></div>
+      <div class="fg"><label>Propósito</label><select id="repoPackagePurpose">
+        <option value="bolsa">🎓 Inscrição / documentação de bolsa</option>
+        <option value="processo">📋 Processo seletivo / inscrição</option>
+        <option value="prestacao">🧾 Prestação de contas</option>
+        <option value="documentos">🗂 Documentos pessoais/acadêmicos</option>
+        <option value="projeto">🔬 Projeto / pesquisa</option>
+        <option value="revisao">✍️ Material para revisão</option>
+        <option value="outro">Outro</option>
+      </select></div>
+      <div class="fg" id="repoPackagePurposeOtherRow" style="display:none"><label>Qual propósito?</label><input id="repoPackagePurposeOther" placeholder="Descreva em poucas palavras"></div>
+      <div class="fg"><label>Quem pode ver?</label>
+        <div class="repo-access-grid">
+          <label class="repo-access-option"><input type="radio" name="repoPackageAccess" value="private" checked><span><b>🔒 Restrito</b><small>Somente o proprietário e quem está enviando.</small></span></label>
+          <label class="repo-access-option"><input type="radio" name="repoPackageAccess" value="selected"><span><b>👥 Pessoas escolhidas</b><small>Você marca exatamente quem poderá abrir os arquivos.</small></span></label>
+          <label class="repo-access-option"><input type="radio" name="repoPackageAccess" value="group"><span><b>🌐 Toda a Rede</b><small>Todos os integrantes ativos do Carbonautas poderão ver.</small></span></label>
+        </div>
+      </div>
+      <div class="fg" id="repoPackagePeopleRow" style="display:none"><label>Escolha as pessoas autorizadas</label><input id="repoPackagePeopleSearch" placeholder="Buscar pessoa..." style="margin-bottom:7px"><div id="repoPackagePeople" class="repo-share-people"></div></div>
+      <div class="fg"><label>Arquivos</label>
+        <div class="repo-upload-pick">
+          <button class="btn" type="button" id="repoPackageFilePick" style="width:100%;justify-content:center">＋ Escolher vários arquivos</button>
+          <input type="file" id="repoPackageFiles" multiple style="display:none">
+          <div class="hint" style="margin-top:7px">Até 20 arquivos por conjunto, 15 MB por arquivo e 120 MB no total.</div>
+          <div id="repoPackageSelectedFiles" class="repo-upload-list"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-f"><button class="btn" data-close="repoPackageUploadOverlay">Cancelar</button><button class="btn primary" id="repoPackageSaveBtn">Enviar conjunto</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="repoPackageOverlay">
+  <div class="modal" style="max-width:760px">
+    <div class="modal-h"><h2 id="repoPackageDetailTitle">📦 Conjunto de arquivos</h2><div class="spacer"></div><button class="btn ghost" data-close="repoPackageOverlay">Fechar</button></div>
+    <div class="modal-b">
+      <div id="repoPackageDetailMeta"></div>
+      <div id="repoPackageDetailFiles" style="margin-top:12px"></div>
+    </div>
+  </div>
+</div>
+
 <!-- RECADO MODAL -->
 <div class="overlay" id="recadoOverlay">
   <div class="modal" style="max-width:520px">
@@ -2176,7 +2246,16 @@
       </div>
       <div class="fg"><label>Mensagem</label><textarea id="rMsg" placeholder="Escreva o recado" style="min-height:90px"></textarea></div>
       <div class="fg"><label>Pré-visualização</label><div class="recado-prev" id="rPrev"></div></div>
-      <div class="notice" style="margin-top:8px"><strong>📲 WhatsApp automático.</strong> Depois de publicar, o Carbonautas cria uma notificação individual para cada destinatário. Quem tiver número cadastrado e consentimento ativado recebe o aviso automaticamente. Se você escolher <strong>Todo o grupo</strong>, cada integrante elegível recebe uma mensagem individual — nunca uma conversa coletiva no WhatsApp.</div>
+      <details style="margin-top:4px">
+        <summary style="cursor:pointer;font-size:12.5px;font-weight:600;color:var(--ink-3)">Também enviar pelo WhatsApp</summary>
+        <div style="margin-top:12px">
+          <div class="fg"><label>Link do grupo no WhatsApp (opcional)</label><input id="rGroup" placeholder="https://chat.whatsapp.com/..."></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn" id="rCopy" style="flex:1;justify-content:center">Copiar texto</button>
+            <button class="btn" id="rOpen" style="flex:1;justify-content:center">Abrir WhatsApp</button>
+          </div>
+        </div>
+      </details>
     </div>
     <div class="modal-f">
       <button class="btn" data-close="recadoOverlay">Cancelar</button>
@@ -2323,7 +2402,7 @@ const SEED_VINCULOS = [
 ];
 
 /* ============ STATE ============ */
-let state = { members: [], chat: [], schedule: [], photos: [], publicacoes: [], activities: [], feed: [], comments: [], reactions: [], notifications: [], users: [], privateThreads: [], privateDirectory: [], linhas: DEFAULT_LINHAS.slice(), settings: {groupLink:''} };
+let state = { members: [], chat: [], schedule: [], photos: [], publicacoes: [], repositoryPackages: [], activities: [], feed: [], comments: [], reactions: [], notifications: [], users: [], privateThreads: [], privateDirectory: [], linhas: DEFAULT_LINHAS.slice(), settings: {groupLink:''} };
 let hiddenNiveis = new Set();
 let hiddenLinhas = new Set();
 let selectedId = null;
@@ -2394,6 +2473,7 @@ function scholarshipHTML(m,compact=false){
 function memberRepositoryItems(memberId){
   const out=[];
   state.publicacoes.filter(p=>p.memberId===memberId).forEach(p=>out.push({source:'publicacao',id:p.id,title:p.titulo||p.fileName||'Documento',kind:(CATEGORIAS[p.categoria]?.label||p.categoriaOutro||p.categoria||'Publicação'),url:p.url||'',fileName:p.fileName||'',isFile:p.tipo==='arquivo',ts:p.ts,reviewFlow:!!p.reviewFlow,reviewVersion:p.reviewVersion||0,reviewStatus:p.reviewStatus||'',reviewReviewerId:p.reviewReviewerId||'',reviewReturnToId:p.reviewReturnToId||'',reviewNextRecipientId:p.reviewNextRecipientId||'',reviewNote:p.reviewNote||'',onlineEditVersion:p.onlineEditVersion||1,raw:p}));
+  state.repositoryPackages.filter(p=>p.ownerMemberId===memberId).forEach(p=>out.push({source:'package',id:p.id,title:p.title||'Conjunto de arquivos',kind:'Dossiê · '+repoPurposeLabel(p),url:'',fileName:'',isFile:false,ts:p.ts,package:p}));
   state.activities.filter(a=>a.ownerId===memberId && (a.fileUrl||a.externalUrl)).forEach(a=>out.push({source:'atividade',id:a.id,title:a.title||'Registro de acompanhamento',kind:ACTIVITY_TYPES[a.type]||a.type||'Acompanhamento',url:a.fileUrl||a.externalUrl||'',fileName:a.fileName||'',isFile:!!a.fileUrl,ts:a.updatedAt||a.createdAt}));
   const m=memberById(memberId); (m?.resultados||[]).forEach((r,i)=>{if(r.url)out.push({source:'resultado',id:'r'+i,title:r.titulo||'Resultado / produto',kind:'Resultado / produto',url:r.url,fileName:'',isFile:false,ts:null})});
   return out.sort((a,b)=>{const ta=a.ts?.toMillis?a.ts.toMillis():0,tb=b.ts?.toMillis?b.ts.toMillis():0;return tb-ta});
@@ -2408,7 +2488,7 @@ function renderMemberRepository(){
   const canAdd=isAdmin||isMe(m.id); $('#repoAddBtn').style.display=canAdd?'inline-flex':'none';
   $('#repoList').innerHTML=list.length?list.map(it=>{
     const icon=it.reviewFlow?'✍️':(it.isFile?'📄':'🔗');
-    const view=it.raw?.labRun?`<button class="btn primary" type="button" onclick="openLabRun('${it.raw.labRunId}')">📈 Resultados</button>`:it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Visualizar</button><button class="btn review-download" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Baixar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;
+    const view=it.source==='package'?`<button class="btn ghost" type="button" onclick="openRepositoryPackage('${it.id}')">📦 Abrir dossiê</button>`:it.raw?.labRun?`<button class="btn primary" type="button" onclick="openLabRun('${it.raw.labRunId}')">📈 Resultados</button>`:it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Visualizar</button><button class="btn review-download" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Baixar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;
     const rev=it.reviewFlow?reviewBadgeHTML(it.raw):'';
     const online=it.source==='publicacao'?officeActionButtons(it.raw):'';
     const respond=it.reviewFlow&&canActOnReview(it.raw)?`<button class="btn review-action" type="button" onclick="openReviewResponse('${it.id}')">${reviewActionLabel(it.raw)}</button>`:'';
@@ -2556,6 +2636,19 @@ function subscribeAll(){
     state.publicacoes=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='pubs') renderPubs(); if(currentView==='lab') renderLab(); if(currentView==='painel') renderPainel(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
   }));
+  // P13 · DOSSIÊS/CONJUNTOS COM ACL EXPLÍCITA
+  if(myId){
+    try{
+      const pq=f.query(f.collection(window.db,'rede_repository_packages'),f.where('allowedMemberIds','array-contains',myId));
+      subscriptions.push(f.onSnapshot(pq,snap=>{
+        state.repositoryPackages=snap.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>{
+          const ta=a.ts?.toMillis?a.ts.toMillis():0,tb=b.ts?.toMillis?b.ts.toMillis():0;return tb-ta;
+        });
+        if(currentView==='pubs')renderPubs();
+        if($('#repoOverlay')?.classList.contains('open'))renderMemberRepository();
+      },e=>{console.warn('Dossiês privados indisponíveis:',e);state.repositoryPackages=[];}));
+    }catch(e){console.warn('Não consegui iniciar a consulta de dossiês:',e)}
+  }
   // ACOMPANHAMENTO
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_activities'),f.orderBy('updatedAt','desc')),snap=>{
     state.activities=snap.docs.map(d=>({...d.data(),id:d.id}));
@@ -3340,8 +3433,6 @@ function openMember(id){
   $('#mPrograma').value=m?m.programa:''; $('#mStatus').value=m?m.status:'ativo';
   $('#mBolsista').checked=!!m?.bolsista; $('#mBolsaModalidade').value=m?m.bolsaModalidade||'':''; $('#mBolsaInicio').value=m?m.bolsaInicio||'':''; $('#mBolsaFim').value=m?m.bolsaFim||'':'';
   $('#mOrigem').value=m?m.origem||'':''; $('#mTelefone').value=m?m.telefone||'':'';
-  const waOpt=$('#mWhatsappOptIn'),waHint=$('#mWhatsappOptHint');
-  if(waOpt){waOpt.checked=!!m?.whatsappOptIn;const waSelf=!!(m&&isMe(id));waOpt.disabled=!waSelf;if(waHint)waHint.textContent=waSelf?'Ao ativar, você confirma que informou este número e autoriza o Carbonautas a enviar mensagens de serviço sobre conversas, documentos, tarefas, correções e recados. Você pode desativar quando quiser.':'Somente a própria pessoa pode ativar ou desativar o recebimento automático pelo WhatsApp.';}
   $('#mTema').value=m?m.tema:''; $('#mPlataforma').value=m?m.plataforma||'':''; $('#mDrive').value=m?m.driveLink||'':'';
   $('#mNotas').value=m?m.notas||'':'';
   const lockField=(el,locked)=>{el.disabled=locked};
@@ -3453,16 +3544,10 @@ async function saveMember(){
     }catch(e){ console.error(e); toast('Falha ao enviar a foto. Salvando sem imagem.'); fotoUrl=''; }
   }
 
-  const existingMember=editingId?memberById(editingId):null;
-  const canChangeWhatsapp=!!(editingId&&isMe(editingId));
-  const whatsappOptIn=canChangeWhatsapp?!!$('#mWhatsappOptIn')?.checked:!!existingMember?.whatsappOptIn;
-  const whatsappConsentChanged=canChangeWhatsapp && whatsappOptIn!==!!existingMember?.whatsappOptIn;
   const data={
     nome, nivel:$('#mNivel').value, programa:$('#mPrograma').value.trim(), status:$('#mStatus').value,
     bolsista:$('#mBolsista').checked, bolsaModalidade:$('#mBolsaModalidade').value.trim(), bolsaInicio:$('#mBolsaInicio').value, bolsaFim:$('#mBolsaFim').value,
     origem:$('#mOrigem').value.trim(), telefone:$('#mTelefone').value.trim(),
-    whatsappOptIn, whatsappOptInTextVersion:'2026-09-07',
-    ...(whatsappConsentChanged?{whatsappOptInAt:whatsappOptIn?FB().serverTimestamp():null,whatsappOptOutAt:whatsappOptIn?null:FB().serverTimestamp()}:{}),
     tema:$('#mTema').value.trim(), plataforma:$('#mPlataforma').value.trim(), driveLink:$('#mDrive').value.trim(), notas:$('#mNotas').value.trim(),
     linhas:[...formLinhas], resultados:formResultados.filter(r=>r.titulo||r.url), prazos:formPrazos.filter(p=>p.titulo), foto:fotoUrl,
     hub:$('#mHub').checked, hubMotivo:$('#mHubMotivo').value.trim(),
@@ -3548,20 +3633,31 @@ function showWorkbookSheet(i){
   const ws=previewWorkbook.Sheets[names[i]], html=window.XLSX.utils.sheet_to_html(ws,{id:'excelTable'});
   const el=$('#excelSheet'); if(el) el.innerHTML=sanitizePreviewHtml(html);
 }
+function externalViewerUrl(url,ext=''){
+  const e=String(ext||'').toLowerCase(),safe=encodeURIComponent(url);
+  if(['doc','docx','ppt','pptx','xls','xlsx','rtf','odt','ods','odp'].includes(e))return `https://view.officeapps.live.com/op/view.aspx?src=${safe}`;
+  if(e==='pdf')return `https://docs.google.com/gview?embedded=0&url=${safe}`;
+  return url;
+}
 async function openFilePreview(url,name='Arquivo'){
   if(!url)return; const ext=inferFileExt(url,name), body=$('#filePreviewBody');
   currentPreviewUrl=url; currentPreviewName=name||'Arquivo';
-  $('#filePreviewTitle').textContent=name||'Visualizar arquivo'; $('#filePreviewOpen').href=url; $('#filePreviewDownload').href=url;
+  $('#filePreviewTitle').textContent=name||'Visualizar arquivo'; $('#filePreviewOpen').href=externalViewerUrl(url,ext); $('#filePreviewDownload').href=url;
   if(previewObjectUrl){URL.revokeObjectURL(previewObjectUrl);previewObjectUrl=''} previewWorkbook=null;
   body.innerHTML='<div class="preview-loading">Abrindo arquivo…</div>'; openOverlay('filePreviewOverlay');
   const images=['png','jpg','jpeg','webp','gif','svg'];
   if(ext==='pdf'){
-    // PDF: abre diretamente pela URL do Firebase, sem fetch/CORS.
-    body.innerHTML=`<object class="file-preview-frame" data="${esc(url)}#toolbar=1&navpanes=1&view=FitH" type="application/pdf"><iframe class="file-preview-frame" src="${esc(url)}#toolbar=1&navpanes=1&view=FitH" title="${esc(name)}"></iframe></object>`;
+    // P13: o visualizador PDF nativo embutido do Chrome/Android é inconsistente.
+    const mobile=/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent||'')||window.innerWidth<=760;
+    body.innerHTML=mobile?onlineViewerHtml(url,name,'google'):`<object class="file-preview-frame" data="${esc(url)}#toolbar=1&navpanes=1&view=FitH" type="application/pdf"><iframe class="file-preview-frame" src="${esc(url)}#toolbar=1&navpanes=1&view=FitH" title="${esc(name)}"></iframe></object>`;
     return;
   }
   if(images.includes(ext)){
     body.innerHTML=`<div class="file-preview-fallback"><img class="file-preview-img" src="${esc(url)}" alt="${esc(name)}"></div>`;
+    return;
+  }
+  if(['doc','rtf','odt'].includes(ext)){
+    body.innerHTML=onlineViewerHtml(url,name,'office');
     return;
   }
   if(ext==='docx'){
@@ -4097,6 +4193,7 @@ function renderPubs(){
   refreshPubFilters();
   const wrap=$('#pubList');
   const cat=$('#pubCategoria').value, pessoa=$('#pubPessoa').value, mine=$('#pubMine').checked;
+  const packageCount=renderRepoPackages(cat,pessoa,mine);
   let list=state.publicacoes;
   if(cat) list=list.filter(p=>p.categoria===cat);
   if(pessoa) list=list.filter(p=>p.memberId===pessoa);
@@ -4104,7 +4201,7 @@ function renderPubs(){
     if(!myId){ toast('Identifique-se primeiro para ver só as suas.'); $('#pubMine').checked=false; }
     else list=list.filter(p=>p.memberId===myId);
   }
-  if(!list.length){ wrap.innerHTML='<div class="crono-empty">Nenhuma publicação encontrada com esses filtros.</div>'; return; }
+  if(!list.length){ wrap.innerHTML=packageCount?'':'<div class="crono-empty">Nenhuma publicação encontrada com esses filtros.</div>'; return; }
   wrap.innerHTML=list.map(p=>{
     const cfg=CATEGORIAS[p.categoria]||CATEGORIAS.outro;
     const catLabel = p.categoria==='outro' && p.categoriaOutro ? p.categoriaOutro : cfg.label;
@@ -4139,6 +4236,41 @@ function renderPubs(){
     </div>`;
   }).join('');
 }
+
+/* ============ P13 · DOSSIÊS / MÚLTIPLOS ARQUIVOS COM ACL ============ */
+let repoPackageSelectedFiles=[],activeRepoPackageId='';
+const REPO_PURPOSES={bolsa:'Inscrição / bolsa',processo:'Processo seletivo / inscrição',prestacao:'Prestação de contas',documentos:'Documentos pessoais/acadêmicos',projeto:'Projeto / pesquisa',revisao:'Material para revisão',outro:'Outro'};
+function repoPurposeLabel(p){return p?.purpose==='outro'?(p.purposeOther||'Outro'):(REPO_PURPOSES[p?.purpose]||'Conjunto de arquivos')}
+function repoAccessLabel(p){
+  const mode=p?.accessMode||'private',n=(p?.allowedMemberIds||[]).length;
+  if(mode==='group')return {cls:'group',text:'🌐 Toda a Rede'};
+  if(mode==='selected')return {cls:'selected',text:`👥 ${Math.max(0,n)} autorizado${n===1?'':'s'}`};
+  return {cls:'private',text:'🔒 Restrito'};
+}
+function canManageRepoPackage(p){if(!p||!window.auth?.currentUser)return false;return p.createdByUid===window.auth.currentUser.uid||p.ownerMemberId===myId}
+function renderRepoPackages(cat='',pessoa='',mine=false){
+  const wrap=$('#repoPackageList');if(!wrap)return;if(cat){wrap.innerHTML='';wrap.style.display='none';return}
+  let list=[...(state.repositoryPackages||[])];if(pessoa)list=list.filter(p=>p.ownerMemberId===pessoa);if(mine&&myId)list=list.filter(p=>p.ownerMemberId===myId||p.createdByMemberId===myId);
+  wrap.style.display=list.length?'flex':'none';wrap.innerHTML=list.map(p=>{const owner=memberById(p.ownerMemberId),a=repoAccessLabel(p),dt=p.ts?.toMillis?new Date(p.ts.toMillis()):null,date=dt?dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}):'';return `<div class="repo-package-card"><div class="repo-package-icon">📦</div><div class="repo-package-main"><div class="repo-package-title">${esc(p.title||'Conjunto de arquivos')}</div><div class="repo-package-meta"><span>${esc(repoPurposeLabel(p))}</span><span>·</span><span>${esc(p.ownerName||owner?.nome||'')}</span>${date?`<span>· ${date}</span>`:''}<span class="repo-access-chip ${a.cls}">${esc(a.text)}</span><span>${Number(p.fileCount||0)} arquivo${Number(p.fileCount||0)===1?'':'s'}</span></div></div><div class="repo-package-actions"><button class="btn ghost" type="button" onclick="openRepositoryPackage('${p.id}')">Abrir</button>${canManageRepoPackage(p)?`<button class="mini-x" type="button" onclick="deleteRepositoryPackage('${p.id}')" title="Excluir conjunto">×</button>`:''}</div></div>`}).join('');
+  return list.length;
+}
+function repoFileIcon(name=''){const e=inferFileExt('',name);if(e==='pdf')return'📕';if(['doc','docx','rtf','odt'].includes(e))return'📄';if(['xls','xlsx','csv'].includes(e))return'📊';if(['ppt','pptx'].includes(e))return'📽️';if(['png','jpg','jpeg','webp','gif','svg'].includes(e))return'🖼️';return'📎'}
+function humanBytes(n=0){n=Number(n)||0;if(n<1024)return n+' B';if(n<1048576)return(n/1024).toFixed(1)+' KB';return(n/1048576).toFixed(1)+' MB'}
+async function openRepositoryPackage(id){
+  const p=state.repositoryPackages.find(x=>x.id===id);if(!p)return toast('Este conjunto não está disponível para sua conta.');activeRepoPackageId=id;$('#repoPackageDetailTitle').textContent='📦 '+(p.title||'Conjunto de arquivos');const a=repoAccessLabel(p),owner=memberById(p.ownerMemberId);$('#repoPackageDetailMeta').innerHTML=`<div class="repo-package-head"><span class="repo-access-chip ${a.cls}">${esc(a.text)}</span><span class="repo-access-chip">${esc(repoPurposeLabel(p))}</span><span class="repo-access-chip">👤 ${esc(p.ownerName||owner?.nome||'')}</span></div>`;$('#repoPackageDetailFiles').innerHTML='<div class="preview-loading">Carregando arquivos autorizados…</div>';openOverlay('repoPackageOverlay');
+  try{const f=FB(),snap=await f.getDocs(f.collection(f.doc(window.db,'rede_repository_packages',id),'files'));const files=snap.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>(a.order||0)-(b.order||0));$('#repoPackageDetailFiles').innerHTML=files.length?files.map(x=>`<div class="repo-package-file"><div class="pf-ico">${repoFileIcon(x.fileName)}</div><div class="pf-main"><div class="pf-name">${esc(x.fileName||x.title||'Arquivo')}</div><div class="pf-meta">${esc((x.ext||inferFileExt('',x.fileName)||'arquivo').toUpperCase())} · ${esc(humanBytes(x.size||0))}</div></div><div class="repo-package-actions"><button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(x.url||'')}'),decodeURIComponent('${encodeURIComponent(x.fileName||'Arquivo')}'))">👁 Ver</button><button class="btn" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(x.url||'')}'),decodeURIComponent('${encodeURIComponent(x.fileName||'arquivo')}'))">⬇ Baixar</button></div></div>`).join(''):'<div class="repo-empty">Nenhum arquivo neste conjunto.</div>'}catch(e){console.error(e);$('#repoPackageDetailFiles').innerHTML='<div class="repo-empty">Não foi possível abrir os arquivos. Verifique se sua conta ainda está autorizada.</div>'}
+}
+async function fileToDataUrl(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('Falha ao ler '+file.name));r.readAsDataURL(file)})}
+function renderRepoPackagePeople(){const q=($('#repoPackagePeopleSearch')?.value||'').trim().toLowerCase(),wrap=$('#repoPackagePeople');if(!wrap)return;const owner=$('#repoPackageOwner')?.value||myId;wrap.innerHTML=state.members.filter(m=>m.status!=='inativo'&&(!q||m.nome.toLowerCase().includes(q))).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>`<label class="repo-share-person"><input type="checkbox" value="${m.id}" ${m.id===owner||m.id===myId?'checked disabled':''}><span>${esc(m.nome)}</span>${m.id===owner?'<small>proprietário</small>':''}${m.id===myId&&m.id!==owner?'<small>você</small>':''}</label>`).join('')}
+function updateRepoPackageAccessUI(){const mode=document.querySelector('input[name="repoPackageAccess"]:checked')?.value||'private';$('#repoPackagePeopleRow').style.display=mode==='selected'?'block':'none';if(mode==='selected')renderRepoPackagePeople()}
+function renderRepoSelectedFiles(){const wrap=$('#repoPackageSelectedFiles');if(!wrap)return;wrap.innerHTML=repoPackageSelectedFiles.length?repoPackageSelectedFiles.map((f,i)=>`<div class="repo-upload-file"><span>${i+1}. ${esc(f.name)}</span><b>${esc(humanBytes(f.size))}</b></div>`).join(''):''}
+function handleRepoPackageFiles(files){const list=[...(files||[])];if(!list.length)return;if(list.length>20){toast('Escolha no máximo 20 arquivos por conjunto.');return}const tooBig=list.find(f=>f.size>15*1024*1024);if(tooBig){toast(`“${tooBig.name}” passa de 15 MB.`);return}const total=list.reduce((s,f)=>s+f.size,0);if(total>120*1024*1024){toast('O conjunto ultrapassa 120 MB. Divida em dois conjuntos.');return}repoPackageSelectedFiles=list;renderRepoSelectedFiles()}
+function openRepoPackageUpload(){if(!window.auth?.currentUser||!myId)return toast('Entre com seu perfil para enviar arquivos.');repoPackageSelectedFiles=[];renderRepoSelectedFiles();const sel=$('#repoPackageOwner'),ordered=[...state.members].filter(m=>m.status!=='inativo').sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));sel.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');sel.value=myId;$('#repoPackageOwnerRow').style.display=isAdmin?'block':'none';if(!isAdmin)sel.value=myId;$('#repoPackageTitle').value='';$('#repoPackagePurpose').value='bolsa';$('#repoPackagePurposeOther').value='';$('#repoPackagePurposeOtherRow').style.display='none';document.querySelector('input[name="repoPackageAccess"][value="private"]').checked=true;$('#repoPackagePeopleSearch').value='';updateRepoPackageAccessUI();openOverlay('repoPackageUploadOverlay');setTimeout(()=>$('#repoPackageTitle')?.focus(),60)}
+function selectedRepoPackageAllowedIds(ownerId,mode){const ids=new Set([ownerId,myId].filter(Boolean));if(mode==='group')state.members.filter(m=>m.status!=='inativo').forEach(m=>ids.add(m.id));if(mode==='selected')document.querySelectorAll('#repoPackagePeople input[type="checkbox"]:checked').forEach(x=>ids.add(x.value));return[...ids]}
+async function saveRepoPackage(){const btn=$('#repoPackageSaveBtn'),ownerId=isAdmin?$('#repoPackageOwner').value:myId,title=$('#repoPackageTitle').value.trim(),purpose=$('#repoPackagePurpose').value,purposeOther=$('#repoPackagePurposeOther').value.trim(),mode=document.querySelector('input[name="repoPackageAccess"]:checked')?.value||'private';if(!ownerId)return toast('Defina o proprietário.');if(!title)return toast('Dê um nome ao conjunto.');if(purpose==='outro'&&!purposeOther)return toast('Descreva o propósito.');if(!repoPackageSelectedFiles.length)return toast('Escolha pelo menos um arquivo.');const allowedMemberIds=selectedRepoPackageAllowedIds(ownerId,mode);if(mode==='selected'&&allowedMemberIds.length<2&&ownerId===myId)return toast('Escolha pelo menos uma pessoa para compartilhar, ou use “Restrito”.');const f=FB(),uid=window.auth.currentUser.uid,owner=memberById(ownerId),actor=currentActor(),ref=f.doc(f.collection(window.db,'rede_repository_packages')),ownerUid=(state.users||[]).find(u=>u.memberId===ownerId)?.uid||'';try{btn.disabled=true;await f.setDoc(ref,{title,purpose,purposeOther,accessMode:mode,allowedMemberIds,ownerMemberId:ownerId,ownerUid,ownerName:owner?.nome||'',createdByUid:uid,createdByMemberId:myId,createdByName:actor?.name||myName||'',fileCount:0,ts:f.serverTimestamp(),updatedAt:f.serverTimestamp()});let ok=0;for(let i=0;i<repoPackageSelectedFiles.length;i++){const file=repoPackageSelectedFiles[i];btn.textContent=`Enviando ${i+1}/${repoPackageSelectedFiles.length}…`;const dataUrl=await fileToDataUrl(file),up=await fbUploadFile('dossie_'+ref.id,dataUrl,file.name),child=f.doc(f.collection(ref,'files'));await f.setDoc(child,{fileName:file.name,title:file.name.replace(/\.[^.]+$/,''),url:up.url,storagePath:up.path,size:file.size,mimeType:file.type||'',ext:inferFileExt('',file.name),order:i,createdByUid:uid,ts:f.serverTimestamp()});ok++}await f.updateDoc(ref,{fileCount:ok,updatedAt:f.serverTimestamp()});const recipients=allowedMemberIds.filter(id=>id&&id!==myId);await Promise.allSettled(recipients.map(id=>createRepoNotification(id,{kind:'repositorio_pacote',sourceType:'repositorio_pacote',sourceId:ref.id,ownerId,title:'📦 Arquivos compartilhados com você',message:`${actor?.name||'Um Carbonauta'} compartilhou “${title}” (${ok} arquivo${ok===1?'':'s'}).`})));closeOverlay('repoPackageUploadOverlay');toast(`Conjunto salvo com ${ok} arquivo${ok===1?'':'s'}. ${recipients.length?recipients.length+' pessoa(s) notificada(s).':''}`)}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou o dossiê. Publique as regras P13.':(e.message||'Erro ao enviar o conjunto.'))}finally{btn.disabled=false;btn.textContent='Enviar conjunto'}}
+async function deleteRepositoryPackage(id){const p=state.repositoryPackages.find(x=>x.id===id);if(!p||!canManageRepoPackage(p))return toast('Você não pode excluir este conjunto.');if(!confirm(`Excluir “${p.title||'este conjunto'}” e seus arquivos?`))return;try{const f=FB(),pref=f.doc(window.db,'rede_repository_packages',id),snap=await f.getDocs(f.collection(pref,'files'));for(const d of snap.docs){const x=d.data();if(x.storagePath){try{await f.deleteObject(f.sRef(window.storage,x.storagePath))}catch(_e){}}await f.deleteDoc(d.ref)}await f.deleteDoc(pref);closeOverlay('repoPackageOverlay');toast('Conjunto excluído.')}catch(e){console.error(e);toast(e.message||'Não foi possível excluir o conjunto.')}}
+window.openRepositoryPackage=openRepositoryPackage;window.deleteRepositoryPackage=deleteRepositoryPackage;
+
 let pubTipo='link', pubFileData='', pubFileName='', pubReviewContext=null;
 function reviewStatusLabel(p){
   if(!p?.reviewFlow)return '';
@@ -4408,7 +4540,7 @@ async function downloadRepoFile(url,name='arquivo'){
 function openReviewResponse(id){const p=state.publicacoes.find(x=>x.id===id);if(!p||!p.reviewFlow)return;openPubModal(p.memberId,{...p,id})}
 async function createRepoNotification(recipientId,meta={}){
   if(!recipientId||recipientId===myId)return;const me=currentActor(),f=FB();
-  try{await f.addDoc(f.collection(window.db,'rede_notifications'),{recipientId,senderId:me?.id||myId||'',senderUid:window.auth.currentUser?.uid||'',senderName:me?.name||'Carbonauta',kind:meta.kind||'correcao',title:meta.title||'✍️ Arquivo para correção',message:(meta.message||'').slice(0,240),sourceType:'repositorio_correcao',sourceId:meta.sourceId||'',ownerId:meta.ownerId||'',read:false,ts:f.serverTimestamp()})}catch(e){console.warn('Não foi possível criar a notificação do Repositório',e)}
+  try{await f.addDoc(f.collection(window.db,'rede_notifications'),{recipientId,senderId:me?.id||myId||'',senderUid:window.auth.currentUser?.uid||'',senderName:me?.name||'Carbonauta',kind:meta.kind||'correcao',title:meta.title||'✍️ Arquivo para correção',message:(meta.message||'').slice(0,240),sourceType:meta.sourceType||'repositorio_correcao',sourceId:meta.sourceId||'',ownerId:meta.ownerId||'',read:false,ts:f.serverTimestamp()})}catch(e){console.warn('Não foi possível criar a notificação do Repositório',e)}
 }
 async function openPubModal(presetMemberId=null,reviewContext=null){
   try{
@@ -4809,7 +4941,7 @@ async function dedupeMembers(){
 
 /* ============ NOTIFICAÇÕES ============ */
 function notifMillis(n){return n?.ts?.toMillis?n.ts.toMillis():+new Date(n?.ts||0)}
-function notificationIcon(kind='atualizacao'){return ({ajuda_campo:'🌿',ajuda_lab:'🧪',ajuda_dados:'📊',ajuda_outro:'🆘',alerta:'⚠️',ideia:'💡',resenha:'😂',recado:'✈️',atualizacao:'📌',resultado:'✅',evento:'📅',acompanhamento:'📌',correcao:'✍️',pendencia:'⚠️',repositorio_correcao:'✍️',repositorio_retorno:'🔁',private_message:'🔐'})[kind]||'🔔'}
+function notificationIcon(kind='atualizacao'){return ({ajuda_campo:'🌿',ajuda_lab:'🧪',ajuda_dados:'📊',ajuda_outro:'🆘',alerta:'⚠️',ideia:'💡',resenha:'😂',recado:'✈️',atualizacao:'📌',resultado:'✅',evento:'📅',acompanhamento:'📌',correcao:'✍️',pendencia:'⚠️',repositorio_correcao:'✍️',repositorio_retorno:'🔁',repositorio_pacote:'📦',private_message:'🔐'})[kind]||'🔔'}
 function renderNotificationUI(){
   const unread=state.notifications.filter(n=>!n.read).length,b=$('#notifyBadge');
   if(b){b.textContent=unread>99?'99+':unread;b.style.display=unread?'grid':'none'}
@@ -4822,7 +4954,7 @@ async function openNotification(id){
   const n=state.notifications.find(x=>x.id===id);if(!n)return;
   try{await FB().updateDoc(FB().doc(window.db,'rede_notifications',id),{read:true,readAt:FB().serverTimestamp()})}catch(e){console.warn(e)}
   closeOverlay('notifyOverlay');
-  if(n.sourceType==='acompanhamento'){switchView('track');setTimeout(()=>{if(n.ownerId&&$('#trackOwner')){$('#trackOwner').value=n.ownerId;renderTrack()}},40)} else if(n.sourceType==='repositorio_correcao'){switchView('pubs');setTimeout(()=>{if(n.ownerId&&$('#pubPessoa')){$('#pubPessoa').value=n.ownerId;renderPubs()}},50)} else if(n.sourceType==='private_chat'){switchView('conversas');setTimeout(()=>openPrivateThread(n.threadId||n.sourceId),80)} else switchView('mural');
+  if(n.sourceType==='acompanhamento'){switchView('track');setTimeout(()=>{if(n.ownerId&&$('#trackOwner')){$('#trackOwner').value=n.ownerId;renderTrack()}},40)} else if(n.sourceType==='repositorio_correcao'){switchView('pubs');setTimeout(()=>{if(n.ownerId&&$('#pubPessoa')){$('#pubPessoa').value=n.ownerId;renderPubs()}},50)} else if(n.sourceType==='repositorio_pacote'){switchView('pubs');setTimeout(()=>openRepositoryPackage(n.sourceId),100)} else if(n.sourceType==='private_chat'){switchView('conversas');setTimeout(()=>openPrivateThread(n.threadId||n.sourceId),80)} else switchView('mural');
 }
 async function markAllNotificationsRead(){
   const unread=state.notifications.filter(n=>!n.read);if(!unread.length){toast('Não há notificações novas.');return}
@@ -4840,7 +4972,7 @@ function updateNotificationPermissionHint(){
 function showDeviceNotification(n){
   if(!('Notification' in window)||Notification.permission!=='granted')return;
   if(document.visibilityState==='visible'&&((currentView==='mural'&&n.sourceType!=='private_chat')||(currentView==='conversas'&&n.sourceType==='private_chat')))return;
-  try{const note=new Notification(n.title||'Carbonautas',{body:n.message||'Nova notificação',icon:'./icons/icon-192.png',badge:'./icons/icon-192.png',tag:'carbonautas-'+(n.sourceId||n.id)});note.onclick=()=>{window.focus();if(n.sourceType==='repositorio_correcao')switchView('pubs');else if(n.sourceType==='acompanhamento')switchView('track');else if(n.sourceType==='private_chat'){switchView('conversas');setTimeout(()=>openPrivateThread(n.threadId||n.sourceId),80)}else switchView('mural');note.close()}}catch(e){console.warn('Notificação nativa falhou',e)}
+  try{const note=new Notification(n.title||'Carbonautas',{body:n.message||'Nova notificação',icon:'./icons/icon-192.png',badge:'./icons/icon-192.png',tag:'carbonautas-'+(n.sourceId||n.id)});note.onclick=()=>{window.focus();if(n.sourceType==='repositorio_correcao')switchView('pubs');else if(n.sourceType==='repositorio_pacote'){switchView('pubs');setTimeout(()=>openRepositoryPackage(n.sourceId),100)}else if(n.sourceType==='acompanhamento')switchView('track');else if(n.sourceType==='private_chat'){switchView('conversas');setTimeout(()=>openPrivateThread(n.threadId||n.sourceId),80)}else switchView('mural');note.close()}}catch(e){console.warn('Notificação nativa falhou',e)}
 }
 async function createMuralNotifications(dest,meta={}){
   const me=currentActor();if(!me?.id)return;
@@ -4857,6 +4989,7 @@ function openRecado(){
   const sel=$('#rDest');
   sel.innerHTML='<option value="all">Todo o grupo</option>'+
     state.members.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');
+  $('#rGroup').value=state.settings.groupLink||'';
   $('#rMsg').value=''; $('#rPrioridade').value='media'; updateRecadoPrev();
   openOverlay('recadoOverlay');
 }
@@ -4885,6 +5018,24 @@ async function sendRecado(){
     closeOverlay('recadoOverlay');
     toast(para?'Recado publicado e '+(memberById(para)?.nome||'')+' foi notificado.':'Recado publicado e o grupo foi notificado.');
   }catch(e){ console.error(e); toast('Erro ao publicar. Verifique a conexão.'); }
+}
+function copyRecado(){
+  navigator.clipboard.writeText($('#rPrev').textContent).then(()=>toast('Recado copiado. Cole no WhatsApp.'));
+}
+async function openWhats(){
+  const dest=$('#rDest').value, msg=$('#rPrev').textContent;
+  state.settings.groupLink=$('#rGroup').value.trim();
+  try{ await fbSaveSettings(); }catch(e){}
+  if(dest!=='all'){
+    const m=state.members.find(x=>x.id===dest);
+    if(m&&m.telefone){ window.open(`https://wa.me/${m.telefone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`,'_blank'); return; }
+    navigator.clipboard.writeText(msg); toast('Sem telefone salvo. Recado copiado.');
+    if(state.settings.groupLink) window.open(state.settings.groupLink,'_blank');
+    return;
+  }
+  navigator.clipboard.writeText(msg);
+  if(state.settings.groupLink){ window.open(state.settings.groupLink,'_blank'); toast('Recado copiado. Cole no grupo.'); }
+  else toast('Recado copiado. Salve o link do grupo para abrir direto.');
 }
 
 
@@ -5173,7 +5324,7 @@ $('#tHubLinks').onchange=()=>{renderGraph(); if(selectedId) renderDetail();};
 $('#fitBtn').onclick=fitView;
 $('#rDest').onchange=updateRecadoPrev; $('#rMsg').oninput=updateRecadoPrev;
 $('#rSend').onclick=sendRecado;
-
+$('#rCopy').onclick=copyRecado; $('#rOpen').onclick=openWhats;
 
 
 /* ===== Mobile: Mural flutuante + abas por gesto ===== */
@@ -5296,6 +5447,15 @@ $('#lbDel').onclick=deleteLightboxPhoto;
 $('#lightbox').addEventListener('click',e=>{if(e.target.id==='lightbox')closeLightbox()});
 
 $('#addPubBtn').onclick=async()=>{try{await openPubModal()}catch(e){console.error(e);toast('Erro ao abrir o repositório.')}};
+if($('#addRepoPackageBtn'))$('#addRepoPackageBtn').onclick=openRepoPackageUpload;
+if($('#repoPackageFilePick'))$('#repoPackageFilePick').onclick=()=>$('#repoPackageFiles').click();
+if($('#repoPackageFiles'))$('#repoPackageFiles').onchange=e=>handleRepoPackageFiles(e.target.files);
+if($('#repoPackagePurpose'))$('#repoPackagePurpose').onchange=e=>{$('#repoPackagePurposeOtherRow').style.display=e.target.value==='outro'?'block':'none'};
+if($('#repoPackageOwner'))$('#repoPackageOwner').onchange=()=>{if(document.querySelector('input[name="repoPackageAccess"]:checked')?.value==='selected')renderRepoPackagePeople()};
+if($('#repoPackagePeopleSearch'))$('#repoPackagePeopleSearch').oninput=renderRepoPackagePeople;
+document.querySelectorAll('input[name="repoPackageAccess"]').forEach(r=>r.onchange=updateRepoPackageAccessUI);
+if($('#repoPackageSaveBtn'))$('#repoPackageSaveBtn').onclick=saveRepoPackage;
+
 $('#pubCategoria').onchange=renderPubs; $('#pubPessoa').onchange=renderPubs; $('#pubMine').onchange=renderPubs;
 $('#pubCategoriaSel').onchange=e=>{$('#pubOutroRow').style.display=e.target.value==='outro'?'block':'none'};
 $$('input[name="pubTipo"]').forEach(r=>r.onchange=e=>{
@@ -5362,11 +5522,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='PREDATOR-P12-WHATSAPP-AUTO-20260907';
+window.CARBONAUTAS_BUILD='PREDATOR-P13-DOSSIE-PRIVACIDADE-PREVIEW-20260907';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P12-20260907',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P13-20260907',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -5378,7 +5538,7 @@ waitFirebase().then(startAuth);
 <script id="carbonautas-dynamic-favicon">
 (()=>{
   const link=document.getElementById('dynamicFavicon'); if(!link)return;
-  const img=new Image(); img.src='./icon-192.png?v=P12';
+  const img=new Image(); img.src='./icon-192.png?v=P13';
   img.onload=()=>{
     const c=document.createElement('canvas'),ctx=c.getContext('2d'); c.width=c.height=64; let phase=0,last=0;
     const draw=(ts)=>{

@@ -1,0 +1,16 @@
+CHECKLIST P13
+
+[ ] GitHub: index.html enviado
+[ ] GitHub: manifest.webmanifest enviado
+[ ] GitHub: sw.js enviado
+[ ] Firebase Firestore Rules: FIRESTORE_RULES_P13_COMPLETAS.txt publicado
+[ ] Carbonautas mostra P13
+[ ] PDF abre no celular
+[ ] arquivo .DOC antigo abre em visualizador online
+[ ] DOCX/XLSX/PPTX continuam com botão Editar quando aplicável
+[ ] Criar dossiê com 2 ou mais arquivos
+[ ] Testar "Restrito"
+[ ] Testar "Pessoas escolhidas"
+[ ] Confirmar em segunda conta autorizada que o dossiê aparece
+[ ] Confirmar em conta NÃO autorizada que o dossiê não aparece
+[ ] Testar "Toda a Rede" apenas se realmente necessário

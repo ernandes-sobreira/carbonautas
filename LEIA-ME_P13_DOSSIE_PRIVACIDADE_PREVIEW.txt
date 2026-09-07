@@ -1,0 +1,87 @@
+CARBONAUTAS · P13 · DOSSIÊS + ACESSO SELETIVO + PREVIEW MOBILE
+Data: 2026-09-07
+
+BASE USADA
+- P11 (sem o botão LAB flutuante), preservando chat privado P10 e turno do repositório P9.
+- A integração automática do WhatsApp da P12 NÃO foi incorporada nesta P13.
+
+CORREÇÕES DE VISUALIZAÇÃO
+1. PDF no celular:
+   - O P11/P12 tentava embutir o PDF diretamente em <object>/<iframe>.
+   - Chrome/Android frequentemente mostra uma tela escura/"Abrir" em vez do PDF.
+   - P13 usa visualizador online no mobile e mantém abertura direta no desktop.
+   - "Abrir em nova guia" também usa um visualizador apropriado para PDF.
+
+2. Word antigo .DOC:
+   - O código anterior só tinha preview local para .DOCX.
+   - Arquivos .DOC, como o exemplo mostrado pelo usuário, caíam em "Pré-visualização não disponível".
+   - P13 encaminha .DOC/RTF/ODT para visualizador Office online.
+   - Edição no ONLYOFFICE continua garantida apenas para DOCX/XLSX/PPTX, como definido no projeto.
+
+NOVO: ENVIAR ARQUIVO(S) COM ACESSO
+No Repositório aparece:
+  📦 Enviar arquivo(s) com acesso
+
+Funciona com 1 ou vários arquivos.
+Limites atuais:
+- até 20 arquivos por conjunto;
+- até 15 MB por arquivo;
+- até 120 MB no total;
+- upload sequencial para reduzir consumo de memória no celular.
+
+PROPÓSITOS DISPONÍVEIS
+- inscrição/documentação de bolsa;
+- processo seletivo/inscrição;
+- prestação de contas;
+- documentos pessoais/acadêmicos;
+- projeto/pesquisa;
+- material para revisão;
+- outro.
+
+ACESSO
+- 🔒 Restrito: proprietário + pessoa que enviou.
+- 👥 Pessoas escolhidas: somente as pessoas marcadas, além de proprietário e remetente.
+- 🌐 Toda a Rede: todos os integrantes ativos.
+
+SEGURANÇA FIRESTORE
+A P13 cria a coleção:
+  rede_repository_packages/{packageId}
+
+E a subcoleção:
+  rede_repository_packages/{packageId}/files/{fileId}
+
+O frontend NÃO consulta a coleção inteira. Ele consulta apenas:
+  allowedMemberIds array-contains <meu memberId>
+
+As regras P13 repetem essa exigência no servidor Firestore.
+O coordenador não recebe leitura especial desses dossiês: ele só vê um dossiê quando está na lista permitida ou é proprietário/remetente.
+
+NOTIFICAÇÕES
+Cada pessoa autorizada recebe sua própria notificação individual.
+Exemplo:
+- Josy é proprietária e Ernandes envia um dossiê restrito -> Josy é notificada.
+- Ernandes marca Josy e Letícia -> somente Josy e Letícia recebem.
+- "Toda a Rede" -> é criada uma notificação individual para cada integrante ativo.
+
+IMPORTANTE SOBRE ARQUIVOS BAIXADOS
+A ACL impede usuários não autorizados de listar/abrir o dossiê dentro do Carbonautas.
+Uma pessoa autorizada que já baixou um arquivo pode, naturalmente, guardar ou repassar sua cópia. Revogar acesso futuro não apaga cópias já baixadas.
+
+PASSOS PARA PUBLICAR
+1. GitHub Pages: substituir index.html, manifest.webmanifest e sw.js.
+2. Firebase > Firestore Database > Rules:
+   - substituir o conteúdo completo por FIRESTORE_RULES_P13_COMPLETAS.txt
+   - clicar em Publicar.
+3. Fechar/reabrir o Carbonautas.
+4. Conferir que o menu mostra P13.
+5. Testar com duas contas:
+   a) criar um dossiê em "Pessoas escolhidas" autorizando apenas uma delas;
+   b) a autorizada deve ver;
+   c) a não autorizada não deve ver.
+
+NÃO FOI ALTERADO
+- service account;
+- VPS/ONLYOFFICE;
+- coleções antigas do Cinzas;
+- Storage Rules;
+- WhatsApp API automático.
