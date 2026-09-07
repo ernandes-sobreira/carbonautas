@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carbonautas · Science OS · P6</title>
+<title>Carbonautas · Science OS · P7</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P6">
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P6">
-<link rel="apple-touch-icon" href="./icon-192.png?v=P6">
+<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P7">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P7">
+<link rel="apple-touch-icon" href="./icon-192.png?v=P7">
 <meta name="theme-color" content="#08152B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1019,6 +1019,61 @@
     .lab-ai-card{overflow:hidden!important}
   }
 
+
+
+  /* ===== PREDATOR P7 · BLACK COMMAND NAV ===== */
+  :root{
+    --p7-black:#050505;--p7-black2:#0D0D0F;--p7-card:#131316;--p7-line:#2A2A2F;
+    --p7-red:#FF3158;--p7-green:#28E07A;--p7-yellow:#FFD43B;--p7-blue:#3B82F6;
+    --p7-cyan:#16D9E3;--p7-violet:#9B6CFF;--p7-orange:#FF8A2A;--p7-pink:#FF4FA3;--p7-lime:#B7F34A;
+  }
+  .topbar{background:var(--p7-black)!important;border-bottom:1px solid #222!important;box-shadow:0 8px 28px rgba(0,0,0,.30)!important}
+  .brand h1{color:#fff!important}.brand .sub{color:#8dffcf!important}.brand .mark{box-shadow:0 0 0 1px #25252b,0 0 24px rgba(22,217,227,.20)!important}
+  .tabs{background:#0b0b0d!important;border-color:#2b2b31!important}
+  .tab{color:#bdbdc5!important}.tab:hover{background:#18181c!important;color:#fff!important}
+  .tab.on{color:#050505!important;font-weight:850!important}
+  .tab[data-view="painel"].on{background:var(--p7-red)!important;color:#fff!important}
+  .tab[data-view="rede"].on{background:var(--p7-green)!important}
+  .tab[data-view="crono"].on{background:var(--p7-yellow)!important}
+  .tab[data-view="track"].on{background:var(--p7-blue)!important;color:#fff!important}
+  .tab[data-view="lab"].on{background:var(--p7-cyan)!important}
+  .tab[data-view="mensagens"].on{background:var(--p7-violet)!important;color:#fff!important}
+  .tab[data-view="mural"].on{background:var(--p7-orange)!important}
+  .tab[data-view="fotos"].on{background:var(--p7-pink)!important;color:#fff!important}
+  .tab[data-view="pubs"].on{background:var(--p7-lime)!important}
+  .id-chip{background:#111114!important;border-color:#393940!important;color:#fff!important}.id-chip.admin{border-color:var(--p7-yellow)!important;box-shadow:0 0 0 1px var(--p7-yellow) inset!important}
+  .topbar>.btn:not(.primary){background:#111114!important;border-color:#33333a!important;color:#fff!important}
+  .topbar>.btn:not(.primary):hover{background:#1c1c21!important;border-color:#4b4b54!important}
+  .topbar>.btn.primary{background:var(--p7-red)!important;border-color:var(--p7-red)!important}
+  .menu-btn{position:relative}
+  .app-menu-backdrop{position:fixed;inset:0;z-index:95;background:rgba(0,0,0,.68);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:.2s}
+  .app-menu-backdrop.open{opacity:1;pointer-events:auto}
+  .app-menu-drawer{position:absolute;top:0;left:0;bottom:0;width:min(430px,94vw);background:linear-gradient(180deg,#050505,#0a0a0d);border-right:1px solid #2c2c31;box-shadow:28px 0 70px rgba(0,0,0,.48);transform:translateX(-104%);transition:transform .24s cubic-bezier(.2,.8,.2,1);padding:18px;overflow:auto;color:#fff}
+  .app-menu-backdrop.open .app-menu-drawer{transform:translateX(0)}
+  .app-menu-head{display:flex;align-items:center;gap:12px;padding:4px 2px 18px;border-bottom:1px solid #242429;margin-bottom:15px}
+  .app-menu-brand{display:flex;align-items:center;gap:11px;flex:1;min-width:0}.app-menu-logo{width:48px;height:48px;border-radius:14px;box-shadow:0 0 24px rgba(22,217,227,.2)}.app-menu-brand b{display:block;font:700 22px/1.05 'Fraunces',serif}.app-menu-brand small{display:block;color:#9c9ca5;margin-top:4px}
+  .app-menu-close{width:42px;height:42px;border-radius:13px;border:1px solid #34343b;background:#151519;color:#fff;font-size:28px;line-height:1}
+  .app-menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .app-nav-card{--accent:#fff;position:relative;min-height:118px;border:1px solid #2a2a30;background:#111114;color:#fff;border-radius:18px;padding:14px;text-align:left;overflow:hidden;transition:.16s;box-shadow:inset 0 3px 0 var(--accent)}
+  .app-nav-card:after{content:'';position:absolute;right:-35px;bottom:-55px;width:110px;height:110px;border-radius:50%;background:var(--accent);filter:blur(32px);opacity:.14;pointer-events:none}.app-nav-card:active{transform:scale(.98)}.app-nav-card:hover{background:#19191e;border-color:#44444c;transform:translateY(-1px)}
+  .app-nav-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:color-mix(in srgb,var(--accent) 18%,#111114);border:1px solid color-mix(in srgb,var(--accent) 55%,#222);font-size:20px;margin-bottom:10px}.app-nav-card b{display:block;font-size:15px}.app-nav-card small{display:block;color:#aaaab3;font-size:10.5px;line-height:1.35;margin-top:4px}
+  .app-nav-card.c-red{--accent:var(--p7-red)}.app-nav-card.c-green{--accent:var(--p7-green)}.app-nav-card.c-yellow{--accent:var(--p7-yellow)}.app-nav-card.c-blue{--accent:var(--p7-blue)}.app-nav-card.c-cyan{--accent:var(--p7-cyan)}.app-nav-card.c-violet{--accent:var(--p7-violet)}.app-nav-card.c-orange{--accent:var(--p7-orange)}.app-nav-card.c-pink{--accent:var(--p7-pink)}.app-nav-card.c-lime{--accent:var(--p7-lime)}
+  .app-menu-foot{padding:15px 2px 4px}.app-menu-tip{font-size:11px;color:#8f8f99}.app-menu-tip b{color:#fff}
+  .side-mobile-head{display:none}.rede-filter-fab{display:none}
+  @media(max-width:920px){
+    .menu-btn{display:inline-flex!important;background:var(--p7-red)!important;border-color:var(--p7-red)!important;color:#fff!important;min-width:76px;justify-content:center;box-shadow:0 0 0 1px rgba(255,255,255,.06),0 8px 22px rgba(255,49,88,.28)!important}
+    .menu-btn::after{content:'MENU';font-size:10px;font-weight:900;letter-spacing:.08em}.menu-btn svg{width:20px!important;height:20px!important}
+    .topbar{background:#050505!important;padding:9px 12px!important}
+    .tabs{display:none!important}
+    .mobile-nav-handle{display:none!important}
+    .brand{flex:1}.brand h1{font-size:21px!important}.brand .mark{width:48px!important;height:48px!important}
+    .topbar .id-chip{order:6;flex:1 1 calc(100% - 145px);max-width:none;min-width:0}.topbar .id-chip #idName{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.topbar #adminBtn{order:7}.topbar #recadoBtn{order:8}.topbar #addBtn{order:9}.topbar #notifyBtn{margin-left:auto}
+    .side-mobile-head{display:flex;position:sticky;top:0;z-index:3;align-items:center;gap:10px;background:#070709;color:#fff;margin:-14px -14px 12px;padding:13px 14px;border-bottom:1px solid #2d2d33}.side-mobile-head>div{flex:1}.side-mobile-head b{display:block;font-size:14px}.side-mobile-head small{display:block;color:#9d9da6;margin-top:2px}.side-mobile-head button{width:38px;height:38px;border-radius:12px;border:1px solid #34343a;background:#17171b;color:#fff;font-size:24px}
+    .side{background:#fff}.rede-filter-fab{display:none;position:fixed;left:14px;bottom:82px;z-index:31;border:0;border-radius:999px;background:#111114;color:#fff;padding:12px 16px;font-weight:850;box-shadow:0 12px 34px rgba(0,0,0,.25);align-items:center;gap:7px}.rede-filter-fab span{font-size:11px}body[data-view="rede"] .rede-filter-fab{display:inline-flex}
+    .app-menu-grid{grid-template-columns:1fr 1fr}.app-nav-card{min-height:112px}
+  }
+  @media(max-width:420px){.app-menu-drawer{width:100vw}.app-menu-grid{gap:8px}.app-nav-card{padding:12px;min-height:108px}.app-nav-card b{font-size:14px}.app-nav-card small{font-size:10px}.menu-btn{min-width:72px;padding-left:10px!important;padding-right:10px!important}}
+
 </style>
 </head>
 <body data-view="painel">
@@ -1026,7 +1081,7 @@
 <div class="auth-gate" id="authGate">
   <div class="auth-card">
     <div class="auth-brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P6" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P7" alt="Carbonautas · carbono em ligação"></div>
       <div><h2>Carbonautas</h2><p>Acompanhamento · projetos · rede</p></div>
     </div>
     <div class="auth-login" id="authLoginPane">
@@ -1062,7 +1117,7 @@
 </div>
 
 <div class="loading" id="loading">
-  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P6" alt="Carbonautas · carbono em ligação"></div>
+  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P7" alt="Carbonautas · carbono em ligação"></div>
   <p id="loadingMsg">Conectando à rede…</p>
 </div>
 
@@ -1070,11 +1125,11 @@
 
   <!-- TOPBAR -->
   <div class="topbar">
-    <button class="btn ghost menu-btn" id="menuBtn" title="Filtros">
+    <button class="btn ghost menu-btn" id="menuBtn" title="Abrir menu do aplicativo" aria-label="Abrir menu do aplicativo">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
     </button>
     <div class="brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P6" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P7" alt="Carbonautas · carbono em ligação"></div>
       <div>
         <h1>Carbonautas</h1>
         <div class="sub">LIPAN · LEFA · CELBE</div>
@@ -1144,6 +1199,31 @@
     </button>
   </div>
 
+  <!-- ============ MENU GLOBAL DO APP · P7 ============ -->
+  <div class="app-menu-backdrop" id="appMenuBackdrop" aria-hidden="true">
+    <aside class="app-menu-drawer" id="appMenuDrawer" role="dialog" aria-modal="true" aria-label="Navegação do Carbonautas">
+      <div class="app-menu-head">
+        <div class="app-menu-brand">
+          <img src="./icon-192.png?v=P7" alt="" class="app-menu-logo">
+          <div><b>Carbonautas</b><small>Escolha onde quer ir</small></div>
+        </div>
+        <button type="button" class="app-menu-close" id="appMenuClose" aria-label="Fechar menu">×</button>
+      </div>
+      <div class="app-menu-grid">
+        <button type="button" class="app-nav-card c-red" data-app-view="painel"><span class="app-nav-icon">⚡</span><b>Painel</b><small>O que precisa da sua atenção</small></button>
+        <button type="button" class="app-nav-card c-green" data-app-view="rede"><span class="app-nav-icon">🕸️</span><b>Rede</b><small>Pessoas, projetos e conexões</small></button>
+        <button type="button" class="app-nav-card c-yellow" data-app-view="crono"><span class="app-nav-icon">📅</span><b>Cronograma</b><small>Prazos, entregas e eventos</small></button>
+        <button type="button" class="app-nav-card c-blue" data-app-view="track"><span class="app-nav-icon">📈</span><b>Acompanhamento</b><small>Orientações e saúde dos projetos</small></button>
+        <button type="button" class="app-nav-card c-cyan" data-app-view="lab"><span class="app-nav-icon">🧪</span><b>Lab de Dados</b><small>Análises, figuras e reprodutibilidade</small></button>
+        <button type="button" class="app-nav-card c-violet" data-app-view="mensagens"><span class="app-nav-icon">💬</span><b>Mensagens</b><small>Conversa rápida da equipe</small></button>
+        <button type="button" class="app-nav-card c-orange" data-app-view="mural"><span class="app-nav-icon">📣</span><b>Mural</b><small>Pedidos, alertas e direcionamentos</small></button>
+        <button type="button" class="app-nav-card c-pink" data-app-view="fotos"><span class="app-nav-icon">📸</span><b>Fotos</b><small>Registros das ações</small></button>
+        <button type="button" class="app-nav-card c-lime" data-app-view="pubs"><span class="app-nav-icon">📚</span><b>Repositório</b><small>Arquivos, Office e produtos</small></button>
+      </div>
+      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span></div>
+    </aside>
+  </div>
+
   <!-- ============ VIEW: PAINEL ============ -->
   <div class="view on" id="viewPainel">
     <div class="dash-scroll"><div class="dash-wrap">
@@ -1167,8 +1247,10 @@
   <!-- ============ VIEW: REDE ============ -->
   <div class="view" id="viewRede">
     <div class="stats" id="stats"></div>
+    <button type="button" class="rede-filter-fab" id="redeFiltersBtn" aria-label="Abrir filtros da Rede">⚙️ <span>Filtros da Rede</span></button>
     <div class="main">
       <aside class="side" id="side">
+        <div class="side-mobile-head"><div><b>Filtros da Rede</b><small>Refine pessoas e conexões</small></div><button type="button" id="sideCloseBtn" aria-label="Fechar filtros">×</button></div>
         <div class="block" id="peopleAdminBlock" style="display:none">
           <h3>Administração da rede</h3>
           <button class="btn primary" id="managePeopleBtn" style="width:100%;justify-content:center;margin-bottom:8px">Gerenciar alunos</button>
@@ -4788,6 +4870,7 @@ function switchView(v){
   if(v==='fotos') renderFotos();
   if(v==='pubs'){ renderPubs(); checkScienceEngine(); }
   $('#side').classList.remove('open');
+  if($('#appMenuBackdrop')){ $('#appMenuBackdrop').classList.remove('open'); $('#appMenuBackdrop').setAttribute('aria-hidden','true'); }
 }
 
 /* ============ RENDER ALL (rede) ============ */
@@ -4903,7 +4986,21 @@ document.addEventListener('touchend',e=>{
   mobileSwipeStartY=null;
 },{passive:true});
 
-$('#menuBtn').onclick=()=>$('#side').classList.toggle('open');
+function openAppMenu(){
+  const b=$('#appMenuBackdrop'); if(!b)return;
+  b.classList.add('open');b.setAttribute('aria-hidden','false');
+}
+function closeAppMenu(){
+  const b=$('#appMenuBackdrop'); if(!b)return;
+  b.classList.remove('open');b.setAttribute('aria-hidden','true');
+}
+$('#menuBtn').onclick=openAppMenu;
+if($('#appMenuClose')) $('#appMenuClose').onclick=closeAppMenu;
+if($('#appMenuBackdrop')) $('#appMenuBackdrop').addEventListener('click',e=>{if(e.target===$('#appMenuBackdrop'))closeAppMenu()});
+$$('[data-app-view]').forEach(b=>b.onclick=()=>{const v=b.dataset.appView;closeAppMenu();switchView(v)});
+if($('#redeFiltersBtn')) $('#redeFiltersBtn').onclick=()=>$('#side').classList.add('open');
+if($('#sideCloseBtn')) $('#sideCloseBtn').onclick=()=>$('#side').classList.remove('open');
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeAppMenu()});
 
 $('#newEventBtn').onclick=openEventModal;
 $('#saveEventBtn').onclick=saveEvent;
@@ -5024,7 +5121,7 @@ window.CARBONAUTAS_BUILD='PREDATOR-P6-20260906';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P6-20260906',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P7-20260906',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -5036,7 +5133,7 @@ waitFirebase().then(startAuth);
 <script id="carbonautas-dynamic-favicon">
 (()=>{
   const link=document.getElementById('dynamicFavicon'); if(!link)return;
-  const img=new Image(); img.src='./icon-192.png?v=P6';
+  const img=new Image(); img.src='./icon-192.png?v=P7';
   img.onload=()=>{
     const c=document.createElement('canvas'),ctx=c.getContext('2d'); c.width=c.height=64; let phase=0,last=0;
     const draw=(ts)=>{
