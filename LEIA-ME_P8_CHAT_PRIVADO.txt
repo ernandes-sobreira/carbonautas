@@ -1,0 +1,30 @@
+CARBONAUTAS P8 — CHAT PRIVADO 1:1
+
+Implementado no index.html:
+- nova área Conversas;
+- lista de threads com avatar, última mensagem, horário e contador de não lidas;
+- busca de conversas e busca de pessoas;
+- chat 1:1 com bolhas;
+- texto e emojis;
+- resposta a mensagem;
+- exclusão apenas da própria mensagem no frontend + regra;
+- recibo ✓ Enviada / ✓✓ Lida;
+- notificação genérica sem copiar o texto privado;
+- navegação pelo sino diretamente para a conversa;
+- diretório privado separado para resolver UID sem expor rede_member_claims;
+- P8 no menu e cache PWA atualizado.
+
+NÃO IMPLEMENTADO NESTA ETAPA:
+- anexos privados. Motivo: Storage Rules não vieram no ZIP. Não habilitamos upload privado sem auditar segurança.
+- FCM background. Continua como etapa posterior.
+
+ARQUIVOS ALTERADOS:
+- index.html
+- manifest.webmanifest
+- sw.js
+
+ARQUIVO NOVO:
+- FIRESTORE_RULES_CHAT_PRIVADO_P8.txt
+
+IMPORTANTE:
+A regra atual do Firestore não veio no pacote. Portanto o arquivo de Rules fornecido é um BLOCO ADITIVO, não uma regra completa para substituir tudo.

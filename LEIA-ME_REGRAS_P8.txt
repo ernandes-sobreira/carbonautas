@@ -1,0 +1,22 @@
+CARBONAUTAS P8 — REGRAS FIRESTORE COMPLETAS
+
+Use o arquivo firestore.rules (ou FIRESTORE_RULES_P8_COMPLETAS.txt) como regra COMPLETA do Firestore.
+Ele já inclui as regras atuais enviadas pelo usuário + o chat privado 1:1 P8.
+
+Mudanças intencionais:
+- chat privado só pode ser lido pelos dois participantes vinculados;
+- coordenador NÃO recebe exceção para ler chats privados;
+- recibo de leitura só pode ser gravado pelo destinatário real;
+- participants/memberIds da conversa são imutáveis;
+- notificação privada não pode carregar o texto da conversa;
+- diretório privado expõe somente uid/memberId/nome/foto para integrantes vinculados;
+- e-mail do coordenador continua reconhecido mesmo se rede_users precisar de reparo;
+- regras antigas do Carbonautas foram preservadas;
+- coleções antigas do Cinzas permanecem `allow read, write: if true` para compatibilidade.
+
+ATENÇÃO:
+As coleções antigas do Cinzas continuam públicas porque não foi auditado se o app antigo usa Firebase Authentication.
+Isso é uma pendência de segurança separada e não deve ser fechado às cegas.
+
+Este arquivo trata apenas FIRESTORE RULES. Não substitui Firebase Storage Rules.
+Anexos privados continuam desabilitados na P8 até auditoria das Storage Rules.

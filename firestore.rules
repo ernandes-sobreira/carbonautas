@@ -1,0 +1,865 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================================
+    // FUNÇÕES GERAIS
+    // ============================================================
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function hasProfile() {
+      return signedIn()
+        && exists(
+          /databases/$(database)/documents/rede_users/$(request.auth.uid)
+        );
+    }
+
+    function userProfile() {
+      return get(
+        /databases/$(database)/documents/rede_users/$(request.auth.uid)
+      );
+    }
+
+    function myMemberId() {
+      return userProfile().data.memberId;
+    }
+
+    // O e-mail especial continua sendo reconhecido mesmo se o perfil
+    // rede_users precisar ser reparado. Isso reduz o risco de lockout
+    // administrativo sem dar privilégios a outras contas.
+    function isCoordinator() {
+      return signedIn() && (
+        request.auth.token.email == 'ernandes.sobreira@gmail.com'
+        || (
+          hasProfile() && (
+            userProfile().data.role == 'coordinator'
+            || userProfile().data.memberId ==
+              'seed-ernandes-sobreira-oliveira-junior'
+          )
+        )
+      );
+    }
+
+    function isMine(memberId) {
+      return hasProfile()
+        && myMemberId() == memberId;
+    }
+
+    function registrationOpen(code) {
+      return get(
+        /databases/$(database)/documents/rede_settings/registration
+      ).data.enabled == true
+      && get(
+        /databases/$(database)/documents/rede_settings/registration
+      ).data.code == code;
+    }
+
+
+    // ============================================================
+    // CARBON-FLUX
+    // Mantido compatível com a regra atual.
+    // ============================================================
+
+    match /projects/{projectCode} {
+
+      function cfMember() {
+        return signedIn()
+          && request.auth.uid in
+          get(
+            /databases/$(database)/documents/projects/$(projectCode)
+          ).data.members;
+      }
+
+      allow get: if signedIn();
+
+      allow list: if signedIn()
+        && request.auth.uid in resource.data.members;
+
+      allow create: if signedIn()
+        && request.resource.data.owner == request.auth.uid
+        && request.resource.data.code == projectCode
+        && request.resource.data.members == [request.auth.uid];
+
+      allow update: if signedIn() && (
+        resource.data.owner == request.auth.uid
+        || (
+          request.resource.data.owner == resource.data.owner
+          && request.resource.data.code == resource.data.code
+          && request.resource.data.members ==
+             resource.data.members.concat([request.auth.uid])
+        )
+      );
+
+      allow delete: if signedIn()
+        && resource.data.owner == request.auth.uid;
+
+      match /files/{fileId} {
+        allow read, write: if cfMember();
+      }
+
+      match /results/{resultId} {
+        allow read, write: if cfMember();
+      }
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — CONTAS
+    // ============================================================
+
+    match /rede_users/{uid} {
+
+      allow read: if signedIn()
+        && (
+          request.auth.uid == uid
+          || isCoordinator()
+        );
+
+      allow create: if isCoordinator() || (
+        signedIn()
+        && request.auth.uid == uid
+        && request.resource.data.role == 'student'
+        && request.resource.data.email ==
+           request.auth.token.email
+
+        && request.resource.data.keys().hasOnly([
+          'memberId',
+          'nome',
+          'email',
+          'role',
+          'createdAt'
+        ])
+
+        && getAfter(
+          /databases/$(database)/documents/rede_member_claims/$(request.resource.data.memberId)
+        ).data.uid == request.auth.uid
+      );
+
+      allow update, delete: if isCoordinator();
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — VÍNCULO LOGIN ↔ PESSOA
+    // ============================================================
+
+    match /rede_member_claims/{memberId} {
+
+      allow read: if isCoordinator()
+        || (
+          signedIn()
+          && resource.data.uid == request.auth.uid
+        );
+
+      allow create: if signedIn()
+
+        && request.resource.data.uid == request.auth.uid
+
+        && request.resource.data.memberId == memberId
+
+        && request.resource.data.email ==
+           request.auth.token.email
+
+        && request.resource.data.keys().hasOnly([
+          'uid',
+          'memberId',
+          'email',
+          'registrationCode',
+          'createdAt'
+        ])
+
+        && registrationOpen(
+          request.resource.data.registrationCode
+        )
+
+        && exists(
+          /databases/$(database)/documents/rede_members/$(memberId)
+        )
+
+        && get(
+          /databases/$(database)/documents/rede_members/$(memberId)
+        ).data.nivel != 'coord'
+
+        && !exists(
+          /databases/$(database)/documents/rede_member_claims/$(memberId)
+        )
+
+        && getAfter(
+          /databases/$(database)/documents/rede_users/$(request.auth.uid)
+        ).data.memberId == memberId
+
+        && getAfter(
+          /databases/$(database)/documents/rede_users/$(request.auth.uid)
+        ).data.role == 'student';
+
+      allow update: if false;
+
+      allow delete: if isCoordinator();
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — PESSOAS
+    // ============================================================
+
+    match /rede_members/{memberId} {
+
+      allow read: if signedIn();
+
+      allow create, delete: if isCoordinator();
+
+      allow update: if isCoordinator()
+        || isMine(memberId);
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — CRONOGRAMA
+    // ============================================================
+
+    match /rede_schedule/{documentId} {
+
+      allow read: if signedIn();
+
+      allow create, update, delete: if isCoordinator();
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — ACOMPANHAMENTO
+    // Bolsa, orientações, correções, pendências,
+    // check-ins, produtos e entregas
+    // ============================================================
+
+    match /rede_activities/{documentId} {
+
+      allow read: if signedIn();
+
+      allow create: if isCoordinator() || (
+        hasProfile()
+        && request.resource.data.ownerId == myMemberId()
+      );
+
+      allow update: if isCoordinator() || (
+        isMine(resource.data.ownerId)
+        && request.resource.data.ownerId ==
+           resource.data.ownerId
+      );
+
+      allow delete: if isCoordinator()
+        || isMine(resource.data.ownerId);
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — REPOSITÓRIO
+    // ============================================================
+
+    match /rede_publicacoes/{documentId} {
+
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && (
+          request.resource.data.ownerUid == request.auth.uid
+          || isCoordinator()
+        );
+
+      allow update, delete: if signedIn()
+        && (
+          resource.data.ownerUid == request.auth.uid
+          || isCoordinator()
+        );
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — FOTOS
+    // ============================================================
+
+    match /rede_photos/{documentId} {
+
+      allow read: if signedIn();
+
+      allow create: if hasProfile()
+        && request.resource.data.autorId == myMemberId();
+
+      allow update: if isCoordinator() || (
+        isMine(resource.data.autorId)
+        && request.resource.data.autorId ==
+           resource.data.autorId
+      );
+
+      allow delete: if isCoordinator()
+        || isMine(resource.data.autorId);
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — MURAL
+    // ============================================================
+
+    match /rede_feed/{documentId} {
+
+      allow read: if signedIn();
+
+      allow create: if hasProfile()
+        && request.resource.data.authorUid == request.auth.uid;
+
+      allow update, delete: if isCoordinator()
+        || (
+          hasProfile()
+          && resource.data.authorUid == request.auth.uid
+        );
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — COMENTÁRIOS
+    // ============================================================
+
+    match /rede_feed_comments/{documentId} {
+
+      allow read: if signedIn();
+
+      allow create: if hasProfile()
+        && request.resource.data.authorUid == request.auth.uid;
+
+      allow update, delete: if isCoordinator()
+        || (
+          hasProfile()
+          && resource.data.authorUid == request.auth.uid
+        );
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — REAÇÕES
+    // ============================================================
+
+    match /rede_feed_reactions/{documentId} {
+
+      allow read: if signedIn();
+
+      allow create, update: if hasProfile()
+        && request.resource.data.actorUid == request.auth.uid;
+
+      allow delete: if isCoordinator()
+        || (
+          hasProfile()
+          && resource.data.actorUid == request.auth.uid
+        );
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — MENSAGENS DO GRUPO
+    // ============================================================
+
+    match /rede_chat/{documentId} {
+
+      allow read: if signedIn();
+
+      allow create: if hasProfile()
+        && request.resource.data.authorId == myMemberId();
+
+      allow update, delete: if isCoordinator()
+        || isMine(resource.data.authorId);
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — CONFIGURAÇÕES
+    // ============================================================
+
+    match /rede_settings/{documentId} {
+
+      allow read: if signedIn()
+        && (
+          documentId != 'registration'
+          || isCoordinator()
+        );
+
+      allow write: if isCoordinator();
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — NOTIFICAÇÕES
+    // Privacidade reforçada para chat privado.
+    // ============================================================
+
+    match /rede_notifications/{notificationId} {
+
+      function notificationSenderIsValid() {
+        return hasProfile()
+          && request.resource.data.senderUid == request.auth.uid
+          && request.resource.data.senderId == myMemberId()
+          && request.resource.data.recipientId is string
+          && exists(
+            /databases/$(database)/documents/rede_members/$(request.resource.data.recipientId)
+          )
+          && request.resource.data.kind is string
+          && request.resource.data.title is string
+          && request.resource.data.title.size() <= 200
+          && request.resource.data.message is string
+          && request.resource.data.message.size() <= 240
+          && request.resource.data.read == false
+          && request.resource.data.ts == request.time;
+      }
+
+      function privateNotificationIsSafe() {
+        let tid = request.resource.data.threadId;
+        let thread = get(
+          /databases/$(database)/documents/rede_private_threads/$(tid)
+        );
+
+        return request.resource.data.keys().hasOnly([
+            'recipientId',
+            'senderId',
+            'senderUid',
+            'senderName',
+            'kind',
+            'title',
+            'message',
+            'sourceType',
+            'sourceId',
+            'threadId',
+            'read',
+            'ts'
+          ])
+          && request.resource.data.kind == 'private_message'
+          && request.resource.data.sourceType == 'private_chat'
+          && request.resource.data.sourceId == tid
+          && request.resource.data.message ==
+             'Você recebeu uma nova mensagem privada.'
+          && thread.data.participants.size() == 2
+          && thread.data.memberIds.size() == 2
+          && request.auth.uid in thread.data.participants
+          && myMemberId() in thread.data.memberIds
+          && request.resource.data.recipientId in thread.data.memberIds
+          && request.resource.data.recipientId != myMemberId();
+      }
+
+      allow create: if notificationSenderIsValid()
+        && (
+          request.resource.data.kind != 'private_message'
+          || privateNotificationIsSafe()
+        );
+
+      allow read: if hasProfile()
+        && resource.data.recipientId == myMemberId();
+
+      // O destinatário só pode marcar a própria notificação como lida.
+      // Não pode reescrever remetente, texto, destino ou origem.
+      allow update: if hasProfile()
+        && resource.data.recipientId == myMemberId()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'read',
+          'readAt'
+        ])
+        && request.resource.data.read == true
+        && request.resource.data.readAt == request.time;
+
+      allow delete: if hasProfile()
+        && resource.data.recipientId == myMemberId();
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS P8 — DIRETÓRIO SEGURO DO CHAT PRIVADO
+    // Somente dados mínimos para localizar outro integrante.
+    // Não expõe rede_member_claims, código de entrada ou e-mail.
+    // ============================================================
+
+    match /rede_private_directory/{memberId} {
+
+      function validPrivateDirectoryPayload() {
+        return request.resource.data.uid is string
+          && request.resource.data.memberId == memberId
+          && request.resource.data.nome is string
+          && request.resource.data.nome.size() <= 200
+          && request.resource.data.foto is string
+          && request.resource.data.foto.size() <= 5000
+          && request.resource.data.updatedAt == request.time;
+      }
+
+      // Somente integrantes já vinculados à Rede podem consultar
+      // o diretório usado pelo botão "Nova conversa".
+      allow read: if hasProfile();
+
+      allow create: if validPrivateDirectoryPayload()
+        && request.resource.data.keys().hasOnly([
+          'uid',
+          'memberId',
+          'nome',
+          'foto',
+          'updatedAt'
+        ])
+        && (
+          (
+            hasProfile()
+            && memberId == myMemberId()
+            && request.resource.data.uid == request.auth.uid
+          )
+          || (
+            isCoordinator()
+            && exists(
+              /databases/$(database)/documents/rede_users/$(request.resource.data.uid)
+            )
+            && get(
+              /databases/$(database)/documents/rede_users/$(request.resource.data.uid)
+            ).data.memberId == memberId
+          )
+        );
+
+      allow update: if validPrivateDirectoryPayload()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'uid',
+          'memberId',
+          'nome',
+          'foto',
+          'updatedAt'
+        ])
+        && (
+          (
+            hasProfile()
+            && memberId == myMemberId()
+            && resource.data.uid == request.auth.uid
+            && request.resource.data.uid == request.auth.uid
+            && request.resource.data.memberId == resource.data.memberId
+          )
+          || (
+            isCoordinator()
+            && exists(
+              /databases/$(database)/documents/rede_users/$(request.resource.data.uid)
+            )
+            && get(
+              /databases/$(database)/documents/rede_users/$(request.resource.data.uid)
+            ).data.memberId == memberId
+          )
+        );
+
+      allow delete: if (
+        hasProfile()
+        && memberId == myMemberId()
+        && resource.data.uid == request.auth.uid
+      ) || isCoordinator();
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS P8 — CHAT PRIVADO 1:1
+    // NÃO existe exceção de leitura para coordenador.
+    // Só os dois participantes conseguem ler o conteúdo.
+    // ============================================================
+
+    match /rede_private_threads/{threadId} {
+
+      function privateThreadAccess() {
+        return hasProfile()
+          && resource.data.participants is list
+          && resource.data.memberIds is list
+          && resource.data.participants.size() == 2
+          && resource.data.memberIds.size() == 2
+          && (
+            (
+              resource.data.participants[0] == request.auth.uid
+              && resource.data.memberIds[0] == myMemberId()
+            )
+            || (
+              resource.data.participants[1] == request.auth.uid
+              && resource.data.memberIds[1] == myMemberId()
+            )
+          );
+      }
+
+      function otherPrivateUid() {
+        return resource.data.participants[0] == request.auth.uid
+          ? resource.data.participants[1]
+          : resource.data.participants[0];
+      }
+
+      function validUnreadMapForExistingThread() {
+        return request.resource.data.unreadBy is map
+          && request.resource.data.unreadBy.keys().size() == 2
+          && request.resource.data.unreadBy.keys().hasOnly(
+            resource.data.participants
+          );
+      }
+
+      function validSendSummaryUpdate() {
+        let otherUid = otherPrivateUid();
+
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'updatedAt',
+            'lastMessage',
+            'lastSenderUid',
+            'lastSenderMemberId',
+            'unreadBy'
+          ])
+          && request.resource.data.diff(resource.data).affectedKeys().hasAll([
+            'updatedAt',
+            'unreadBy'
+          ])
+          && request.resource.data.updatedAt == request.time
+          && request.resource.data.lastMessage is string
+          && request.resource.data.lastMessage.size() <= 160
+          && request.resource.data.lastSenderUid == request.auth.uid
+          && request.resource.data.lastSenderMemberId == myMemberId()
+          && validUnreadMapForExistingThread()
+          && request.resource.data.unreadBy[request.auth.uid] ==
+             resource.data.unreadBy[request.auth.uid]
+          && request.resource.data.unreadBy[otherUid] ==
+             resource.data.unreadBy[otherUid] + 1;
+      }
+
+      function validReadSummaryUpdate() {
+        let otherUid = otherPrivateUid();
+
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'unreadBy'
+          ])
+          && validUnreadMapForExistingThread()
+          && request.resource.data.unreadBy[request.auth.uid] == 0
+          && request.resource.data.unreadBy[otherUid] ==
+             resource.data.unreadBy[otherUid];
+      }
+
+      function validDeletedLastMessageSummary() {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'lastMessage'
+          ])
+          && request.auth.uid == resource.data.lastSenderUid
+          && request.resource.data.lastMessage is string
+          && request.resource.data.lastMessage.size() <= 160;
+      }
+
+      allow read: if privateThreadAccess();
+
+      allow create: if hasProfile()
+        && request.resource.data.keys().hasOnly([
+          'participants',
+          'memberIds',
+          'createdAt',
+          'updatedAt',
+          'lastMessage',
+          'lastSenderUid',
+          'lastSenderMemberId',
+          'unreadBy'
+        ])
+        && request.resource.data.participants is list
+        && request.resource.data.memberIds is list
+        && request.resource.data.unreadBy is map
+        && request.resource.data.participants.size() == 2
+        && request.resource.data.memberIds.size() == 2
+        && request.resource.data.participants[0] is string
+        && request.resource.data.participants[1] is string
+        && request.resource.data.memberIds[0] is string
+        && request.resource.data.memberIds[1] is string
+        && request.resource.data.participants[0] !=
+           request.resource.data.participants[1]
+        && request.resource.data.memberIds[0] !=
+           request.resource.data.memberIds[1]
+        && request.auth.uid in request.resource.data.participants
+        && myMemberId() in request.resource.data.memberIds
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time
+        && request.resource.data.lastMessage == ''
+        && request.resource.data.lastSenderUid == ''
+        && request.resource.data.lastSenderMemberId == ''
+        && request.resource.data.unreadBy.keys().size() == 2
+        && request.resource.data.unreadBy.keys().hasOnly(
+          request.resource.data.participants
+        )
+        && request.resource.data.unreadBy[
+             request.resource.data.participants[0]
+           ] == 0
+        && request.resource.data.unreadBy[
+             request.resource.data.participants[1]
+           ] == 0
+
+        // Os dois pares UID ↔ memberId precisam existir no diretório.
+        && exists(
+          /databases/$(database)/documents/rede_private_directory/$(request.resource.data.memberIds[0])
+        )
+        && exists(
+          /databases/$(database)/documents/rede_private_directory/$(request.resource.data.memberIds[1])
+        )
+        && get(
+          /databases/$(database)/documents/rede_private_directory/$(request.resource.data.memberIds[0])
+        ).data.uid == request.resource.data.participants[0]
+        && get(
+          /databases/$(database)/documents/rede_private_directory/$(request.resource.data.memberIds[1])
+        ).data.uid == request.resource.data.participants[1]
+
+        // E também precisam continuar vinculados em rede_users.
+        // Isso impede um diretório antigo/stale de reabrir acesso privado.
+        && exists(
+          /databases/$(database)/documents/rede_users/$(request.resource.data.participants[0])
+        )
+        && exists(
+          /databases/$(database)/documents/rede_users/$(request.resource.data.participants[1])
+        )
+        && get(
+          /databases/$(database)/documents/rede_users/$(request.resource.data.participants[0])
+        ).data.memberId == request.resource.data.memberIds[0]
+        && get(
+          /databases/$(database)/documents/rede_users/$(request.resource.data.participants[1])
+        ).data.memberId == request.resource.data.memberIds[1];
+
+      // participants e memberIds são imutáveis.
+      // O update aceita somente:
+      // 1) resumo de uma nova mensagem;
+      // 2) zerar o próprio contador de não lidas;
+      // 3) ajustar o resumo após excluir a própria última mensagem.
+      allow update: if privateThreadAccess()
+        && request.resource.data.participants == resource.data.participants
+        && request.resource.data.memberIds == resource.data.memberIds
+        && (
+          validSendSummaryUpdate()
+          || validReadSummaryUpdate()
+          || validDeletedLastMessageSummary()
+        );
+
+      // O histórico da thread não é apagado pelo cliente.
+      allow delete: if false;
+
+
+      match /messages/{messageId} {
+
+        function privateParentThread() {
+          return get(
+            /databases/$(database)/documents/rede_private_threads/$(threadId)
+          );
+        }
+
+        function privateMessageAccess() {
+          let thread = privateParentThread();
+
+          return hasProfile()
+            && thread.data.participants is list
+            && thread.data.memberIds is list
+            && thread.data.participants.size() == 2
+            && thread.data.memberIds.size() == 2
+            && (
+              (
+                thread.data.participants[0] == request.auth.uid
+                && thread.data.memberIds[0] == myMemberId()
+              )
+              || (
+                thread.data.participants[1] == request.auth.uid
+                && thread.data.memberIds[1] == myMemberId()
+              )
+            );
+        }
+
+        function validReplyTo() {
+          return request.resource.data.replyTo == null
+            || (
+              request.resource.data.replyTo is map
+              && request.resource.data.replyTo.keys().hasOnly([
+                'messageId',
+                'senderName',
+                'textExcerpt'
+              ])
+              && request.resource.data.replyTo.messageId is string
+              && request.resource.data.replyTo.messageId.size() <= 200
+              && request.resource.data.replyTo.senderName is string
+              && request.resource.data.replyTo.senderName.size() <= 200
+              && request.resource.data.replyTo.textExcerpt is string
+              && request.resource.data.replyTo.textExcerpt.size() <= 120
+            );
+        }
+
+        allow read: if privateMessageAccess();
+
+        allow create: if privateMessageAccess()
+          && request.resource.data.keys().hasOnly([
+            'senderUid',
+            'senderMemberId',
+            'text',
+            'createdAt',
+            'readBy',
+            'replyTo'
+          ])
+          && request.resource.data.senderUid == request.auth.uid
+          && request.resource.data.senderMemberId == myMemberId()
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 5000
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.readBy == [request.auth.uid]
+          && validReplyTo();
+
+        // Só o outro participante pode acrescentar o próprio UID
+        // ao readBy. O remetente não consegue marcar a mensagem
+        // como lida em nome do destinatário.
+        allow update: if privateMessageAccess()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'readBy'
+          ])
+          && request.auth.uid != resource.data.senderUid
+          && !(request.auth.uid in resource.data.readBy)
+          && request.resource.data.readBy ==
+             resource.data.readBy.concat([request.auth.uid])
+          && request.resource.data.readBy.hasOnly(
+             privateParentThread().data.participants
+          );
+
+        // Só o autor pode excluir a própria mensagem.
+        allow delete: if privateMessageAccess()
+          && resource.data.senderUid == request.auth.uid;
+      }
+    }
+
+
+    // ============================================================
+    // BRASA — CINZAS PROJECT
+    // MANTIDO EXATAMENTE ABERTO para não quebrar o app antigo.
+    // ATENÇÃO: estas coleções continuam públicas na internet.
+    // A migração/fechamento deve ser feita separadamente após auditar Cinzas.
+    // ============================================================
+
+    match /records/{documentId} {
+      allow read, write: if true;
+    }
+
+    match /chat/{documentId} {
+      allow read, write: if true;
+    }
+
+    match /photos/{documentId} {
+      allow read, write: if true;
+    }
+
+    match /upload_history/{documentId} {
+      allow read, write: if true;
+    }
+
+    match /atmospheric/{documentId} {
+      allow read, write: if true;
+    }
+
+    match /diary/{documentId} {
+      allow read, write: if true;
+    }
+
+    match /schedule/{documentId} {
+      allow read, write: if true;
+    }
+
+
+    // ============================================================
+    // TUDO QUE NÃO FOI AUTORIZADO ACIMA FICA BLOQUEADO
+    // ============================================================
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

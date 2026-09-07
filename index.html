@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carbonautas · Science OS · P7</title>
+<title>Carbonautas · Science OS · P8</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P7">
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P7">
-<link rel="apple-touch-icon" href="./icon-192.png?v=P7">
+<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P8">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P8">
+<link rel="apple-touch-icon" href="./icon-192.png?v=P8">
 <meta name="theme-color" content="#08152B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1021,7 +1021,7 @@
 
 
 
-  /* ===== PREDATOR P7 · BLACK COMMAND NAV ===== */
+  /* ===== PREDATOR P8 · BLACK COMMAND NAV ===== */
   :root{
     --p7-black:#050505;--p7-black2:#0D0D0F;--p7-card:#131316;--p7-line:#2A2A2F;
     --p7-red:#FF3158;--p7-green:#28E07A;--p7-yellow:#FFD43B;--p7-blue:#3B82F6;
@@ -1038,6 +1038,7 @@
   .tab[data-view="track"].on{background:var(--p7-blue)!important;color:#fff!important}
   .tab[data-view="lab"].on{background:var(--p7-cyan)!important}
   .tab[data-view="mensagens"].on{background:var(--p7-violet)!important;color:#fff!important}
+  .tab[data-view="conversas"].on{background:linear-gradient(135deg,#16D9E3,#9B6CFF)!important;color:#050505!important}
   .tab[data-view="mural"].on{background:var(--p7-orange)!important}
   .tab[data-view="fotos"].on{background:var(--p7-pink)!important;color:#fff!important}
   .tab[data-view="pubs"].on{background:var(--p7-lime)!important}
@@ -1057,7 +1058,7 @@
   .app-nav-card{--accent:#fff;position:relative;min-height:118px;border:1px solid #2a2a30;background:#111114;color:#fff;border-radius:18px;padding:14px;text-align:left;overflow:hidden;transition:.16s;box-shadow:inset 0 3px 0 var(--accent)}
   .app-nav-card:after{content:'';position:absolute;right:-35px;bottom:-55px;width:110px;height:110px;border-radius:50%;background:var(--accent);filter:blur(32px);opacity:.14;pointer-events:none}.app-nav-card:active{transform:scale(.98)}.app-nav-card:hover{background:#19191e;border-color:#44444c;transform:translateY(-1px)}
   .app-nav-icon{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:color-mix(in srgb,var(--accent) 18%,#111114);border:1px solid color-mix(in srgb,var(--accent) 55%,#222);font-size:20px;margin-bottom:10px}.app-nav-card b{display:block;font-size:15px}.app-nav-card small{display:block;color:#aaaab3;font-size:10.5px;line-height:1.35;margin-top:4px}
-  .app-nav-card.c-red{--accent:var(--p7-red)}.app-nav-card.c-green{--accent:var(--p7-green)}.app-nav-card.c-yellow{--accent:var(--p7-yellow)}.app-nav-card.c-blue{--accent:var(--p7-blue)}.app-nav-card.c-cyan{--accent:var(--p7-cyan)}.app-nav-card.c-violet{--accent:var(--p7-violet)}.app-nav-card.c-orange{--accent:var(--p7-orange)}.app-nav-card.c-pink{--accent:var(--p7-pink)}.app-nav-card.c-lime{--accent:var(--p7-lime)}
+  .app-nav-card.c-red{--accent:var(--p7-red)}.app-nav-card.c-green{--accent:var(--p7-green)}.app-nav-card.c-yellow{--accent:var(--p7-yellow)}.app-nav-card.c-blue{--accent:var(--p7-blue)}.app-nav-card.c-cyan{--accent:var(--p7-cyan)}.app-nav-card.c-violet{--accent:var(--p7-violet)}.app-nav-card.c-private{--accent:#36E3FF}.app-nav-card.c-orange{--accent:var(--p7-orange)}.app-nav-card.c-pink{--accent:var(--p7-pink)}.app-nav-card.c-lime{--accent:var(--p7-lime)}
   .app-menu-foot{padding:15px 2px 4px}.app-menu-tip{font-size:11px;color:#8f8f99}.app-menu-tip b{color:#fff}
   .side-mobile-head{display:none}.rede-filter-fab{display:none}
   @media(max-width:920px){
@@ -1074,6 +1075,20 @@
   }
   @media(max-width:420px){.app-menu-drawer{width:100vw}.app-menu-grid{gap:8px}.app-nav-card{padding:12px;min-height:108px}.app-nav-card b{font-size:14px}.app-nav-card small{font-size:10px}.menu-btn{min-width:72px;padding-left:10px!important;padding-right:10px!important}}
 
+
+  /* ===== P8 · CHAT PRIVADO 1:1 ===== */
+  .private-wrap{height:calc(100vh - 76px);min-height:0;padding:16px;background:radial-gradient(circle at 82% 0%,rgba(155,108,255,.13),transparent 30%),radial-gradient(circle at 12% 92%,rgba(22,217,227,.10),transparent 34%),#06070a;color:#fff}
+  .private-head{max-width:1240px;margin:0 auto 12px;display:flex;align-items:center;gap:14px}.private-head h2{font-family:'Fraunces';font-size:28px;margin:0;color:#fff}.private-head p{margin:4px 0 0;color:#9aa7b3;font-size:12.5px}.private-lock{display:inline-flex;gap:6px;align-items:center;border:1px solid #24424d;background:#0d191e;color:#81f1ff;border-radius:999px;padding:7px 10px;font-size:10.5px;font-weight:850}
+  .private-shell{max-width:1240px;height:calc(100% - 62px);margin:0 auto;border:1px solid #24262d;border-radius:24px;overflow:hidden;display:grid;grid-template-columns:360px minmax(0,1fr);background:#0b0c10;box-shadow:0 22px 70px rgba(0,0,0,.32)}
+  .private-list-pane{min-width:0;border-right:1px solid #24262d;background:linear-gradient(180deg,#0d0e13,#090a0d);display:flex;flex-direction:column;min-height:0}.private-list-top{padding:16px;border-bottom:1px solid #24262d}.private-list-actions{display:flex;gap:8px}.private-new-btn{flex:1;border:0;border-radius:14px;padding:11px 13px;background:linear-gradient(135deg,#11d6e6,#8a68ff);color:#05060a;font-weight:900;cursor:pointer}.private-search{margin-top:10px;width:100%;border:1px solid #30333b;background:#15161b;color:#fff;border-radius:13px;padding:10px 12px;outline:none}.private-search:focus{border-color:#24d8e5;box-shadow:0 0 0 3px rgba(22,217,227,.10)}
+  .private-thread-list{flex:1;min-height:0;overflow:auto;padding:8px}.private-thread{width:100%;display:grid;grid-template-columns:46px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid transparent;background:transparent;color:#fff;border-radius:16px;padding:10px;text-align:left;cursor:pointer}.private-thread:hover{background:#14161c;border-color:#262a33}.private-thread.on{background:linear-gradient(135deg,rgba(22,217,227,.12),rgba(155,108,255,.09));border-color:#315a68}.private-av{width:46px;height:46px;border-radius:15px;background:#20232b;display:grid;place-items:center;font-size:12px;font-weight:900;overflow:hidden;color:#fff}.private-av img{width:100%;height:100%;object-fit:cover}.private-thread-main{min-width:0}.private-thread-name{font-size:13.5px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.private-thread-last{font-size:11px;color:#8f9aa5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px}.private-thread-side{text-align:right;align-self:stretch;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:5px}.private-thread-time{font-size:9.5px;color:#68727d}.private-unread{min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#20ddea;color:#02090b;display:grid;place-items:center;font-size:10px;font-weight:950}
+  .private-empty-list{padding:30px 18px;color:#7f8994;text-align:center;font-size:12px;line-height:1.55}.private-chat-pane{min-width:0;min-height:0;display:flex;flex-direction:column;background:radial-gradient(circle at 50% -15%,rgba(28,102,150,.13),transparent 36%),#090b0f}.private-chat-empty{margin:auto;padding:28px;text-align:center;color:#82909d;max-width:380px}.private-chat-empty .big{font-size:42px;margin-bottom:10px}.private-chat-empty b{display:block;color:#dce7ee;font-size:17px;margin-bottom:5px}.private-chat-header{display:none;align-items:center;gap:11px;padding:12px 15px;border-bottom:1px solid #24262d;background:rgba(9,11,15,.92);backdrop-filter:blur(8px);min-height:70px}.private-chat-header.show{display:flex}.private-chat-person{min-width:0;flex:1}.private-chat-person b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.private-chat-person small{display:block;color:#72dce7;font-size:10px;margin-top:3px}.private-back{display:none;width:38px;height:38px;border-radius:12px;border:1px solid #343740;background:#17191f;color:#fff;font-size:18px}
+  .private-messages{flex:1;min-height:0;overflow-y:auto;padding:18px 20px;display:none;flex-direction:column;gap:8px}.private-messages.show{display:flex}.private-day{align-self:center;background:#151820;border:1px solid #292d36;color:#7f8b96;border-radius:999px;padding:5px 9px;font-size:9.5px;margin:6px 0}.private-msg{max-width:min(72%,680px);display:flex;flex-direction:column;gap:3px}.private-msg.mine{align-self:flex-end;align-items:flex-end}.private-msg.other{align-self:flex-start;align-items:flex-start}.private-reply-quote{max-width:100%;border-left:3px solid #55e9f4;background:rgba(255,255,255,.05);padding:7px 9px;border-radius:9px;font-size:10px;color:#aeb9c4;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.private-bubble{position:relative;border:1px solid #2b3039;background:#171a20;color:#edf4f7;border-radius:18px 18px 18px 6px;padding:10px 12px 8px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word;box-shadow:0 6px 18px rgba(0,0,0,.12)}.private-msg.mine .private-bubble{background:linear-gradient(135deg,#103b4a,#20234f);border-color:#296275;border-radius:18px 18px 6px 18px}.private-msg-meta{display:flex;gap:7px;align-items:center;color:#68747f;font-size:9px;padding:0 4px}.private-read{color:#53e3ef}.private-msg-actions{display:flex;gap:4px;opacity:0;transition:.12s}.private-msg:hover .private-msg-actions,.private-msg:focus-within .private-msg-actions{opacity:1}.private-msg-actions button{border:0;background:transparent;color:#7d8995;font-size:9px;padding:2px 4px;cursor:pointer}.private-msg-actions button:hover{color:#fff}.private-msg-actions .delete:hover{color:#ff6681}
+  .private-composer-zone{display:none;border-top:1px solid #24262d;background:#0d0f14;padding:10px 12px}.private-composer-zone.show{display:block}.private-replying{display:none;align-items:center;gap:10px;background:#151921;border:1px solid #2d3540;border-radius:12px;padding:8px 10px;margin-bottom:8px}.private-replying.show{display:flex}.private-replying .text{min-width:0;flex:1;font-size:10.5px;color:#a9b7c2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.private-replying .text b{color:#5ee8f2}.private-replying button{border:0;background:transparent;color:#a0aab4;font-size:18px}.private-emoji-bar{display:none;gap:5px;flex-wrap:wrap;margin-bottom:7px}.private-emoji-bar.show{display:flex}.private-emoji-bar button{border:1px solid #30343d;background:#16191f;border-radius:10px;padding:6px 8px;font-size:17px;cursor:pointer}.private-composer{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:end}.private-emoji-toggle,.private-send{width:42px;height:42px;border-radius:13px;border:1px solid #343842;background:#171a20;color:#fff;font-size:18px;cursor:pointer}.private-send{background:linear-gradient(135deg,#12d8e7,#8c6aff);border:0;color:#05060a;font-weight:950}.private-composer textarea{resize:none;max-height:130px;min-height:42px;border:1px solid #30343d;background:#15181e;color:#fff;border-radius:14px;padding:11px 12px;outline:none;font:inherit;line-height:1.4}.private-composer textarea:focus{border-color:#29dce8;box-shadow:0 0 0 3px rgba(22,217,227,.08)}
+  .private-modal-search{width:100%;border:1px solid #cbd8df;border-radius:12px;padding:10px 12px;margin-bottom:10px}.private-people-list{display:flex;flex-direction:column;gap:7px;max-height:55vh;overflow:auto}.private-person-row{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;border:1px solid #dce5ea;border-radius:14px;padding:9px;background:#fff}.private-person-main b{display:block;font-size:13px;color:#142b3b}.private-person-main small{display:block;font-size:10.5px;color:#71828e;margin-top:2px}.private-person-row button{border:1px solid #bddbe0;background:#ecfbfd;color:#0d6670;border-radius:10px;padding:7px 9px;font-size:10.5px;font-weight:850}.private-person-row button:disabled{opacity:.45;cursor:not-allowed}.private-rule-warning{display:none;margin:10px 0;border:1px solid #673f48;background:#2a1319;color:#ffbcc8;border-radius:13px;padding:10px 12px;font-size:11px;line-height:1.45}.private-rule-warning.show{display:block}
+  .app-version{margin-left:8px;border:1px solid #303039;background:#111114;color:#7eeaf2;border-radius:999px;padding:4px 7px;font-size:9px;font-weight:900;letter-spacing:.06em}
+  @media(max-width:760px){.private-wrap{height:calc(100dvh - 116px);padding:8px}.private-head{margin:0 4px 8px}.private-head h2{font-size:22px}.private-head p{display:none}.private-lock{font-size:9px;padding:6px 8px}.private-shell{height:calc(100% - 44px);grid-template-columns:1fr;border-radius:18px}.private-list-pane{border-right:0}.private-chat-pane{display:none}.private-shell.chat-open .private-list-pane{display:none}.private-shell.chat-open .private-chat-pane{display:flex}.private-back{display:inline-grid;place-items:center}.private-messages{padding:14px 10px}.private-msg{max-width:86%}.private-msg-actions{opacity:.75}.private-bubble{font-size:14px}.private-composer-zone{padding:8px}.private-composer{grid-template-columns:40px minmax(0,1fr) 40px}.private-emoji-toggle,.private-send{width:40px;height:40px}.private-list-top{padding:12px}.private-thread-list{padding:5px}}
+
 </style>
 </head>
 <body data-view="painel">
@@ -1081,7 +1096,7 @@
 <div class="auth-gate" id="authGate">
   <div class="auth-card">
     <div class="auth-brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P7" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P8" alt="Carbonautas · carbono em ligação"></div>
       <div><h2>Carbonautas</h2><p>Acompanhamento · projetos · rede</p></div>
     </div>
     <div class="auth-login" id="authLoginPane">
@@ -1117,7 +1132,7 @@
 </div>
 
 <div class="loading" id="loading">
-  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P7" alt="Carbonautas · carbono em ligação"></div>
+  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P8" alt="Carbonautas · carbono em ligação"></div>
   <p id="loadingMsg">Conectando à rede…</p>
 </div>
 
@@ -1129,7 +1144,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
     </button>
     <div class="brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P7" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P8" alt="Carbonautas · carbono em ligação"></div>
       <div>
         <h1>Carbonautas</h1>
         <div class="sub">LIPAN · LEFA · CELBE</div>
@@ -1160,6 +1175,10 @@
       <button class="tab" data-view="mensagens">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a3 3 0 0 1-3 3H8l-5 3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>
         <span class="tl">Mensagens</span><span class="badge" id="msgBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="conversas" title="Conversas privadas 1:1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a7 7 0 0 1-7 7H8l-4 3v-5.5A7 7 0 1 1 20 11Z"/><path d="M9 11h6"/><path d="M12 8v6"/></svg>
+        <span class="tl">Conversas</span><span class="badge" id="privateBadge" style="display:none"></span>
       </button>
       <button class="tab" data-view="mural">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -1199,12 +1218,12 @@
     </button>
   </div>
 
-  <!-- ============ MENU GLOBAL DO APP · P7 ============ -->
+  <!-- ============ MENU GLOBAL DO APP · P8 ============ -->
   <div class="app-menu-backdrop" id="appMenuBackdrop" aria-hidden="true">
     <aside class="app-menu-drawer" id="appMenuDrawer" role="dialog" aria-modal="true" aria-label="Navegação do Carbonautas">
       <div class="app-menu-head">
         <div class="app-menu-brand">
-          <img src="./icon-192.png?v=P7" alt="" class="app-menu-logo">
+          <img src="./icon-192.png?v=P8" alt="" class="app-menu-logo">
           <div><b>Carbonautas</b><small>Escolha onde quer ir</small></div>
         </div>
         <button type="button" class="app-menu-close" id="appMenuClose" aria-label="Fechar menu">×</button>
@@ -1216,11 +1235,12 @@
         <button type="button" class="app-nav-card c-blue" data-app-view="track"><span class="app-nav-icon">📈</span><b>Acompanhamento</b><small>Orientações e saúde dos projetos</small></button>
         <button type="button" class="app-nav-card c-cyan" data-app-view="lab"><span class="app-nav-icon">🧪</span><b>Lab de Dados</b><small>Análises, figuras e reprodutibilidade</small></button>
         <button type="button" class="app-nav-card c-violet" data-app-view="mensagens"><span class="app-nav-icon">💬</span><b>Mensagens</b><small>Conversa rápida da equipe</small></button>
+        <button type="button" class="app-nav-card c-private" data-app-view="conversas"><span class="app-nav-icon">🔐</span><b>Conversas</b><small>Chat privado entre duas pessoas</small></button>
         <button type="button" class="app-nav-card c-orange" data-app-view="mural"><span class="app-nav-icon">📣</span><b>Mural</b><small>Pedidos, alertas e direcionamentos</small></button>
         <button type="button" class="app-nav-card c-pink" data-app-view="fotos"><span class="app-nav-icon">📸</span><b>Fotos</b><small>Registros das ações</small></button>
         <button type="button" class="app-nav-card c-lime" data-app-view="pubs"><span class="app-nav-icon">📚</span><b>Repositório</b><small>Arquivos, Office e produtos</small></button>
       </div>
-      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span></div>
+      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P8</span></div>
     </aside>
   </div>
 
@@ -1388,6 +1408,46 @@
         <button class="send" id="sendBtn" title="Enviar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: CONVERSAS PRIVADAS 1:1 · P8 ============ -->
+  <div class="view" id="viewConversas">
+    <div class="private-wrap">
+      <div class="private-head">
+        <div><h2>Conversas</h2><p>Chat privado 1:1. O conteúdo só é carregado para os dois participantes da conversa.</p></div>
+        <div class="spacer"></div><span class="private-lock">🔐 PRIVADO · 1:1</span>
+      </div>
+      <div class="private-shell" id="privateShell">
+        <aside class="private-list-pane">
+          <div class="private-list-top">
+            <div class="private-list-actions"><button type="button" class="private-new-btn" id="privateNewBtn">＋ Nova conversa</button></div>
+            <input class="private-search" id="privateThreadSearch" placeholder="Buscar conversa…" autocomplete="off">
+            <div class="private-rule-warning" id="privateRulesWarning"></div>
+          </div>
+          <div class="private-thread-list" id="privateThreadList"><div class="private-empty-list">Nenhuma conversa privada ainda.</div></div>
+        </aside>
+        <section class="private-chat-pane" id="privateChatPane">
+          <div class="private-chat-empty" id="privateChatEmpty"><div class="big">🔐</div><b>Suas conversas privadas</b><span>Escolha alguém na lista ou toque em “Nova conversa”. O coordenador não recebe acesso especial ao conteúdo.</span></div>
+          <div class="private-chat-header" id="privateChatHeader">
+            <button type="button" class="private-back" id="privateBackBtn" aria-label="Voltar para conversas">‹</button>
+            <div class="private-av" id="privateChatAv">?</div>
+            <div class="private-chat-person"><b id="privateChatName">Conversa</b><small id="privateChatStatus">privada entre 2 participantes</small></div>
+          </div>
+          <div class="private-messages" id="privateMessages"></div>
+          <div class="private-composer-zone" id="privateComposerZone">
+            <div class="private-replying" id="privateReplying"><div class="text" id="privateReplyText"></div><button type="button" id="privateReplyCancel" aria-label="Cancelar resposta">×</button></div>
+            <div class="private-emoji-bar" id="privateEmojiBar">
+              <button type="button">👍</button><button type="button">💙</button><button type="button">😂</button><button type="button">🎉</button><button type="button">🤨</button><button type="button">🔥</button><button type="button">👏</button><button type="button">✅</button><button type="button">🙏</button><button type="button">🧪</button>
+            </div>
+            <div class="private-composer">
+              <button type="button" class="private-emoji-toggle" id="privateEmojiToggle" title="Emoji">☺</button>
+              <textarea id="privateInput" rows="1" maxlength="5000" placeholder="Mensagem privada…"></textarea>
+              <button type="button" class="private-send" id="privateSendBtn" title="Enviar">➤</button>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </div>
@@ -2131,6 +2191,17 @@
   </div>
 </div>
 
+<div class="overlay" id="privateNewOverlay">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-h"><h2>🔐 Nova conversa privada</h2><div class="spacer"></div><button class="btn ghost" data-close="privateNewOverlay">Fechar</button></div>
+    <div class="modal-b">
+      <div class="notice"><b>Somente 1:1.</b> Escolha uma pessoa da Rede. A conversa não inclui automaticamente coordenadores ou terceiros.</div>
+      <input class="private-modal-search" id="privatePersonSearch" placeholder="Buscar pessoa pelo nome…" autocomplete="off">
+      <div class="private-people-list" id="privatePeopleList"></div>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="notifyOverlay"><div class="modal" style="max-width:620px">
   <div class="modal-h"><h2>🔔 Notificações</h2><div class="spacer"></div><button class="btn ghost" data-close="notifyOverlay">Fechar</button></div>
   <div class="modal-b">
@@ -2143,7 +2214,7 @@
 <div class="toast" id="toast"></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp, addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion }
+import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp, addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion, increment }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref as sRef, uploadString, getDownloadURL, deleteObject }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
@@ -2166,7 +2237,7 @@ window.auth = getAuth(app);
 window.secondaryAuth = getAuth(secondaryApp);
 window.fbFns = {
   collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp,
-  addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion, sRef, uploadString, getDownloadURL, deleteObject,
+  addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion, increment, sRef, uploadString, getDownloadURL, deleteObject,
   onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail
 };
 window.dispatchEvent(new Event('firebase-ready'));
@@ -2258,7 +2329,7 @@ const SEED_VINCULOS = [
 ];
 
 /* ============ STATE ============ */
-let state = { members: [], chat: [], schedule: [], photos: [], publicacoes: [], activities: [], feed: [], comments: [], reactions: [], notifications: [], users: [], linhas: DEFAULT_LINHAS.slice(), settings: {groupLink:''} };
+let state = { members: [], chat: [], schedule: [], photos: [], publicacoes: [], activities: [], feed: [], comments: [], reactions: [], notifications: [], users: [], privateThreads: [], privateDirectory: [], linhas: DEFAULT_LINHAS.slice(), settings: {groupLink:''} };
 let hiddenNiveis = new Set();
 let hiddenLinhas = new Set();
 let selectedId = null;
@@ -2274,6 +2345,12 @@ let bootstrapped = false;
 let currentView = 'painel';
 let lastSeenChat = +localStorage.getItem('rede_lastSeenChat') || 0;
 let lbPhotoId = null;
+let privateActiveThreadId = null;
+let privateMessagesState = [];
+let privateMessageUnsub = null;
+let privateReplyTarget = null;
+let privateChatAccessError = '';
+let privateDirectorySeeded = false;
 const FB = () => window.fbFns;
 
 /* ============ HELPERS ============ */
@@ -2419,6 +2496,7 @@ async function bootstrap(){
       if(isAdmin) await f.setDoc(setRef,{groupLink:'',linhas:state.settings.linhas});
     }
     state.linhas=state.settings.linhas;
+    ensurePrivateDirectoryEntry().catch(e=>console.warn('Diretório privado indisponível:',e));
     subscribeAll();
     bootstrapped=true;
     $('#authGate').classList.add('off');
@@ -2432,7 +2510,7 @@ async function bootstrap(){
   }
 }
 
-function clearSubscriptions(){subscriptions.forEach(fn=>{try{fn()}catch(e){}});subscriptions=[];}
+function clearSubscriptions(){subscriptions.forEach(fn=>{try{fn()}catch(e){}});subscriptions=[];if(privateMessageUnsub){try{privateMessageUnsub()}catch(e){}privateMessageUnsub=null;}privateMessagesState=[];privateActiveThreadId=null;}
 
 function subscribeAll(){
   const f=FB();
@@ -2455,6 +2533,8 @@ function subscribeAll(){
     if(currentView==='crono') renderCrono();
     updateAttentionBadge();
     refreshMemberDependentUI();
+    if(currentView==='conversas') renderPrivateThreads();
+    if($('#privateNewOverlay')?.classList.contains('open')) renderPrivatePeople();
     if(selectedId && memberById(selectedId)) renderDetail(); if(isAdmin && $('#peopleOverlay')?.classList.contains('on')) renderPeopleManager();
   }));
   // CHAT
@@ -2513,6 +2593,22 @@ function subscribeAll(){
     if(currentView==='fotos') renderFotos();
     if(lbPhotoId) renderLightboxSocial();
   }));
+  // CHAT PRIVADO 1:1 · somente threads em que o UID autenticado participa
+  if(authUser?.uid){
+    const tq=f.query(f.collection(window.db,'rede_private_threads'),f.where('participants','array-contains',authUser.uid));
+    subscriptions.push(f.onSnapshot(tq,snap=>{
+      privateChatAccessError='';
+      state.privateThreads=snap.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>privateMillis(b.updatedAt)-privateMillis(a.updatedAt));
+      renderPrivateThreads();updatePrivateBadge();
+      if(privateActiveThreadId && !state.privateThreads.some(t=>t.id===privateActiveThreadId)){closePrivateThread();}
+    },err=>{console.warn('Chat privado indisponível:',err);privateChatAccessError='As regras do Firestore do chat privado ainda não foram liberadas para esta versão.';state.privateThreads=[];renderPrivateThreads();updatePrivateBadge();}));
+    subscriptions.push(f.onSnapshot(f.collection(window.db,'rede_private_directory'),snap=>{
+      state.privateDirectory=snap.docs.map(d=>({...d.data(),memberId:d.id}));
+      if(currentView==='conversas')renderPrivateThreads();
+      if($('#privateNewOverlay')?.classList.contains('open'))renderPrivatePeople();
+    },err=>{console.warn('Diretório do chat privado indisponível:',err)}));
+  }
+
   // NOTIFICAÇÕES DO USUÁRIO LOGADO
   if(myId){
     let notifInitial=true;
@@ -2531,6 +2627,7 @@ function subscribeAll(){
     subscriptions.push(f.onSnapshot(f.collection(window.db,'rede_users'),snap=>{
       state.users=snap.docs.map(d=>({...d.data(),uid:d.id}));
       renderAccessList();
+      if(!privateDirectorySeeded){privateDirectorySeeded=true;seedPrivateDirectoryFromUsers().catch(e=>console.warn('Não foi possível preparar o diretório privado:',e));}
     }));
   } else { state.users=authProfile?[{...authProfile,uid:authUser.uid}]:[]; }
 }
@@ -2790,11 +2887,11 @@ async function resetMyPassword(emailOverride=''){
   }
 }
 async function doLogout(){
-  clearSubscriptions(); bootstrapped=false; authProfile=null; authUser=null; myId=null; myName=''; isAdmin=false;
+  clearSubscriptions(); bootstrapped=false; authProfile=null; authUser=null; myId=null; myName=''; isAdmin=false; state.privateThreads=[];state.privateDirectory=[];privateDirectorySeeded=false;
   try{await FB().signOut(window.auth)}catch(e){console.error(e)}
 }
 async function handleAuthUser(user){
-  clearSubscriptions(); bootstrapped=false; state.users=[];
+  clearSubscriptions(); bootstrapped=false; state.users=[];state.privateThreads=[];state.privateDirectory=[];privateDirectorySeeded=false;privateChatAccessError='';
   if(!user){authUser=null;authProfile=null;myId=null;myName='';isAdmin=false;showLogin();refreshIdentityUI();return}
   authUser=user; $('#loading').classList.remove('off'); $('#loadingMsg').textContent='Validando sua conta…';
   try{
@@ -4665,7 +4762,7 @@ async function dedupeMembers(){
 
 /* ============ NOTIFICAÇÕES ============ */
 function notifMillis(n){return n?.ts?.toMillis?n.ts.toMillis():+new Date(n?.ts||0)}
-function notificationIcon(kind='atualizacao'){return ({ajuda_campo:'🌿',ajuda_lab:'🧪',ajuda_dados:'📊',ajuda_outro:'🆘',alerta:'⚠️',ideia:'💡',resenha:'😂',recado:'✈️',atualizacao:'📌',resultado:'✅',evento:'📅',acompanhamento:'📌',correcao:'✍️',pendencia:'⚠️',repositorio_correcao:'✍️'})[kind]||'🔔'}
+function notificationIcon(kind='atualizacao'){return ({ajuda_campo:'🌿',ajuda_lab:'🧪',ajuda_dados:'📊',ajuda_outro:'🆘',alerta:'⚠️',ideia:'💡',resenha:'😂',recado:'✈️',atualizacao:'📌',resultado:'✅',evento:'📅',acompanhamento:'📌',correcao:'✍️',pendencia:'⚠️',repositorio_correcao:'✍️',private_message:'🔐'})[kind]||'🔔'}
 function renderNotificationUI(){
   const unread=state.notifications.filter(n=>!n.read).length,b=$('#notifyBadge');
   if(b){b.textContent=unread>99?'99+':unread;b.style.display=unread?'grid':'none'}
@@ -4678,7 +4775,7 @@ async function openNotification(id){
   const n=state.notifications.find(x=>x.id===id);if(!n)return;
   try{await FB().updateDoc(FB().doc(window.db,'rede_notifications',id),{read:true,readAt:FB().serverTimestamp()})}catch(e){console.warn(e)}
   closeOverlay('notifyOverlay');
-  if(n.sourceType==='acompanhamento'){switchView('track');setTimeout(()=>{if(n.ownerId&&$('#trackOwner')){$('#trackOwner').value=n.ownerId;renderTrack()}},40)} else if(n.sourceType==='repositorio_correcao'){switchView('pubs');setTimeout(()=>{if(n.ownerId&&$('#pubPessoa')){$('#pubPessoa').value=n.ownerId;renderPubs()}},50)} else switchView('mural');
+  if(n.sourceType==='acompanhamento'){switchView('track');setTimeout(()=>{if(n.ownerId&&$('#trackOwner')){$('#trackOwner').value=n.ownerId;renderTrack()}},40)} else if(n.sourceType==='repositorio_correcao'){switchView('pubs');setTimeout(()=>{if(n.ownerId&&$('#pubPessoa')){$('#pubPessoa').value=n.ownerId;renderPubs()}},50)} else if(n.sourceType==='private_chat'){switchView('conversas');setTimeout(()=>openPrivateThread(n.threadId||n.sourceId),80)} else switchView('mural');
 }
 async function markAllNotificationsRead(){
   const unread=state.notifications.filter(n=>!n.read);if(!unread.length){toast('Não há notificações novas.');return}
@@ -4695,8 +4792,8 @@ function updateNotificationPermissionHint(){
 }
 function showDeviceNotification(n){
   if(!('Notification' in window)||Notification.permission!=='granted')return;
-  if(document.visibilityState==='visible'&&currentView==='mural')return;
-  try{const note=new Notification(n.title||'Carbonautas',{body:n.message||'Nova notificação',icon:'./icons/icon-192.png',badge:'./icons/icon-192.png',tag:'carbonautas-'+(n.sourceId||n.id)});note.onclick=()=>{window.focus();if(n.sourceType==='repositorio_correcao')switchView('pubs');else if(n.sourceType==='acompanhamento')switchView('track');else switchView('mural');note.close()}}catch(e){console.warn('Notificação nativa falhou',e)}
+  if(document.visibilityState==='visible'&&((currentView==='mural'&&n.sourceType!=='private_chat')||(currentView==='conversas'&&n.sourceType==='private_chat')))return;
+  try{const note=new Notification(n.title||'Carbonautas',{body:n.message||'Nova notificação',icon:'./icons/icon-192.png',badge:'./icons/icon-192.png',tag:'carbonautas-'+(n.sourceId||n.id)});note.onclick=()=>{window.focus();if(n.sourceType==='repositorio_correcao')switchView('pubs');else if(n.sourceType==='acompanhamento')switchView('track');else if(n.sourceType==='private_chat'){switchView('conversas');setTimeout(()=>openPrivateThread(n.threadId||n.sourceId),80)}else switchView('mural');note.close()}}catch(e){console.warn('Notificação nativa falhou',e)}
 }
 async function createMuralNotifications(dest,meta={}){
   const me=currentActor();if(!me?.id)return;
@@ -4852,12 +4949,89 @@ function openOverlay(id){$('#'+id).classList.add('open')}
 function closeOverlay(id){$('#'+id).classList.remove('open')}
 
 /* ============ VIEW SWITCHING ============ */
+
+/* ============ CHAT PRIVADO 1:1 · P8 ============ */
+function privateMillis(ts){return ts?.toMillis?ts.toMillis():+new Date(ts||0)||0}
+function privateUid(){return window.auth?.currentUser?.uid||''}
+function privateThreadId(a,b){return [String(a||''),String(b||'')].sort().map(x=>encodeURIComponent(x)).join('__')}
+function privateOtherMemberId(thread){return (thread?.memberIds||[]).find(id=>id!==myId)||''}
+function privateOtherUid(thread){return (thread?.participants||[]).find(id=>id!==privateUid())||''}
+function privateAvatarHTML(m,cls='private-av'){return `<div class="${cls}">${m?.foto?`<img src="${esc(m.foto)}" alt="">`:esc(initials(m?.nome||'?'))}</div>`}
+function privateUnread(thread){const uidv=privateUid();return Math.max(0,Number(thread?.unreadBy?.[uidv]||0))}
+function updatePrivateBadge(){const n=(state.privateThreads||[]).reduce((sum,t)=>sum+privateUnread(t),0),b=$('#privateBadge');if(!b)return;if(currentView!=='conversas'&&n){b.textContent=n>99?'99+':n;b.style.display='grid'}else b.style.display='none'}
+
+async function ensurePrivateDirectoryEntry(){
+  const uidv=privateUid(),m=memberById(myId);if(!uidv||!myId||!m)return;
+  const f=FB();await f.setDoc(f.doc(window.db,'rede_private_directory',myId),{uid:uidv,memberId:myId,nome:m.nome||myName||'',foto:m.foto||'',updatedAt:f.serverTimestamp()},{merge:true});
+}
+async function seedPrivateDirectoryFromUsers(){
+  if(!isAdmin||!state.users?.length)return;const f=FB();
+  // Escritas individuais evitam estourar o limite de leituras de Security Rules em batch quando a rede crescer.
+  for(const u of state.users){if(!u?.uid||!u?.memberId)continue;const m=memberById(u.memberId);await f.setDoc(f.doc(window.db,'rede_private_directory',u.memberId),{uid:u.uid,memberId:u.memberId,nome:m?.nome||u.nome||'',foto:m?.foto||'',updatedAt:f.serverTimestamp()},{merge:true});}
+}
+function privateDirectoryFor(memberId){return state.privateDirectory.find(x=>x.memberId===memberId)||null}
+function renderPrivateThreads(){
+  const list=$('#privateThreadList'),warn=$('#privateRulesWarning');if(!list)return;
+  if(warn){warn.textContent=privateChatAccessError;warn.classList.toggle('show',!!privateChatAccessError)}
+  const term=($('#privateThreadSearch')?.value||'').trim().toLowerCase();
+  const threads=(state.privateThreads||[]).filter(t=>{const m=memberById(privateOtherMemberId(t));return !term||(m?.nome||'').toLowerCase().includes(term)||(t.lastMessage||'').toLowerCase().includes(term)});
+  if(!threads.length){list.innerHTML=`<div class="private-empty-list">${privateChatAccessError?'O restante da plataforma continua funcionando. Depois de aplicar as regras P8, as conversas aparecerão aqui.':'Nenhuma conversa privada ainda.<br>Toque em <b>Nova conversa</b> para falar diretamente com alguém.'}</div>`;return}
+  list.innerHTML=threads.map(t=>{const mid=privateOtherMemberId(t),m=memberById(mid),un=privateUnread(t),tm=privateMillis(t.updatedAt);return `<button type="button" class="private-thread ${t.id===privateActiveThreadId?'on':''}" data-private-thread="${esc(t.id)}">${privateAvatarHTML(m)}<span class="private-thread-main"><span class="private-thread-name">${esc(m?.nome||'Carbonauta')}</span><span class="private-thread-last">${esc(t.lastMessage||'Conversa iniciada')}</span></span><span class="private-thread-side"><span class="private-thread-time">${tm?esc(fmtTime(tm)):''}</span>${un?`<span class="private-unread">${un>99?'99+':un}</span>`:''}</span></button>`}).join('');
+  list.querySelectorAll('[data-private-thread]').forEach(b=>b.onclick=()=>openPrivateThread(b.dataset.privateThread));
+}
+function renderPrivatePeople(){
+  const box=$('#privatePeopleList');if(!box)return;const term=($('#privatePersonSearch')?.value||'').trim().toLowerCase();
+  const rows=state.members.filter(m=>m.id!==myId&&m.status!=='inativo'&&(!term||(m.nome||'').toLowerCase().includes(term))).sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
+  if(!rows.length){box.innerHTML='<div class="private-empty-list" style="color:#657582">Nenhuma pessoa encontrada.</div>';return}
+  box.innerHTML=rows.map(m=>{const d=privateDirectoryFor(m.id),known=!!d?.uid||!!(isAdmin&&state.users.find(u=>u.memberId===m.id));return `<div class="private-person-row">${privateAvatarHTML(m)}<div class="private-person-main"><b>${esc(m.nome||'Carbonauta')}</b><small>${known?'Conta vinculada · disponível para conversa':'Conta ainda não localizada no diretório privado'}</small></div><button type="button" data-private-person="${esc(m.id)}" ${known?'':'disabled'}>${known?'Conversar':'Indisponível'}</button></div>`}).join('');
+  box.querySelectorAll('[data-private-person]').forEach(b=>b.onclick=()=>startPrivateConversation(b.dataset.privatePerson));
+}
+function openPrivateNew(){if(!privateUid()||!myId)return toast('Entre com seu perfil para iniciar uma conversa.');$('#privatePersonSearch').value='';renderPrivatePeople();openOverlay('privateNewOverlay');setTimeout(()=>$('#privatePersonSearch')?.focus(),60)}
+async function resolvePrivateTarget(memberId){
+  let d=privateDirectoryFor(memberId);if(d?.uid)return d;
+  try{const snap=await FB().getDoc(FB().doc(window.db,'rede_private_directory',memberId));if(snap.exists()){d={...snap.data(),memberId};state.privateDirectory=[...state.privateDirectory.filter(x=>x.memberId!==memberId),d];return d}}catch(e){console.warn(e)}
+  if(isAdmin){const u=state.users.find(x=>x.memberId===memberId);if(u?.uid)return {uid:u.uid,memberId}}
+  return null;
+}
+async function startPrivateConversation(targetMemberId){
+  if(!targetMemberId||targetMemberId===myId)return;const target=await resolvePrivateTarget(targetMemberId);if(!target?.uid){toast('Essa pessoa ainda não está disponível para chat privado.');return}
+  const uidv=privateUid(),pairs=[{memberId:myId,uid:uidv},{memberId:targetMemberId,uid:target.uid}].sort((a,b)=>a.memberId.localeCompare(b.memberId)),id=privateThreadId(myId,targetMemberId),f=FB(),ref=f.doc(window.db,'rede_private_threads',id);
+  try{const snap=await f.getDoc(ref);let threadData;if(!snap.exists()){const unread={};pairs.forEach(x=>unread[x.uid]=0);threadData={participants:pairs.map(x=>x.uid),memberIds:pairs.map(x=>x.memberId),createdAt:new Date(),updatedAt:new Date(),lastMessage:'',lastSenderUid:'',lastSenderMemberId:'',unreadBy:unread};await f.setDoc(ref,{...threadData,createdAt:f.serverTimestamp(),updatedAt:f.serverTimestamp()});}else threadData={...snap.data(),id};if(!state.privateThreads.some(t=>t.id===id)){state.privateThreads=[{...threadData,id},...state.privateThreads];}closeOverlay('privateNewOverlay');switchView('conversas');openPrivateThread(id)}catch(e){console.error(e);toast(e?.code==='permission-denied'?'As regras do chat privado ainda precisam ser aplicadas no Firestore.':'Não consegui abrir a conversa privada.')}
+}
+function closePrivateThread(){if(privateMessageUnsub){try{privateMessageUnsub()}catch(e){}privateMessageUnsub=null}privateActiveThreadId=null;privateMessagesState=[];privateReplyTarget=null;$('#privateShell')?.classList.remove('chat-open');$('#privateChatHeader')?.classList.remove('show');$('#privateMessages')?.classList.remove('show');$('#privateComposerZone')?.classList.remove('show');if($('#privateChatEmpty'))$('#privateChatEmpty').style.display='block';renderPrivateThreads();updatePrivateBadge()}
+function openPrivateThread(id){
+  const t=state.privateThreads.find(x=>x.id===id);if(!t){if(id)toast('A conversa ainda não foi carregada.');return}privateActiveThreadId=id;privateReplyTarget=null;renderPrivateReply();renderPrivateThreads();
+  const m=memberById(privateOtherMemberId(t));$('#privateChatName').textContent=m?.nome||'Carbonauta';$('#privateChatStatus').textContent='🔐 privada entre 2 participantes';$('#privateChatAv').innerHTML=m?.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m?.nome||'?');$('#privateChatAv').style.background=m?(NIVEIS[m.nivel]?.color||'#20232b'):'#20232b';
+  $('#privateChatEmpty').style.display='none';$('#privateChatHeader').classList.add('show');$('#privateMessages').classList.add('show');$('#privateComposerZone').classList.add('show');$('#privateShell').classList.add('chat-open');
+  if(privateMessageUnsub){try{privateMessageUnsub()}catch(e){}}
+  const f=FB(),q=f.query(f.collection(window.db,'rede_private_threads',id,'messages'),f.orderBy('createdAt','asc'));
+  privateMessageUnsub=f.onSnapshot(q,snap=>{privateMessagesState=snap.docs.map(d=>({...d.data(),id:d.id}));renderPrivateMessages();markPrivateThreadRead(t).catch(e=>console.warn('Falha no recibo de leitura',e))},e=>{console.warn(e);toast('Não consegui carregar as mensagens desta conversa.')});
+}
+function renderPrivateMessages(){
+  const box=$('#privateMessages');if(!box)return;if(!privateMessagesState.length){box.innerHTML='<div class="private-chat-empty" style="margin:auto"><div class="big">💬</div><b>Comece a conversa</b><span>Esta mensagem será visível somente para vocês dois.</span></div>';return}
+  let lastDay='';const other=privateOtherUid(state.privateThreads.find(t=>t.id===privateActiveThreadId));
+  box.innerHTML=privateMessagesState.map(msg=>{const ms=privateMillis(msg.createdAt),day=ms?dayLabel(ms):'',sep=day&&day!==lastDay?`<div class="private-day">${esc(day)}</div>`:'';if(day)lastDay=day;const mine=msg.senderUid===privateUid(),read=mine&&other&&Array.isArray(msg.readBy)&&msg.readBy.includes(other);const reply=msg.replyTo?`<div class="private-reply-quote">↪ ${esc(msg.replyTo.senderName||'Mensagem')}: ${esc(msg.replyTo.textExcerpt||'')}</div>`:'';return `${sep}<div class="private-msg ${mine?'mine':'other'}" data-mid="${esc(msg.id)}">${reply}<div class="private-bubble">${esc(msg.text||'')}</div><div class="private-msg-meta"><span>${ms?esc(fmtTime(ms)):''}</span>${mine?`<span class="${read?'private-read':''}">${read?'✓✓ Lida':'✓ Enviada'}</span>`:''}</div><div class="private-msg-actions"><button type="button" data-private-reply="${esc(msg.id)}">Responder</button>${mine?`<button type="button" class="delete" data-private-delete="${esc(msg.id)}">Excluir</button>`:''}</div></div>`}).join('');
+  box.querySelectorAll('[data-private-reply]').forEach(b=>b.onclick=()=>setPrivateReply(b.dataset.privateReply));box.querySelectorAll('[data-private-delete]').forEach(b=>b.onclick=()=>deletePrivateMessage(b.dataset.privateDelete));requestAnimationFrame(()=>{box.scrollTop=box.scrollHeight});
+}
+function setPrivateReply(id){const m=privateMessagesState.find(x=>x.id===id);if(!m)return;const sender=m.senderMemberId===myId?(myName||'Você'):(memberById(m.senderMemberId)?.nome||'Carbonauta');privateReplyTarget={messageId:id,senderName:sender,textExcerpt:(m.text||'').slice(0,120)};renderPrivateReply();$('#privateInput')?.focus()}
+function renderPrivateReply(){const el=$('#privateReplying'),txt=$('#privateReplyText');if(!el||!txt)return;if(privateReplyTarget){txt.innerHTML=`<b>Respondendo a ${esc(privateReplyTarget.senderName)}</b> · ${esc(privateReplyTarget.textExcerpt)}`;el.classList.add('show')}else el.classList.remove('show')}
+async function markPrivateThreadRead(thread){
+  if(!thread||thread.id!==privateActiveThreadId||currentView!=='conversas')return;const uidv=privateUid(),unread=privateUnread(state.privateThreads.find(t=>t.id===thread.id)||thread),unreadMsgs=privateMessagesState.filter(m=>m.senderUid!==uidv&&!(m.readBy||[]).includes(uidv));if(!unread&&!unreadMsgs.length)return;
+  const f=FB(),batch=f.writeBatch(window.db);batch.update(f.doc(window.db,'rede_private_threads',thread.id),{[`unreadBy.${uidv}`]:0});unreadMsgs.slice(-200).forEach(m=>batch.update(f.doc(window.db,'rede_private_threads',thread.id,'messages',m.id),{readBy:f.arrayUnion(uidv)}));await batch.commit();
+}
+async function sendPrivateMessage(){
+  const input=$('#privateInput'),text=(input?.value||'').trim(),thread=state.privateThreads.find(t=>t.id===privateActiveThreadId);if(!thread||!text)return;if(text.length>5000){toast('A mensagem pode ter no máximo 5.000 caracteres.');return}const uidv=privateUid(),targetUid=privateOtherUid(thread);if(!targetUid)return toast('Participante da conversa não encontrado.');
+  const f=FB(),msgRef=f.doc(f.collection(window.db,'rede_private_threads',thread.id,'messages')),threadRef=f.doc(window.db,'rede_private_threads',thread.id),batch=f.writeBatch(window.db),payload={senderUid:uidv,senderMemberId:myId,text,createdAt:f.serverTimestamp(),readBy:[uidv],replyTo:privateReplyTarget?{...privateReplyTarget}:null};
+  try{batch.set(msgRef,payload);batch.update(threadRef,{updatedAt:f.serverTimestamp(),lastMessage:text.slice(0,160),lastSenderUid:uidv,lastSenderMemberId:myId,[`unreadBy.${targetUid}`]:f.increment(1)});await batch.commit();input.value='';privateReplyTarget=null;renderPrivateReply();$('#privateEmojiBar')?.classList.remove('show');const targetMemberId=privateOtherMemberId(thread),target=memberById(targetMemberId),me=memberById(myId);try{await f.addDoc(f.collection(window.db,'rede_notifications'),{recipientId:targetMemberId,senderId:myId,senderUid:uidv,senderName:me?.nome||myName||'Carbonauta',kind:'private_message',title:`🔐 Nova mensagem privada de ${me?.nome||myName||'um Carbonauta'}`,message:'Você recebeu uma nova mensagem privada.',sourceType:'private_chat',sourceId:thread.id,threadId:thread.id,read:false,ts:f.serverTimestamp()})}catch(e){console.warn('Mensagem enviada, mas a notificação não pôde ser criada:',e)}}catch(e){console.error(e);toast(e?.code==='permission-denied'?'Sem permissão para enviar. Aplique as regras P8 do chat privado.':'Não consegui enviar a mensagem.')}
+}
+async function deletePrivateMessage(id){const msg=privateMessagesState.find(x=>x.id===id);if(!msg||msg.senderUid!==privateUid())return;if(!confirm('Excluir esta mensagem da conversa?'))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_private_threads',privateActiveThreadId,'messages',id));const isLast=privateMessagesState[privateMessagesState.length-1]?.id===id;if(isLast){const prev=privateMessagesState[privateMessagesState.length-2];await FB().updateDoc(FB().doc(window.db,'rede_private_threads',privateActiveThreadId),{lastMessage:prev?.text?.slice(0,160)||'Mensagem excluída'})}toast('Mensagem excluída.')}catch(e){console.error(e);toast('Não foi possível excluir a mensagem.')}}
+
 function switchView(v){
   currentView=v;
   document.body.dataset.view=v;
   $$('.view').forEach(el=>el.classList.remove('on'));
   $$('.tab').forEach(el=>el.classList.toggle('on',el.dataset.view===v));
-  const map={painel:'viewPainel',rede:'viewRede',crono:'viewCrono',track:'viewTrack',lab:'viewLab',feed:'viewFeed',mensagens:'viewMensagens',mural:'viewMural',fotos:'viewFotos',pubs:'viewPubs'};
+  const map={painel:'viewPainel',rede:'viewRede',crono:'viewCrono',track:'viewTrack',lab:'viewLab',feed:'viewFeed',mensagens:'viewMensagens',conversas:'viewConversas',mural:'viewMural',fotos:'viewFotos',pubs:'viewPubs'};
   map[v] && $('#'+map[v]).classList.add('on');
   if(v==='painel') renderPainel();
   if(v==='rede') renderAll();
@@ -4866,6 +5040,7 @@ function switchView(v){
   if(v==='lab'){ renderLab(); checkScienceEngine(); }
   if(v==='feed') renderFeed();
   if(v==='mensagens'){renderMensagens();markQuickSeen();}
+  if(v==='conversas'){renderPrivateThreads();updatePrivateBadge();const t=state.privateThreads.find(x=>x.id===privateActiveThreadId);if(t)markPrivateThreadRead(t).catch(()=>{});}
   if(v==='mural'){ renderMural(); markChatSeen(); }
   if(v==='fotos') renderFotos();
   if(v==='pubs'){ renderPubs(); checkScienceEngine(); }
@@ -5074,6 +5249,15 @@ if($('#pubFinalidade'))$('#pubFinalidade').onchange=syncPubFinalidade;
 $$('[data-close="pubOverlay"]').forEach(b=>b.addEventListener('click',()=>{pubReviewContext=null;$$('input[name="pubTipo"]').forEach(r=>r.disabled=false)}));
 $('#repoAddBtn').onclick=async()=>{const id=repoMemberId;if(!(isAdmin||isMe(id))){toast('Sem permissão para adicionar documentos para esta pessoa.');return}closeOverlay('repoOverlay');await openPubModal(id)};
 
+if($('#privateNewBtn'))$('#privateNewBtn').onclick=openPrivateNew;
+if($('#privateThreadSearch'))$('#privateThreadSearch').oninput=renderPrivateThreads;
+if($('#privatePersonSearch'))$('#privatePersonSearch').oninput=renderPrivatePeople;
+if($('#privateBackBtn'))$('#privateBackBtn').onclick=()=>{$('#privateShell')?.classList.remove('chat-open')};
+if($('#privateSendBtn'))$('#privateSendBtn').onclick=sendPrivateMessage;
+if($('#privateInput')){$('#privateInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendPrivateMessage()}});$('#privateInput').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(130,e.target.scrollHeight)+'px'})}
+if($('#privateEmojiToggle'))$('#privateEmojiToggle').onclick=()=>$('#privateEmojiBar')?.classList.toggle('show');
+$$('#privateEmojiBar button').forEach(b=>b.onclick=()=>{const i=$('#privateInput');if(!i)return;i.value+=(i.value?' ':'')+b.textContent;i.focus()});
+if($('#privateReplyCancel'))$('#privateReplyCancel').onclick=()=>{privateReplyTarget=null;renderPrivateReply()};
 $$('[data-close]').forEach(b=>b.onclick=()=>closeOverlay(b.dataset.close));
 $$('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
 window.addEventListener('keydown',e=>{if(e.key==='Escape'){$$('.overlay.open').forEach(o=>o.classList.remove('open'));closeDetail();closeLightbox()}});
@@ -5117,11 +5301,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='PREDATOR-P6-20260906';
+window.CARBONAUTAS_BUILD='PREDATOR-P8-PRIVATE-CHAT-20260907';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P7-20260906',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P8-20260907',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -5133,7 +5317,7 @@ waitFirebase().then(startAuth);
 <script id="carbonautas-dynamic-favicon">
 (()=>{
   const link=document.getElementById('dynamicFavicon'); if(!link)return;
-  const img=new Image(); img.src='./icon-192.png?v=P7';
+  const img=new Image(); img.src='./icon-192.png?v=P8';
   img.onload=()=>{
     const c=document.createElement('canvas'),ctx=c.getContext('2d'); c.width=c.height=64; let phase=0,last=0;
     const draw=(ts)=>{

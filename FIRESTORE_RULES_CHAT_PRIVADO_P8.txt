@@ -1,0 +1,124 @@
+CARBONAUTAS P8 — BLOCO ADITIVO PARA FIRESTORE RULES
+
+IMPORTANTE
+- Este arquivo NÃO é a sua regra completa atual.
+- NÃO substitua todas as regras do Firebase por este texto.
+- O carbonautas-main.zip enviado não continha o arquivo atual de Firestore Rules, então seria inseguro inventar/recriar suas regras antigas (inclusive as do app Cinzas).
+- Cole SOMENTE o bloco abaixo DENTRO de: match /databases/{database}/documents { ... }
+- Se quiser que eu entregue a regra COMPLETA já mesclada, envie/exporte primeiro a sua Firestore Rule atual.
+
+===== BLOCO P8 — INÍCIO =====
+
+function p8PrivateSignedIn() {
+  return request.auth != null;
+}
+
+function p8PrivateMyMemberId() {
+  return get(/databases/$(database)/documents/rede_users/$(request.auth.uid)).data.memberId;
+}
+
+function p8PrivateCoordinator() {
+  return p8PrivateSignedIn() && (
+    get(/databases/$(database)/documents/rede_users/$(request.auth.uid)).data.role == 'coordinator' ||
+    get(/databases/$(database)/documents/rede_users/$(request.auth.uid)).data.memberId == 'seed-ernandes-sobreira-oliveira-junior' ||
+    request.auth.token.email == 'ernandes.sobreira@gmail.com'
+  );
+}
+
+// Diretório seguro: expõe somente UID <-> memberId necessário para iniciar o 1:1.
+// NÃO usa rede_member_claims, pois essa coleção pode conter e-mail/código de entrada.
+match /rede_private_directory/{memberId} {
+  allow read: if p8PrivateSignedIn();
+
+  allow create, update: if p8PrivateSignedIn()
+    && request.resource.data.keys().hasOnly(['uid', 'memberId', 'nome', 'foto', 'updatedAt'])
+    && (
+    (
+      memberId == p8PrivateMyMemberId() &&
+      request.resource.data.memberId == p8PrivateMyMemberId() &&
+      request.resource.data.uid == request.auth.uid
+    ) ||
+    (
+      p8PrivateCoordinator() &&
+      request.resource.data.memberId == memberId &&
+      exists(/databases/$(database)/documents/rede_users/$(request.resource.data.uid)) &&
+      get(/databases/$(database)/documents/rede_users/$(request.resource.data.uid)).data.memberId == memberId
+    )
+  );
+
+  allow delete: if p8PrivateSignedIn() && (
+    resource.data.uid == request.auth.uid || p8PrivateCoordinator()
+  );
+}
+
+match /rede_private_threads/{threadId} {
+  allow read: if p8PrivateSignedIn() && request.auth.uid in resource.data.participants;
+
+  allow create: if p8PrivateSignedIn()
+    && request.resource.data.participants is list
+    && request.resource.data.memberIds is list
+    && request.resource.data.participants.size() == 2
+    && request.resource.data.memberIds.size() == 2
+    && request.resource.data.participants[0] != request.resource.data.participants[1]
+    && request.resource.data.memberIds[0] != request.resource.data.memberIds[1]
+    && request.auth.uid in request.resource.data.participants
+    && p8PrivateMyMemberId() in request.resource.data.memberIds
+    && exists(/databases/$(database)/documents/rede_private_directory/$(request.resource.data.memberIds[0]))
+    && exists(/databases/$(database)/documents/rede_private_directory/$(request.resource.data.memberIds[1]))
+    && get(/databases/$(database)/documents/rede_private_directory/$(request.resource.data.memberIds[0])).data.uid == request.resource.data.participants[0]
+    && get(/databases/$(database)/documents/rede_private_directory/$(request.resource.data.memberIds[1])).data.uid == request.resource.data.participants[1];
+
+  // Participantes e memberIds ficam imutáveis: ninguém consegue adicionar um terceiro silenciosamente.
+  allow update: if p8PrivateSignedIn()
+    && request.auth.uid in resource.data.participants
+    && request.resource.data.participants == resource.data.participants
+    && request.resource.data.memberIds == resource.data.memberIds
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+      'updatedAt', 'lastMessage', 'lastSenderUid', 'lastSenderMemberId', 'unreadBy'
+    ]);
+
+  allow delete: if false;
+
+  match /messages/{messageId} {
+    function p8PrivateThread() {
+      return get(/databases/$(database)/documents/rede_private_threads/$(threadId));
+    }
+
+    allow read: if p8PrivateSignedIn()
+      && request.auth.uid in p8PrivateThread().data.participants;
+
+    allow create: if p8PrivateSignedIn()
+      && request.auth.uid in p8PrivateThread().data.participants
+      && request.resource.data.senderUid == request.auth.uid
+      && request.resource.data.senderMemberId == p8PrivateMyMemberId()
+      && request.resource.data.text is string
+      && request.resource.data.text.size() > 0
+      && request.resource.data.text.size() <= 5000
+      && request.resource.data.readBy is list
+      && request.auth.uid in request.resource.data.readBy;
+
+    // Uma mensagem enviada não pode ser reescrita. O único update permitido é recibo de leitura.
+    allow update: if p8PrivateSignedIn()
+      && request.auth.uid in p8PrivateThread().data.participants
+      && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy'])
+      && request.resource.data.readBy is list
+      && request.resource.data.readBy.hasAll(resource.data.readBy)
+      && request.auth.uid in request.resource.data.readBy
+      && request.resource.data.readBy.size() <= resource.data.readBy.size() + 1;
+
+    // Só quem enviou pode excluir a própria mensagem.
+    allow delete: if p8PrivateSignedIn()
+      && request.auth.uid in p8PrivateThread().data.participants
+      && resource.data.senderUid == request.auth.uid;
+  }
+}
+
+===== BLOCO P8 — FIM =====
+
+OBSERVAÇÃO SOBRE rede_notifications
+O chat usa a coleção rede_notifications que já existe na plataforma e cria apenas uma notificação genérica:
+"Você recebeu uma nova mensagem privada."
+O texto da conversa NÃO é copiado para a notificação.
+
+ANEXOS
+A P8 não habilita anexos privados ainda. Isso foi proposital: os Storage Rules atuais não vieram no pacote enviado e não seria seguro prometer privacidade de arquivos/imagens sem auditar essas regras.
