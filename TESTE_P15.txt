@@ -1,0 +1,11 @@
+P15 — TESTE RÁPIDO
+
+[ ] Menu mostra P15
+[ ] PDF abre com "visualização interna" e páginas legíveis
+[ ] .DOC antigo mostra botão "Converter e editar"
+[ ] Ao clicar, conversão termina e abre no ONLYOFFICE
+[ ] Arquivo original permanece preservado
+[ ] DOCX existente continua editando normalmente
+[ ] XLSX/PPTX existentes continuam editando normalmente
+[ ] Chat privado continua funcionando
+[ ] Dossiês privados continuam respeitando permissões

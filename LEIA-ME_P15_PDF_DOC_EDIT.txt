@@ -1,0 +1,38 @@
+CARBONAUTAS P15 — PDF INTERNO + CONVERSÃO DE OFFICE ANTIGO
+Data: 2026-09-07
+
+CORREÇÕES
+1. PDF
+- O P14 ainda dependia do leitor PDF do Chrome/WebView em parte do fluxo.
+- No Android isso pode mostrar apenas um ícone de arquivo quebrado.
+- P15 renderiza o PDF dentro do Carbonautas com PDF.js usando a URL segura temporária do bridge.
+
+2. DOC/XLS/PPT ANTIGOS
+- Esses formatos binários antigos não são editados diretamente pelo ONLYOFFICE Docs.
+- P15 mostra "Converter e editar".
+- O bridge usa o serviço oficial de conversão do ONLYOFFICE para gerar DOCX/XLSX/PPTX.
+- O arquivo original é preservado em legacyOriginal e no Storage.
+- O item do Repositório passa a apontar para a cópia moderna editável.
+
+O QUE SUBIR NO GITHUB
+- index.html
+- manifest.webmanifest
+- sw.js
+
+O QUE APLICAR NA VPS
+- P15_VPS_CONVERSAO_LEGADO.sh
+
+FIRESTORE RULES
+- Nenhuma mudança nesta versão. Continue usando as regras P13 já publicadas.
+
+TESTE RECOMENDADO
+A. PDF
+1. Abra um PDF pelo ícone de visualizar.
+2. Deve aparecer "Lendo PDF com o visualizador interno…".
+3. Em seguida devem aparecer as páginas renderizadas dentro do Carbonautas.
+
+B. DOC antigo
+1. No card do arquivo .doc deve aparecer "DOC antigo · converter para editar".
+2. Clique em "Converter e editar".
+3. O Carbonautas converte para DOCX, preserva o original e abre o ONLYOFFICE.
+4. Depois de salvo, o fluxo de versões/notificações continua normal.

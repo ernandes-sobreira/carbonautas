@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carbonautas · Science OS · P14</title>
+<title>Carbonautas · Science OS · P15</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P14">
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P14">
-<link rel="apple-touch-icon" href="./icon-192.png?v=P14">
+<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P15">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P15">
+<link rel="apple-touch-icon" href="./icon-192.png?v=P15">
 <meta name="theme-color" content="#08152B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,6 +15,7 @@
 <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mammoth@1.10.0/mammoth.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   :root{
     --petrol:#0E5C63; --petrol-d:#0a464c; --agua:#1E88C7; --cerrado:#2E9E5B;
@@ -531,6 +532,7 @@
   .excel-sheet{overflow:auto;background:#fff;border:1px solid #cfd8df;border-radius:12px;padding:12px}.excel-sheet table{border-collapse:collapse;font-size:12px;white-space:nowrap}.excel-sheet td,.excel-sheet th{border:1px solid #c8d0d8;padding:5px 8px;max-width:360px;overflow:hidden;text-overflow:ellipsis}.excel-sheet tr:first-child{font-weight:700;background:#EDE9FE}
   .preview-loading{height:100%;display:grid;place-items:center;font-weight:700;color:var(--ink-2)}
   .online-preview-wrap{height:100%;display:flex;flex-direction:column;background:#EEF3F8}.online-preview-note{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:8px 12px;background:#fff;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-2)}.online-preview-note>div{display:flex;gap:6px}.online-preview-wrap .file-preview-frame{flex:1;min-height:0}
+  .pdfjs-preview{height:100%;overflow:auto;-webkit-overflow-scrolling:touch;background:#d7dde2;padding:14px 8px 28px}.pdfjs-toolbar{position:sticky;top:0;z-index:4;display:flex;justify-content:center;gap:8px;padding:7px 10px;margin:-14px -8px 12px;background:rgba(238,243,248,.96);border-bottom:1px solid #cbd5dc;font-size:11px;color:#4a5c62}.pdfjs-page{width:min(100%,920px);margin:0 auto 14px;background:#fff;box-shadow:0 2px 12px rgba(12,35,48,.18);display:flex;justify-content:center;overflow:hidden}.pdfjs-page canvas{display:block;max-width:100%;height:auto}.pdfjs-error{height:100%;display:grid;place-items:center;padding:24px;text-align:center}.pdfjs-error>div{max-width:540px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px}
 
   /* Modal */
   .overlay{position:fixed;inset:0;background:rgba(16,38,44,.34);backdrop-filter:blur(2px);z-index:50;display:none;align-items:flex-start;justify-content:center;padding:34px 16px;overflow-y:auto}
@@ -1118,7 +1120,7 @@
 <div class="auth-gate" id="authGate">
   <div class="auth-card">
     <div class="auth-brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P14" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P15" alt="Carbonautas · carbono em ligação"></div>
       <div><h2>Carbonautas</h2><p>Acompanhamento · projetos · rede</p></div>
     </div>
     <div class="auth-login" id="authLoginPane">
@@ -1154,7 +1156,7 @@
 </div>
 
 <div class="loading" id="loading">
-  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P14" alt="Carbonautas · carbono em ligação"></div>
+  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P15" alt="Carbonautas · carbono em ligação"></div>
   <p id="loadingMsg">Conectando à rede…</p>
 </div>
 
@@ -1166,7 +1168,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
     </button>
     <div class="brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P14" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P15" alt="Carbonautas · carbono em ligação"></div>
       <div>
         <h1>Carbonautas</h1>
         <div class="sub">LIPAN · LEFA · CELBE</div>
@@ -1245,7 +1247,7 @@
     <aside class="app-menu-drawer" id="appMenuDrawer" role="dialog" aria-modal="true" aria-label="Navegação do Carbonautas">
       <div class="app-menu-head">
         <div class="app-menu-brand">
-          <img src="./icon-192.png?v=P14" alt="" class="app-menu-logo">
+          <img src="./icon-192.png?v=P15" alt="" class="app-menu-logo">
           <div><b>Carbonautas</b><small>Escolha onde quer ir</small></div>
         </div>
         <button type="button" class="app-menu-close" id="appMenuClose" aria-label="Fechar menu">×</button>
@@ -1262,7 +1264,7 @@
         <button type="button" class="app-nav-card c-pink" data-app-view="fotos"><span class="app-nav-icon">📸</span><b>Fotos</b><small>Registros das ações</small></button>
         <button type="button" class="app-nav-card c-lime" data-app-view="pubs"><span class="app-nav-icon">📚</span><b>Repositório</b><small>Arquivos, Office e produtos</small></button>
       </div>
-      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P14</span></div>
+      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P15</span></div>
     </aside>
   </div>
 
@@ -3639,6 +3641,36 @@ function externalViewerUrl(url,ext=''){
   if(e==='pdf')return `https://docs.google.com/gview?embedded=0&url=${safe}`;
   return url;
 }
+async function renderPdfJs(viewUrl,name='PDF'){
+  const body=$('#filePreviewBody');
+  try{
+    if(!window.pdfjsLib?.getDocument)throw new Error('Leitor PDF não carregou. Verifique sua conexão e tente novamente.');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    body.innerHTML='<div class="preview-loading">Lendo PDF com o visualizador interno…</div>';
+    const task=window.pdfjsLib.getDocument({url:viewUrl,withCredentials:false});
+    const pdf=await task.promise;
+    const host=document.createElement('div');host.className='pdfjs-preview';
+    const bar=document.createElement('div');bar.className='pdfjs-toolbar';bar.textContent=`PDF · ${pdf.numPages} página${pdf.numPages===1?'':'s'} · visualização interna`;
+    host.appendChild(bar);body.innerHTML='';body.appendChild(host);
+    const maxCssWidth=Math.min(900,Math.max(280,(body.clientWidth||window.innerWidth)-36));
+    const dpr=Math.min(window.devicePixelRatio||1,1.6);
+    for(let n=1;n<=pdf.numPages;n++){
+      const page=await pdf.getPage(n),base=page.getViewport({scale:1});
+      const cssScale=Math.min(1.7,Math.max(.55,maxCssWidth/base.width));
+      const viewport=page.getViewport({scale:cssScale});
+      const wrap=document.createElement('div');wrap.className='pdfjs-page';wrap.setAttribute('aria-label',`Página ${n}`);
+      const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d',{alpha:false});
+      canvas.width=Math.floor(viewport.width*dpr);canvas.height=Math.floor(viewport.height*dpr);
+      canvas.style.width=Math.floor(viewport.width)+'px';canvas.style.height=Math.floor(viewport.height)+'px';wrap.appendChild(canvas);host.appendChild(wrap);
+      const transform=dpr!==1?[dpr,0,0,dpr,0,0]:null;
+      await page.render({canvasContext:ctx,viewport,transform}).promise;
+      if(n%3===0)await new Promise(r=>requestAnimationFrame(r));
+    }
+  }catch(e){
+    console.error('PDF.JS:',e);
+    body.innerHTML=`<div class="pdfjs-error"><div><h3>Não consegui renderizar este PDF</h3><p>${esc(e.message||'Falha no leitor PDF.')}</p><p>Você ainda pode usar “Abrir em nova guia” ou “Baixar”.</p></div></div>`;
+  }
+}
 async function securePreviewUrl(context){
   if(!context||!window.auth?.currentUser)return '';
   const base=onlyOfficeBase();
@@ -3674,9 +3706,8 @@ async function openFilePreview(url,name='Arquivo',context=null){
   currentPreviewUrl=viewUrl;
   $('#filePreviewOpen').href=externalViewerUrl(viewUrl,ext);
   if(ext==='pdf'){
-    // P14: Google recebe uma URL temporária pública do bridge, não o link privado/instável do Storage.
-    const mobile=/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent||'')||window.innerWidth<=760;
-    body.innerHTML=mobile?onlineViewerHtml(viewUrl,name,'google'):`<object class="file-preview-frame" data="${esc(viewUrl)}#toolbar=1&navpanes=1&view=FitH" type="application/pdf"><iframe class="file-preview-frame" src="${esc(viewUrl)}#toolbar=1&navpanes=1&view=FitH" title="${esc(name)}"></iframe></object>`;
+    // P15: renderização própria com PDF.js. Evita depender do leitor PDF do Chrome/WebView.
+    await renderPdfJs(viewUrl,name);
     return;
   }
   if(images.includes(ext)){
@@ -4370,6 +4401,7 @@ function syncPubFinalidade(){
 const OO_SERVER_KEY='carbonautas_onlyoffice_server_v1';
 const OO_DEFAULT_SERVER='https://docs.carbonautas.online';
 const OO_EXTS=new Set(['docx','xlsx','pptx']);
+const OO_LEGACY_CONVERTIBLE=new Set(['doc','xls','ppt']);
 let ooEditorInstance=null,ooSession=null,ooPendingPubId='',officeNewType='docx';
 function onlyOfficeBase(){return (localStorage.getItem(OO_SERVER_KEY)||OO_DEFAULT_SERVER).trim().replace(/\/+$/,'')}
 function officeExt(p){
@@ -4382,15 +4414,15 @@ function officeExt(p){
 function isOnlyOfficeEditable(p){return !!(p&&OO_EXTS.has(officeExt(p)))}
 function canPotentialOfficeEdit(p){
   if(!p||p.tipo!=='arquivo'||!window.auth?.currentUser)return false;
-  const ext=officeExt(p);if(ext&&!OO_EXTS.has(ext))return false;
+  const ext=officeExt(p);if(ext&&!OO_EXTS.has(ext)&&!OO_LEGACY_CONVERTIBLE.has(ext))return false;
   const uid=window.auth.currentUser.uid;
   if(p.reviewFlow)return canActOnReview(p);
   return !!(isAdmin||p.memberId===myId||p.ownerUid===uid);
 }
-function officeFileChip(p){const ext=officeExt(p);if(!ext&&canPotentialOfficeEdit(p))return `<span class="file-type-chip">OFFICE? · detectar ao abrir</span>`;if(!OO_EXTS.has(ext))return '';const map={docx:'WORD',xlsx:'EXCEL',pptx:'POWERPOINT'};return `<span class="file-type-chip">${map[ext]||ext.toUpperCase()} · editável</span>`}
+function officeFileChip(p){const ext=officeExt(p);if(!ext&&canPotentialOfficeEdit(p))return `<span class="file-type-chip">OFFICE? · detectar ao abrir</span>`;if(OO_LEGACY_CONVERTIBLE.has(ext))return `<span class="file-type-chip">${ext.toUpperCase()} antigo · converter para editar</span>`;if(!OO_EXTS.has(ext))return '';const map={docx:'WORD',xlsx:'EXCEL',pptx:'POWERPOINT'};return `<span class="file-type-chip">${map[ext]||ext.toUpperCase()} · editável</span>`}
 function canPersonalEdit(p){
   if(!p||p.reviewFlow||!window.auth?.currentUser)return false;
-  const ext=officeExt(p);if(ext&&!OO_EXTS.has(ext))return false;
+  const ext=officeExt(p);if(ext&&!OO_EXTS.has(ext)&&!OO_LEGACY_CONVERTIBLE.has(ext))return false;
   const uid=window.auth.currentUser.uid;
   return !!(p.tipo==='arquivo'&&(isAdmin||p.memberId===myId||p.ownerUid===uid));
 }
@@ -4401,12 +4433,13 @@ function onlineCorrectionLabel(p){
 }
 function officeActionButtons(p,compact=''){
   if(!p||p.tipo!=='arquivo')return '';
-  const ext=officeExt(p);if(ext&&!OO_EXTS.has(ext))return '';
+  const ext=officeExt(p);if(ext&&!OO_EXTS.has(ext)&&!OO_LEGACY_CONVERTIBLE.has(ext))return '';
+  const legacy=OO_LEGACY_CONVERTIBLE.has(ext);
   if(p.reviewFlow){
     if(!canActOnReview(p))return '';
-    return `<button type="button" class="btn oo-online-btn" onclick="openOnlineCorrection('${p.id}')">${onlineCorrectionLabel(p)}</button>`;
+    return `<button type="button" class="btn oo-online-btn" onclick="openOnlineCorrection('${p.id}')">${legacy?'🔄 Converter e corrigir':onlineCorrectionLabel(p)}</button>`;
   }
-  if(canPersonalEdit(p))return `<button type="button" class="btn office-edit-btn" onclick="openOnlineEdit('${p.id}')">✏️ ${ext?'Editar':'Editar / detectar'}</button>`;
+  if(canPersonalEdit(p))return `<button type="button" class="btn office-edit-btn" onclick="openOnlineEdit('${p.id}')">${legacy?'🔄 Converter e editar':`✏️ ${ext?'Editar':'Editar / detectar'}`}</button>`;
   return '';
 }
 function openOnlyOfficeSetup(){const u=onlyOfficeBase();if($('#ooServerUrl'))$('#ooServerUrl').value=u;openOverlay('onlyOfficeSetupOverlay')}
@@ -4414,12 +4447,28 @@ function setOoStatus(msg){const el=$('#ooStatus');if(el)el.textContent=msg}
 function destroyOnlyOffice(){try{if(ooEditorInstance?.destroyEditor)ooEditorInstance.destroyEditor()}catch(e){console.warn(e)}ooEditorInstance=null}
 function loadOnlyOfficeApi(base){return new Promise((resolve,reject)=>{if(window.DocsAPI?.DocEditor)return resolve();const old=document.getElementById('onlyoffice-api-script');if(old){old.addEventListener('load',()=>resolve(),{once:true});old.addEventListener('error',()=>reject(new Error('Falha ao carregar a API do ONLYOFFICE.')),{once:true});return}const sc=document.createElement('script');sc.id='onlyoffice-api-script';sc.src=base+'/web-apps/apps/api/documents/api.js';sc.onload=()=>resolve();sc.onerror=()=>reject(new Error('Não consegui conectar ao servidor ONLYOFFICE.'));document.head.appendChild(sc)})}
 function officeKindLabel(ext){return ext==='xlsx'?'Planilha Excel':ext==='pptx'?'Apresentação PowerPoint':'Documento Word'}
+async function convertLegacyOfficeFile(p,base){
+  const ext=officeExt(p);
+  if(!OO_LEGACY_CONVERTIBLE.has(ext))return p;
+  if(!window.auth?.currentUser)throw new Error('Entre novamente na plataforma.');
+  toast(`Convertendo ${ext.toUpperCase()} antigo para o formato moderno…`);
+  const token=await window.auth.currentUser.getIdToken();
+  const r=await fetch(base+'/carbonautas-api/api/convert-legacy/'+encodeURIComponent(p.id),{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'}});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(data.error||('Conversão respondeu '+r.status));
+  p.detectedExt=data.ext||({doc:'docx',xls:'xlsx',ppt:'pptx'}[ext]);
+  if(data.fileName)p.fileName=data.fileName;if(data.url)p.url=data.url;if(data.storagePath)p.storagePath=data.storagePath;
+  toast(`${ext.toUpperCase()} convertido para ${String(p.detectedExt||'').toUpperCase()}. O original foi preservado.`);
+  try{renderRepo()}catch{}
+  return p;
+}
 async function openOnlineCorrection(id){
   const p=state.publicacoes.find(x=>x.id===id);
   if(!p||!p.reviewFlow)return toast('Fluxo de correção não encontrado.');
   if(!canActOnReview(p))return toast('Este arquivo está com outra pessoa neste momento.');
-  const ext=officeExt(p),mode=(ext==='docx'&&myId===p.reviewReviewerId)?'review':'edit';
   const base=onlyOfficeBase();if(!base){ooPendingPubId=id;openOnlyOfficeSetup();return}
+  try{await convertLegacyOfficeFile(p,base)}catch(e){console.error(e);toast(e.message||'Não foi possível converter o arquivo antigo.');return}
+  const ext=officeExt(p),mode=(ext==='docx'&&myId===p.reviewReviewerId)?'review':'edit';
   await launchOnlyOffice(p,base,{purpose:'review',mode});
 }
 async function openOnlineEdit(id){
@@ -4428,6 +4477,7 @@ async function openOnlineEdit(id){
   if(p.reviewFlow)return openOnlineCorrection(id);
   if(!canPersonalEdit(p))return toast('Você pode editar seus próprios arquivos; o coordenador pode editar qualquer arquivo.');
   const base=onlyOfficeBase();if(!base){ooPendingPubId=id;openOnlyOfficeSetup();return}
+  try{await convertLegacyOfficeFile(p,base)}catch(e){console.error(e);toast(e.message||'Não foi possível converter o arquivo antigo.');return}
   await launchOnlyOffice(p,base,{purpose:'personal',mode:'edit'});
 }
 async function launchOnlyOffice(p,base,opts={}){
@@ -5549,11 +5599,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='PREDATOR-P14-PREVIEW-SEGURO-20260907';
+window.CARBONAUTAS_BUILD='PREDATOR-P15-PDFJS-DOC-CONVERT-20260907';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P14-20260907',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P15-20260907',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -5565,7 +5615,7 @@ waitFirebase().then(startAuth);
 <script id="carbonautas-dynamic-favicon">
 (()=>{
   const link=document.getElementById('dynamicFavicon'); if(!link)return;
-  const img=new Image(); img.src='./icon-192.png?v=P14';
+  const img=new Image(); img.src='./icon-192.png?v=P15';
   img.onload=()=>{
     const c=document.createElement('canvas'),ctx=c.getContext('2d'); c.width=c.height=64; let phase=0,last=0;
     const draw=(ts)=>{
