@@ -1,0 +1,27 @@
+CARBONAUTAS P10 — CORREÇÃO DO CHAT PRIVADO 1:1
+Data: 2026-09-07
+
+CAUSA CONFIRMADA DO AVISO INCORRETO:
+1) O frontend P9 fazia getDoc() da thread ANTES de criá-la. Para uma conversa nova,
+   o documento ainda não existe e a regra baseada em resource.data pode devolver
+   permission-denied. O app então dizia incorretamente que as regras não tinham sido aplicadas.
+2) A listagem de threads usa array-contains em participants. A regra P8 exigia também
+   correspondência posicional com memberIds, condição que a consulta não consegue provar
+   para todos os documentos candidatos. Isso pode bloquear o listener mesmo com as regras publicadas.
+
+CORREÇÕES P10:
+- criação de conversa tenta CREATE primeiro e só faz GET de fallback se a thread já existir;
+- leitura de thread é autorizada por usuário autenticado com perfil cujo UID esteja em participants;
+- integridade 1:1 continua validada no CREATE e participants/memberIds continuam imutáveis;
+- mensagens herdam a mesma autorização pelo UID participante da thread;
+- mensagens de erro não acusam mais falsamente que as regras 'não foram aplicadas';
+- cache/manifest/build atualizados para P10.
+
+PUBLICAÇÃO:
+1. GitHub: substitua index.html, manifest.webmanifest e sw.js pelos arquivos P10.
+2. Firebase > Firestore Database > Regras: substitua TODO o conteúdo por firestore.rules
+   (ou FIRESTORE_RULES_P10_COMPLETAS.txt) e clique em Publicar.
+3. Feche/reabra o PWA ou recarregue a página para pegar P10.
+4. Teste Nova conversa com duas contas.
+
+As coleções antigas do Cinzas continuam preservadas como estavam.

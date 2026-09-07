@@ -1,0 +1,19 @@
+CARBONAUTAS P9 — TURNO DE TRABALHO NO REPOSITÓRIO
+
+Mudança principal:
+- quando uma pessoa diferente do proprietário edita um DOCX/XLSX/PPTX no ONLYOFFICE e clica em “Salvar edição no Carbonautas”, o proprietário é automaticamente notificado;
+- o cartão do Repositório passa a mostrar a sequência: quem enviou, quem editou, data/hora e versão;
+- aparece o aviso “Agora é sua vez, <nome>. Dê uma olhada no que foi editado e continue a partir daqui.”;
+- quando o proprietário salva sua própria edição, o aviso de turno é limpo;
+- versões anteriores continuam preservadas em onlineEditHistory;
+- o fluxo formal “Enviar para correção” continua separado e não foi removido.
+
+Notificação usada:
+Título: “✨ Agora é sua vez, <nome>”
+Mensagem: “<editor> editou ‘<arquivo>’. Dê uma olhada no que foi ajustado e continue a partir daqui.”
+
+Firestore Rules:
+- NÃO exigem alteração adicional em relação às regras completas P8 já preparadas, porque rede_publicacoes já permite atualização pelo proprietário/coordenador e rede_notifications já permite criação pelo remetente autenticado.
+
+Importante:
+- a notificação ocorre no momento em que a edição é salva de volta no Carbonautas pelo botão de salvamento da integração ONLYOFFICE.
