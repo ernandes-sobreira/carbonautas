@@ -1,0 +1,11 @@
+TESTE RÁPIDO P14
+
+1. MENU -> confirme P14.
+2. Repositório -> abra "Subprojeto 2027 Letícia Carvalho Zen.doc" -> olho.
+   Esperado: "Preparando visualização segura..." e depois Microsoft Viewer sem "Arquivo não encontrado".
+3. Abra um PDF antigo -> olho.
+   Esperado no celular: Google Viewer carregando a URL temporária do Carbonautas.
+4. Abra um DOCX -> olho.
+   Esperado: preview local; se falhar, fallback online pela URL temporária.
+5. Abra um dossiê privado com uma conta autorizada -> arquivo -> Ver.
+6. Com uma conta NÃO autorizada, o dossiê não deve aparecer; mesmo com ticket antigo, acesso é revalidado e expira.

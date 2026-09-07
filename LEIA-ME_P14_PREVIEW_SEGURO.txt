@@ -1,0 +1,37 @@
+CARBONAUTAS P14 — PREVIEW SEGURO DE PDF/DOC/DOCX/XLS/XLSX/PPT/PPTX
+Data: 2026-09-07
+
+PROBLEMA CORRIGIDO
+- O Chrome/Android não renderizava alguns PDFs diretamente no iframe/object.
+- O Google/Microsoft Viewer recebia a URL original do Firebase Storage e podia responder "arquivo não encontrado / URL não publicamente acessível".
+- Arquivos DOC antigos dependiam totalmente do visualizador externo.
+
+SOLUÇÃO P14
+1) O frontend pede ao bridge do VPS um ticket temporário (30 min), autenticado com Firebase.
+2) O bridge verifica se a pessoa pode acessar o arquivo.
+3) O bridge recupera o arquivo pelo Firebase Admin/Storage quando possível, inclusive por storagePath ou pelo caminho embutido na URL antiga do Firebase.
+4) O bridge entrega uma URL HTTPS temporária para visualização.
+5) Google/Microsoft Viewer recebem essa URL temporária estável, e não a URL problemática do Storage.
+
+PRIVACIDADE
+- Dossiês privados: o bridge valida allowedMemberIds / proprietário / criador antes de emitir ticket.
+- O coordenador NÃO ganha acesso automático aos dossiês privados.
+- O ticket expira em 30 minutos.
+- O arquivo original e a service account NÃO são expostos no GitHub.
+
+ARQUIVOS PARA GITHUB
+- index.html
+- manifest.webmanifest
+- sw.js
+
+ARQUIVO PARA VPS
+- P14_VPS_PREVIEW_SEGURO.sh
+
+ORDEM CORRETA
+A) Primeiro aplicar P14_VPS_PREVIEW_SEGURO.sh no VPS.
+B) Confirmar que carbonautas-bridge.service voltou como active (running).
+C) Depois subir index.html, manifest.webmanifest e sw.js no GitHub.
+D) Fechar/reabrir o PWA e confirmar versão P14 no MENU.
+E) Testar primeiro o DOC antigo da Letícia e um PDF antigo.
+
+NÃO É NECESSÁRIO ALTERAR FIRESTORE RULES PARA ESTA CORREÇÃO.

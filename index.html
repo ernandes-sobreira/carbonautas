@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carbonautas · Science OS · P13</title>
+<title>Carbonautas · Science OS · P14</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P13">
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P13">
-<link rel="apple-touch-icon" href="./icon-192.png?v=P13">
+<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P14">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P14">
+<link rel="apple-touch-icon" href="./icon-192.png?v=P14">
 <meta name="theme-color" content="#08152B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1118,7 +1118,7 @@
 <div class="auth-gate" id="authGate">
   <div class="auth-card">
     <div class="auth-brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P13" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P14" alt="Carbonautas · carbono em ligação"></div>
       <div><h2>Carbonautas</h2><p>Acompanhamento · projetos · rede</p></div>
     </div>
     <div class="auth-login" id="authLoginPane">
@@ -1154,7 +1154,7 @@
 </div>
 
 <div class="loading" id="loading">
-  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P13" alt="Carbonautas · carbono em ligação"></div>
+  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P14" alt="Carbonautas · carbono em ligação"></div>
   <p id="loadingMsg">Conectando à rede…</p>
 </div>
 
@@ -1166,7 +1166,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
     </button>
     <div class="brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P13" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P14" alt="Carbonautas · carbono em ligação"></div>
       <div>
         <h1>Carbonautas</h1>
         <div class="sub">LIPAN · LEFA · CELBE</div>
@@ -1245,7 +1245,7 @@
     <aside class="app-menu-drawer" id="appMenuDrawer" role="dialog" aria-modal="true" aria-label="Navegação do Carbonautas">
       <div class="app-menu-head">
         <div class="app-menu-brand">
-          <img src="./icon-192.png?v=P13" alt="" class="app-menu-logo">
+          <img src="./icon-192.png?v=P14" alt="" class="app-menu-logo">
           <div><b>Carbonautas</b><small>Escolha onde quer ir</small></div>
         </div>
         <button type="button" class="app-menu-close" id="appMenuClose" aria-label="Fechar menu">×</button>
@@ -1262,7 +1262,7 @@
         <button type="button" class="app-nav-card c-pink" data-app-view="fotos"><span class="app-nav-icon">📸</span><b>Fotos</b><small>Registros das ações</small></button>
         <button type="button" class="app-nav-card c-lime" data-app-view="pubs"><span class="app-nav-icon">📚</span><b>Repositório</b><small>Arquivos, Office e produtos</small></button>
       </div>
-      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P13</span></div>
+      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P14</span></div>
     </aside>
   </div>
 
@@ -2488,7 +2488,7 @@ function renderMemberRepository(){
   const canAdd=isAdmin||isMe(m.id); $('#repoAddBtn').style.display=canAdd?'inline-flex':'none';
   $('#repoList').innerHTML=list.length?list.map(it=>{
     const icon=it.reviewFlow?'✍️':(it.isFile?'📄':'🔗');
-    const view=it.source==='package'?`<button class="btn ghost" type="button" onclick="openRepositoryPackage('${it.id}')">📦 Abrir dossiê</button>`:it.raw?.labRun?`<button class="btn primary" type="button" onclick="openLabRun('${it.raw.labRunId}')">📈 Resultados</button>`:it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Visualizar</button><button class="btn review-download" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Baixar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;
+    const view=it.source==='package'?`<button class="btn ghost" type="button" onclick="openRepositoryPackage('${it.id}')">📦 Abrir dossiê</button>`:it.raw?.labRun?`<button class="btn primary" type="button" onclick="openLabRun('${it.raw.labRunId}')">📈 Resultados</button>`:it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'),{source:'publication',id:'${it.id}'})">Visualizar</button><button class="btn review-download" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Baixar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;
     const rev=it.reviewFlow?reviewBadgeHTML(it.raw):'';
     const online=it.source==='publicacao'?officeActionButtons(it.raw):'';
     const respond=it.reviewFlow&&canActOnReview(it.raw)?`<button class="btn review-action" type="button" onclick="openReviewResponse('${it.id}')">${reviewActionLabel(it.raw)}</button>`:'';
@@ -3639,17 +3639,44 @@ function externalViewerUrl(url,ext=''){
   if(e==='pdf')return `https://docs.google.com/gview?embedded=0&url=${safe}`;
   return url;
 }
-async function openFilePreview(url,name='Arquivo'){
+async function securePreviewUrl(context){
+  if(!context||!window.auth?.currentUser)return '';
+  const base=onlyOfficeBase();
+  if(!base)return '';
+  const token=await window.auth.currentUser.getIdToken();
+  const r=await fetch(base+'/carbonautas-api/api/preview-ticket',{
+    method:'POST',
+    headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
+    body:JSON.stringify(context)
+  });
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(data.error||('Servidor de visualização respondeu '+r.status));
+  if(!data.url)throw new Error('O servidor não devolveu a URL temporária de visualização.');
+  return data.url;
+}
+async function openFilePreview(url,name='Arquivo',context=null){
   if(!url)return; const ext=inferFileExt(url,name), body=$('#filePreviewBody');
   currentPreviewUrl=url; currentPreviewName=name||'Arquivo';
-  $('#filePreviewTitle').textContent=name||'Visualizar arquivo'; $('#filePreviewOpen').href=externalViewerUrl(url,ext); $('#filePreviewDownload').href=url;
+  $('#filePreviewTitle').textContent=name||'Visualizar arquivo'; $('#filePreviewDownload').href=url;
   if(previewObjectUrl){URL.revokeObjectURL(previewObjectUrl);previewObjectUrl=''} previewWorkbook=null;
-  body.innerHTML='<div class="preview-loading">Abrindo arquivo…</div>'; openOverlay('filePreviewOverlay');
+  body.innerHTML='<div class="preview-loading">Preparando visualização segura…</div>'; openOverlay('filePreviewOverlay');
   const images=['png','jpg','jpeg','webp','gif','svg'];
+  let viewUrl=url;
+  if(context){
+    try{viewUrl=await securePreviewUrl(context)}
+    catch(e){
+      console.error('PREVIEW TICKET:',e);
+      body.innerHTML=`<div class="file-preview-fallback"><div><h3>Não consegui preparar a visualização</h3><p>${esc(e.message||'Falha no servidor de visualização.')}</p><p>O download original continua disponível.</p></div></div>`;
+      $('#filePreviewOpen').href=url;
+      return;
+    }
+  }
+  currentPreviewUrl=viewUrl;
+  $('#filePreviewOpen').href=externalViewerUrl(viewUrl,ext);
   if(ext==='pdf'){
-    // P13: o visualizador PDF nativo embutido do Chrome/Android é inconsistente.
+    // P14: Google recebe uma URL temporária pública do bridge, não o link privado/instável do Storage.
     const mobile=/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent||'')||window.innerWidth<=760;
-    body.innerHTML=mobile?onlineViewerHtml(url,name,'google'):`<object class="file-preview-frame" data="${esc(url)}#toolbar=1&navpanes=1&view=FitH" type="application/pdf"><iframe class="file-preview-frame" src="${esc(url)}#toolbar=1&navpanes=1&view=FitH" title="${esc(name)}"></iframe></object>`;
+    body.innerHTML=mobile?onlineViewerHtml(viewUrl,name,'google'):`<object class="file-preview-frame" data="${esc(viewUrl)}#toolbar=1&navpanes=1&view=FitH" type="application/pdf"><iframe class="file-preview-frame" src="${esc(viewUrl)}#toolbar=1&navpanes=1&view=FitH" title="${esc(name)}"></iframe></object>`;
     return;
   }
   if(images.includes(ext)){
@@ -3657,35 +3684,35 @@ async function openFilePreview(url,name='Arquivo'){
     return;
   }
   if(['doc','rtf','odt'].includes(ext)){
-    body.innerHTML=onlineViewerHtml(url,name,'office');
+    body.innerHTML=onlineViewerHtml(viewUrl,name,'office');
     return;
   }
   if(ext==='docx'){
     try{
       if(!window.mammoth) throw new Error('Leitor local indisponível.');
-      const ab=await previewFetch(url), result=await window.mammoth.convertToHtml({arrayBuffer:ab});
+      const ab=await previewFetch(viewUrl), result=await window.mammoth.convertToHtml({arrayBuffer:ab});
       body.innerHTML=`<article class="docx-preview">${sanitizePreviewHtml(result.value||'<p>Documento vazio.</p>')}</article>`;
     }catch(e){
       console.warn('Leitor local do Word falhou; usando visualizador online.',e);
-      body.innerHTML=onlineViewerHtml(url,name,'google');
+      body.innerHTML=onlineViewerHtml(viewUrl,name,'google');
     }
     return;
   }
   if(ext==='xlsx'||ext==='xls'){
     try{
       if(!window.XLSX) throw new Error('Leitor local indisponível.');
-      const ab=await previewFetch(url); previewWorkbook=window.XLSX.read(ab,{type:'array'});
+      const ab=await previewFetch(viewUrl); previewWorkbook=window.XLSX.read(ab,{type:'array'});
       const names=previewWorkbook.SheetNames||[]; if(!names.length) throw new Error('A planilha não contém abas legíveis.');
       body.innerHTML=`<div class="excel-preview"><div class="excel-tabs" id="excelTabs">${names.map((n,i)=>`<button type="button" onclick="showWorkbookSheet(${i})">${esc(n)}</button>`).join('')}</div><div class="excel-sheet" id="excelSheet"></div></div>`;
       showWorkbookSheet(0);
     }catch(e){
       console.warn('Leitor local do Excel falhou; usando visualizador online.',e);
-      body.innerHTML=onlineViewerHtml(url,name,'google');
+      body.innerHTML=onlineViewerHtml(viewUrl,name,'google');
     }
     return;
   }
   if(ext==='ppt'||ext==='pptx'){
-    body.innerHTML=onlineViewerHtml(url,name,'office');
+    body.innerHTML=onlineViewerHtml(viewUrl,name,'office');
     return;
   }
   body.innerHTML=`<div class="file-preview-fallback"><div><h3>Pré-visualização não disponível</h3><p>Use “Abrir em nova guia” ou “Baixar”.</p></div></div>`;
@@ -4227,7 +4254,7 @@ function renderPubs(){
         ${officeFileChip(p)}
       </div>
       <div class="pub-act">
-        ${p.labRun?`<button type="button" class="btn primary" onclick="openLabRun('${p.labRunId}')">📈 Resultados</button>`:p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Visualizar" style="padding:6px 9px">👁️</button><button type="button" class="btn review-download" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Baixar" style="padding:6px 9px">⬇</button>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}
+        ${p.labRun?`<button type="button" class="btn primary" onclick="openLabRun('${p.labRunId}')">📈 Resultados</button>`:p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'),{source:'publication',id:'${p.id}'})" title="Visualizar" style="padding:6px 9px">👁️</button><button type="button" class="btn review-download" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Baixar" style="padding:6px 9px">⬇</button>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}
         ${labRepoButton(p)}
         ${officeActionButtons(p,'compact')}
         ${p.reviewFlow&&canActOnReview(p)?`<button type="button" class="btn review-action" onclick="openReviewResponse('${p.id}')">${reviewActionLabel(p)}</button>`:''}
@@ -4258,7 +4285,7 @@ function repoFileIcon(name=''){const e=inferFileExt('',name);if(e==='pdf')return
 function humanBytes(n=0){n=Number(n)||0;if(n<1024)return n+' B';if(n<1048576)return(n/1024).toFixed(1)+' KB';return(n/1048576).toFixed(1)+' MB'}
 async function openRepositoryPackage(id){
   const p=state.repositoryPackages.find(x=>x.id===id);if(!p)return toast('Este conjunto não está disponível para sua conta.');activeRepoPackageId=id;$('#repoPackageDetailTitle').textContent='📦 '+(p.title||'Conjunto de arquivos');const a=repoAccessLabel(p),owner=memberById(p.ownerMemberId);$('#repoPackageDetailMeta').innerHTML=`<div class="repo-package-head"><span class="repo-access-chip ${a.cls}">${esc(a.text)}</span><span class="repo-access-chip">${esc(repoPurposeLabel(p))}</span><span class="repo-access-chip">👤 ${esc(p.ownerName||owner?.nome||'')}</span></div>`;$('#repoPackageDetailFiles').innerHTML='<div class="preview-loading">Carregando arquivos autorizados…</div>';openOverlay('repoPackageOverlay');
-  try{const f=FB(),snap=await f.getDocs(f.collection(f.doc(window.db,'rede_repository_packages',id),'files'));const files=snap.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>(a.order||0)-(b.order||0));$('#repoPackageDetailFiles').innerHTML=files.length?files.map(x=>`<div class="repo-package-file"><div class="pf-ico">${repoFileIcon(x.fileName)}</div><div class="pf-main"><div class="pf-name">${esc(x.fileName||x.title||'Arquivo')}</div><div class="pf-meta">${esc((x.ext||inferFileExt('',x.fileName)||'arquivo').toUpperCase())} · ${esc(humanBytes(x.size||0))}</div></div><div class="repo-package-actions"><button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(x.url||'')}'),decodeURIComponent('${encodeURIComponent(x.fileName||'Arquivo')}'))">👁 Ver</button><button class="btn" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(x.url||'')}'),decodeURIComponent('${encodeURIComponent(x.fileName||'arquivo')}'))">⬇ Baixar</button></div></div>`).join(''):'<div class="repo-empty">Nenhum arquivo neste conjunto.</div>'}catch(e){console.error(e);$('#repoPackageDetailFiles').innerHTML='<div class="repo-empty">Não foi possível abrir os arquivos. Verifique se sua conta ainda está autorizada.</div>'}
+  try{const f=FB(),snap=await f.getDocs(f.collection(f.doc(window.db,'rede_repository_packages',id),'files'));const files=snap.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>(a.order||0)-(b.order||0));$('#repoPackageDetailFiles').innerHTML=files.length?files.map(x=>`<div class="repo-package-file"><div class="pf-ico">${repoFileIcon(x.fileName)}</div><div class="pf-main"><div class="pf-name">${esc(x.fileName||x.title||'Arquivo')}</div><div class="pf-meta">${esc((x.ext||inferFileExt('',x.fileName)||'arquivo').toUpperCase())} · ${esc(humanBytes(x.size||0))}</div></div><div class="repo-package-actions"><button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(x.url||'')}'),decodeURIComponent('${encodeURIComponent(x.fileName||'Arquivo')}'),{source:'package',packageId:'${id}',fileId:'${x.id}'})">👁 Ver</button><button class="btn" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(x.url||'')}'),decodeURIComponent('${encodeURIComponent(x.fileName||'arquivo')}'))">⬇ Baixar</button></div></div>`).join(''):'<div class="repo-empty">Nenhum arquivo neste conjunto.</div>'}catch(e){console.error(e);$('#repoPackageDetailFiles').innerHTML='<div class="repo-empty">Não foi possível abrir os arquivos. Verifique se sua conta ainda está autorizada.</div>'}
 }
 async function fileToDataUrl(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('Falha ao ler '+file.name));r.readAsDataURL(file)})}
 function renderRepoPackagePeople(){const q=($('#repoPackagePeopleSearch')?.value||'').trim().toLowerCase(),wrap=$('#repoPackagePeople');if(!wrap)return;const owner=$('#repoPackageOwner')?.value||myId;wrap.innerHTML=state.members.filter(m=>m.status!=='inativo'&&(!q||m.nome.toLowerCase().includes(q))).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>`<label class="repo-share-person"><input type="checkbox" value="${m.id}" ${m.id===owner||m.id===myId?'checked disabled':''}><span>${esc(m.nome)}</span>${m.id===owner?'<small>proprietário</small>':''}${m.id===myId&&m.id!==owner?'<small>você</small>':''}</label>`).join('')}
@@ -5522,11 +5549,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='PREDATOR-P13-DOSSIE-PRIVACIDADE-PREVIEW-20260907';
+window.CARBONAUTAS_BUILD='PREDATOR-P14-PREVIEW-SEGURO-20260907';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P13-20260907',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P14-20260907',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -5538,7 +5565,7 @@ waitFirebase().then(startAuth);
 <script id="carbonautas-dynamic-favicon">
 (()=>{
   const link=document.getElementById('dynamicFavicon'); if(!link)return;
-  const img=new Image(); img.src='./icon-192.png?v=P13';
+  const img=new Image(); img.src='./icon-192.png?v=P14';
   img.onload=()=>{
     const c=document.createElement('canvas'),ctx=c.getContext('2d'); c.width=c.height=64; let phase=0,last=0;
     const draw=(ts)=>{
