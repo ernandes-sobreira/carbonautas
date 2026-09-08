@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carbonautas · Science OS · P15</title>
+<title>Carbonautas · Science OS · P16</title>
 <link rel="manifest" href="./manifest.webmanifest">
-<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P15">
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P15">
-<link rel="apple-touch-icon" href="./icon-192.png?v=P15">
+<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P16">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P16">
+<link rel="apple-touch-icon" href="./icon-192.png?v=P16">
 <meta name="theme-color" content="#08152B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1120,7 +1120,7 @@
 <div class="auth-gate" id="authGate">
   <div class="auth-card">
     <div class="auth-brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P15" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P16" alt="Carbonautas · carbono em ligação"></div>
       <div><h2>Carbonautas</h2><p>Acompanhamento · projetos · rede</p></div>
     </div>
     <div class="auth-login" id="authLoginPane">
@@ -1156,7 +1156,7 @@
 </div>
 
 <div class="loading" id="loading">
-  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P15" alt="Carbonautas · carbono em ligação"></div>
+  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P16" alt="Carbonautas · carbono em ligação"></div>
   <p id="loadingMsg">Conectando à rede…</p>
 </div>
 
@@ -1168,7 +1168,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
     </button>
     <div class="brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P15" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P16" alt="Carbonautas · carbono em ligação"></div>
       <div>
         <h1>Carbonautas</h1>
         <div class="sub">LIPAN · LEFA · CELBE</div>
@@ -1247,7 +1247,7 @@
     <aside class="app-menu-drawer" id="appMenuDrawer" role="dialog" aria-modal="true" aria-label="Navegação do Carbonautas">
       <div class="app-menu-head">
         <div class="app-menu-brand">
-          <img src="./icon-192.png?v=P15" alt="" class="app-menu-logo">
+          <img src="./icon-192.png?v=P16" alt="" class="app-menu-logo">
           <div><b>Carbonautas</b><small>Escolha onde quer ir</small></div>
         </div>
         <button type="button" class="app-menu-close" id="appMenuClose" aria-label="Fechar menu">×</button>
@@ -1264,7 +1264,7 @@
         <button type="button" class="app-nav-card c-pink" data-app-view="fotos"><span class="app-nav-icon">📸</span><b>Fotos</b><small>Registros das ações</small></button>
         <button type="button" class="app-nav-card c-lime" data-app-view="pubs"><span class="app-nav-icon">📚</span><b>Repositório</b><small>Arquivos, Office e produtos</small></button>
       </div>
-      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P15</span></div>
+      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P16</span></div>
     </aside>
   </div>
 
@@ -4486,9 +4486,11 @@ async function launchOnlyOffice(p,base,opts={}){
     if(!window.auth?.currentUser)throw new Error('Entre novamente na plataforma.');
     destroyOnlyOffice();ooSession=null;
     const isReview=purpose==='review';
+    const saveLabel=isReview?'💾 Salvar nova versão no Carbonautas':'💾 Salvar edição no Carbonautas';
     $('#ooTitle').textContent=(isReview?'Correção / revisão · ':'Editar · ')+(p.titulo||p.fileName||'Arquivo Office');
     $('#ooModePill').textContent='🔎 Detectando formato…';
-    $('#ooSaveBtn').textContent=isReview?'💾 Salvar nova versão no Carbonautas':'💾 Salvar edição no Carbonautas';
+    $('#ooSaveBtn').textContent='💾 Edite o arquivo para salvar';
+    $('#ooSaveBtn').disabled=true;
     $('#onlyOfficeEditor').innerHTML='<div class="preview-loading">Conectando ao editor gratuito…</div>';
     setOoStatus('Autenticando e preparando o arquivo…');openOverlay('onlyOfficeOverlay');
     if(/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent||''))setOoStatus('Modo desktop completo ativado no celular. Toque no documento e use a barra do ONLYOFFICE para editar.');
@@ -4501,10 +4503,23 @@ async function launchOnlyOffice(p,base,opts={}){
     const mode=(isReview&&ext==='docx'&&myId===p.reviewReviewerId)?'review':'edit';
     $('#ooModePill').textContent=mode==='review'?'✍️ Controle de alterações':'✏️ '+officeKindLabel(ext);
     await loadOnlyOfficeApi(base);
-    ooSession={key:data.sessionKey,pubId:p.id,p,base,mode,purpose,ext,saved:false};
+    ooSession={key:data.sessionKey,pubId:p.id,p,base,mode,purpose,ext,saved:false,changed:false,syncPending:false,lastChangeAt:0,lastSyncAt:0,saveLabel};
     $('#onlyOfficeEditor').innerHTML='';
     const cfg=data.config||{};cfg.height='100%';cfg.width='100%';cfg.events={
-      onDocumentReady:()=>setOoStatus(isReview?'Documento pronto. Corrija e depois salve a nova versão.':'Arquivo pronto. Edite normalmente e depois clique em “Salvar edição no Carbonautas”.'),
+      onDocumentReady:()=>{setOoStatus(isReview?'Documento pronto. Faça suas correções. O botão do Carbonautas será liberado quando houver uma alteração.':'Arquivo pronto. Edite normalmente. O botão do Carbonautas será liberado quando houver uma alteração.');},
+      onDocumentStateChange:e=>{
+        if(!ooSession)return;
+        const editing=!!e?.data;
+        if(editing){
+          ooSession.changed=true;ooSession.syncPending=true;ooSession.saved=false;ooSession.lastChangeAt=Date.now();
+          const b=$('#ooSaveBtn');if(b){b.disabled=false;b.textContent=ooSession.saveLabel||saveLabel}
+          setOoStatus('Alteração detectada. Sincronizando com o servidor do editor…');
+        }else if(ooSession.changed){
+          ooSession.syncPending=false;ooSession.lastSyncAt=Date.now();
+          const b=$('#ooSaveBtn');if(b){b.disabled=false;b.textContent=ooSession.saveLabel||saveLabel}
+          setOoStatus('✅ Alterações sincronizadas. Você já pode salvar a nova versão no Carbonautas.');
+        }
+      },
       onError:e=>{console.error('ONLYOFFICE',e);setOoStatus('O editor informou um erro. Veja o console ou tente reabrir.')},
       onWarning:e=>console.warn('ONLYOFFICE warning',e)
     };
@@ -4512,6 +4527,30 @@ async function launchOnlyOffice(p,base,opts={}){
   }catch(e){console.error(e);setOoStatus(e.message||'Falha ao abrir o editor.');toast(e.message||'Não foi possível abrir o editor online.')}
 }
 async function blobToDataUrl(blob){return new Promise((resolve,reject)=>{const fr=new FileReader();fr.onload=()=>resolve(fr.result);fr.onerror=()=>reject(fr.error||new Error('Falha ao ler arquivo.'));fr.readAsDataURL(blob)})}
+function ooSleep(ms){return new Promise(r=>setTimeout(r,ms))}
+async function waitOnlyOfficeClientSync(timeoutMs=12000){
+  const started=Date.now();
+  while(ooSession?.syncPending&&Date.now()-started<timeoutMs)await ooSleep(300);
+  return !ooSession?.syncPending;
+}
+async function requestOnlyOfficeForceSave(token){
+  let last={};
+  for(let attempt=0;attempt<6;attempt++){
+    const force=await fetch(ooSession.base+'/carbonautas-api/api/session/'+encodeURIComponent(ooSession.key)+'/force-save',{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'}});
+    const fj=await force.json().catch(()=>({}));last=fj||{};
+    const code=Number(fj?.code??fj?.onlyOfficeError??-1);
+    if(force.status===202||fj?.pending===true||code===4){
+      setOoStatus(`O ONLYOFFICE ainda está consolidando a alteração… tentativa ${attempt+1}/6`);
+      await ooSleep(1200+attempt*500);
+      continue;
+    }
+    if(!force.ok)throw new Error(fj.error||fj.message||'Não foi possível solicitar o salvamento.');
+    if(fj?.ok===false)throw new Error(fj.message||'O ONLYOFFICE não confirmou o salvamento.');
+    return fj;
+  }
+  const err=new Error(last?.message||'As alterações ainda não chegaram ao servidor do ONLYOFFICE. Aguarde alguns segundos e tente novamente.');
+  err.code='OO_NOT_SYNCED';throw err;
+}
 async function waitOnlineSaved(base,key,token){
   for(let i=0;i<30;i++){
     await new Promise(r=>setTimeout(r,i?1000:500));
@@ -4524,45 +4563,35 @@ function splitOfficeName(name,ext){const clean=(name||'arquivo').replace(new Reg
 async function saveOnlineDocument(){
   if(!ooSession||ooSession.saved)return;
   const btn=$('#ooSaveBtn'),p=state.publicacoes.find(x=>x.id===ooSession.pubId)||ooSession.p;
+  if(!ooSession.changed){setOoStatus('Nenhuma alteração nova detectada. Edite o documento antes de criar outra versão.');toast('Nenhuma alteração nova para salvar.');return;}
   try{
-    btn.disabled=true;setOoStatus('Salvando o estado atual do arquivo…');toast('Salvando edição online…');
-    const token=await window.auth.currentUser.getIdToken();
-    const force=await fetch(ooSession.base+'/carbonautas-api/api/session/'+encodeURIComponent(ooSession.key)+'/force-save',{method:'POST',headers:{Authorization:'Bearer '+token}});
-    const fj=await force.json().catch(()=>({}));if(!force.ok)throw new Error(fj.error||'Não foi possível forçar o salvamento.');
-    setOoStatus('Gerando o arquivo atualizado…');await waitOnlineSaved(ooSession.base,ooSession.key,token);
+    btn.disabled=true;btn.textContent='⏳ Sincronizando…';setOoStatus('Sincronizando suas últimas alterações com o ONLYOFFICE…');
+    const synced=await waitOnlyOfficeClientSync(12000);if(!synced)setOoStatus('A alteração ainda está sendo enviada pelo editor. Vou tentar consolidar automaticamente…');
+    const token=await window.auth.currentUser.getIdToken();await requestOnlyOfficeForceSave(token);
+    setOoStatus('ONLYOFFICE confirmou o salvamento. Gerando o arquivo atualizado…');await waitOnlineSaved(ooSession.base,ooSession.key,token);
     const fr=await fetch(ooSession.base+'/carbonautas-api/api/session/'+encodeURIComponent(ooSession.key)+'/file',{headers:{Authorization:'Bearer '+token}});
     if(!fr.ok){const t=await fr.text();throw new Error(t||'Arquivo editado indisponível.');}
     const blob=await fr.blob(),dataUrl=await blobToDataUrl(blob),ext=ooSession.ext;
     const f=FB(),actor=currentActor(),uid=window.auth.currentUser?.uid||'';
     if(ooSession.purpose==='review'){
-      const nextVersion=reviewNextVersion(p),baseName=splitOfficeName(p.fileName||p.titulo||'documento',ext);
-      const fileName=`${baseName}_v${nextVersion}.${ext}`;
-      const {url}=await fbUploadFile('onlyoffice_'+p.memberId,dataUrl,fileName);
-      const ref=f.doc(f.collection(window.db,'rede_publicacoes'));
+      const nextVersion=reviewNextVersion(p),baseName=splitOfficeName(p.fileName||p.titulo||'documento',ext);const fileName=`${baseName}_v${nextVersion}.${ext}`;
+      const {url}=await fbUploadFile('onlyoffice_'+p.memberId,dataUrl,fileName);const ref=f.doc(f.collection(window.db,'rede_publicacoes'));
       const reviewerId=p.reviewReviewerId,returnToId=p.reviewReturnToId,actingAsReviewer=(myId===reviewerId);
       const nextRecipientId=actingAsReviewer?returnToId:reviewerId,status=actingAsReviewer?'correcao_devolvida':'nova_versao',baseTitle=p.reviewBaseTitle||p.titulo||'Documento';
       await f.setDoc(ref,{memberId:p.memberId,ownerUid:uid,createdByUid:uid,memberNome:p.memberNome||memberById(p.memberId)?.nome||'',categoria:p.categoria||'outro',categoriaOutro:p.categoriaOutro||'',titulo:baseTitle,tipo:'arquivo',url,fileName,reviewFlow:true,reviewThreadId:p.reviewThreadId||p.id,reviewVersion:nextVersion,reviewStatus:status,reviewReviewerId:reviewerId,reviewReturnToId:returnToId,reviewNextRecipientId:nextRecipientId,reviewParentId:p.id,reviewSenderId:actor?.id||myId||'',reviewSenderName:actor?.name||'',reviewBaseTitle:baseTitle,reviewNote:actingAsReviewer?(ext==='docx'?'Correção realizada online com controle de alterações.':'Arquivo revisado online.'):'Nova versão revisada online.',editedOnline:true,ts:f.serverTimestamp()});
       await createRepoNotification(nextRecipientId,{sourceId:ref.id,ownerId:p.memberId,title:actingAsReviewer?'✅ Correção online devolvida':'⬆️ Nova versão para revisar',message:`${baseTitle} · versão ${nextVersion} · editada no ONLYOFFICE`});
-      setOoStatus('Nova versão salva e destinatário notificado.');toast('Nova versão salva e notificação enviada.');
+      setOoStatus('✅ Nova versão salva e destinatário notificado.');toast('Nova versão salva e notificação enviada.');
     }else{
       const currentV=Number(p.onlineEditVersion||1),nextV=currentV+1,baseName=splitOfficeName(p.fileName||p.titulo||'arquivo',ext),fileName=`${baseName}_v${nextV}.${ext}`;
-      const {url}=await fbUploadFile('onlyoffice_workspace_'+p.memberId,dataUrl,fileName);
-      const editorMemberId=actor?.id||myId||'',editorName=actor?.name||myName||'Carbonauta';
-      const ownerMemberId=p.memberId||'',owner=memberById(ownerMemberId),ownerName=p.memberNome||owner?.nome||'proprietário';
-      const editingSomeoneElsesFile=!!(ownerMemberId&&editorMemberId&&ownerMemberId!==editorMemberId);
+      const {url}=await fbUploadFile('onlyoffice_workspace_'+p.memberId,dataUrl,fileName);const editorMemberId=actor?.id||myId||'',editorName=actor?.name||myName||'Carbonauta';
+      const ownerMemberId=p.memberId||'',owner=memberById(ownerMemberId),ownerName=p.memberNome||owner?.nome||'proprietário';const editingSomeoneElsesFile=!!(ownerMemberId&&editorMemberId&&ownerMemberId!==editorMemberId);
       const history={version:currentV,url:p.url||'',fileName:p.fileName||`${baseName}.${ext}`,savedAt:new Date().toISOString(),byUid:uid,byMemberId:editorMemberId,byName:editorName};
       await f.updateDoc(f.doc(window.db,'rede_publicacoes',p.id),{url,fileName,onlineEditVersion:nextV,onlineEditHistory:f.arrayUnion(history),editedOnline:true,editedAt:f.serverTimestamp(),editedByUid:uid,editedByMemberId:editorMemberId,editedByName:editorName,repositoryTurnMemberId:editingSomeoneElsesFile?ownerMemberId:'',repositoryTurnFromId:editingSomeoneElsesFile?editorMemberId:'',repositoryTurnFromName:editingSomeoneElsesFile?editorName:'',repositoryTurnAt:f.serverTimestamp()});
-      if(editingSomeoneElsesFile){
-        await createRepoNotification(ownerMemberId,{kind:'repositorio_retorno',sourceId:p.id,ownerId:ownerMemberId,title:`✨ Agora é sua vez, ${ownerName}`,message:`${editorName} editou “${p.titulo||p.fileName||'seu arquivo'}”. Dê uma olhada no que foi ajustado e continue a partir daqui.`});
-        setOoStatus(`Edição v${nextV} salva. ${ownerName} foi notificado(a) para continuar.`);toast(`Edição v${nextV} salva. ${ownerName} foi notificado(a).`);
-      }else{
-        setOoStatus(`Edição v${nextV} salva. A versão anterior foi preservada no histórico.`);toast(`Edição v${nextV} salva no Repositório.`);
-      }
+      if(editingSomeoneElsesFile){await createRepoNotification(ownerMemberId,{kind:'repositorio_retorno',sourceId:p.id,ownerId:ownerMemberId,title:`✨ Agora é sua vez, ${ownerName}`,message:`${editorName} editou “${p.titulo||p.fileName||'seu arquivo'}”. Dê uma olhada no que foi ajustado e continue a partir daqui.`});setOoStatus(`✅ Edição v${nextV} salva. ${ownerName} foi notificado(a) para continuar.`);toast(`Edição v${nextV} salva. ${ownerName} foi notificado(a).`);}else{setOoStatus(`✅ Edição v${nextV} salva. A versão anterior foi preservada no histórico.`);toast(`Edição v${nextV} salva no Repositório.`);}
     }
-    ooSession.saved=true;
-    setTimeout(()=>{destroyOnlyOffice();closeOverlay('onlyOfficeOverlay')},900);
-  }catch(e){console.error(e);setOoStatus(e.message||'Erro ao salvar.');toast(e.message||'Erro ao salvar a edição online.');}
-  finally{btn.disabled=false}
+    ooSession.saved=true;ooSession.changed=false;ooSession.syncPending=false;btn.textContent='✅ Salvo';setTimeout(()=>{destroyOnlyOffice();closeOverlay('onlyOfficeOverlay')},1100);
+  }catch(e){console.error(e);const msg=e?.code==='OO_NOT_SYNCED'?'O editor ainda está sincronizando. Aguarde alguns segundos e toque em salvar novamente.':(e.message||'Erro ao salvar.');setOoStatus(msg);toast(msg);}
+  finally{if(ooSession&&!ooSession.saved&&btn){btn.disabled=!ooSession.changed;btn.textContent=ooSession.changed?(ooSession.saveLabel||'💾 Salvar no Carbonautas'):'💾 Edite o arquivo para salvar'}}
 }
 
 function openNewOffice(){
@@ -5599,11 +5628,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='PREDATOR-P15-PDFJS-DOC-CONVERT-20260907';
+window.CARBONAUTAS_BUILD='PREDATOR-P16-ONLYOFFICE-SAVEFLOW-20260908';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P15-20260907',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P16-20260908',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -5615,7 +5644,7 @@ waitFirebase().then(startAuth);
 <script id="carbonautas-dynamic-favicon">
 (()=>{
   const link=document.getElementById('dynamicFavicon'); if(!link)return;
-  const img=new Image(); img.src='./icon-192.png?v=P15';
+  const img=new Image(); img.src='./icon-192.png?v=P16';
   img.onload=()=>{
     const c=document.createElement('canvas'),ctx=c.getContext('2d'); c.width=c.height=64; let phase=0,last=0;
     const draw=(ts)=>{

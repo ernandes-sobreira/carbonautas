@@ -1,0 +1,8 @@
+CARBONAUTAS P16 — SALVAMENTO ONLYOFFICE ROBUSTO
+Data: 2026-09-08
+
+GITHUB: substitua index.html, sw.js e manifest.webmanifest.
+VPS: execute P16_VPS_SALVAMENTO_ONLYOFFICE.sh.
+Não há mudança nas regras do Firestore.
+
+O botão agora só libera após alteração, espera a sincronização do editor, trata código 4 como pendência e só cria nova versão após callback status 6.
