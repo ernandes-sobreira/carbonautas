@@ -1,15 +1,23 @@
-CARBONAUTAS PWA — COMO PUBLICAR
+CARBONAUTAS P18 — AGENDA PRIVADA
 
-Envie TODOS estes arquivos/pastas para a mesma raiz do repositório do GitHub Pages:
-- index.html
-- manifest.webmanifest
-- sw.js
-- favicon.ico
-- pasta icons/ completa
+SEM ALTERAÇÃO NO VPS.
+O ONLYOFFICE/bridge atual permanece intacto.
 
-Depois aguarde o GitHub Pages atualizar e abra o site por HTTPS.
-Android/Chrome: menu → Instalar app / Adicionar à tela inicial.
-iPhone/iPad/Safari: Compartilhar → Adicionar à Tela de Início.
-PC (Chrome/Edge): opção Instalar Carbonautas na barra/endereço ou no menu.
+1) GitHub — substituir na raiz:
+   index.html
+   sw.js
+   manifest.webmanifest (pode substituir; mantém o atual)
 
-O botão “Instalar Carbonautas” também aparece em Minha conta quando o navegador permite instalação.
+2) Firebase Console > Firestore Database > Rules
+   Substituir pelas regras completas do arquivo firestore.rules e clicar em Publicar.
+
+NOVO NO CRONOGRAMA:
+- botão 🔒 Só para mim
+- compromisso privado sincronizado entre seus dispositivos
+- somente o próprio UID autenticado consegue ler/criar/editar/excluir
+- nem o coordenador ganha exceção de leitura
+- hora e observação opcionais
+- filtro "Só compromissos privados"
+- editar, concluir/reabrir e excluir
+
+P18 não altera o servidor VPS nem o fluxo ONLYOFFICE.

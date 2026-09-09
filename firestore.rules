@@ -866,6 +866,76 @@ service cloud.firestore {
     }
 
 
+
+    // ============================================================
+    // CARBONAUTAS P18 — AGENDA PRIVADA / CRONOGRAMA PARTICULAR
+    // Cada compromisso pertence ao UID autenticado.
+    // Nem o coordenador recebe exceção de leitura: "só eu" é realmente privado.
+    // ============================================================
+
+    match /rede_private_schedule/{documentId} {
+
+      function privateScheduleOwner() {
+        return hasProfile()
+          && resource.data.ownerUid == request.auth.uid;
+      }
+
+      allow read: if privateScheduleOwner();
+
+      allow create: if hasProfile()
+        && request.resource.data.keys().hasOnly([
+          'titulo',
+          'data',
+          'hora',
+          'descricao',
+          'feito',
+          'ownerUid',
+          'ownerMemberId',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerMemberId == myMemberId()
+        && request.resource.data.titulo is string
+        && request.resource.data.titulo.size() > 0
+        && request.resource.data.titulo.size() <= 300
+        && request.resource.data.data is string
+        && request.resource.data.data.size() == 10
+        && request.resource.data.hora is string
+        && request.resource.data.hora.size() <= 5
+        && request.resource.data.descricao is string
+        && request.resource.data.descricao.size() <= 3000
+        && request.resource.data.feito == false
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if privateScheduleOwner()
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.ownerMemberId == resource.data.ownerMemberId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'titulo',
+          'data',
+          'hora',
+          'descricao',
+          'feito',
+          'updatedAt'
+        ])
+        && request.resource.data.titulo is string
+        && request.resource.data.titulo.size() > 0
+        && request.resource.data.titulo.size() <= 300
+        && request.resource.data.data is string
+        && request.resource.data.data.size() == 10
+        && request.resource.data.hora is string
+        && request.resource.data.hora.size() <= 5
+        && request.resource.data.descricao is string
+        && request.resource.data.descricao.size() <= 3000
+        && request.resource.data.feito is bool
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if privateScheduleOwner();
+    }
+
     // ============================================================
     // BRASA — CINZAS PROJECT
     // MANTIDO EXATAMENTE ABERTO para não quebrar o app antigo.
