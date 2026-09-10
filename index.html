@@ -2693,6 +2693,8 @@ let authUser = null;
 let authProfile = null;
 let subscriptions = [];
 let bootstrapped = false;
+let authOpenPromise = null;
+let authOpenUid = '';
 let currentView = 'painel';
 let lastSeenChat = +localStorage.getItem('rede_lastSeenChat') || 0;
 let lbPhotoId = null;
@@ -2853,8 +2855,10 @@ async function bootstrap(){
       if(isAdmin) await f.setDoc(setRef,{groupLink:'',linhas:state.settings.linhas});
     }
     state.linhas=state.settings.linhas;
+    // Recursos privados não podem bloquear a entrada na plataforma.
+    // Inicializam em segundo plano depois que o núcleo da conta já foi validado.
     ensurePrivateDirectoryEntry().catch(e=>console.warn('Diretório privado indisponível:',e));
-    await ensurePersonalRepositoryRoot().catch(e=>console.warn('Repositório privado indisponível:',e));
+    ensurePersonalRepositoryRoot().catch(e=>console.warn('Repositório privado indisponível:',e));
     subscribeAll();
     bootstrapped=true;
     $('#authGate').classList.add('off');
@@ -3215,6 +3219,11 @@ async function repairCurrentAccountLink(showMessage=true){
 }
 function isMe(id){ return !!myId && id===myId }
 function canEditMember(id){ return isAdmin || isMe(id) }
+function withTimeout(promise,ms,message='A conexão demorou mais que o esperado.'){
+  let timer;
+  const timeout=new Promise((_,reject)=>{timer=setTimeout(()=>{const e=new Error(message);e.code='carbonautas/timeout';reject(e)},ms)});
+  return Promise.race([promise,timeout]).finally(()=>clearTimeout(timer));
+}
 function authErrorMessage(e){
   const c=e?.code||'';
   if(c.includes('invalid-credential')||c.includes('wrong-password')||c.includes('user-not-found')) return 'E-mail ou senha incorretos.';
@@ -3227,6 +3236,7 @@ function authErrorMessage(e){
 function showLogin(message=''){
   $('#authGate').classList.remove('off'); $('#authLoginPane').classList.remove('hidden'); $('#authRegisterPane').classList.add('hidden'); $('#authUnlinkedPane').classList.remove('on');
   $('#authMsg').textContent=message; $('#loading').classList.add('off');
+  if($('#loginBtn')) $('#loginBtn').disabled=false;
 }
 function showRegister(){
   $('#authGate').classList.remove('off'); $('#authLoginPane').classList.add('hidden'); $('#authRegisterPane').classList.remove('hidden'); $('#authUnlinkedPane').classList.remove('on');
@@ -3272,9 +3282,22 @@ async function claimMyProfile(){
   }finally{$('#claimProfileBtn').disabled=false}
 }
 async function login(){
-  const email=$('#loginEmail').value.trim(), password=$('#loginPassword').value; if(!email||!password){$('#authMsg').textContent='Digite e-mail e senha.';return}
-  $('#loginBtn').disabled=true; $('#authMsg').textContent='Entrando…';
-  try{await FB().signInWithEmailAndPassword(window.auth,email,password)}catch(e){$('#authMsg').textContent=authErrorMessage(e)}finally{$('#loginBtn').disabled=false}
+  const email=$('#loginEmail').value.trim(), password=$('#loginPassword').value;
+  if(!email||!password){$('#authMsg').textContent='Digite e-mail e senha.';return}
+  const btn=$('#loginBtn'); btn.disabled=true; $('#authMsg').textContent='Entrando…';
+  try{
+    const cred=await withTimeout(
+      FB().signInWithEmailAndPassword(window.auth,email,password),
+      20000,
+      'A autenticação está demorando. Verifique sua internet e tente novamente.'
+    );
+    $('#authMsg').textContent='Login confirmado. Abrindo o Carbonautas…';
+    // Não dependemos somente do evento onAuthStateChanged: abrimos a sessão diretamente.
+    await handleAuthUser(cred.user);
+  }catch(e){
+    console.error('Login:',e);
+    $('#authMsg').textContent=authErrorMessage(e);
+  }finally{btn.disabled=false}
 }
 async function resetMyPassword(emailOverride=''){
   const email=(emailOverride||authUser?.email||$('#loginEmail').value).trim();
@@ -3298,17 +3321,38 @@ async function doLogout(){
   try{await FB().signOut(window.auth)}catch(e){console.error(e)}
 }
 async function handleAuthUser(user){
-  clearSubscriptions(); bootstrapped=false; state.users=[];state.privateThreads=[];state.privateDirectory=[];state.privateSchedule=[];privateDirectorySeeded=false;privateChatAccessError='';
-  if(!user){authUser=null;authProfile=null;myId=null;myName='';isAdmin=false;showLogin();refreshIdentityUI();return}
-  authUser=user; $('#loading').classList.remove('off'); $('#loadingMsg').textContent='Validando sua conta…';
-  try{
-    const snap=await FB().getDoc(FB().doc(window.db,'rede_users',user.uid));
-    if(!snap.exists()){authProfile=null;myId=null;myName='';isAdmin=false;showUnlinked(user);return}
-    authProfile={uid:user.uid,...snap.data()}; myId=authProfile.memberId||null; myName=authProfile.nome||user.email||''; isAdmin=shouldTreatAsCoordinator(authProfile,user);
-    await bootstrap();
-  }catch(e){console.error(e);showLogin('Sua conta não conseguiu acessar o perfil. Verifique as regras do Firestore.')}
+  if(!user){
+    authOpenPromise=null;authOpenUid='';
+    clearSubscriptions();bootstrapped=false;authUser=null;authProfile=null;myId=null;myName='';isAdmin=false;
+    state.users=[];state.privateThreads=[];state.privateDirectory=[];state.privateSchedule=[];privateDirectorySeeded=false;privateChatAccessError='';
+    showLogin();refreshIdentityUI();return;
+  }
+  // Login direto e onAuthStateChanged podem disparar quase juntos. Uma única inicialização vence.
+  if(authOpenPromise && authOpenUid===user.uid) return authOpenPromise;
+  authOpenUid=user.uid;
+  authOpenPromise=(async()=>{
+    clearSubscriptions(); bootstrapped=false; state.users=[];state.privateThreads=[];state.privateDirectory=[];state.privateSchedule=[];privateDirectorySeeded=false;privateChatAccessError='';
+    authUser=user; $('#loading').classList.remove('off'); $('#loadingMsg').textContent='Validando sua conta…';
+    try{
+      const snap=await withTimeout(
+        FB().getDoc(FB().doc(window.db,'rede_users',user.uid)),
+        15000,
+        'O Firestore demorou para validar seu perfil.'
+      );
+      if(!snap.exists()){authProfile=null;myId=null;myName='';isAdmin=false;await showUnlinked(user);return}
+      authProfile={uid:user.uid,...snap.data()}; myId=authProfile.memberId||null; myName=authProfile.nome||user.email||''; isAdmin=shouldTreatAsCoordinator(authProfile,user);
+      $('#authMsg').textContent='Conta validada. Carregando a rede…';
+      await withTimeout(bootstrap(),25000,'A rede demorou para carregar. Tente novamente.');
+    }catch(e){
+      console.error('Abertura da sessão:',e);
+      const timeout=e?.code==='carbonautas/timeout';
+      showLogin(timeout?(e.message+' Se sua internet estiver normal, toque em Entrar novamente.'):'Sua conta entrou, mas não conseguiu acessar o perfil. Confira as regras do Firestore.');
+    }
+  })();
+  try{return await authOpenPromise}
+  finally{if(authOpenUid===user.uid){authOpenPromise=null;authOpenUid=''}}
 }
-function startAuth(){FB().onAuthStateChanged(window.auth,handleAuthUser)}
+function startAuth(){FB().onAuthStateChanged(window.auth,user=>{handleAuthUser(user).catch(e=>{console.error('Auth observer:',e);showLogin('Não foi possível abrir a sessão. Tente novamente.')})})}
 
 function refreshIdentityUI(){
   const chip=$('#idChip'),av=$('#idAv'),nm=$('#idName'),me=resolveCurrentMember();
@@ -6298,11 +6342,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='PREDATOR-P17-ONLYOFFICE-FULLSCREEN-SAFEEXIT-20260908';
+window.CARBONAUTAS_BUILD='P23-LOGIN-ROBUSTO-20260910';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=PREDATOR-P16-20260908',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P23-20260910',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -6314,7 +6358,7 @@ waitFirebase().then(startAuth);
 <script id="carbonautas-dynamic-favicon">
 (()=>{
   const link=document.getElementById('dynamicFavicon'); if(!link)return;
-  const img=new Image(); img.src='./icon-192.png?v=P22';
+  const img=new Image(); img.src='./icon-192.png?v=P23';
   img.onload=()=>{
     const c=document.createElement('canvas'),ctx=c.getContext('2d'); c.width=c.height=64; let phase=0,last=0;
     const draw=(ts)=>{
