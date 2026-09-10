@@ -1,14 +1,63 @@
-CARBONAUTAS P23 — CORREÇÃO DE LOGIN
+CARBONAUTAS P24 — MENSAGEM PRIVADA + COLABORAÇÃO POR ARQUIVO
+=============================================================
 
-O que foi corrigido:
-- o login não depende mais exclusivamente do onAuthStateChanged;
-- login e observador de autenticação não inicializam a plataforma duas vezes;
-- o Meu Repositório deixa de bloquear a entrada na plataforma;
-- validações demoradas agora têm timeout e mostram mensagem útil, em vez de ficar eternamente em “Entrando…”;
-- service worker atualizado para P23.
+OBJETIVO
+1. Em TODO arquivo do Repositório Geral que pertence a outra pessoa, aparece:
+   💬 Falar com NOME
+   Isso abre o chat privado 1:1 com o responsável pelo arquivo. Não é mensagem do grupo.
 
-ATUALIZAÇÃO:
-1. GitHub: substituir index.html, sw.js e manifest.webmanifest.
-2. Não mexer no VPS.
-3. Não mexer nas regras do Firestore para esta correção.
-4. Fechar o app instalado e abrir pelo Chrome uma vez com ?v=P23.
+2. O proprietário de um arquivo pode usar:
+   👥 Colaboradores
+   e convidar pessoas específicas para trabalhar naquele arquivo.
+
+3. Somente proprietário + convidados veem:
+   🗂 Sala do arquivo
+   Essa conversa é vinculada ao arquivo e é privada para a equipe convidada.
+
+4. Em DOCX/XLSX/PPTX, colaboradores convidados também podem usar:
+   ✏️ Editar
+   e salvar novas versões pelo ONLYOFFICE.
+
+5. O fluxo de correção continua separado:
+   ✍️ Conversa da correção
+   somente entre autor e revisor daquele fluxo.
+
+ATUALIZAÇÃO NO GITHUB
+---------------------
+Substitua na raiz do repositório:
+- index.html
+- sw.js
+- manifest.webmanifest
+
+FIREBASE
+--------
+Firebase Console > Firestore Database > Rules
+Substitua pelas regras completas do arquivo:
+- firestore.rules
+Depois clique em Publicar.
+
+VPS — SOMENTE PARA EDIÇÃO ONLINE PELOS COLABORADORES
+----------------------------------------------------
+A mensagem privada e a Sala do arquivo NÃO precisam do VPS.
+
+Mas, para que uma pessoa convidada consiga abrir DOCX/XLSX/PPTX no ONLYOFFICE e EDITAR online, rode UMA VEZ no Web Console:
+- P24_VPS_COLABORADORES_OFFICE.txt
+
+Esse patch:
+- cria backup do server.js;
+- altera somente a autorização das rotas de abertura do Office;
+- NÃO altera callback;
+- NÃO altera salvamento;
+- NÃO altera Lab;
+- valida a sintaxe antes de reiniciar;
+- restaura o backup se o healthcheck falhar.
+
+PRIVACIDADE
+-----------
+💬 Falar com NOME = conversa privada 1:1.
+🗂 Sala do arquivo = somente dono + colaboradores explicitamente convidados.
+O coordenador não entra automaticamente na Sala do arquivo só por ser coordenador.
+
+OBSERVAÇÃO
+----------
+Para iniciar chat privado 1:1, a pessoa precisa ter uma conta Carbonautas vinculada ao diretório privado. Se ainda não tiver conta/vínculo, o app informa que ela ainda não está disponível para conversa privada.

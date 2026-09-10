@@ -1269,6 +1269,237 @@
     .repo-package-actions{gap:6px!important;flex-wrap:wrap!important}
     .repo-package-actions .btn{min-height:40px}
   }
+  /* P24 · mensagem direta + colaboração explícita por arquivo */
+  .repo-direct-btn{background:#eef8ff!important;border:1px solid #b9deef!important;color:#075985!important;font-weight:850!important}
+  .repo-direct-btn:hover{background:#def3ff!important;border-color:#38bdf8!important}
+  .repo-collab-btn{background:linear-gradient(135deg,#0f766e,#14b8a6)!important;border:0!important;color:#fff!important;font-weight:900!important}
+  .repo-room-btn{background:linear-gradient(135deg,#111827,#312e81)!important;border:1px solid #4f46e5!important;color:#fff!important;font-weight:900!important}
+  .repo-collab-chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 8px;margin-top:5px;background:#e9fbf7;border:1px solid #9ee8d8;color:#11635a;font-size:10px;font-weight:850}
+  .file-collab-list{display:grid;gap:8px;max-height:360px;overflow:auto;border:1px solid #dbe7ed;border-radius:16px;padding:10px;background:#fbfdff}
+  .file-collab-row{display:flex;align-items:center;gap:10px;padding:9px;border-radius:12px;background:#fff;border:1px solid #e5edf2}
+  .file-collab-row input{width:20px;height:20px;flex:0 0 auto}
+  .file-collab-row .main{min-width:0;flex:1}.file-collab-row b{display:block;color:#102633}.file-collab-row small{display:block;color:#6b7f89;margin-top:2px}
+  .file-collab-note{border:1px solid #9ee8d8;background:linear-gradient(135deg,#ecfdf8,#eef8ff);border-radius:16px;padding:12px;color:#174d4a;line-height:1.45}
+  @media(max-width:760px){.repo-direct-btn,.repo-collab-btn,.repo-room-btn{min-height:40px}.file-collab-list{max-height:46dvh}}
+</style>
+
+
+<style id="p25-photo-social-contrast">
+/* ================================================================
+   P25 · FOTO SOCIAL ULTRALEGÍVEL
+   Corrige contraste no lightbox e mantém compatibilidade com o
+   renderizador social antigo, caso exista dado/cache legado.
+   ================================================================ */
+#lightbox{
+  --p25-ink:#102c39;
+  --p25-muted:#617983;
+  --p25-line:#d8e4e8;
+  --p25-soft:#f4f9fb;
+  --p25-blue:#eaf6ff;
+  --p25-shadow:0 18px 46px rgba(0,0,0,.28);
+}
+
+/* bloco social nunca mais transparente */
+#lbSocial,
+#lbSocial .photo-engagement,
+#lbSocial .social-wrap,
+#lbSocial .comments{
+  color:var(--p25-ink)!important;
+}
+#lbSocial .photo-engagement,
+#lbSocial .social-wrap{
+  background:#ffffff!important;
+  border:1px solid var(--p25-line)!important;
+  box-shadow:var(--p25-shadow)!important;
+  border-radius:22px!important;
+  overflow:hidden!important;
+}
+
+/* Cabeçalho claro, grande e legível */
+#lbSocial .photo-engagement-head{
+  background:linear-gradient(135deg,#ffffff,#edfaff)!important;
+  border-bottom:1px solid var(--p25-line)!important;
+  padding:15px 16px 13px!important;
+}
+#lbSocial .photo-engagement-title{
+  color:#0d2937!important;
+  font-size:17px!important;
+  font-weight:950!important;
+}
+#lbSocial .photo-engagement-count{
+  color:#345664!important;
+  background:#e6f2f6!important;
+  border:1px solid #d3e5ea!important;
+  font-size:11.5px!important;
+}
+
+/* Reações: sempre com texto visível */
+#lbSocial .photo-reaction-grid{
+  background:#ffffff!important;
+  padding:12px!important;
+  gap:9px!important;
+}
+#lbSocial .photo-react{
+  background:#f7fbfc!important;
+  color:#102c39!important;
+  border:1px solid #d7e5e9!important;
+  box-shadow:0 3px 9px rgba(11,45,58,.04)!important;
+  opacity:1!important;
+}
+#lbSocial .photo-react .ico{
+  opacity:1!important;
+  filter:none!important;
+}
+#lbSocial .photo-react .lab{
+  display:block!important;
+  color:#153746!important;
+  opacity:1!important;
+  font-size:13px!important;
+  line-height:1.18!important;
+  font-weight:900!important;
+  text-shadow:none!important;
+}
+#lbSocial .photo-react .n{
+  display:inline-flex!important;
+  min-width:24px!important;
+  min-height:22px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:1px 7px!important;
+  border-radius:999px!important;
+  background:#ffffff!important;
+  border:1px solid #d9e4e8!important;
+  color:#405f6b!important;
+  font-size:12px!important;
+  font-weight:950!important;
+  opacity:1!important;
+}
+#lbSocial .photo-react.on{background:#e9f8ff!important;border-color:#79c8e6!important;color:#0e4962!important}
+#lbSocial .photo-react.heart.on{background:#eaf4ff!important;border-color:#78bfff!important}
+#lbSocial .photo-react.party.on{background:#fff6df!important;border-color:#f1c86e!important}
+#lbSocial .photo-react.dislike.on{background:#f7efff!important;border-color:#c99cff!important}
+
+/* Comentários com fundo sólido */
+#lbSocial .photo-comments{
+  background:#f3f8fa!important;
+  border-top:1px solid var(--p25-line)!important;
+  color:var(--p25-ink)!important;
+}
+#lbSocial .photo-comments-label{
+  color:#173746!important;
+  font-size:13.5px!important;
+  font-weight:950!important;
+}
+#lbSocial .photo-comment-empty{
+  background:#ffffff!important;
+  color:#667f8a!important;
+  border:1px dashed #bfd2d9!important;
+}
+#lbSocial .photo-comment-card{
+  background:#ffffff!important;
+  color:#173746!important;
+  border:1px solid #d9e5e9!important;
+  box-shadow:0 3px 9px rgba(8,42,54,.05)!important;
+}
+#lbSocial .photo-comment-name{color:#132f3b!important;font-size:12.5px!important;font-weight:950!important}
+#lbSocial .photo-comment-time{color:#738b95!important}
+#lbSocial .photo-comment-text{color:#203b47!important;font-size:14px!important;line-height:1.46!important}
+#lbSocial .photo-comment-compose{border-top:1px solid #d6e3e7!important}
+#lbSocial .photo-comment-compose textarea{
+  background:#ffffff!important;
+  color:#102c39!important;
+  border:2px solid #9ed7e2!important;
+  min-height:58px!important;
+  font-size:15px!important;
+}
+#lbSocial .photo-comment-compose textarea::placeholder{color:#78919b!important;opacity:1!important}
+#lbSocial .photo-comment-send{
+  background:#ff3d62!important;
+  color:#ffffff!important;
+  font-size:14px!important;
+  font-weight:950!important;
+  box-shadow:0 8px 18px rgba(255,61,98,.24)!important;
+}
+
+/* Fallback para a versão antiga do socialBar que pode vir de cache/dados antigos */
+#lbSocial .social-summary{
+  background:#f3f8fa!important;
+  color:#425f6b!important;
+  padding:10px 12px 6px!important;
+  font-size:12px!important;
+}
+#lbSocial .social-bar{
+  background:#ffffff!important;
+  padding:10px!important;
+  gap:8px!important;
+}
+#lbSocial .react-btn,
+#lbSocial .comment-toggle{
+  background:#f7fbfc!important;
+  color:#173746!important;
+  border:1px solid #d7e5e9!important;
+  opacity:1!important;
+  text-shadow:none!important;
+  font-weight:900!important;
+}
+#lbSocial .react-btn span,
+#lbSocial .comment-toggle span{
+  color:inherit!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+#lbSocial .react-btn .react-emoji,
+#lbSocial .comment-toggle .react-emoji{font-size:22px!important}
+#lbSocial .react-count{
+  background:#fff!important;
+  color:#304e5a!important;
+  border:1px solid #d7e5e9!important;
+  border-radius:999px!important;
+  padding:2px 7px!important;
+}
+#lbSocial .comments{
+  display:block!important;
+  background:#f3f8fa!important;
+  border-top:1px solid var(--p25-line)!important;
+  padding:12px!important;
+}
+#lbSocial .comment-b{background:#fff!important;color:#203b47!important;border:1px solid #d9e5e9!important}
+#lbSocial .comment-name{color:#173746!important;font-weight:900!important}
+#lbSocial .comment-text{color:#203b47!important;font-size:13.5px!important}
+#lbSocial .comment-form input{
+  background:#fff!important;
+  color:#173746!important;
+  border:2px solid #9ed7e2!important;
+  font-size:14px!important;
+}
+
+@media(max-width:650px){
+  #lightbox{padding-bottom:calc(22px + env(safe-area-inset-bottom))!important}
+  #lightbox #lbImg{max-height:46vh!important;background:#020b10!important}
+  #lbSocial{margin:0 10px!important;width:auto!important}
+  #lbSocial .photo-engagement{border-radius:20px!important}
+  #lbSocial .photo-reaction-grid,
+  #lbSocial .social-bar{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  #lbSocial .photo-react{
+    min-height:82px!important;
+    padding:10px 8px!important;
+  }
+  #lbSocial .photo-react .ico{font-size:25px!important}
+  #lbSocial .photo-react .lab{font-size:13px!important}
+  #lbSocial .photo-comments{padding:13px!important}
+  #lbSocial .photo-comments-list{max-height:38vh!important}
+  #lbSocial .photo-comment-compose{grid-template-columns:1fr!important}
+  #lbSocial .photo-comment-send{width:100%!important;height:50px!important}
+  #lbSocial .react-btn,
+  #lbSocial .comment-toggle{
+    min-height:54px!important;
+    font-size:13px!important;
+    padding:9px 8px!important;
+  }
+  #lbSocial .comment-toggle{grid-column:1/-1!important}
+}
 </style>
 
 </head>
@@ -1421,7 +1652,7 @@
         <button type="button" class="app-nav-card c-pink" data-app-view="fotos"><span class="app-nav-icon">📸</span><b>Fotos</b><small>Registros das ações</small></button>
         <button type="button" class="app-nav-card c-lime" data-app-view="pubs"><span class="app-nav-icon">📚</span><b>Repositório</b><small>Arquivos, Office e produtos</small></button>
       </div>
-      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P22</span></div>
+      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P25</span></div>
     </aside>
   </div>
 
@@ -2419,6 +2650,22 @@
   </div>
 </div>
 
+<!-- P24 · COLABORAÇÃO EXPLÍCITA EM UM ARQUIVO -->
+<div class="overlay" id="fileCollaboratorsOverlay">
+  <div class="modal" style="max-width:650px">
+    <div class="modal-h">
+      <div><h2 id="fileCollaboratorsTitle">👥 Colaboradores do arquivo</h2><div class="hint" id="fileCollaboratorsSubtitle">Convide pessoas para escrever, editar e conversar sobre este arquivo.</div></div>
+      <div class="spacer"></div><button class="btn ghost" data-close="fileCollaboratorsOverlay">Fechar</button>
+    </div>
+    <div class="modal-b">
+      <div class="file-collab-note"><b>Convite explícito.</b> Quem você marcar entra na <b>Sala do arquivo</b>. Em Word, Excel e PowerPoint compatíveis, também poderá editar online e salvar novas versões. Quem não foi convidado não vê essa conversa.</div>
+      <div class="fg" style="margin-top:12px"><label>Buscar pessoa</label><input id="fileCollaboratorsSearch" placeholder="Digite um nome…"></div>
+      <div class="file-collab-list" id="fileCollaboratorsList"></div>
+    </div>
+    <div class="modal-f"><button class="btn" data-close="fileCollaboratorsOverlay">Cancelar</button><button class="btn primary" id="fileCollaboratorsSaveBtn">Salvar colaboradores</button></div>
+  </div>
+</div>
+
 <!-- P13 · DOSSIÊ / MÚLTIPLOS ARQUIVOS -->
 <div class="overlay" id="repoPackageUploadOverlay">
   <div class="modal" style="max-width:620px">
@@ -2775,7 +3022,7 @@ function renderMemberRepository(){
     const view=it.source==='package'?`<button class="btn ghost" type="button" onclick="openRepositoryPackage('${it.id}')">📦 Abrir dossiê</button>`:it.raw?.labRun?`<button class="btn primary" type="button" onclick="openLabRun('${it.raw.labRunId}')">📈 Resultados</button>`:it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'),{source:'publication',id:'${it.id}'})">Visualizar</button><button class="btn review-download" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Baixar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;
     const rev=it.reviewFlow?reviewBadgeHTML(it.raw):'';
     const online=it.source==='publicacao'?officeActionButtons(it.raw):'';
-    const chat=it.source==='publicacao'&&it.isFile?(it.reviewFlow?(canAccessReviewConversation(it.raw)?`<button class="btn review-chat-btn" type="button" onclick="openReviewConversation('${it.id}')">💬 Conversa</button>`:''):`<button class="btn repo-file-chat-btn" type="button" onclick="openRepoFileConversationPublication('${it.id}')">💬 Conversa</button>`):'';
+    const chat=it.source==='publicacao'&&it.isFile?repositoryCommunicationButtons(it.raw):'';
     const respond=it.reviewFlow&&canActOnReview(it.raw)?`<button class="btn review-action" type="button" onclick="openReviewResponse('${it.id}')">${reviewActionLabel(it.raw)}</button>`:'';
     const ver=!it.reviewFlow&&it.onlineEditVersion>1?`<span class="office-version">✏️ edição v${it.onlineEditVersion}</span>`:'';
     return `<div class="repo-item"><div class="repo-icon">${icon}</div><div class="repo-main"><div class="repo-title">${esc(it.title)}</div><div class="repo-meta">${esc(it.kind)}</div>${ver}${rev}${it.reviewNote?`<div class="review-note">💬 ${esc(it.reviewNote)}</div>`:''}${it.raw?scientificContextHTML(it.raw):''}</div><div class="repo-actions">${view}${it.raw?labRepoButton(it.raw):''}${online}${chat}${respond}</div></div>`
@@ -4767,7 +5014,7 @@ function renderPubs(){
     const canDel = isAdmin || (p.reviewFlow ? p.ownerUid===(window.auth.currentUser?.uid||'') : canEditMember(p.memberId));
     const dt = p.ts?.toMillis?new Date(p.ts.toMillis()):null;
     const dateLabel = dt ? dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}) : '';
-    return `<div class="pub-row"><div class="pub-cat" style="background:${cfg.color}"></div><div class="pub-body"><div class="pub-t">${esc(p.titulo)}</div><div class="pub-meta"><span class="pub-cat-tag" style="background:${cfg.color}">${esc(catLabel)}</span><span class="pub-author"><span class="d" style="background:${m?NIVEIS[m.nivel]?.color:'var(--ink-3)'}"></span>${esc(p.memberNome||(m?m.nome:'—'))}</span>${dateLabel?`<span class="pub-date">${dateLabel}</span>`:''}</div>${!p.reviewFlow&&Number(p.onlineEditVersion||1)>1?`<span class="office-version">✏️ edição v${Number(p.onlineEditVersion||1)}</span>`:''}${!p.reviewFlow?repositorySequenceHTML(p):''}${p.reviewFlow?reviewBadgeHTML(p):''}${p.reviewNote?`<div class="review-note">💬 ${esc(p.reviewNote)}</div>`:''}${scientificContextHTML(p)}${officeFileChip(p)}</div><div class="pub-act">${p.labRun?`<button type="button" class="btn primary" onclick="openLabRun('${p.labRunId}')">📈 Resultados</button>`:p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'),{source:'publication',id:'${p.id}'})" title="Visualizar" style="padding:6px 9px">👁️</button><button type="button" class="btn review-download" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Baixar" style="padding:6px 9px">⬇</button>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}${labRepoButton(p)}${officeActionButtons(p,'compact')}${p.tipo==='arquivo'?(p.reviewFlow?(canAccessReviewConversation(p)?`<button type="button" class="btn review-chat-btn" onclick="openReviewConversation('${p.id}')">💬 Conversa</button>`:''):`<button type="button" class="btn repo-file-chat-btn" onclick="openRepoFileConversationPublication('${p.id}')">💬 Conversa</button>`):''}${p.reviewFlow&&canActOnReview(p)?`<button type="button" class="btn review-action" onclick="openReviewResponse('${p.id}')">${reviewActionLabel(p)}</button>`:''}${canDel?`<button class="mini-x" onclick="deletePublicacao('${p.id}')" title="Excluir">×</button>`:''}</div></div>`;
+    return `<div class="pub-row"><div class="pub-cat" style="background:${cfg.color}"></div><div class="pub-body"><div class="pub-t">${esc(p.titulo)}</div><div class="pub-meta"><span class="pub-cat-tag" style="background:${cfg.color}">${esc(catLabel)}</span><span class="pub-author"><span class="d" style="background:${m?NIVEIS[m.nivel]?.color:'var(--ink-3)'}"></span>${esc(p.memberNome||(m?m.nome:'—'))}</span>${dateLabel?`<span class="pub-date">${dateLabel}</span>`:''}</div>${!p.reviewFlow&&Number(p.onlineEditVersion||1)>1?`<span class="office-version">✏️ edição v${Number(p.onlineEditVersion||1)}</span>`:''}${!p.reviewFlow?repositorySequenceHTML(p):''}${p.reviewFlow?reviewBadgeHTML(p):''}${p.reviewNote?`<div class="review-note">💬 ${esc(p.reviewNote)}</div>`:''}${scientificContextHTML(p)}${officeFileChip(p)}${publicationCollaboratorIds(p).length?`<span class="repo-collab-chip">👥 ${publicationCollaboratorIds(p).length} colaborador${publicationCollaboratorIds(p).length===1?'':'es'}</span>`:''}</div><div class="pub-act">${p.labRun?`<button type="button" class="btn primary" onclick="openLabRun('${p.labRunId}')">📈 Resultados</button>`:p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'),{source:'publication',id:'${p.id}'})" title="Visualizar" style="padding:6px 9px">👁️</button><button type="button" class="btn review-download" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Baixar" style="padding:6px 9px">⬇</button>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}${labRepoButton(p)}${officeActionButtons(p,'compact')}${p.tipo==='arquivo'?repositoryCommunicationButtons(p):''}${p.reviewFlow&&canActOnReview(p)?`<button type="button" class="btn review-action" onclick="openReviewResponse('${p.id}')">${reviewActionLabel(p)}</button>`:''}${canDel?`<button class="mini-x" onclick="deletePublicacao('${p.id}')" title="Excluir">×</button>`:''}</div></div>`;
   }).join('');
 }
 
@@ -4890,6 +5137,52 @@ function repositorySequenceHTML(p){
 }
 function reviewNextVersion(p){return Math.max(0,...reviewThreadItems(p.reviewThreadId||p.id).map(x=>Number(x.reviewVersion)||0))+1}
 
+/* ===== P24 · MENSAGEM DIRETA AO AUTOR + COLABORAÇÃO EXPLÍCITA ===== */
+let activeFileCollaboratorsPubId='';
+function publicationCollaboratorIds(p){return [...new Set((Array.isArray(p?.collaboratorMemberIds)?p.collaboratorMemberIds:[]).filter(Boolean))]}
+function isPublicationOwner(p){const uid=window.auth?.currentUser?.uid||'';return !!(p&&myId&&(p.memberId===myId||p.ownerUid===uid))}
+function isPublicationCollaborator(p){return !!(p&&myId&&publicationCollaboratorIds(p).includes(myId))}
+function canUsePublicationRoom(p){return !!(p&&p.tipo==='arquivo'&&!p.reviewFlow&&(isPublicationOwner(p)||isPublicationCollaborator(p)))}
+function canManagePublicationCollaborators(p){return !!(p&&p.tipo==='arquivo'&&!p.reviewFlow&&isPublicationOwner(p))}
+function publicationOwnerName(p){return p?.memberNome||memberById(p?.memberId)?.nome||'autor(a)'}
+function firstRepoName(name=''){return String(name||'').trim().split(/\s+/)[0]||'autor'}
+function repositoryCommunicationButtons(p){
+  if(!p||p.tipo!=='arquivo')return '';
+  const ownerId=p.memberId||'',ownerName=publicationOwnerName(p),direct=ownerId&&ownerId!==myId?`<button type="button" class="btn repo-direct-btn" onclick="messagePublicationOwner('${p.id}')" title="Conversa privada somente com ${esc(ownerName)}">💬 Falar com ${esc(firstRepoName(ownerName))}</button>`:'';
+  const correction=p.reviewFlow&&canAccessReviewConversation(p)?`<button type="button" class="btn review-chat-btn" onclick="openReviewConversation('${p.id}')">✍️ Conversa da correção</button>`:'';
+  if(p.reviewFlow)return direct+correction;
+  const room=canUsePublicationRoom(p)?`<button type="button" class="btn repo-room-btn" onclick="openRepoFileConversationPublication('${p.id}')">🗂 Sala do arquivo</button>`:'';
+  const manage=canManagePublicationCollaborators(p)?`<button type="button" class="btn repo-collab-btn" onclick="openFileCollaborators('${p.id}')">👥 Colaboradores</button>`:'';
+  return direct+room+manage;
+}
+async function messagePublicationOwner(pubId){
+  const p=state.publicacoes.find(x=>x.id===pubId);if(!p)return toast('Arquivo não encontrado.');
+  const targetId=p.memberId||'';if(!targetId)return toast('Este arquivo não possui uma pessoa responsável vinculada.');
+  if(targetId===myId)return toast('Este arquivo é seu. Use a Sala do arquivo para conversar com colaboradores.');
+  await startPrivateConversation(targetId);
+  setTimeout(()=>{const input=$('#privateInput');if(!input)return;const prefix=`📎 Sobre o arquivo “${p.titulo||p.fileName||'Arquivo'}”: `;if(!input.value)input.value=prefix;input.focus();input.style.height='auto';input.style.height=Math.min(130,input.scrollHeight)+'px';},180);
+}
+function renderFileCollaborators(){
+  const box=$('#fileCollaboratorsList');if(!box)return;const p=state.publicacoes.find(x=>x.id===activeFileCollaboratorsPubId);if(!p){box.innerHTML='<div class="repo-empty">Arquivo não encontrado.</div>';return}
+  const term=($('#fileCollaboratorsSearch')?.value||'').trim().toLowerCase(),selected=new Set(publicationCollaboratorIds(p));
+  const rows=state.members.filter(m=>m.status!=='inativo'&&m.id!==p.memberId&&(!term||(m.nome||'').toLowerCase().includes(term))).sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
+  box.innerHTML=rows.length?rows.map(m=>`<label class="file-collab-row"><input type="checkbox" value="${esc(m.id)}" ${selected.has(m.id)?'checked':''}><span class="main"><b>${esc(m.nome||'Carbonauta')}</b><small>${esc(NIVEIS[m.nivel]?.label||m.programa||'Integrante da Rede')} · editar + conversar</small></span></label>`).join(''):'<div class="repo-empty">Nenhuma pessoa encontrada.</div>';
+}
+function openFileCollaborators(pubId){
+  const p=state.publicacoes.find(x=>x.id===pubId);if(!p||!canManagePublicationCollaborators(p))return toast('Somente o proprietário do arquivo pode convidar colaboradores.');
+  activeFileCollaboratorsPubId=pubId;$('#fileCollaboratorsTitle').textContent='👥 Colaboradores · '+(p.titulo||p.fileName||'Arquivo');$('#fileCollaboratorsSubtitle').textContent='Escolha quem poderá editar e participar da conversa deste arquivo.';$('#fileCollaboratorsSearch').value='';renderFileCollaborators();openOverlay('fileCollaboratorsOverlay');setTimeout(()=>$('#fileCollaboratorsSearch')?.focus(),60);
+}
+async function saveFileCollaborators(){
+  const p=state.publicacoes.find(x=>x.id===activeFileCollaboratorsPubId);if(!p||!canManagePublicationCollaborators(p))return;
+  const btn=$('#fileCollaboratorsSaveBtn'),selected=[...document.querySelectorAll('#fileCollaboratorsList input[type="checkbox"]:checked')].map(x=>x.value),old=new Set(publicationCollaboratorIds(p)),newly=selected.filter(id=>!old.has(id)),removed=[...old].filter(id=>!selected.includes(id)),f=FB();
+  try{btn.disabled=true;await f.updateDoc(f.doc(window.db,'rede_publicacoes',p.id),{collaboratorMemberIds:selected,collaborationUpdatedAt:f.serverTimestamp()});
+    await Promise.allSettled(newly.map(id=>createRepoNotification(id,{kind:'repositorio_colaboracao',sourceType:'repositorio_colaboracao',sourceId:p.id,ownerId:p.memberId||'',title:'👥 Convite para colaborar em arquivo',message:`${publicationOwnerName(p)} convidou você para editar e conversar sobre “${p.titulo||p.fileName||'Arquivo'}”.`})));
+    p.collaboratorMemberIds=selected;closeOverlay('fileCollaboratorsOverlay');renderPubs();toast(`Colaboração atualizada · ${selected.length} pessoa${selected.length===1?'':'s'}.`);
+    if(removed.length)console.info('Colaboradores removidos:',removed);
+  }catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou a alteração. Publique as regras P24.':(e.message||'Não foi possível salvar os colaboradores.'))}finally{btn.disabled=false}
+}
+window.messagePublicationOwner=messagePublicationOwner;window.openFileCollaborators=openFileCollaborators;window.saveFileCollaborators=saveFileCollaborators;
+
 /* ===== P22 · CONVERSA ESPECÍFICA DE CADA ARQUIVO ===== */
 let repoFileConversationCtx=null,repoFileConversationMessages=[],repoFileConversationUnsub=null;
 function repoFileConversationCollection(ctx){
@@ -4917,20 +5210,21 @@ function startRepoFileConversation(ctx){
     $('#repoFileConversationAccess').textContent='As mensagens ficam dentro desta pasta e seguem exatamente as mesmas permissões do arquivo.';
     $('#repoFileConversationVisibility').textContent='🔐 Somente quem tem acesso à pasta';
   }else{
-    $('#repoFileConversationAccess').textContent='Este arquivo está no Repositório Geral. A conversa acompanha o arquivo e não se mistura com o chat do grupo.';
-    $('#repoFileConversationVisibility').textContent='🌐 Carbonautas autenticados';
+    const p=state.publicacoes.find(x=>x.id===ctx.pubId),names=[p?.memberId,...publicationCollaboratorIds(p)].filter(Boolean);$('#repoFileConversationAccess').textContent='Sala privada deste arquivo. Só o proprietário e as pessoas convidadas como colaboradoras podem entrar.';
+    $('#repoFileConversationVisibility').textContent='🔐 '+Math.max(1,new Set(names).size)+' participante'+(new Set(names).size===1?'':'s');
   }
   $('#repoFileConversationMessages').innerHTML='<div class="file-thread-empty">Carregando conversa…</div>';
   openOverlay('repoFileConversationOverlay');
   if(repoFileConversationUnsub){try{repoFileConversationUnsub()}catch(_e){}}
   const f=FB(),q=f.query(repoFileConversationCollection(ctx),f.orderBy('createdAt','asc'));
-  repoFileConversationUnsub=f.onSnapshot(q,snap=>{repoFileConversationMessages=snap.docs.map(d=>({...d.data(),id:d.id}));renderRepoFileConversationMessages()},e=>{console.error('Conversa do arquivo:',e);$('#repoFileConversationMessages').innerHTML='<div class="file-thread-empty">⚠️ O Firestore bloqueou esta conversa. Publique as regras P22.</div>'});
+  repoFileConversationUnsub=f.onSnapshot(q,snap=>{repoFileConversationMessages=snap.docs.map(d=>({...d.data(),id:d.id}));renderRepoFileConversationMessages()},e=>{console.error('Conversa do arquivo:',e);$('#repoFileConversationMessages').innerHTML='<div class="file-thread-empty">⚠️ O Firestore bloqueou esta conversa. Publique as regras P24.</div>'});
 }
 function openRepoFileConversationPublication(id){
   const p=state.publicacoes.find(x=>x.id===id);if(!p)return toast('Arquivo não encontrado.');
   if(p.reviewFlow)return openReviewConversation(id);
   if(p.tipo!=='arquivo')return toast('A conversa por arquivo é usada para documentos e anexos.');
-  startRepoFileConversation({source:'publication',pubId:p.id,title:p.titulo||p.fileName||'Arquivo',fileName:p.fileName||'',ownerMemberId:p.memberId||''});
+  if(!canUsePublicationRoom(p))return toast('A Sala do arquivo é privada. O proprietário precisa convidar você como colaborador.');
+  startRepoFileConversation({source:'publication',pubId:p.id,title:p.titulo||p.fileName||'Arquivo',fileName:p.fileName||'',ownerMemberId:p.memberId||'',collaboratorMemberIds:publicationCollaboratorIds(p)});
 }
 async function openRepoFileConversationPackage(packageId,fileId){
   const pkg=state.repositoryPackages.find(x=>x.id===packageId);if(!pkg)return toast('Pasta não disponível para sua conta.');
@@ -4943,7 +5237,7 @@ async function sendRepoFileConversationMessage(){
     btn.disabled=true;
     await f.addDoc(repoFileConversationCollection(ctx),{authorUid:uid,authorMemberId:actor?.id||myId||'',authorName:actor?.name||myName||'Carbonauta',text:text.slice(0,5000),createdAt:f.serverTimestamp()});
     input.value='';
-    const participantIds=[...new Set([ctx.ownerMemberId,...repoFileConversationMessages.map(m=>m.authorMemberId)].filter(Boolean))].filter(id=>id!==myId);
+    const participantIds=ctx.source==='publication'?[...new Set([ctx.ownerMemberId,...(ctx.collaboratorMemberIds||[])].filter(Boolean))].filter(id=>id!==myId):[...new Set([ctx.ownerMemberId,...repoFileConversationMessages.map(m=>m.authorMemberId)].filter(Boolean))].filter(id=>id!==myId);
     await Promise.allSettled(participantIds.map(id=>createRepoNotification(id,{kind:'repo_file_message',sourceType:ctx.source==='package'?'repositorio_privado':'repositorio_geral',sourceId:ctx.source==='package'?ctx.packageId:ctx.pubId,fileId:ctx.fileId||'',title:'💬 Mensagem sobre arquivo',message:`${actor?.name||myName||'Um Carbonauta'} comentou em “${ctx.title||'Arquivo'}”.`})));
   }catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou esta conversa. Publique as regras P22.':(e.message||'Não foi possível enviar a mensagem.'))}finally{btn.disabled=false}
 }
@@ -5008,14 +5302,14 @@ function canPotentialOfficeEdit(p){
   const ext=officeExt(p);if(ext&&!OO_EXTS.has(ext)&&!OO_LEGACY_CONVERTIBLE.has(ext))return false;
   const uid=window.auth.currentUser.uid;
   if(p.reviewFlow)return canActOnReview(p);
-  return !!(isAdmin||p.memberId===myId||p.ownerUid===uid);
+  return !!(isAdmin||p.memberId===myId||p.ownerUid===uid||isPublicationCollaborator(p));
 }
 function officeFileChip(p){const ext=officeExt(p);if(!ext&&canPotentialOfficeEdit(p))return `<span class="file-type-chip">OFFICE? · detectar ao abrir</span>`;if(OO_LEGACY_CONVERTIBLE.has(ext))return `<span class="file-type-chip">${ext.toUpperCase()} antigo · converter para editar</span>`;if(!OO_EXTS.has(ext))return '';const map={docx:'WORD',xlsx:'EXCEL',pptx:'POWERPOINT'};return `<span class="file-type-chip">${map[ext]||ext.toUpperCase()} · editável</span>`}
 function canPersonalEdit(p){
   if(!p||p.reviewFlow||!window.auth?.currentUser)return false;
   const ext=officeExt(p);if(ext&&!OO_EXTS.has(ext)&&!OO_LEGACY_CONVERTIBLE.has(ext))return false;
   const uid=window.auth.currentUser.uid;
-  return !!(p.tipo==='arquivo'&&(isAdmin||p.memberId===myId||p.ownerUid===uid));
+  return !!(p.tipo==='arquivo'&&(isAdmin||p.memberId===myId||p.ownerUid===uid||isPublicationCollaborator(p)));
 }
 function onlineCorrectionLabel(p){
   const ext=officeExt(p);
@@ -5066,7 +5360,7 @@ async function openOnlineEdit(id){
   const p=state.publicacoes.find(x=>x.id===id);
   if(!p)return toast('Arquivo não encontrado.');
   if(p.reviewFlow)return openOnlineCorrection(id);
-  if(!canPersonalEdit(p))return toast('Você pode editar seus próprios arquivos; o coordenador pode editar qualquer arquivo.');
+  if(!canPersonalEdit(p))return toast('Você pode editar arquivos próprios ou aqueles em que foi convidado como colaborador.');
   const base=onlyOfficeBase();if(!base){ooPendingPubId=id;openOnlyOfficeSetup();return}
   try{await convertLegacyOfficeFile(p,base)}catch(e){console.error(e);toast(e.message||'Não foi possível converter o arquivo antigo.');return}
   await launchOnlyOffice(p,base,{purpose:'personal',mode:'edit'});
@@ -5758,7 +6052,7 @@ async function openNotification(id){
   const n=state.notifications.find(x=>x.id===id);if(!n)return;
   try{await FB().updateDoc(FB().doc(window.db,'rede_notifications',id),{read:true,readAt:FB().serverTimestamp()})}catch(e){console.warn(e)}
   closeOverlay('notifyOverlay');
-  if(n.sourceType==='acompanhamento'){switchView('track');setTimeout(()=>{if(n.ownerId&&$('#trackOwner')){$('#trackOwner').value=n.ownerId;renderTrack()}},40)} else if(n.sourceType==='review_message'){switchView('pubs');setTimeout(()=>openReviewConversation(n.threadId||n.sourceId),100)} else if(n.sourceType==='repositorio_correcao'){switchView('pubs');setTimeout(()=>{if(n.ownerId&&$('#pubPessoa')){$('#pubPessoa').value=n.ownerId;renderPubs()}},50)} else if(n.sourceType==='repositorio_pacote'){switchView('pubs');setTimeout(()=>openRepositoryPackage(n.sourceId),100)} else if(n.sourceType==='private_chat'){switchView('conversas');setTimeout(()=>openPrivateThread(n.threadId||n.sourceId),80)} else switchView('mural');
+  if(n.sourceType==='acompanhamento'){switchView('track');setTimeout(()=>{if(n.ownerId&&$('#trackOwner')){$('#trackOwner').value=n.ownerId;renderTrack()}},40)} else if(n.sourceType==='review_message'){switchView('pubs');setTimeout(()=>openReviewConversation(n.threadId||n.sourceId),100)} else if(n.sourceType==='repositorio_correcao'){switchView('pubs');setTimeout(()=>{if(n.ownerId&&$('#pubPessoa')){$('#pubPessoa').value=n.ownerId;renderPubs()}},50)} else if(n.sourceType==='repositorio_pacote'){switchView('pubs');setTimeout(()=>openRepositoryPackage(n.sourceId),100)} else if(n.sourceType==='private_chat'){switchView('conversas');setTimeout(()=>openPrivateThread(n.threadId||n.sourceId),80)} else if(n.sourceType==='repositorio_colaboracao'){switchView('pubs');setTimeout(()=>{if(n.sourceId){const p=state.publicacoes.find(x=>x.id===n.sourceId);if(p&&p.memberId&&$('#pubPessoa')){$('#pubPessoa').value=p.memberId;renderPubs()}}},80)} else switchView('mural');
 }
 async function markAllNotificationsRead(){
   const unread=state.notifications.filter(n=>!n.read);if(!unread.length){toast('Não há notificações novas.');return}
@@ -5776,7 +6070,7 @@ function updateNotificationPermissionHint(){
 function showDeviceNotification(n){
   if(!('Notification' in window)||Notification.permission!=='granted')return;
   if(document.visibilityState==='visible'&&((currentView==='mural'&&n.sourceType!=='private_chat')||(currentView==='conversas'&&n.sourceType==='private_chat')))return;
-  try{const note=new Notification(n.title||'Carbonautas',{body:n.message||'Nova notificação',icon:'./icons/icon-192.png',badge:'./icons/icon-192.png',tag:'carbonautas-'+(n.sourceId||n.id)});note.onclick=()=>{window.focus();if(n.sourceType==='review_message'){switchView('pubs');setTimeout(()=>openReviewConversation(n.threadId||n.sourceId),100)}else if(n.sourceType==='repositorio_correcao')switchView('pubs');else if(n.sourceType==='repositorio_pacote'){switchView('pubs');setTimeout(()=>openRepositoryPackage(n.sourceId),100)}else if(n.sourceType==='acompanhamento')switchView('track');else if(n.sourceType==='private_chat'){switchView('conversas');setTimeout(()=>openPrivateThread(n.threadId||n.sourceId),80)}else switchView('mural');note.close()}}catch(e){console.warn('Notificação nativa falhou',e)}
+  try{const note=new Notification(n.title||'Carbonautas',{body:n.message||'Nova notificação',icon:'./icons/icon-192.png',badge:'./icons/icon-192.png',tag:'carbonautas-'+(n.sourceId||n.id)});note.onclick=()=>{window.focus();if(n.sourceType==='review_message'){switchView('pubs');setTimeout(()=>openReviewConversation(n.threadId||n.sourceId),100)}else if(n.sourceType==='repositorio_correcao')switchView('pubs');else if(n.sourceType==='repositorio_pacote'){switchView('pubs');setTimeout(()=>openRepositoryPackage(n.sourceId),100)}else if(n.sourceType==='acompanhamento')switchView('track');else if(n.sourceType==='private_chat'){switchView('conversas');setTimeout(()=>openPrivateThread(n.threadId||n.sourceId),80)}else if(n.sourceType==='repositorio_colaboracao')switchView('pubs');else switchView('mural');note.close()}}catch(e){console.warn('Notificação nativa falhou',e)}
 }
 async function createMuralNotifications(dest,meta={}){
   const me=currentActor();if(!me?.id)return;
@@ -6290,6 +6584,8 @@ if($('#pubFinalidade'))$('#pubFinalidade').onchange=syncPubFinalidade;
 $$('[data-close="pubOverlay"]').forEach(b=>b.addEventListener('click',()=>{pubReviewContext=null;$$('input[name="pubTipo"]').forEach(r=>r.disabled=false)}));
 $('#repoAddBtn').onclick=async()=>{const id=repoMemberId;if(!(isAdmin||isMe(id))){toast('Sem permissão para adicionar documentos para esta pessoa.');return}closeOverlay('repoOverlay');await openPubModal(id)};
 
+if($('#fileCollaboratorsSearch'))$('#fileCollaboratorsSearch').oninput=renderFileCollaborators;
+if($('#fileCollaboratorsSaveBtn'))$('#fileCollaboratorsSaveBtn').onclick=saveFileCollaborators;
 if($('#privateNewBtn'))$('#privateNewBtn').onclick=openPrivateNew;
 if($('#privateThreadSearch'))$('#privateThreadSearch').oninput=renderPrivateThreads;
 if($('#privatePersonSearch'))$('#privatePersonSearch').oninput=renderPrivatePeople;
@@ -6342,11 +6638,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P23-LOGIN-ROBUSTO-20260910';
+window.CARBONAUTAS_BUILD='P25-FOTOS-LEGIVEIS-20260910';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P23-20260910',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P25-20260910',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -6358,7 +6654,7 @@ waitFirebase().then(startAuth);
 <script id="carbonautas-dynamic-favicon">
 (()=>{
   const link=document.getElementById('dynamicFavicon'); if(!link)return;
-  const img=new Image(); img.src='./icon-192.png?v=P23';
+  const img=new Image(); img.src='./icon-192.png?v=P25';
   img.onload=()=>{
     const c=document.createElement('canvas'),ctx=c.getContext('2d'); c.width=c.height=64; let phase=0,last=0;
     const draw=(ts)=>{

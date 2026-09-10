@@ -269,23 +269,99 @@ service cloud.firestore {
           || isCoordinator()
         );
 
-      allow update, delete: if signedIn()
+      // P24: o dono lógico é a pessoa a quem o arquivo está vinculado no Repositório.
+      // Isso importa quando o coordenador fez o upload em nome de um aluno.
+      function publicationLinkedOwner() {
+        return hasProfile()
+          && resource.data.tipo == 'arquivo'
+          && resource.data.get('reviewFlow', false) != true
+          && resource.data.memberId == myMemberId();
+      }
+
+      function publicationCollaborator() {
+        return hasProfile()
+          && resource.data.tipo == 'arquivo'
+          && resource.data.get('reviewFlow', false) != true
+          && resource.data.get('collaboratorMemberIds', []) is list
+          && myMemberId() in resource.data.get('collaboratorMemberIds', []);
+      }
+
+      function validLinkedOwnerUpdate() {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'collaboratorMemberIds',
+          'collaborationUpdatedAt',
+          'url',
+          'fileName',
+          'onlineEditVersion',
+          'onlineEditHistory',
+          'editedOnline',
+          'editedAt',
+          'editedByUid',
+          'editedByMemberId',
+          'editedByName',
+          'repositoryTurnMemberId',
+          'repositoryTurnFromId',
+          'repositoryTurnFromName',
+          'repositoryTurnAt'
+        ])
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.memberId == resource.data.memberId;
+      }
+
+      function validCollaboratorOfficeUpdate() {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'url',
+          'fileName',
+          'onlineEditVersion',
+          'onlineEditHistory',
+          'editedOnline',
+          'editedAt',
+          'editedByUid',
+          'editedByMemberId',
+          'editedByName',
+          'repositoryTurnMemberId',
+          'repositoryTurnFromId',
+          'repositoryTurnFromName',
+          'repositoryTurnAt'
+        ])
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.memberId == resource.data.memberId
+        && request.resource.data.get('collaboratorMemberIds', []) == resource.data.get('collaboratorMemberIds', []);
+      }
+
+      allow update: if signedIn()
+        && (
+          resource.data.ownerUid == request.auth.uid
+          || isCoordinator()
+          || (publicationLinkedOwner() && validLinkedOwnerUpdate())
+          || (publicationCollaborator() && validCollaboratorOfficeUpdate())
+        );
+
+      allow delete: if signedIn()
         && (
           resource.data.ownerUid == request.auth.uid
           || isCoordinator()
         );
 
-      // P22 — conversa vinculada a um arquivo do Repositório Geral.
-      // Como o próprio Repositório Geral é legível por usuários autenticados,
-      // a conversa do arquivo segue a mesma visibilidade.
+      // P24 — Sala do arquivo: conversa privada do proprietário + colaboradores convidados.
+      // O Repositório Geral continua visível para a Rede, mas a conversa NÃO é pública.
       match /file_messages/{messageId} {
 
         function generalFileConversationAllowed() {
           let d = get(
             /databases/$(database)/documents/rede_publicacoes/$(documentId)
           ).data;
-          return d.tipo == 'arquivo'
-            && (!d.keys().hasAny(['reviewFlow']) || d.reviewFlow != true);
+          return hasProfile()
+            && d.tipo == 'arquivo'
+            && d.get('reviewFlow', false) != true
+            && (
+              d.memberId == myMemberId()
+              || d.get('ownerUid', '') == request.auth.uid
+              || (
+                d.get('collaboratorMemberIds', []) is list
+                && myMemberId() in d.get('collaboratorMemberIds', [])
+              )
+            );
         }
 
         allow read: if hasProfile()

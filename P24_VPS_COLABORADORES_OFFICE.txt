@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd /opt/carbonautas-bridge
+TS=$(date +%Y%m%d-%H%M%S)
+BACKUP="server.js.bak-p24-colab-${TS}"
+cp -f server.js "$BACKUP"
+
+echo '=== P24 · COLABORADORES OFFICE ==='
+echo "Backup: /opt/carbonautas-bridge/$BACKUP"
+
+python3 - <<'PY'
+from pathlib import Path
+import re
+
+p=Path('/opt/carbonautas-bridge/server.js')
+s=p.read_text(encoding='utf-8')
+marker='/* ===== P24 COLLABORATOR OFFICE AUTH ===== */'
+
+if marker in s:
+    print('P24 já está instalado. Nenhuma duplicação será feita.')
+    raise SystemExit(0)
+
+orig=s
+
+# 1) /api/file-probe/:pubId — autoriza colaborador explícito a passar na sondagem do Office.
+pat1=r"const coord=isCoordinator\(req\.user\),owner=coord\|\|p\.ownerUid===req\.user\.uid\|\|p\.memberId===req\.user\.memberId;"
+rep1=("const coord=isCoordinator(req.user);\n"
+      "    const collaborator=Array.isArray(p.collaboratorMemberIds)&&p.collaboratorMemberIds.includes(req.user.memberId);\n"
+      "    const owner=coord||p.ownerUid===req.user.uid||p.memberId===req.user.memberId||collaborator;")
+s,n1=re.subn(pat1,rep1,s,count=1)
+
+# 2) /api/editor-config/:pubId — autoriza colaborador explícito a abrir o editor.
+pat2=r"const ownerAccess=coord \|\| p\.ownerUid===req\.user\.uid \|\| p\.memberId===memberId;"
+rep2=("const collaboratorAccess=Array.isArray(p.collaboratorMemberIds)&&p.collaboratorMemberIds.includes(memberId);\n"
+      "    const ownerAccess=coord || p.ownerUid===req.user.uid || p.memberId===memberId || collaboratorAccess;")
+s,n2=re.subn(pat2,rep2,s,count=1)
+
+if n1 != 1 or n2 != 1:
+    print(f'ERRO: padrões esperados não encontrados com segurança (file-probe={n1}, editor-config={n2}).')
+    print('Nenhuma alteração foi gravada. O servidor atual permanece intacto.')
+    raise SystemExit(2)
+
+# Marca a instalação sem alterar lógica de salvamento/callback.
+pos=s.find("app.post('/api/file-probe/:pubId'")
+if pos < 0:
+    print('ERRO: rota file-probe não encontrada. Nada foi gravado.')
+    raise SystemExit(3)
+s=s[:pos]+marker+'\n'+s[pos:]
+
+p.write_text(s,encoding='utf-8')
+print('Autorização de colaboradores adicionada em 2 pontos. Salvamento/ONLYOFFICE não foi modificado.')
+PY
+
+if ! node --check server.js; then
+  echo 'ERRO de sintaxe. Restaurando backup...'
+  cp -f "$BACKUP" server.js
+  exit 1
+fi
+
+echo 'Sintaxe Node: OK'
+systemctl restart carbonautas-bridge.service
+sleep 3
+
+if ! curl -fsS http://127.0.0.1:3000/health >/tmp/p24_health.json; then
+  echo 'Healthcheck falhou. Restaurando backup e reiniciando serviço...'
+  cp -f "$BACKUP" server.js
+  systemctl restart carbonautas-bridge.service
+  exit 1
+fi
+
+echo '=== HEALTH ==='
+cat /tmp/p24_health.json
+echo
+
+echo '=== CONFIRMAÇÃO ==='
+grep -n "P24 COLLABORATOR OFFICE AUTH\|collaboratorAccess\|const collaborator=" server.js | head -10 || true
+
+echo
+echo 'P24 COLABORADORES OFFICE CONCLUIDO'
