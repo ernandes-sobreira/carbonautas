@@ -275,6 +275,47 @@ service cloud.firestore {
           || isCoordinator()
         );
 
+      // P22 — conversa vinculada a um arquivo do Repositório Geral.
+      // Como o próprio Repositório Geral é legível por usuários autenticados,
+      // a conversa do arquivo segue a mesma visibilidade.
+      match /file_messages/{messageId} {
+
+        function generalFileConversationAllowed() {
+          let d = get(
+            /databases/$(database)/documents/rede_publicacoes/$(documentId)
+          ).data;
+          return d.tipo == 'arquivo'
+            && (!d.keys().hasAny(['reviewFlow']) || d.reviewFlow != true);
+        }
+
+        allow read: if hasProfile()
+          && generalFileConversationAllowed();
+
+        allow create: if hasProfile()
+          && generalFileConversationAllowed()
+          && request.resource.data.keys().hasOnly([
+            'authorUid',
+            'authorMemberId',
+            'authorName',
+            'text',
+            'createdAt'
+          ])
+          && request.resource.data.authorUid == request.auth.uid
+          && request.resource.data.authorMemberId == myMemberId()
+          && request.resource.data.authorName is string
+          && request.resource.data.authorName.size() <= 200
+          && request.resource.data.text is string
+          && request.resource.data.text.size() >= 1
+          && request.resource.data.text.size() <= 5000
+          && request.resource.data.createdAt == request.time;
+
+        allow update: if false;
+
+        allow delete: if hasProfile()
+          && generalFileConversationAllowed()
+          && resource.data.authorUid == request.auth.uid;
+      }
+
       // P20 — conversa privada vinculada a um fluxo de correção.
       // Nem o coordenador recebe acesso automático: somente as duas pessoas
       // declaradas na versão raiz da correção podem ler/escrever.
@@ -389,7 +430,7 @@ service cloud.firestore {
 
       function packageManager() {
         return hasProfile() && (
-          resource.data.createdByUid == request.auth.uid
+          resource.data.get('createdByUid', '') == request.auth.uid
           || resource.data.ownerMemberId == myMemberId()
         );
       }
@@ -408,9 +449,10 @@ service cloud.firestore {
         && request.resource.data.ownerMemberId in request.resource.data.allowedMemberIds
         && request.resource.data.accessMode in ['private', 'selected', 'group'];
 
+      // P22: ownerMemberId continua imutável, mas não exigimos campos de criador
+      // em pacotes antigos. Isso permite que pastas criadas antes da P19/P20
+      // salvem acesso e metadados sem quebrar a ACL.
       allow update: if packageManager()
-        && request.resource.data.createdByUid == resource.data.createdByUid
-        && request.resource.data.createdByMemberId == resource.data.createdByMemberId
         && request.resource.data.ownerMemberId == resource.data.ownerMemberId
         && request.resource.data.allowedMemberIds is list
         && request.resource.data.allowedMemberIds.size() >= 1
@@ -431,7 +473,7 @@ service cloud.firestore {
 
         function parentManager() {
           return hasProfile() && (
-            parentPackage().data.createdByUid == request.auth.uid
+            parentPackage().data.get('createdByUid', '') == request.auth.uid
             || parentPackage().data.ownerMemberId == myMemberId()
           );
         }
@@ -444,6 +486,41 @@ service cloud.firestore {
           && request.resource.data.createdByUid == request.auth.uid;
 
         allow update, delete: if parentManager();
+
+        // P22 — conversa de um arquivo do Meu Repositório.
+        // Herda a ACL da pasta: só quem pode abrir a pasta pode ler/conversar.
+        match /messages/{messageId} {
+
+          allow read: if hasProfile()
+            && parentPackage().data.allowedMemberIds is list
+            && myMemberId() in parentPackage().data.allowedMemberIds;
+
+          allow create: if hasProfile()
+            && parentPackage().data.allowedMemberIds is list
+            && myMemberId() in parentPackage().data.allowedMemberIds
+            && request.resource.data.keys().hasOnly([
+              'authorUid',
+              'authorMemberId',
+              'authorName',
+              'text',
+              'createdAt'
+            ])
+            && request.resource.data.authorUid == request.auth.uid
+            && request.resource.data.authorMemberId == myMemberId()
+            && request.resource.data.authorName is string
+            && request.resource.data.authorName.size() <= 200
+            && request.resource.data.text is string
+            && request.resource.data.text.size() >= 1
+            && request.resource.data.text.size() <= 5000
+            && request.resource.data.createdAt == request.time;
+
+          allow update: if false;
+
+          allow delete: if hasProfile()
+            && parentPackage().data.allowedMemberIds is list
+            && myMemberId() in parentPackage().data.allowedMemberIds
+            && resource.data.authorUid == request.auth.uid;
+        }
       }
     }
 

@@ -1,0 +1,27 @@
+CARBONAUTAS P22 — CONVERSA POR ARQUIVO + MEU REPOSITÓRIO EDITÁVEL
+
+O QUE MUDA
+1. Todo ARQUIVO do Repositório Geral ganha botão “💬 Conversa”.
+2. Arquivos enviados para correção mantêm a conversa privada autor/revisor e histórico de versões.
+3. Cada arquivo dentro do Meu Repositório também ganha sua própria conversa.
+4. A conversa de arquivo privado herda a permissão da pasta.
+5. DOCX/XLSX/PPTX do Meu Repositório ganham “✏️ Editar” para o proprietário/gestor.
+6. “Salvar e sair” passa a atualizar o MESMO arquivo do Meu Repositório, mantendo histórico de versão.
+
+GITHUB
+- index.html
+- sw.js
+- manifest.webmanifest
+
+FIREBASE
+- publique firestore.rules para habilitar as novas conversas por arquivo.
+
+VPS
+- Para apenas conversar, NÃO precisa mexer no VPS.
+- Para editar e SALVAR Word/Excel/PowerPoint diretamente no Meu Repositório, execute UMA VEZ P22_VPS_MEU_REPOSITORIO_OFFICE.txt.
+- O script cria backup do server.js e só adiciona uma rota nova; não substitui o fluxo atual de correção.
+
+TESTE
+A) Repositório Geral > qualquer arquivo > Conversa > enviar mensagem.
+B) Meu Repositório > abrir pasta > arquivo > Conversa.
+C) Meu Repositório > DOCX/XLSX/PPTX próprio > Editar > alterar > Salvar e sair > reabrir e conferir.

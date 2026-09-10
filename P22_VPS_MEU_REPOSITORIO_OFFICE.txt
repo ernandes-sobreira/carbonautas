@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd /opt/carbonautas-bridge
+TS=$(date +%Y%m%d-%H%M%S)
+cp -f server.js "server.js.bak-p22-${TS}"
+
+echo "Aplicando P22 - editor ONLYOFFICE também para arquivos do Meu Repositório..."
+
+python3 - <<'PY2'
+from pathlib import Path
+p=Path('/opt/carbonautas-bridge/server.js')
+s=p.read_text(encoding='utf-8')
+marker='/* ===== P22 PERSONAL REPOSITORY OFFICE ===== */'
+if marker in s:
+    print('P22 já estava instalado; nenhuma duplicação foi feita.')
+else:
+    anchor="app.post('/callback/:key'"
+    i=s.find(anchor)
+    if i < 0:
+        raise SystemExit('ERRO: não encontrei o callback do ONLYOFFICE. O backup foi preservado e nada foi alterado.')
+    block=r'''/* ===== P22 PERSONAL REPOSITORY OFFICE ===== */
+app.post('/api/editor-config-package/:packageId/:fileId',requireUser,async(req,res)=>{
+  try{
+    const packageId=req.params.packageId,fileId=req.params.fileId;
+    const pkgSnap=await db.collection('rede_repository_packages').doc(packageId).get();
+    if(!pkgSnap.exists)return res.status(404).json({error:'Pasta do Meu Repositório não encontrada.'});
+    const pkg=pkgSnap.data()||{},memberId=req.user.memberId;
+    const allowed=Array.isArray(pkg.allowedMemberIds)&&pkg.allowedMemberIds.includes(memberId);
+    const manager=pkg.createdByUid===req.user.uid||pkg.ownerMemberId===memberId;
+    if(!allowed)return res.status(403).json({error:'Sua conta não tem acesso a esta pasta.'});
+    if(!manager)return res.status(403).json({error:'Nesta versão, somente o proprietário/gestor pode editar este arquivo.'});
+
+    const fileSnap=await db.collection('rede_repository_packages').doc(packageId).collection('files').doc(fileId).get();
+    if(!fileSnap.exists)return res.status(404).json({error:'Arquivo não encontrado dentro da pasta.'});
+    const x=fileSnap.data()||{};
+    if(!/^https?:\/\//i.test(x.url||''))return res.status(400).json({error:'O arquivo não possui URL válida.'});
+
+    const info=await resolveOfficeFile({...x,titulo:x.title||x.fileName||'Arquivo',url:x.url||''});
+    const ext=String(info.ext||'').toLowerCase(),fileName=info.fileName||x.fileName||x.title||('arquivo.'+ext);
+    if(!SUPPORTED.has(ext))return res.status(400).json({error:'No Meu Repositório, a edição online direta aceita DOCX, XLSX e PPTX.'});
+
+    const key=crypto.createHash('sha256').update('package:'+packageId+':'+fileId+':'+req.user.uid+':'+Date.now()+':'+crypto.randomBytes(8).toString('hex')).digest('hex').slice(0,40);
+    sessions.set(key,{key,uid:req.user.uid,memberId,packageId,fileId,ext,fileName,ready:false,error:'',filePath:'',createdAt:Date.now()});
+
+    const displayName=req.user.nome||req.user.name||req.user.email||'Carbonauta';
+    const customization={autosave:true,forcesave:true,uiTheme:'theme-system'};
+    const config={
+      documentType:DOC_TYPES[ext],
+      type:'desktop',
+      document:{fileType:ext,key,title:fileName,url:x.url,permissions:{edit:true,review:ext==='docx',comment:true,download:true,print:true,copy:true}},
+      editorConfig:{mode:'edit',lang:'pt',callbackUrl:PUBLIC_BASE+'/carbonautas-api/callback/'+key,user:{id:req.user.uid,name:displayName},customization}
+    };
+    config.token=jwt.sign(config,OO_SECRET,{algorithm:'HS256'});
+    res.json({sessionKey:key,config,ext,fileName,source:'package',packageId,fileId});
+  }catch(e){
+    console.error('PACKAGE EDITOR CONFIG:',e);
+    res.status(500).json({error:'Falha ao preparar arquivo do Meu Repositório: '+e.message});
+  }
+});
+/* ===== /P22 PERSONAL REPOSITORY OFFICE ===== */
+
+'''
+    s=s[:i]+block+s[i:]
+    p.write_text(s,encoding='utf-8')
+    print('Endpoint P22 adicionado sem substituir os endpoints existentes.')
+PY2
+
+node --check server.js
+systemctl restart carbonautas-bridge.service
+sleep 2
+
+echo
+echo '=== P22 STATUS ==='
+systemctl --no-pager --full status carbonautas-bridge.service | sed -n '1,18p'
+echo
+echo '=== P22 HEALTH ==='
+curl -fsS http://127.0.0.1:3000/health || true
+echo
+echo
+echo '=== P22 ROTA INSTALADA ==='
+grep -n "editor-config-package" server.js || true
+echo
+echo 'P22 CONCLUIDO'
