@@ -1286,7 +1286,7 @@
 
 <style id="p25-photo-social-contrast">
 /* ================================================================
-   P25 · FOTO SOCIAL ULTRALEGÍVEL
+   P26 · FOTO SOCIAL ULTRALEGÍVEL + REPOSITÓRIO FUNCIONAL
    Corrige contraste no lightbox e mantém compatibilidade com o
    renderizador social antigo, caso exista dado/cache legado.
    ================================================================ */
@@ -1502,6 +1502,7 @@
 }
 </style>
 
+<!-- CARBONAUTAS P26 · Meu Repositório: criar pasta restaurado -->
 </head>
 <body data-view="painel">
 
@@ -1652,7 +1653,7 @@
         <button type="button" class="app-nav-card c-pink" data-app-view="fotos"><span class="app-nav-icon">📸</span><b>Fotos</b><small>Registros das ações</small></button>
         <button type="button" class="app-nav-card c-lime" data-app-view="pubs"><span class="app-nav-icon">📚</span><b>Repositório</b><small>Arquivos, Office e produtos</small></button>
       </div>
-      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P25</span></div>
+      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P26</span></div>
     </aside>
   </div>
 
@@ -2700,11 +2701,11 @@
         </div>
       </div>
       <div class="fg" id="repoPackagePeopleRow" style="display:none"><label>Escolha as pessoas autorizadas</label><input id="repoPackagePeopleSearch" placeholder="Buscar pessoa..." style="margin-bottom:7px"><div id="repoPackagePeople" class="repo-share-people"></div></div>
-      <div class="fg"><label>Arquivos</label>
+      <div class="fg"><label id="repoPackageFilesLabel">Arquivos</label>
         <div class="repo-upload-pick">
           <button class="btn" type="button" id="repoPackageFilePick" style="width:100%;justify-content:center">＋ Escolher vários arquivos</button>
           <input type="file" id="repoPackageFiles" multiple style="display:none">
-          <div class="hint" style="margin-top:7px">Até 20 arquivos por conjunto, 15 MB por arquivo e 120 MB no total.</div>
+          <div class="hint" id="repoPackageFilesHint" style="margin-top:7px">Até 20 arquivos por conjunto, 15 MB por arquivo e 120 MB no total.</div>
           <div id="repoPackageSelectedFiles" class="repo-upload-list"></div>
         </div>
       </div>
@@ -3121,11 +3122,26 @@ async function bootstrap(){
 
 
 async function ensurePersonalRepositoryRoot(){
-  if(!window.auth?.currentUser||!myId)return;
-  const f=FB(),ref=f.doc(window.db,'rede_personal_repositories',myId),snap=await f.getDoc(ref);
-  if(snap.exists())return;
+  if(!window.auth?.currentUser||!myId)return null;
+  const f=FB(),ref=f.doc(window.db,'rede_personal_repositories',myId);
   const m=memberById(myId),uid=window.auth.currentUser.uid;
-  await f.setDoc(ref,{ownerUid:uid,ownerMemberId:myId,ownerName:m?.nome||myName||'',allowedMemberIds:[myId],collaboratorMemberIds:[],createdAt:f.serverTimestamp(),updatedAt:f.serverTimestamp()});
+  // Em regras privadas, um GET de um documento que ainda não existe pode ser negado.
+  // Por isso tentamos ler; se não existir (ou a leitura do inexistente for negada), tentamos criar.
+  try{
+    const snap=await f.getDoc(ref);
+    if(snap.exists())return {...snap.data(),id:snap.id};
+  }catch(e){
+    if(e?.code!=='permission-denied')throw e;
+  }
+  const now=f.serverTimestamp();
+  try{
+    await f.setDoc(ref,{ownerUid:uid,ownerMemberId:myId,ownerName:m?.nome||myName||'',allowedMemberIds:[myId],collaboratorMemberIds:[],createdAt:now,updatedAt:now});
+    return {ownerUid:uid,ownerMemberId:myId,ownerName:m?.nome||myName||'',allowedMemberIds:[myId],collaboratorMemberIds:[]};
+  }catch(e){
+    // Se outro snapshot/aba criou a raiz entre as duas operações, confirme e siga.
+    try{const snap=await f.getDoc(ref);if(snap.exists())return {...snap.data(),id:snap.id};}catch(_e){}
+    throw e;
+  }
 }
 
 function clearSubscriptions(){subscriptions.forEach(fn=>{try{fn()}catch(e){}});subscriptions=[];if(privateMessageUnsub){try{privateMessageUnsub()}catch(e){}privateMessageUnsub=null;}privateMessagesState=[];privateActiveThreadId=null;}
@@ -5053,10 +5069,141 @@ async function openRepositoryPackage(id){
 
 function renderRepoSelectedFiles(){const wrap=$('#repoPackageSelectedFiles');if(!wrap)return;wrap.innerHTML=repoPackageSelectedFiles.length?repoPackageSelectedFiles.map((f,i)=>`<div class="repo-upload-file"><span>${i+1}. ${esc(f.name)}</span><b>${esc(humanBytes(f.size))}</b></div>`).join(''):''}
 function handleRepoPackageFiles(files){const list=[...(files||[])];if(!list.length)return;if(list.length>20){toast('Escolha no máximo 20 arquivos por pasta.');return}const tooBig=list.find(f=>f.size>15*1024*1024);if(tooBig){toast(`“${tooBig.name}” passa de 15 MB.`);return}const total=list.reduce((s,f)=>s+f.size,0);if(total>120*1024*1024){toast('Os arquivos ultrapassam 120 MB. Divida em duas pastas.');return}repoPackageSelectedFiles=list;renderRepoSelectedFiles()}
-function openRepoPackageUpload(opts={}){if(!window.auth?.currentUser||!myId)return toast('Entre com seu perfil para enviar arquivos.');repoPackageUploadContext=opts.personal?'personal':'general';repoPackageSelectedFiles=[];renderRepoSelectedFiles();const sel=$('#repoPackageOwner'),ordered=[...state.members].filter(m=>m.status!=='inativo').sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));sel.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');sel.value=myId;$('#repoPackageOwnerRow').style.display=repoPackageUploadContext==='personal'?'none':(isAdmin?'block':'none');if(!isAdmin||repoPackageUploadContext==='personal')sel.value=myId;$('#repoPackageTitle').value='';$('#repoPackagePurpose').value=repoPackageUploadContext==='personal'?'artigos':'bolsa';$('#repoPackagePurposeOther').value='';$('#repoPackagePurposeOtherRow').style.display='none';document.querySelector('input[name="repoPackageAccess"][value="private"]').checked=true;$('#repoPackagePeopleSearch').value='';const h=$('#repoPackageUploadOverlay .modal-h h2'),save=$('#repoPackageSaveBtn'),notice=$('#repoPackageUploadOverlay .notice');if(h)h.textContent=repoPackageUploadContext==='personal'?'📁 Nova pasta no Meu Repositório':'📦 Enviar arquivos com acesso controlado';if(save)save.textContent=repoPackageUploadContext==='personal'?'Criar pasta':'Enviar conjunto';if(notice)notice.innerHTML=repoPackageUploadContext==='personal'?'<strong>Seu espaço começa privado.</strong> Dê um nome à pasta, escolha o tipo de material e envie um ou vários arquivos. Quem tiver acesso ao seu repositório inteiro verá esta pasta automaticamente.':'<strong>Um propósito, vários arquivos.</strong> Organize documentos e escolha exatamente quem poderá abrir.';updateRepoPackageAccessUI();openOverlay('repoPackageUploadOverlay');setTimeout(()=>$('#repoPackageTitle')?.focus(),60)}
+async function openRepoPackageUpload(opts={}){
+  if(!window.auth?.currentUser||!myId){toast('Entre com seu perfil para usar o repositório.');return}
+  repoPackageUploadContext=opts.personal?'personal':'general';
+  if(repoPackageUploadContext==='personal'){
+    try{await ensurePersonalRepositoryRoot()}catch(e){console.warn('Raiz do Meu Repositório não pôde ser confirmada:',e)}
+  }
+  repoPackageSelectedFiles=[];
+  renderRepoSelectedFiles();
+  const sel=$('#repoPackageOwner');
+  const ordered=[...state.members].filter(m=>m.status!=='inativo').sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'));
+  if(sel){
+    sel.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome||'')}</option>`).join('');
+    sel.value=myId;
+  }
+  const ownerRow=$('#repoPackageOwnerRow');
+  if(ownerRow)ownerRow.style.display=repoPackageUploadContext==='personal'?'none':(isAdmin?'block':'none');
+  if(sel&&(!isAdmin||repoPackageUploadContext==='personal'))sel.value=myId;
+  if($('#repoPackageTitle'))$('#repoPackageTitle').value='';
+  if($('#repoPackagePurpose'))$('#repoPackagePurpose').value=repoPackageUploadContext==='personal'?'artigos':'bolsa';
+  if($('#repoPackagePurposeOther'))$('#repoPackagePurposeOther').value='';
+  if($('#repoPackagePurposeOtherRow'))$('#repoPackagePurposeOtherRow').style.display='none';
+  const privateRadio=document.querySelector('input[name="repoPackageAccess"][value="private"]');
+  if(privateRadio)privateRadio.checked=true;
+  if($('#repoPackagePeopleSearch'))$('#repoPackagePeopleSearch').value='';
+
+  const h=$('#repoPackageUploadOverlay .modal-h h2'),save=$('#repoPackageSaveBtn'),notice=$('#repoPackageUploadOverlay .notice');
+  const fileLabel=$('#repoPackageFilesLabel'),fileHint=$('#repoPackageFilesHint');
+  if(repoPackageUploadContext==='personal'){
+    if(h)h.textContent='📁 Criar pasta no Meu Repositório';
+    if(save)save.textContent='Criar pasta';
+    if(notice)notice.innerHTML='<strong>Pasta privada por padrão.</strong> Você pode criar a pasta vazia agora e adicionar arquivos depois. Também pode compartilhar a pasta com pessoas específicas quando quiser.';
+    if(fileLabel)fileLabel.innerHTML='Arquivos <span style="font-weight:700;color:#71848d">(opcional)</span>';
+    if(fileHint)fileHint.textContent='Você pode criar a pasta vazia ou já incluir até 20 arquivos.';
+  }else{
+    if(h)h.textContent='📦 Enviar arquivos com acesso controlado';
+    if(save)save.textContent='Enviar conjunto';
+    if(notice)notice.innerHTML='<strong>Um propósito, vários arquivos.</strong> Organize documentos e escolha exatamente quem poderá abrir.';
+    if(fileLabel)fileLabel.textContent='Arquivos';
+    if(fileHint)fileHint.textContent='Até 20 arquivos por conjunto, 15 MB por arquivo e 120 MB no total.';
+  }
+  updateRepoPackageAccessUI();
+  openOverlay('repoPackageUploadOverlay');
+  setTimeout(()=>$('#repoPackageTitle')?.focus(),60);
+}
+
+// P26: helpers do Meu Repositório restaurados. Tinham sido perdidos numa fusão de versões.
+function rootAllowedMemberIds(ownerId){
+  const ids=new Set();
+  if(ownerId)ids.add(ownerId);
+  const root=repoRootByOwner(ownerId);
+  (root?.allowedMemberIds||[]).forEach(id=>{if(id)ids.add(id)});
+  if(ownerId===myId)(state.personalRepoRoot?.collaboratorMemberIds||[]).forEach(id=>{if(id)ids.add(id)});
+  return ids;
+}
+
+function renderRepoPackagePeople(){
+  const wrap=$('#repoPackagePeople');if(!wrap)return;
+  const ownerId=(repoPackageUploadContext==='personal'||!isAdmin)?myId:($('#repoPackageOwner')?.value||myId);
+  const q=($('#repoPackagePeopleSearch')?.value||'').trim().toLocaleLowerCase('pt-BR');
+  const rootIds=rootAllowedMemberIds(ownerId);
+  const selectedNow=new Set([...wrap.querySelectorAll('input[type="checkbox"]:checked')].map(x=>x.value));
+  const people=(state.members||[])
+    .filter(m=>m.status!=='inativo'&&m.id!==ownerId&&(!q||String(m.nome||'').toLocaleLowerCase('pt-BR').includes(q)))
+    .sort((a,b)=>String(a.nome||'').localeCompare(String(b.nome||''),'pt-BR'));
+  wrap.innerHTML=people.length?people.map(m=>{
+    const inherited=rootIds.has(m.id);
+    const checked=inherited||selectedNow.has(m.id);
+    return `<label class="repo-share-row"><input type="checkbox" value="${m.id}" ${checked?'checked':''} ${inherited?'disabled':''}><span><b>${esc(m.nome||'')}</b><small>${inherited?'Já tem acesso ao repositório inteiro':'Dar acesso somente a esta pasta'}</small></span></label>`;
+  }).join(''):'<div class="hint">Nenhuma pessoa encontrada.</div>';
+}
+
+function updateRepoPackageAccessUI(){
+  const mode=document.querySelector('input[name="repoPackageAccess"]:checked')?.value||'private';
+  const row=$('#repoPackagePeopleRow');
+  if(row)row.style.display=mode==='selected'?'block':'none';
+  if(mode==='selected')renderRepoPackagePeople();
+}
+
 function selectedRepoPackageExtraIds(ownerId,mode){const ids=new Set();if(mode==='group')state.members.filter(m=>m.status!=='inativo'&&m.id!==ownerId).forEach(m=>ids.add(m.id));if(mode==='selected')document.querySelectorAll('#repoPackagePeople input[type="checkbox"]:checked:not(:disabled)').forEach(x=>ids.add(x.value));return[...ids]}
 function selectedRepoPackageAllowedIds(ownerId,mode){const ids=rootAllowedMemberIds(ownerId),extra=selectedRepoPackageExtraIds(ownerId,mode);extra.forEach(id=>ids.add(id));if(repoPackageUploadContext!=='personal')ids.add(myId);return[...ids]}
-async function saveRepoPackage(){const btn=$('#repoPackageSaveBtn'),ownerId=(repoPackageUploadContext==='personal'||!isAdmin)?myId:$('#repoPackageOwner').value,title=$('#repoPackageTitle').value.trim(),purpose=$('#repoPackagePurpose').value,purposeOther=$('#repoPackagePurposeOther').value.trim(),mode=document.querySelector('input[name="repoPackageAccess"]:checked')?.value||'private';if(!ownerId)return toast('Defina o proprietário.');if(!title)return toast('Dê um nome à pasta.');if(purpose==='outro'&&!purposeOther)return toast('Descreva o propósito.');if(!repoPackageSelectedFiles.length)return toast('Escolha pelo menos um arquivo.');const folderExtraMemberIds=selectedRepoPackageExtraIds(ownerId,mode),rootSharedMemberIds=[...rootAllowedMemberIds(ownerId)].filter(id=>id!==ownerId),allowedMemberIds=selectedRepoPackageAllowedIds(ownerId,mode);const f=FB(),uid=window.auth.currentUser.uid,owner=memberById(ownerId),actor=currentActor(),ref=f.doc(f.collection(window.db,'rede_repository_packages')),ownerUid=(state.users||[]).find(u=>u.memberId===ownerId)?.uid||'';try{btn.disabled=true;await f.setDoc(ref,{title,purpose,purposeOther,accessMode:mode,allowedMemberIds,folderExtraMemberIds,rootSharedMemberIds,personalRepo:repoPackageUploadContext==='personal',ownerMemberId:ownerId,ownerUid,ownerName:owner?.nome||'',createdByUid:uid,createdByMemberId:myId,createdByName:actor?.name||myName||'',fileCount:0,ts:f.serverTimestamp(),updatedAt:f.serverTimestamp()});let ok=0;for(let i=0;i<repoPackageSelectedFiles.length;i++){const file=repoPackageSelectedFiles[i];btn.textContent=`Enviando ${i+1}/${repoPackageSelectedFiles.length}…`;const dataUrl=await fileToDataUrl(file),up=await fbUploadFile('repo_'+ref.id,dataUrl,file.name),child=f.doc(f.collection(ref,'files'));await f.setDoc(child,{fileName:file.name,title:file.name.replace(/\.[^.]+$/,''),url:up.url,storagePath:up.path,size:file.size,mimeType:file.type||'',ext:inferFileExt('',file.name),order:i,createdByUid:uid,ts:f.serverTimestamp()});ok++}await f.updateDoc(ref,{fileCount:ok,updatedAt:f.serverTimestamp()});const recipients=allowedMemberIds.filter(id=>id&&id!==myId);await Promise.allSettled(recipients.map(id=>createRepoNotification(id,{kind:'repositorio_pacote',sourceType:'repositorio_pacote',sourceId:ref.id,ownerId,title:'📁 Pasta compartilhada com você',message:`${actor?.name||'Um Carbonauta'} compartilhou “${title}” (${ok} arquivo${ok===1?'':'s'}).`})));closeOverlay('repoPackageUploadOverlay');toast(`Pasta criada com ${ok} arquivo${ok===1?'':'s'}.`);repoViewMode=repoPackageUploadContext==='personal'?'mine':repoViewMode;renderPubs()}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou a pasta. Publique as regras P20.':(e.message||'Erro ao enviar a pasta.'))}finally{btn.disabled=false;btn.textContent=repoPackageUploadContext==='personal'?'Criar pasta':'Enviar conjunto'}}
+async function saveRepoPackage(){
+  const btn=$('#repoPackageSaveBtn');
+  const ownerId=(repoPackageUploadContext==='personal'||!isAdmin)?myId:($('#repoPackageOwner')?.value||myId);
+  const title=($('#repoPackageTitle')?.value||'').trim();
+  const purpose=$('#repoPackagePurpose')?.value||'artigos';
+  const purposeOther=($('#repoPackagePurposeOther')?.value||'').trim();
+  const mode=document.querySelector('input[name="repoPackageAccess"]:checked')?.value||'private';
+  if(!ownerId)return toast('Defina o proprietário.');
+  if(!title)return toast('Dê um nome à pasta.');
+  if(purpose==='outro'&&!purposeOther)return toast('Descreva o propósito.');
+  if(repoPackageUploadContext!=='personal'&&!repoPackageSelectedFiles.length)return toast('Escolha pelo menos um arquivo.');
+
+  const folderExtraMemberIds=selectedRepoPackageExtraIds(ownerId,mode);
+  const rootSharedMemberIds=[...rootAllowedMemberIds(ownerId)].filter(id=>id!==ownerId);
+  const allowedMemberIds=selectedRepoPackageAllowedIds(ownerId,mode);
+  const f=FB(),uid=window.auth.currentUser.uid,owner=memberById(ownerId),actor=currentActor();
+  const ref=f.doc(f.collection(window.db,'rede_repository_packages'));
+  const ownerUid=(state.users||[]).find(u=>u.memberId===ownerId)?.uid||(ownerId===myId?uid:'');
+  const personal=repoPackageUploadContext==='personal';
+  try{
+    if(btn){btn.disabled=true;btn.textContent=personal?'Criando pasta…':'Preparando…'}
+    await f.setDoc(ref,{
+      title,purpose,purposeOther,accessMode:mode,allowedMemberIds,folderExtraMemberIds,rootSharedMemberIds,
+      personalRepo:personal,ownerMemberId:ownerId,ownerUid,ownerName:owner?.nome||myName||'',
+      createdByUid:uid,createdByMemberId:myId,createdByName:actor?.name||myName||'',fileCount:0,
+      ts:f.serverTimestamp(),updatedAt:f.serverTimestamp()
+    });
+
+    let ok=0;
+    for(let i=0;i<repoPackageSelectedFiles.length;i++){
+      const file=repoPackageSelectedFiles[i];
+      if(btn)btn.textContent=`Enviando ${i+1}/${repoPackageSelectedFiles.length}…`;
+      const dataUrl=await fileToDataUrl(file),up=await fbUploadFile('repo_'+ref.id,dataUrl,file.name),child=f.doc(f.collection(ref,'files'));
+      await f.setDoc(child,{fileName:file.name,title:file.name.replace(/\.[^.]+$/,''),url:up.url,storagePath:up.path,size:file.size,mimeType:file.type||'',ext:inferFileExt('',file.name),order:i,createdByUid:uid,ts:f.serverTimestamp()});
+      ok++;
+    }
+    if(ok)await f.updateDoc(ref,{fileCount:ok,updatedAt:f.serverTimestamp()});
+    const recipients=allowedMemberIds.filter(id=>id&&id!==myId);
+    await Promise.allSettled(recipients.map(id=>createRepoNotification(id,{kind:'repositorio_pacote',sourceType:'repositorio_pacote',sourceId:ref.id,ownerId,title:'📁 Pasta compartilhada com você',message:`${actor?.name||'Um Carbonauta'} compartilhou “${title}”${ok?` (${ok} arquivo${ok===1?'':'s'})`:''}.`})));
+    closeOverlay('repoPackageUploadOverlay');
+    repoViewMode=personal?'mine':repoViewMode;
+    toast(ok?`Pasta criada com ${ok} arquivo${ok===1?'':'s'}.`:'✅ Pasta criada. Agora você pode abrir e adicionar arquivos.');
+    // Atualização otimista para não depender do próximo snapshot para o usuário ver que funcionou.
+    if(personal && !state.repositoryPackages.some(p=>p.id===ref.id)){
+      state.repositoryPackages.unshift({id:ref.id,title,purpose,purposeOther,accessMode:mode,allowedMemberIds,folderExtraMemberIds,rootSharedMemberIds,personalRepo:true,ownerMemberId:ownerId,ownerUid,ownerName:owner?.nome||myName||'',createdByUid:uid,createdByMemberId:myId,createdByName:actor?.name||myName||'',fileCount:ok,ts:new Date(),updatedAt:new Date()});
+    }
+    renderPubs();
+  }catch(e){
+    console.error('P26 saveRepoPackage:',e);
+    const msg=e?.code==='permission-denied'?'O Firestore bloqueou a criação da pasta. Confira se as regras P24 estão publicadas.':(e?.message||'Não foi possível criar a pasta.');
+    toast(msg);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent=personal?'Criar pasta':'Enviar conjunto'}
+  }
+}
 
 async function deleteRepositoryPackage(id){const p=state.repositoryPackages.find(x=>x.id===id);if(!p||!canManageRepoPackage(p))return toast('Você não pode excluir este conjunto.');if(!confirm(`Excluir “${p.title||'este conjunto'}” e seus arquivos?`))return;try{const f=FB(),pref=f.doc(window.db,'rede_repository_packages',id),snap=await f.getDocs(f.collection(pref,'files'));for(const d of snap.docs){const x=d.data();if(x.storagePath){try{await f.deleteObject(f.sRef(window.storage,x.storagePath))}catch(_e){}}await f.deleteDoc(d.ref)}await f.deleteDoc(pref);closeOverlay('repoPackageOverlay');toast('Conjunto excluído.')}catch(e){console.error(e);toast(e.message||'Não foi possível excluir o conjunto.')}}
 window.openRepositoryPackage=openRepositoryPackage;window.deleteRepositoryPackage=deleteRepositoryPackage;
@@ -5068,8 +5215,8 @@ function inferGeneralCategory(fileName=''){const e=inferFileExt('',fileName);if(
 async function publishRepositoryPackageFile(packageId,fileId){const p=state.repositoryPackages.find(x=>x.id===packageId);if(!p||!canManageRepoPackage(p))return toast('Somente o proprietário pode publicar este arquivo.');if(!confirm('Publicar este arquivo no Repositório Geral? Ele ficará visível para toda a Rede.'))return;const f=FB();try{const snap=await f.getDoc(f.doc(window.db,'rede_repository_packages',packageId,'files',fileId));if(!snap.exists())throw new Error('Arquivo não encontrado.');const x=snap.data(),ref=f.doc(window.db,'rede_publicacoes',`pkg_${packageId}_${fileId}`),m=memberById(p.ownerMemberId),uid=window.auth.currentUser.uid,categoria=inferGeneralCategory(x.fileName);await f.setDoc(ref,{memberId:p.ownerMemberId,ownerUid:uid,createdByUid:uid,memberNome:m?.nome||p.ownerName||myName||'',categoria,categoriaOutro:categoria==='outro'?'Arquivo do Meu Repositório':'',titulo:x.title||x.fileName||'Arquivo',tipo:'arquivo',url:x.url||'',fileName:x.fileName||'',sourcePersonalRepo:true,sourcePackageId:packageId,sourcePackageFileId:fileId,ts:f.serverTimestamp()});toast('Publicado no Repositório Geral.');repoViewMode='general';renderPubs()}catch(e){console.error(e);toast(e.message||'Não foi possível publicar.')}}
 function repoRootByOwner(ownerId){return (state.personalRepoRoots||[]).find(r=>r.ownerMemberId===ownerId)||(ownerId===myId?state.personalRepoRoot:null)}
 function renderPersonalRepoSharePeople(){const q=($('#personalRepoShareSearch')?.value||'').trim().toLowerCase(),selected=new Set(repoRootCollaborators()),wrap=$('#personalRepoShareList');if(!wrap)return;wrap.innerHTML=state.members.filter(m=>m.status!=='inativo'&&m.id!==myId&&(!q||m.nome.toLowerCase().includes(q))).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>`<label class="repo-share-row"><input type="checkbox" value="${m.id}" ${selected.has(m.id)?'checked':''}><span><b>${esc(m.nome)}</b><small>${esc(NIVEIS[m.nivel]?.label||m.programa||'Integrante da Rede')}</small></span></label>`).join('')}
-function openPersonalRepoSharing(){if(!myId)return;$('#personalRepoShareSearch').value='';renderPersonalRepoSharePeople();openOverlay('personalRepoShareOverlay')}
-async function savePersonalRepoSharing(){await ensurePersonalRepositoryRoot();const btn=$('#personalRepoShareSaveBtn'),selected=[...document.querySelectorAll('#personalRepoShareList input:checked')].map(x=>x.value),old=new Set(repoRootCollaborators()),newly=selected.filter(id=>!old.has(id)),f=FB(),uid=window.auth.currentUser.uid,m=memberById(myId),rootRef=f.doc(window.db,'rede_personal_repositories',myId);try{btn.disabled=true;await f.setDoc(rootRef,{ownerUid:uid,ownerMemberId:myId,ownerName:m?.nome||myName||'',allowedMemberIds:[myId,...selected],collaboratorMemberIds:selected,updatedAt:f.serverTimestamp()},{merge:true});const mine=personalPackagesOwned(),batch=f.writeBatch(window.db);for(const p of mine){const extras=new Set(p.folderExtraMemberIds||((p.allowedMemberIds||[]).filter(id=>id!==myId&&!(p.rootSharedMemberIds||[]).includes(id))));let allowed=[];if(p.accessMode==='group')allowed=state.members.filter(x=>x.status!=='inativo').map(x=>x.id);else allowed=[...new Set([myId,...selected,...extras])];batch.update(f.doc(window.db,'rede_repository_packages',p.id),{allowedMemberIds:allowed,rootSharedMemberIds:selected,folderExtraMemberIds:[...extras],updatedAt:f.serverTimestamp()})}if(mine.length)await batch.commit();await Promise.allSettled(newly.map(id=>createRepoNotification(id,{kind:'repositorio_compartilhado',sourceType:'repositorio_pessoal',sourceId:myId,ownerId:myId,title:'🔐 Repositório compartilhado com você',message:`${m?.nome||'Um Carbonauta'} deu acesso ao repositório pessoal.`})));closeOverlay('personalRepoShareOverlay');toast('Acessos do repositório atualizados.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'Publique as regras P22 no Firestore.':(e.message||'Não foi possível salvar os acessos.'))}finally{btn.disabled=false}}
+async function openPersonalRepoSharing(){if(!myId)return;try{await ensurePersonalRepositoryRoot()}catch(e){console.error('Meu Repositório:',e);return toast(e?.message||'Não foi possível preparar seu repositório.')}$('#personalRepoShareSearch').value='';renderPersonalRepoSharePeople();openOverlay('personalRepoShareOverlay')}
+async function savePersonalRepoSharing(){const btn=$('#personalRepoShareSaveBtn'),selected=[...document.querySelectorAll('#personalRepoShareList input:checked')].map(x=>x.value),old=new Set(repoRootCollaborators()),newly=selected.filter(id=>!old.has(id)),f=FB(),uid=window.auth.currentUser.uid,m=memberById(myId),rootRef=f.doc(window.db,'rede_personal_repositories',myId);try{btn.disabled=true;await ensurePersonalRepositoryRoot();await f.setDoc(rootRef,{ownerUid:uid,ownerMemberId:myId,ownerName:m?.nome||myName||'',allowedMemberIds:[myId,...selected],collaboratorMemberIds:selected,updatedAt:f.serverTimestamp()},{merge:true});const mine=personalPackagesOwned(),batch=f.writeBatch(window.db);for(const p of mine){const extras=new Set(p.folderExtraMemberIds||((p.allowedMemberIds||[]).filter(id=>id!==myId&&!(p.rootSharedMemberIds||[]).includes(id))));let allowed=[];if(p.accessMode==='group')allowed=state.members.filter(x=>x.status!=='inativo').map(x=>x.id);else allowed=[...new Set([myId,...selected,...extras])];batch.update(f.doc(window.db,'rede_repository_packages',p.id),{allowedMemberIds:allowed,rootSharedMemberIds:selected,folderExtraMemberIds:[...extras],updatedAt:f.serverTimestamp()})}if(mine.length)await batch.commit();await Promise.allSettled(newly.map(id=>createRepoNotification(id,{kind:'repositorio_compartilhado',sourceType:'repositorio_pessoal',sourceId:myId,ownerId:myId,title:'🔐 Repositório compartilhado com você',message:`${m?.nome||'Um Carbonauta'} deu acesso ao repositório pessoal.`})));closeOverlay('personalRepoShareOverlay');toast('Acessos do repositório atualizados.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'Publique as regras P22 no Firestore.':(e.message||'Não foi possível salvar os acessos.'))}finally{btn.disabled=false}}
 function renderFolderAccessPeople(p){const q=($('#repoFolderAccessSearch')?.value||'').trim().toLowerCase(),selected=new Set(p?.folderExtraMemberIds||[]),rootIds=rootAllowedMemberIds(p?.ownerMemberId),wrap=$('#repoFolderAccessList');if(!wrap)return;wrap.innerHTML=state.members.filter(m=>m.status!=='inativo'&&m.id!==p.ownerMemberId&&(!q||m.nome.toLowerCase().includes(q))).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>`<label class="repo-share-row"><input type="checkbox" value="${m.id}" ${selected.has(m.id)?'checked':''} ${rootIds.has(m.id)?'disabled':''}><span><b>${esc(m.nome)}</b><small>${rootIds.has(m.id)?'Já tem acesso ao repositório inteiro':'Acesso somente a esta pasta'}</small></span></label>`).join('')}
 function syncFolderAccessPeopleVisibility(){const mode=$('#repoFolderAccessMode')?.value||'private';if($('#repoFolderExtraPeopleRow'))$('#repoFolderExtraPeopleRow').style.display=mode==='selected'?'block':'none'}
 function openRepoFolderAccess(id){const p=state.repositoryPackages.find(x=>x.id===id);if(!p||!canManageRepoPackage(p))return toast('Você não pode alterar o acesso desta pasta.');activeRepoFolderAccessId=id;$('#repoFolderAccessTitle').textContent='👥 Acesso · '+(p.title||'Pasta');$('#repoFolderAccessMode').value=p.accessMode||'private';$('#repoFolderAccessSearch').value='';renderFolderAccessPeople(p);syncFolderAccessPeopleVisibility();openOverlay('repoFolderAccessOverlay')}
@@ -6569,6 +6716,13 @@ if($('#repoPackageOwner'))$('#repoPackageOwner').onchange=()=>{if(document.query
 if($('#repoPackagePeopleSearch'))$('#repoPackagePeopleSearch').oninput=renderRepoPackagePeople;
 document.querySelectorAll('input[name="repoPackageAccess"]').forEach(r=>r.onchange=updateRepoPackageAccessUI);
 if($('#repoPackageSaveBtn'))$('#repoPackageSaveBtn').onclick=saveRepoPackage;
+// P26: fallback delegado. Mesmo que uma rotina anterior da tela falhe, os botões do Meu Repositório continuam respondendo.
+document.addEventListener('click',e=>{
+  const b=e.target.closest?.('#repoPersonalNewFolderBtn,#repoPersonalNewFolderBtn2');
+  if(!b)return;
+  e.preventDefault();e.stopPropagation();
+  openRepoPackageUpload({personal:true}).catch(err=>{console.error('P26 abrir pasta:',err);toast(err?.message||'Não foi possível abrir a criação de pasta.')});
+},true);
 
 $('#pubCategoria').onchange=renderPubs; $('#pubPessoa').onchange=renderPubs; $('#pubMine').onchange=renderPubs;
 $('#pubCategoriaSel').onchange=e=>{$('#pubOutroRow').style.display=e.target.value==='outro'?'block':'none'};
@@ -6638,11 +6792,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P25-FOTOS-LEGIVEIS-20260910';
+window.CARBONAUTAS_BUILD='P26-REPOSITORIO-FUNCIONAL-20260910';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P25-20260910',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P26-20260910',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -6654,7 +6808,7 @@ waitFirebase().then(startAuth);
 <script id="carbonautas-dynamic-favicon">
 (()=>{
   const link=document.getElementById('dynamicFavicon'); if(!link)return;
-  const img=new Image(); img.src='./icon-192.png?v=P25';
+  const img=new Image(); img.src='./icon-192.png?v=P26';
   img.onload=()=>{
     const c=document.createElement('canvas'),ctx=c.getContext('2d'); c.width=c.height=64; let phase=0,last=0;
     const draw=(ts)=>{
