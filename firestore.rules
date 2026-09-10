@@ -274,6 +274,108 @@ service cloud.firestore {
           resource.data.ownerUid == request.auth.uid
           || isCoordinator()
         );
+
+      // P20 — conversa privada vinculada a um fluxo de correção.
+      // Nem o coordenador recebe acesso automático: somente as duas pessoas
+      // declaradas na versão raiz da correção podem ler/escrever.
+      match /review_messages/{messageId} {
+
+        function reviewRoot() {
+          return get(
+            /databases/$(database)/documents/rede_publicacoes/$(documentId)
+          );
+        }
+
+        function isReviewParticipant() {
+          return hasProfile()
+            && reviewRoot().data.reviewFlow == true
+            && (
+              myMemberId() == reviewRoot().data.reviewReviewerId
+              || myMemberId() == reviewRoot().data.reviewReturnToId
+            );
+        }
+
+        allow read: if isReviewParticipant();
+
+        allow create: if isReviewParticipant()
+          && request.resource.data.keys().hasOnly([
+            'authorUid',
+            'authorMemberId',
+            'authorName',
+            'text',
+            'createdAt'
+          ])
+          && request.resource.data.authorUid == request.auth.uid
+          && request.resource.data.authorMemberId == myMemberId()
+          && request.resource.data.authorName is string
+          && request.resource.data.authorName.size() <= 200
+          && request.resource.data.text is string
+          && request.resource.data.text.size() >= 1
+          && request.resource.data.text.size() <= 5000
+          && request.resource.data.createdAt == request.time;
+
+        allow update: if false;
+
+        allow delete: if isReviewParticipant()
+          && resource.data.authorUid == request.auth.uid;
+      }
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS P19 — REPOSITÓRIO PESSOAL / COMPARTILHAMENTO DA RAIZ
+    // Privado por padrão. Nem coordenador ganha leitura automática.
+    // ============================================================
+
+    match /rede_personal_repositories/{memberId} {
+
+      function personalRepoOwner() {
+        return hasProfile()
+          && memberId == myMemberId()
+          && resource.data.ownerUid == request.auth.uid;
+      }
+
+      allow read: if hasProfile()
+        && resource.data.allowedMemberIds is list
+        && myMemberId() in resource.data.allowedMemberIds;
+
+      allow create: if hasProfile()
+        && memberId == myMemberId()
+        && request.resource.data.keys().hasOnly([
+          'ownerUid',
+          'ownerMemberId',
+          'ownerName',
+          'allowedMemberIds',
+          'collaboratorMemberIds',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.ownerMemberId == myMemberId()
+        && request.resource.data.ownerName is string
+        && request.resource.data.allowedMemberIds is list
+        && request.resource.data.allowedMemberIds.size() >= 1
+        && request.resource.data.allowedMemberIds.size() <= 200
+        && myMemberId() in request.resource.data.allowedMemberIds
+        && request.resource.data.collaboratorMemberIds is list
+        && request.resource.data.collaboratorMemberIds.size() <= 199
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if personalRepoOwner()
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.ownerMemberId == resource.data.ownerMemberId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.ownerName is string
+        && request.resource.data.allowedMemberIds is list
+        && request.resource.data.allowedMemberIds.size() >= 1
+        && request.resource.data.allowedMemberIds.size() <= 200
+        && myMemberId() in request.resource.data.allowedMemberIds
+        && request.resource.data.collaboratorMemberIds is list
+        && request.resource.data.collaboratorMemberIds.size() <= 199
+        && request.resource.data.updatedAt == request.time;
+
+      allow delete: if personalRepoOwner();
     }
 
 

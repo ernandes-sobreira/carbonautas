@@ -1,23 +1,40 @@
-CARBONAUTAS P18 — AGENDA PRIVADA
+CARBONAUTAS P20 — CONVERSA DA CORREÇÃO + ANTIDUPLICAÇÃO
 
-SEM ALTERAÇÃO NO VPS.
-O ONLYOFFICE/bridge atual permanece intacto.
+NÃO MEXER NO VPS.
 
-1) GitHub — substituir na raiz:
-   index.html
-   sw.js
-   manifest.webmanifest (pode substituir; mantém o atual)
+1) GITHUB (raiz do repositório carbonautas)
+Substituir:
+- index.html
+- sw.js
+- manifest.webmanifest
 
-2) Firebase Console > Firestore Database > Rules
-   Substituir pelas regras completas do arquivo firestore.rules e clicar em Publicar.
+2) FIREBASE
+Firestore Database > Rules
+Substituir pelas regras completas do arquivo:
+- firestore.rules
+Depois clicar em Publicar.
 
-NOVO NO CRONOGRAMA:
-- botão 🔒 Só para mim
-- compromisso privado sincronizado entre seus dispositivos
-- somente o próprio UID autenticado consegue ler/criar/editar/excluir
-- nem o coordenador ganha exceção de leitura
-- hora e observação opcionais
-- filtro "Só compromissos privados"
-- editar, concluir/reabrir e excluir
+O QUE ENTROU
+- Cada fluxo de correção aparece como UMA entrada no Repositório.
+- Versões v1, v2, v3... ficam organizadas dentro do histórico da correção.
+- Botão “💬 Conversa” para autor/remetente e revisor conversarem sobre aquele arquivo.
+- Mensagens ficam vinculadas ao fluxo de correção e somente as duas pessoas envolvidas conseguem ler.
+- A orientação digitada ao enviar/devolver arquivo também entra na conversa da correção.
+- Notificação quando chega uma nova mensagem sobre a correção.
+- Proteção contra duplo toque no botão de upload.
+- SHA-256 nos novos uploads para detectar reenvio idêntico.
+- Versões de correção novas usam ID determinístico para reduzir criação repetida.
+- Arquivo publicado do Meu Repositório no Geral usa ID determinístico (clicar duas vezes não cria duas entradas).
+- Botão “🧹 Duplicados” remove apenas duplicações exatas que a conta tem permissão de excluir.
+- Versões diferentes de correção NÃO são apagadas pelo limpador.
 
-P18 não altera o servidor VPS nem o fluxo ONLYOFFICE.
+PRIVACIDADE
+As mensagens da correção usam:
+rede_publicacoes/{reviewThreadId}/review_messages/{messageId}
+As regras P20 permitem leitura/escrita somente ao reviewReviewerId e reviewReturnToId daquele fluxo.
+O coordenador não recebe acesso especial à conversa se não for uma das duas pessoas envolvidas.
+
+TESTES ESTÁTICOS REALIZADOS
+- JavaScript inline validado com node --check.
+- Nenhum ID HTML duplicado introduzido pela P20.
+- Não há alteração no bridge, ONLYOFFICE ou VPS.
