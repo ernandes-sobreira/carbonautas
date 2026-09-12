@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carbonautas · Science OS · P25b</title>
+<title>Carbonautas</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P22">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P22">
@@ -102,6 +102,18 @@
 
   /* Views */
   .view{flex:1;min-height:0;display:none;flex-direction:column}
+  /* P26 · sub-navegacao dos grupos */
+  .subnav{display:flex;gap:6px;padding:10px 16px 0;justify-content:center}
+  .subnav button{border:1px solid var(--line);background:#fff;color:var(--ink-2);border-radius:999px;padding:7px 16px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.15s}
+  .subnav button.on{background:var(--petrol,#15616d);border-color:var(--petrol,#15616d);color:#fff}
+  .subnav button .badge{position:static;margin-left:2px}
+  .app-nav-card.app-nav-hero{grid-column:1/-1;min-height:96px;display:grid;grid-template-columns:52px 1fr;grid-template-rows:auto auto;column-gap:14px;align-items:center;align-content:center;padding:16px 18px}
+  .app-nav-card.app-nav-hero .app-nav-icon{grid-row:1/3}
+  .app-nav-card.app-nav-hero .app-nav-icon{width:52px;height:52px;font-size:26px;border-radius:16px;margin:0}
+  .app-nav-card.app-nav-hero b{font-size:19px;display:block}
+  .app-nav-card.app-nav-hero small{font-size:12px}
+  .app-nav-card.app-nav-hero>b,.app-nav-card.app-nav-hero>small{margin:0}
+  .app-menu-foot{display:none!important}
   .view.on{display:flex}
 
   /* Stats strip */
@@ -432,7 +444,15 @@
   .mural-grid.selecting .mt .mt-chk{display:flex}
   .mt.sel{outline:3px solid var(--agua);outline-offset:-3px}
   .mt.sel .mt-chk{background:var(--agua);border-color:var(--agua)}
-  @media(max-width:640px){.mt .mt-tag{display:none}.mural-head h2{font-size:20px}}
+  .mural-more{display:none}
+  @media(max-width:640px){
+    .mt .mt-tag{display:none}.mural-head h2{font-size:20px}
+    .mural-filters{align-items:center}
+    .mural-filters #fProjeto{flex:1 1 auto}
+    .mural-more{display:inline-flex}
+    .mural-filters:not(.open) #fPessoa,.mural-filters:not(.open) #fAno,.mural-filters:not(.open) #fTipo,.mural-filters:not(.open) #fBusca{display:none}
+    .mural-filters.open #fPessoa,.mural-filters.open #fAno,.mural-filters.open #fTipo{flex:1 1 45%}
+  }
   .lightbox{position:fixed;inset:0;background:rgba(10,24,28,.9);z-index:70;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:30px;overflow-y:auto}
   .lightbox.open{display:flex}
   .lightbox img{max-width:92vw;max-height:78vh;border-radius:12px;box-shadow:var(--shadow-lg)}
@@ -1078,7 +1098,6 @@
     .tabs .tab{min-width:0!important;flex:none!important;display:flex!important;flex-direction:column!important;gap:4px!important;padding:10px 4px!important;border-radius:12px!important;font-size:9px!important}
     .tabs .tab span.tl{display:block!important;font-size:8.5px!important;line-height:1.05!important;white-space:normal!important;text-align:center!important;color:inherit!important}
     .tabs .tab svg{width:20px!important;height:20px!important}
-    .tabs .tab[data-view="lab"]{background:linear-gradient(135deg,#0aa9c2,#54d9c8)!important;color:#041923!important;box-shadow:0 8px 18px rgba(0,184,217,.22)}
     .tabs .tab[data-view="lab"] span.tl{font-weight:900!important}
     .science-dock{margin:2px 0 15px;padding:14px;border-radius:18px}.science-dock-head{align-items:center}.science-dock-title{font-size:17px}.science-dock-sub{font-size:10px}.science-dock-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.science-action{min-height:74px;padding:11px 10px}.science-action b{font-size:11px}.science-action small{font-size:9px}
     .view-head #newOfficeBtn{display:none!important}
@@ -1164,8 +1183,7 @@
   .tab[data-view="lab"].on{background:var(--p7-cyan)!important}
   .tab[data-view="mensagens"].on{background:var(--p7-violet)!important;color:#fff!important}
   .tab[data-view="conversas"].on{background:linear-gradient(135deg,#16D9E3,#9B6CFF)!important;color:#050505!important}
-  .tab[data-view="mural"].on{background:var(--p7-orange)!important}
-  .tab[data-view="fotos"].on{background:var(--p7-pink)!important;color:#fff!important}
+  .tab[data-view="mural"].on{background:var(--p7-pink)!important;color:#fff!important}
   .tab[data-view="pubs"].on{background:var(--p7-lime)!important}
   .id-chip{background:#111114!important;border-color:#393940!important;color:#fff!important}.id-chip.admin{border-color:var(--p7-yellow)!important;box-shadow:0 0 0 1px var(--p7-yellow) inset!important}
   .topbar>.btn:not(.primary){background:#111114!important;border-color:#33333a!important;color:#fff!important}
@@ -1592,45 +1610,33 @@
     </div>
 
     <nav class="tabs" id="tabs">
-      <button class="tab on" data-view="painel" title="O que precisa da minha atenção">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h4l3-9 4 16 3-7h4"/><circle cx="12" cy="12" r="10" opacity=".15"/></svg>
+      <button class="tab on" data-view="painel" data-group="painel" title="O que precisa da minha atenção">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h4l3-9 4 16 3-7h4"/></svg>
         <span class="tl">Painel</span><span class="badge" id="attentionBadge" style="display:none"></span>
       </button>
-      <button class="tab" data-view="rede">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="2.2"/><circle cx="18" cy="7" r="2.2"/><circle cx="12" cy="17" r="2.2"/><line x1="7.6" y1="7.3" x2="10.5" y2="15"/><line x1="16.5" y1="8.7" x2="13.5" y2="15.3"/></svg>
-        <span class="tl">Rede</span>
+      <button class="tab" data-view="pubs" data-group="pubs" title="Repositório">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="tl">Repositório</span>
       </button>
-      <button class="tab" data-view="crono">
+      <button class="tab" data-view="rede" data-group="pessoas" title="Pessoas e acompanhamento">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M15.5 20a5 5 0 0 1 5.5-5"/></svg>
+        <span class="tl">Pessoas</span>
+      </button>
+      <button class="tab" data-view="crono" data-group="agenda" title="Agenda">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        <span class="tl">Cronograma</span><span class="badge" id="cronoBadge" style="display:none"></span>
+        <span class="tl">Agenda</span><span class="badge" id="cronoBadge" style="display:none"></span>
       </button>
-      <button class="tab" data-view="track">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-7"/></svg>
-        <span class="tl">Acompanhamento</span>
+      <button class="tab" data-view="mensagens" data-group="conversas" title="Conversas da equipe e privadas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a3 3 0 0 1-3 3H8l-5 3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3z"/></svg>
+        <span class="tl">Conversas</span><span class="badge" id="msgBadge" style="display:none"></span><span class="badge" id="privateBadge" style="display:none"></span>
       </button>
-      <button class="tab" data-view="lab" title="Laboratório de Dados">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6"/><path d="M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3"/><path d="M8 15h8"/></svg>
-        <span class="tl">Lab de Dados</span>
-      </button>
-      <button class="tab" data-view="mensagens">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a3 3 0 0 1-3 3H8l-5 3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>
-        <span class="tl">Mensagens</span><span class="badge" id="msgBadge" style="display:none"></span>
-      </button>
-      <button class="tab" data-view="conversas" title="Conversas privadas 1:1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11a7 7 0 0 1-7 7H8l-4 3v-5.5A7 7 0 1 1 20 11Z"/><path d="M9 11h6"/><path d="M12 8v6"/></svg>
-        <span class="tl">Conversas</span><span class="badge" id="privateBadge" style="display:none"></span>
-      </button>
-      <button class="tab" data-view="mural">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <button class="tab" data-view="mural" data-group="mural" title="Mural e fotos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
         <span class="tl">Mural</span><span class="badge" id="muralBadge" style="display:none"></span>
       </button>
-      <button class="tab" data-view="fotos">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
-        <span class="tl">Fotos</span>
-      </button>
-      <button class="tab" data-view="pubs">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
-        <span class="tl">Repositórios</span>
+      <button class="tab" data-view="lab" data-group="lab" title="Laboratório de Dados">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6"/><path d="M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3"/></svg>
+        <span class="tl">Lab</span>
       </button>
     </nav>
 
@@ -1669,21 +1675,18 @@
         <button type="button" class="app-menu-close" id="appMenuClose" aria-label="Fechar menu">×</button>
       </div>
       <div class="app-menu-grid">
-        <button type="button" class="app-nav-card c-red" data-app-view="painel"><span class="app-nav-icon">⚡</span><b>Painel</b><small>O que precisa da sua atenção</small></button>
-        <button type="button" class="app-nav-card c-green" data-app-view="rede"><span class="app-nav-icon">🕸️</span><b>Rede</b><small>Pessoas, projetos e conexões</small></button>
-        <button type="button" class="app-nav-card c-yellow" data-app-view="crono"><span class="app-nav-icon">📅</span><b>Cronograma</b><small>Prazos, entregas e eventos</small></button>
-        <button type="button" class="app-nav-card c-blue" data-app-view="track"><span class="app-nav-icon">📈</span><b>Acompanhamento</b><small>Orientações e saúde dos projetos</small></button>
-        <button type="button" class="app-nav-card c-cyan" data-app-view="lab"><span class="app-nav-icon">🧪</span><b>Lab de Dados</b><small>Análises, figuras e reprodutibilidade</small></button>
-        <button type="button" class="app-nav-card c-violet" data-app-view="mensagens"><span class="app-nav-icon">💬</span><b>Mensagens</b><small>Conversa rápida da equipe</small></button>
-        <button type="button" class="app-nav-card c-private" data-app-view="conversas"><span class="app-nav-icon">🔐</span><b>Conversas</b><small>Chat privado entre duas pessoas</small></button>
-        <button type="button" class="app-nav-card c-orange" data-app-view="mural"><span class="app-nav-icon">📣</span><b>Mural</b><small>Pedidos, alertas e direcionamentos</small></button>
-        <button type="button" class="app-nav-card c-pink" data-app-view="fotos"><span class="app-nav-icon">📸</span><b>Fotos</b><small>Registros das ações</small></button>
-        <button type="button" class="app-nav-card c-lime" data-app-view="pubs"><span class="app-nav-icon">📚</span><b>Repositório</b><small>Arquivos, Office e produtos</small></button>
+        <button type="button" class="app-nav-card c-lime app-nav-hero" data-app-view="pubs"><span class="app-nav-icon">📚</span><b>Repositório</b><small>Artigos, dados, Office e tudo que o grupo produz</small></button>
+        <button type="button" class="app-nav-card c-red" data-app-view="painel"><span class="app-nav-icon">⚡</span><b>Painel</b><small>O que precisa de você</small></button>
+        <button type="button" class="app-nav-card c-green" data-app-view="rede"><span class="app-nav-icon">🕸️</span><b>Pessoas</b><small>Rede e acompanhamento</small></button>
+        <button type="button" class="app-nav-card c-yellow" data-app-view="crono"><span class="app-nav-icon">📅</span><b>Agenda</b><small>Prazos e eventos</small></button>
+        <button type="button" class="app-nav-card c-violet" data-app-view="mensagens"><span class="app-nav-icon">💬</span><b>Conversas</b><small>Equipe e privadas</small></button>
+        <button type="button" class="app-nav-card c-pink" data-app-view="mural"><span class="app-nav-icon">📸</span><b>Mural</b><small>Avisos e fotos</small></button>
+        <button type="button" class="app-nav-card c-cyan" data-app-view="lab"><span class="app-nav-icon">🧪</span><b>Lab</b><small>Análises e figuras</small></button>
       </div>
-      <div class="app-menu-foot"><span class="app-menu-tip">☝️ O botão <b>MENU</b> funciona em qualquer tela.</span><span class="app-version">P25</span></div>
     </aside>
   </div>
 
+  <div class="subnav" id="subNav" style="display:none"></div>
   <!-- ============ VIEW: PAINEL ============ -->
   <div class="view on" id="viewPainel">
     <div class="dash-scroll"><div class="dash-wrap">
@@ -1772,7 +1775,7 @@
       <div class="crono-wrap">
         <div class="view-head">
           <div>
-            <h2>Cronograma</h2>
+            <h2>Agenda</h2>
             <div class="sub">Prazos compartilhados, eventos do grupo e sua agenda privada.</div>
           </div>
           <div class="spacer"></div>
@@ -1967,6 +1970,7 @@
         </div>
         <div class="mural-filters">
           <select id="fProjeto"><option value="">Todos os projetos</option></select>
+          <button class="btn ghost mural-more" id="fMais" type="button">Filtros</button>
           <select id="fPessoa"><option value="">Todas as pessoas</option></select>
           <select id="fAno"><option value="">Todos os anos</option></select>
           <select id="fTipo"><option value="">Fotos e prints</option><option value="foto">Só fotos</option><option value="print">Só prints</option></select>
@@ -2065,7 +2069,6 @@
             <div><div class="science-dock-title">⚡ Science Dock</div><div class="science-dock-sub">Crie, edite e analise sem sair do Carbonautas.</div></div>
             <div class="spacer"></div>
             <span class="engine-pill" id="scienceEngineStatus"><span class="engine-dot"></span><span>checando motor…</span></span>
-            <span class="build-chip">P22</span>
           </div>
           <div class="science-dock-grid">
             <button class="science-action" type="button" onclick="openNewOfficeType('docx')"><span class="sa-icon">📄</span><b>Novo Word</b><small>Artigo, relatório, tese ou capítulo.</small></button>
@@ -6483,11 +6486,31 @@ async function sendPrivateMessage(){
 }
 async function deletePrivateMessage(id){const msg=privateMessagesState.find(x=>x.id===id);if(!msg||msg.senderUid!==privateUid())return;if(!confirm('Excluir esta mensagem da conversa?'))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_private_threads',privateActiveThreadId,'messages',id));const isLast=privateMessagesState[privateMessagesState.length-1]?.id===id;if(isLast){const prev=privateMessagesState[privateMessagesState.length-2];await FB().updateDoc(FB().doc(window.db,'rede_private_threads',privateActiveThreadId),{lastMessage:prev?.text?.slice(0,160)||'Mensagem excluída'})}toast('Mensagem excluída.')}catch(e){console.error(e);toast('Não foi possível excluir a mensagem.')}}
 
+const VIEW_GROUPS={
+  painel:{views:['painel']},
+  pubs:{views:['pubs']},
+  pessoas:{views:['rede','track'],labels:{rede:'Rede',track:'Acompanhamento'}},
+  agenda:{views:['crono']},
+  conversas:{views:['mensagens','conversas'],labels:{mensagens:'Equipe',conversas:'Privadas'},badges:{mensagens:'msgBadge',conversas:'privateBadge'}},
+  mural:{views:['mural','fotos'],labels:{mural:'Mural',fotos:'Fotos'},badges:{mural:'muralBadge'}},
+  lab:{views:['lab']}
+};
+function groupOfView(v){return Object.keys(VIEW_GROUPS).find(g=>VIEW_GROUPS[g].views.includes(v))||v}
+function renderSubNav(v){
+  const nav=$('#subNav');if(!nav)return;
+  const g=VIEW_GROUPS[groupOfView(v)];
+  if(!g||g.views.length<2){nav.style.display='none';nav.innerHTML='';return}
+  nav.style.display='flex';
+  nav.innerHTML=g.views.map(x=>{const b=g.badges?.[x],bd=b?$('#'+b):null;const n=bd&&bd.style.display!=='none'?`<span class="badge">${esc(bd.textContent)}</span>`:'';return `<button type="button" class="${x===v?'on':''}" data-sub-view="${x}">${esc(g.labels[x])}${n}</button>`}).join('');
+  nav.querySelectorAll('[data-sub-view]').forEach(b=>b.onclick=()=>switchView(b.dataset.subView));
+}
 function switchView(v){
   currentView=v;
   document.body.dataset.view=v;
+  const grp=groupOfView(v);
   $$('.view').forEach(el=>el.classList.remove('on'));
-  $$('.tab').forEach(el=>el.classList.toggle('on',el.dataset.view===v));
+  $$('.tab').forEach(el=>el.classList.toggle('on',(el.dataset.group||el.dataset.view)===grp));
+  renderSubNav(v);
   const map={painel:'viewPainel',rede:'viewRede',crono:'viewCrono',track:'viewTrack',lab:'viewLab',feed:'viewFeed',mensagens:'viewMensagens',conversas:'viewConversas',mural:'viewMural',fotos:'viewFotos',pubs:'viewPubs'};
   map[v] && $('#'+map[v]).classList.add('on');
   if(v==='painel') renderPainel();
@@ -6692,6 +6715,7 @@ $('#savePhotoBtn').onclick=savePhoto;
 if($('#fBusca'))$('#fBusca').oninput=()=>{clearTimeout(window.__fBuscaT);window.__fBuscaT=setTimeout(renderFotos,180)};
 if($('#fLimpar'))$('#fLimpar').onclick=()=>{['fProjeto','fPessoa','fAno','fTipo','fBusca'].forEach(id=>{const el=$('#'+id);if(el)el.value=''});renderFotos()};
 if($('#fotosSelectBtn'))$('#fotosSelectBtn').onclick=toggleFotoSelecting;
+if($('#fMais'))$('#fMais').onclick=()=>{const w=$('#fMais').closest('.mural-filters');w.classList.toggle('open');$('#fMais').textContent=w.classList.contains('open')?'Menos':'Filtros'};
 if($('#muralSelAll'))$('#muralSelAll').onclick=()=>{fotosFiltradas().forEach(p=>fotoSelected.add(p.id));renderFotos()};
 if($('#muralSelNone'))$('#muralSelNone').onclick=()=>{fotoSelected.clear();renderFotos()};
 if($('#muralZipBtn'))$('#muralZipBtn').onclick=downloadSelectedPhotos;
@@ -6796,7 +6820,7 @@ window.CARBONAUTAS_BUILD='P25-FOTOS-LEGIVEIS-20260910';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P25b-20260911',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P26-20260912',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });

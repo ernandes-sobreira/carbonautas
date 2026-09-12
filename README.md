@@ -20,6 +20,13 @@ Plataforma da Rede Carbonautas (LIPAN/LEFA/CELBE, UNEMAT). Arquivo unico `index.
 
 ## CHANGELOG
 
+### P26 · 2026-09-12
+- Navegacao reduzida de 10 para 7 destinos: Repositorio (destaque, largura total no menu), Painel, Pessoas (Rede + Acompanhamento), Agenda (antigo Cronograma), Conversas (Equipe + Privadas), Mural (Mural + Fotos), Lab.
+- Grupos com duas telas ganham uma sub-navegacao em pilulas no topo. Nenhum modulo foi reescrito; as telas antigas continuam existindo por baixo.
+- Removidos o rodape "O botao MENU funciona em qualquer tela", o selo de versao no menu, o chip P22 do Science Dock e a versao no titulo da aba.
+- Fotos no celular: so o filtro de projeto fica visivel; os demais abrem no botao Filtros.
+- Nao alterado: regras, VPS, dados.
+
 ### P25b · 2026-09-11
 - Regras: removido o teste `is list` na leitura de `rede_repository_packages` e `rede_personal_repositories`, que podia negar a consulta de listagem inteira. **Publicar `firestore.rules`.**
 - Meu Repositorio mostra na tela o motivo quando o Firestore bloqueia a listagem ou quando o vinculo conta/pessoa esta inconsistente, em vez de ficar vazio em silencio.
