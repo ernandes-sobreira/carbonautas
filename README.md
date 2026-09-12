@@ -20,6 +20,13 @@ Plataforma da Rede Carbonautas (LIPAN/LEFA/CELBE, UNEMAT). Arquivo unico `index.
 
 ## CHANGELOG
 
+### P27 · 2026-09-12
+- Agenda reconstruida com tres visoes: Mes (grade com pontos coloridos por tipo, vermelho quando atrasado, toque no dia mostra a lista do dia), Ano (12 mini-meses com intensidade por quantidade, toque abre o mes) e Lista (Atrasado, Hoje, Esta semana, Este mes, Depois, Concluido).
+- Itens da agenda compactos: hora, titulo, quem. Descricao so aparece ao tocar em "detalhes".
+- Os tres botoes de criacao viraram um unico "+ Novo" com tres opcoes. Filtros escondidos atras do botao Filtros.
+- Repositorio: cabecalho alinhado no celular (dois botoes por linha, publicacao em linha inteira), titulo e subtitulo encurtados.
+- Nao alterado: regras, VPS, dados. A Agenda usa os mesmos dados (rede_schedule, prazos dos membros, agenda privada).
+
 ### P26 · 2026-09-12
 - Navegacao reduzida de 10 para 7 destinos: Repositorio (destaque, largura total no menu), Painel, Pessoas (Rede + Acompanhamento), Agenda (antigo Cronograma), Conversas (Equipe + Privadas), Mural (Mural + Fotos), Lab.
 - Grupos com duas telas ganham uma sub-navegacao em pilulas no topo. Nenhum modulo foi reescrito; as telas antigas continuam existindo por baixo.
