@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carbonautas · Science OS · P22</title>
+<title>Carbonautas · Science OS · P25</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P22">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P22">
@@ -411,6 +411,28 @@
   .ph-cap{padding:9px 12px;font-size:12.5px;color:var(--ink-2);line-height:1.4}
   .ph-cap .by{display:block;font-size:11px;color:var(--ink-3);margin-top:2px}
   .fotos-empty{color:var(--ink-3);font-size:14px;text-align:center;padding:60px 20px}
+  /* P25 mural minimalista */
+  .fotos-wrap{max-width:1180px}
+  .mural-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .mural-head h2{margin:0;font-family:'Fraunces',serif;font-size:24px;font-weight:600}
+  .mural-head .sub{font-size:12.5px;color:var(--ink-3)}
+  .mural-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .mural-filters select,.mural-filters input{border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;background:#fff;color:var(--ink);min-width:0}
+  .mural-filters input{flex:1 1 180px}
+  .mural-select-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);margin-bottom:14px;font-size:13px;color:var(--ink-2)}
+  .mural-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+  @media(max-width:640px){.mural-grid{grid-template-columns:repeat(3,1fr);gap:4px}}
+  .mt{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:var(--panel);cursor:zoom-in}
+  .mt img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
+  .mt:hover img{transform:scale(1.03)}
+  .mt .mt-tag{position:absolute;left:8px;bottom:8px;max-width:calc(100% - 16px);font-size:10.5px;font-weight:700;color:#fff;background:rgba(12,30,36,.62);padding:3px 8px;border-radius:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;transition:opacity .15s}
+  .mt:hover .mt-tag{opacity:1}
+  .mt .mt-chk{position:absolute;top:8px;left:8px;width:22px;height:22px;border-radius:50%;border:2px solid #fff;background:rgba(12,30,36,.35);display:none;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:900}
+  .mural-grid.selecting .mt{cursor:pointer}
+  .mural-grid.selecting .mt .mt-chk{display:flex}
+  .mt.sel{outline:3px solid var(--agua);outline-offset:-3px}
+  .mt.sel .mt-chk{background:var(--agua);border-color:var(--agua)}
+  @media(max-width:640px){.mt .mt-tag{display:none}.mural-head h2{font-size:20px}}
   .lightbox{position:fixed;inset:0;background:rgba(10,24,28,.9);z-index:70;display:none;flex-direction:column;align-items:center;justify-content:flex-start;padding:30px;overflow-y:auto}
   .lightbox.open{display:flex}
   .lightbox img{max-width:92vw;max-height:78vh;border-radius:12px;box-shadow:var(--shadow-lg)}
@@ -1930,23 +1952,36 @@
   <!-- Pequeno puxador: toque ou deslize para baixo no topo para mostrar as abas -->
   <button type="button" class="mobile-nav-handle" id="mobileNavHandle" aria-label="Mostrar navegação"></button>
 
-  <!-- ============ VIEW: FOTOS ============ -->
+  <!-- ============ VIEW: FOTOS (P25 mural minimalista) ============ -->
   <div class="view" id="viewFotos">
     <div class="fotos-scroll">
       <div class="fotos-wrap">
-        <div class="view-head">
+        <div class="mural-head">
           <div>
-            <h2>Fotos do grupo</h2>
-            <div class="sub">Fotos e prints de campo, laboratório, eventos e ações — vinculados ao projeto, data e atividade realizada.</div>
+            <h2>Fotos</h2>
+            <div class="sub" id="fotosCount">—</div>
           </div>
           <div class="spacer"></div>
-          <button class="btn primary" id="addPhotoBtn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Enviar foto
-          </button>
+          <button class="btn" id="fotosSelectBtn" type="button">Selecionar</button>
+          <button class="btn primary" id="addPhotoBtn" type="button">Enviar</button>
         </div>
-        <div class="gallery" id="gallery"></div>
-        <div class="fotos-empty" id="fotosEmpty" style="display:none">Nenhuma foto ainda. Envie a primeira do grupo.</div>
+        <div class="mural-filters">
+          <select id="fProjeto"><option value="">Todos os projetos</option></select>
+          <select id="fPessoa"><option value="">Todas as pessoas</option></select>
+          <select id="fAno"><option value="">Todos os anos</option></select>
+          <select id="fTipo"><option value="">Fotos e prints</option><option value="foto">Só fotos</option><option value="print">Só prints</option></select>
+          <input id="fBusca" type="search" placeholder="Buscar na legenda ou ação">
+          <button class="btn ghost" id="fLimpar" type="button" style="display:none">Limpar</button>
+        </div>
+        <div class="mural-select-bar" id="muralSelectBar" style="display:none">
+          <span id="muralSelCount">0 selecionadas</span>
+          <button class="btn ghost" id="muralSelAll" type="button">Selecionar todas as filtradas</button>
+          <button class="btn ghost" id="muralSelNone" type="button">Limpar seleção</button>
+          <div class="spacer"></div>
+          <button class="btn primary" id="muralZipBtn" type="button" disabled>Baixar ZIP</button>
+        </div>
+        <div class="mural-grid" id="gallery"></div>
+        <div class="fotos-empty" id="fotosEmpty" style="display:none">Nenhuma foto com esses filtros.</div>
       </div>
     </div>
   </div>
@@ -2455,8 +2490,8 @@
         <div class="photo-pick">
           <div class="photo-prev" id="gPrev" style="width:105px;height:105px">sem imagem</div>
           <div style="flex:1">
-            <button class="btn" id="gPickBtn" style="width:100%;justify-content:center">Escolher foto ou print</button>
-            <input type="file" id="gFile" accept="image/*" style="display:none">
+            <button class="btn" id="gPickBtn" style="width:100%;justify-content:center">Escolher uma ou várias imagens</button>
+            <input type="file" id="gFile" accept="image/*" multiple style="display:none">
             <p class="hint" style="margin:8px 0 0">Aceita JPG, PNG, WEBP e capturas de tela.</p>
           </div>
         </div>
@@ -4832,16 +4867,77 @@ async function deleteChatMsg(id){
 }
 
 /* ============ FOTOS ============ */
+/* ============ FOTOS · P25 mural minimalista, filtros e ZIP ============ */
+let fotoSelecting=false,fotoSelected=new Set();
+function fotoFilters(){return {projeto:$('#fProjeto')?.value||'',pessoa:$('#fPessoa')?.value||'',ano:$('#fAno')?.value||'',tipo:$('#fTipo')?.value||'',busca:($('#fBusca')?.value||'').trim().toLowerCase()}}
+function fotoYear(p){const d=p.dataRealizacao||(p.ts?.toMillis?new Date(p.ts.toMillis()).toISOString().slice(0,10):'');return String(d||'').slice(0,4)}
+function fotosFiltradas(){
+  const f=fotoFilters();
+  return state.photos.filter(p=>{
+    if(f.projeto&&(p.projeto||'')!==f.projeto)return false;
+    if(f.pessoa&&(p.autorId||'')!==f.pessoa&&(p.autor||'')!==f.pessoa)return false;
+    if(f.ano&&fotoYear(p)!==f.ano)return false;
+    if(f.tipo&&(p.tipoImagem||'foto')!==f.tipo)return false;
+    if(f.busca&&!((p.legenda||'')+' '+(p.acao||'')+' '+(p.projeto||'')).toLowerCase().includes(f.busca))return false;
+    return true;
+  });
+}
+function refreshFotoFilterOptions(){
+  const keep=(sel,opts,first)=>{if(!sel)return;const cur=sel.value;sel.innerHTML=`<option value="">${first}</option>`+opts.map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('');sel.value=opts.some(([v])=>v===cur)?cur:''};
+  const projetos=[...new Set(state.photos.map(p=>(p.projeto||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  keep($('#fProjeto'),projetos.map(x=>[x,x]),'Todos os projetos');
+  const pessoas=new Map();state.photos.forEach(p=>{const k=p.autorId||p.autor||'';if(!k)return;pessoas.set(k,memberById(p.autorId)?.nome||p.autor||k)});
+  keep($('#fPessoa'),[...pessoas.entries()].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR')),'Todas as pessoas');
+  const anos=[...new Set(state.photos.map(fotoYear).filter(Boolean))].sort().reverse();
+  keep($('#fAno'),anos.map(x=>[x,x]),'Todos os anos');
+}
 function renderFotos(){
-  const gal=$('#gallery'), empty=$('#fotosEmpty');
-  if(!state.photos.length){gal.innerHTML='';empty.style.display='block';return}
+  const gal=$('#gallery'), empty=$('#fotosEmpty');if(!gal)return;
+  refreshFotoFilterOptions();
+  const f=fotoFilters(),ativo=!!(f.projeto||f.pessoa||f.ano||f.tipo||f.busca);
+  if($('#fLimpar'))$('#fLimpar').style.display=ativo?'inline-flex':'none';
+  const list=fotosFiltradas();
+  if($('#fotosCount'))$('#fotosCount').textContent=state.photos.length?`${list.length} de ${state.photos.length} foto${state.photos.length===1?'':'s'}`:'Nenhuma foto ainda';
+  gal.classList.toggle('selecting',fotoSelecting);
+  if($('#muralSelectBar'))$('#muralSelectBar').style.display=fotoSelecting?'flex':'none';
+  if($('#fotosSelectBtn'))$('#fotosSelectBtn').textContent=fotoSelecting?'Concluir':'Selecionar';
+  updateMuralSelCount();
+  if(!list.length){gal.innerHTML='';empty.style.display='block';empty.textContent=state.photos.length?'Nenhuma foto com esses filtros.':'Nenhuma foto ainda. Envie a primeira do grupo.';return}
   empty.style.display='none';
-  gal.innerHTML=state.photos.map(p=>{
-    const ss=socialFor('photo',p.id),mr=myReaction('photo',p.id);
-    const meta=[p.projeto?`<span class="photo-pill">📌 ${esc(p.projeto)}</span>`:'',p.dataRealizacao?`<span class="photo-pill date">📅 ${fmtDate(p.dataRealizacao)}</span>`:'',p.tipoImagem==='print'?'<span class="photo-pill print">🖥️ Print</span>':''].filter(Boolean).join('');
-    return `<div class="ph" data-id="${p.id}"><img src="${esc(p.url)}" alt="${esc(p.legenda||p.acao||'')}" loading="lazy"><div class="ph-cap">${p.legenda?`<div>${esc(p.legenda)}</div>`:''}${meta?`<div class="photo-meta">${meta}</div>`:''}${p.acao?`<div class="photo-action">${esc(p.acao)}</div>`:''}${p.autor?`<span class="by">por ${esc(p.autor)}</span>`:''}</div><div class="ph-social"><button class="${mr?.type==='like'?'on':''}" data-react="like" title="Topizera">👍 ${ss.likes||''}</button><button class="${mr?.type==='heart'?'on':''}" data-react="heart" title="Qui linduuu!">💙 ${ss.hearts||''}</button><button class="${mr?.type==='party'?'on':''}" data-react="party" title="Agó, xaí esse!">🎉 ${ss.parties||''}</button><button class="${mr?.type==='dislike'?'on':''}" data-react="dislike" title="Agó, çei não ein!">🤨 ${ss.dislikes||''}</button><button data-comments title="fala ae xomano(a)">💬 ${ss.cs.length||''}</button></div></div>`
-  }).join('');
-  gal.querySelectorAll('.ph').forEach(el=>{el.onclick=e=>{const rb=e.target.closest('[data-react]');if(rb){e.stopPropagation();toggleReaction('photo',el.dataset.id,rb.dataset.react,rb);return}openLightbox(el.dataset.id)}});
+  gal.innerHTML=list.map(p=>`<div class="mt${fotoSelected.has(p.id)?' sel':''}" data-id="${p.id}"><img src="${esc(p.url)}" alt="${esc(p.legenda||p.acao||'')}" loading="lazy"><span class="mt-chk">✓</span>${(p.legenda||p.projeto)?`<span class="mt-tag">${esc(p.legenda||p.projeto)}</span>`:''}</div>`).join('');
+  gal.querySelectorAll('.mt').forEach(el=>{el.onclick=()=>{if(fotoSelecting){toggleFotoSel(el.dataset.id);el.classList.toggle('sel',fotoSelected.has(el.dataset.id));updateMuralSelCount()}else openLightbox(el.dataset.id)}});
+}
+function toggleFotoSel(id){if(fotoSelected.has(id))fotoSelected.delete(id);else fotoSelected.add(id)}
+function updateMuralSelCount(){const n=fotoSelected.size;if($('#muralSelCount'))$('#muralSelCount').textContent=`${n} selecionada${n===1?'':'s'}`;if($('#muralZipBtn'))$('#muralZipBtn').disabled=!n}
+function toggleFotoSelecting(){fotoSelecting=!fotoSelecting;if(!fotoSelecting)fotoSelected.clear();renderFotos()}
+function loadJSZip(){return new Promise((res,rej)=>{if(window.JSZip)return res();const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';sc.onload=()=>res();sc.onerror=()=>rej(new Error('Não foi possível carregar o compactador.'));document.head.appendChild(sc)})}
+function fotoSafeName(t=''){return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'_').replace(/^_+|_+$/g,'').slice(0,60)}
+async function downloadSelectedPhotos(){
+  const list=state.photos.filter(p=>fotoSelected.has(p.id));if(!list.length)return;
+  const btn=$('#muralZipBtn');btn.disabled=true;
+  try{
+    await loadJSZip();const zip=new JSZip();let ok=0,fail=0;const linhas=['arquivo;projeto;data;autor;legenda;acao'];
+    for(let i=0;i<list.length;i++){
+      const p=list[i];btn.textContent=`Baixando ${i+1}/${list.length}…`;
+      try{
+        const r=await fetch(p.url,{credentials:'omit'});if(!r.ok)throw new Error('HTTP '+r.status);
+        const blob=await r.blob();const ext=blob.type==='image/png'?'png':blob.type==='image/webp'?'webp':'jpg';
+        const pasta=fotoSafeName(p.projeto||'sem_projeto')||'sem_projeto';
+        const nome=`${p.dataRealizacao||''}_${fotoSafeName(p.autor)}_${fotoSafeName(p.legenda)||String(i+1).padStart(3,'0')}.${ext}`.replace(/^_/,'');
+        zip.file(`${pasta}/${nome}`,blob);
+        linhas.push([`${pasta}/${nome}`,p.projeto||'',p.dataRealizacao||'',p.autor||'',p.legenda||'',(p.acao||'').replace(/[\r\n;]+/g,' ')].map(x=>`"${String(x).replace(/"/g,'""')}"`).join(';'));
+        ok++;
+      }catch(e){console.warn('Foto não baixada:',p.id,e);fail++}
+    }
+    if(!ok)throw new Error('Nenhuma foto pôde ser baixada. Verifique a configuração de CORS do Storage.');
+    zip.file('fotos.csv','\ufeff'+linhas.join('\n'));
+    btn.textContent='Compactando…';
+    const out=await zip.generateAsync({type:'blob'});
+    const f=fotoFilters(),tag=fotoSafeName(f.projeto||'fotos')||'fotos';
+    const a=document.createElement('a');a.href=URL.createObjectURL(out);a.download=`carbonautas_${tag}_${new Date().toISOString().slice(0,10)}.zip`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    toast(fail?`${ok} foto${ok===1?'':'s'} no ZIP. ${fail} falharam.`:`ZIP pronto com ${ok} foto${ok===1?'':'s'} e a planilha fotos.csv.`);
+  }catch(e){console.error(e);toast(e.message||'Não foi possível gerar o ZIP.')}
+  finally{btn.textContent='Baixar ZIP';btn.disabled=!fotoSelected.size}
 }
 function openLightbox(id){
   const p=state.photos.find(x=>x.id===id); if(!p)return;
@@ -4864,7 +4960,7 @@ async function deleteLightboxPhoto(){
     closeLightbox(); toast('Foto removida.');
   }catch(e){ console.error(e); toast('Erro ao remover.'); }
 }
-let photoFoto='';
+let photoFoto='',photoFotos=[];
 function photoProjectChoices(){
   const vals=[];
   state.members.forEach(m=>{if(m.tema)vals.push(m.tema)});
@@ -4880,37 +4976,51 @@ function refreshPhotoProjects(){
 }
 function openPhotoModal(){
   if(!myId){toast('Identifique-se como um Carbonauta para enviar fotos.');openIdentity();return}
-  photoFoto='';$('#gPrev').innerHTML='sem imagem';$('#gCap').value='';$('#gAcao').value='';$('#gTipoImagem').value='foto';$('#gData').value=new Date().toISOString().slice(0,10);$('#gProjetoOutro').value='';
+  photoFoto='';photoFotos=[];$('#gPrev').innerHTML='sem imagem';$('#gCap').value='';$('#gAcao').value='';$('#gTipoImagem').value='foto';$('#gData').value=new Date().toISOString().slice(0,10);$('#gProjetoOutro').value='';
   refreshPhotoProjects();const me=memberById(myId);$('#gAutor').value=me?me.nome:'';$('#gAutor').readOnly=true;openOverlay('photoOverlay');
 }
-function handleGalleryFile(file,fromPaste=false){
-  if(!file||!file.type.startsWith('image/')){toast('Escolha uma imagem ou print.');return}
-  if(fromPaste) $('#gTipoImagem').value='print';
-  const reader=new FileReader();
-  reader.onload=e=>{
-    const img=new Image();
-    img.onload=()=>{
-      const max=1600;
-      const sc=Math.min(1,max/Math.max(img.width,img.height));
-      const c=document.createElement('canvas');
-      c.width=Math.max(1,Math.round(img.width*sc));
-      c.height=Math.max(1,Math.round(img.height*sc));
-      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      const usePng=fromPaste||file.type==='image/png'||$('#gTipoImagem').value==='print';
-      photoFoto=usePng ? c.toDataURL('image/png') : c.toDataURL('image/jpeg',.88);
-      $('#gPrev').innerHTML=`<img src="${photoFoto}" style="width:100%;height:100%;object-fit:cover;border-radius:14px">`;
-      $('#gPasteZone').innerHTML=fromPaste
-        ? '✅ Print colado com sucesso<small>Você pode colar outro para substituir</small>'
-        : '✅ Imagem pronta<small>Você pode arrastar ou colar outra para substituir</small>';
+function handleGalleryFile(file,fromPaste=false){return handleGalleryFiles(file?[file]:[],fromPaste)}
+function handleGalleryFiles(files,fromPaste=false){
+  const list=[...(files||[])].filter(f=>f&&f.type.startsWith('image/'));
+  if(!list.length){toast('Escolha uma imagem ou print.');return}
+  if(list.length>40){toast('Envie no máximo 40 imagens por vez.');return}
+  if(fromPaste)$('#gTipoImagem').value='print';
+  photoFotos=[];let done=0;
+  list.forEach((file,idx)=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        const max=1600,sc=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');
+        c.width=Math.max(1,Math.round(img.width*sc));c.height=Math.max(1,Math.round(img.height*sc));
+        c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+        const usePng=fromPaste||file.type==='image/png'||$('#gTipoImagem').value==='print';
+        photoFotos[idx]=usePng?c.toDataURL('image/png'):c.toDataURL('image/jpeg',.88);
+        if(++done===list.length){
+          photoFoto=photoFotos[0]||'';
+          $('#gPrev').innerHTML=`<img src="${photoFoto}" style="width:100%;height:100%;object-fit:cover;border-radius:14px">`;
+          $('#gPasteZone').innerHTML=list.length>1?`✅ ${list.length} imagens prontas<small>Todas receberão o mesmo projeto, data e ação</small>`:(fromPaste?'✅ Print colado com sucesso<small>Você pode colar outro para substituir</small>':'✅ Imagem pronta<small>Você pode arrastar ou colar outra para substituir</small>');
+        }
+      };
+      img.src=e.target.result;
     };
-    img.src=e.target.result;
-  };
-  reader.readAsDataURL(file);
+    reader.readAsDataURL(file);
+  });
 }
 async function savePhoto(){
-  if(!photoFoto){toast('Escolha uma foto ou cole um print.');return}
+  const imgs=photoFotos.filter(Boolean);if(!imgs.length){toast('Escolha uma foto ou cole um print.');return}
   const projeto=$('#gProjeto').value==='__outro'?$('#gProjetoOutro').value.trim():$('#gProjeto').value;
-  try{toast('Enviando imagem…');const {url,path}=await fbUploadImage('galeria',photoFoto);await FB().addDoc(FB().collection(window.db,'rede_photos'),{url,storagePath:path,legenda:$('#gCap').value.trim(),projeto,acao:$('#gAcao').value.trim(),dataRealizacao:$('#gData').value,tipoImagem:$('#gTipoImagem').value,autor:$('#gAutor').value.trim(),autorId:myId||null,authorUid:window.auth.currentUser?.uid||'',ts:FB().serverTimestamp()});closeOverlay('photoOverlay');toast('Imagem publicada.')}catch(e){console.error(e);toast('Erro ao enviar a imagem.')}
+  const btn=$('#savePhotoBtn');btn.disabled=true;let ok=0;
+  try{
+    for(let i=0;i<imgs.length;i++){
+      btn.textContent=imgs.length>1?`Enviando ${i+1}/${imgs.length}…`:'Enviando…';
+      const {url,path}=await fbUploadImage('galeria',imgs[i]);
+      await FB().addDoc(FB().collection(window.db,'rede_photos'),{url,storagePath:path,legenda:$('#gCap').value.trim(),projeto,acao:$('#gAcao').value.trim(),dataRealizacao:$('#gData').value,tipoImagem:$('#gTipoImagem').value,autor:$('#gAutor').value.trim(),autorId:myId||null,authorUid:window.auth.currentUser?.uid||'',ts:FB().serverTimestamp()});
+      ok++;
+    }
+    closeOverlay('photoOverlay');toast(ok===1?'Imagem publicada.':`${ok} imagens publicadas.`);
+  }catch(e){console.error(e);toast(ok?`${ok} enviadas, depois falhou: ${e.message||'erro'}`:'Erro ao enviar a imagem.')}
+  finally{btn.disabled=false;btn.textContent='Publicar'}
 }
 
 /* ============ PUBLICAÇÕES ============ */
@@ -5060,6 +5170,32 @@ async function openRepositoryPackage(id){
 function renderRepoSelectedFiles(){const wrap=$('#repoPackageSelectedFiles');if(!wrap)return;wrap.innerHTML=repoPackageSelectedFiles.length?repoPackageSelectedFiles.map((f,i)=>`<div class="repo-upload-file"><span>${i+1}. ${esc(f.name)}</span><b>${esc(humanBytes(f.size))}</b></div>`).join(''):''}
 function handleRepoPackageFiles(files){const list=[...(files||[])];if(!list.length)return;if(list.length>20){toast('Escolha no máximo 20 arquivos por pasta.');return}const tooBig=list.find(f=>f.size>15*1024*1024);if(tooBig){toast(`“${tooBig.name}” passa de 15 MB.`);return}const total=list.reduce((s,f)=>s+f.size,0);if(total>120*1024*1024){toast('Os arquivos ultrapassam 120 MB. Divida em duas pastas.');return}repoPackageSelectedFiles=list;renderRepoSelectedFiles()}
 function openRepoPackageUpload(opts={}){if(!window.auth?.currentUser||!myId)return toast('Entre com seu perfil para enviar arquivos.');repoPackageUploadContext=opts.personal?'personal':'general';repoPackageSelectedFiles=[];renderRepoSelectedFiles();const sel=$('#repoPackageOwner'),ordered=[...state.members].filter(m=>m.status!=='inativo').sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));sel.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');sel.value=myId;$('#repoPackageOwnerRow').style.display=repoPackageUploadContext==='personal'?'none':(isAdmin?'block':'none');if(!isAdmin||repoPackageUploadContext==='personal')sel.value=myId;$('#repoPackageTitle').value='';$('#repoPackagePurpose').value=repoPackageUploadContext==='personal'?'artigos':'bolsa';$('#repoPackagePurposeOther').value='';$('#repoPackagePurposeOtherRow').style.display='none';document.querySelector('input[name="repoPackageAccess"][value="private"]').checked=true;$('#repoPackagePeopleSearch').value='';const h=$('#repoPackageUploadOverlay .modal-h h2'),save=$('#repoPackageSaveBtn'),notice=$('#repoPackageUploadOverlay .notice');if(h)h.textContent=repoPackageUploadContext==='personal'?'📁 Nova pasta no Meu Repositório':'📦 Enviar arquivos com acesso controlado';if(save)save.textContent=repoPackageUploadContext==='personal'?'Criar pasta':'Enviar conjunto';if(notice)notice.innerHTML=repoPackageUploadContext==='personal'?'<strong>Seu espaço começa privado.</strong> Dê um nome à pasta. Você pode criar a pasta vazia e adicionar arquivos depois, ou já enviar arquivos agora.':'<strong>Um propósito, vários arquivos.</strong> Organize documentos e escolha exatamente quem poderá abrir.';updateRepoPackageAccessUI();openOverlay('repoPackageUploadOverlay');setTimeout(()=>$('#repoPackageTitle')?.focus(),60)}
+/* P25: funcoes que eram chamadas mas nao existiam no arquivo (perdidas entre patches).
+   Sem elas, openRepoPackageUpload lancava ReferenceError e o modal "Nova pasta" nunca abria;
+   e a linha de wiring do #repoPackagePeopleSearch quebrava o script, deixando sem evento todos
+   os botoes ligados depois dela (Criar pasta, Publicar, chat privado). */
+function rootAllowedMemberIds(ownerId){
+  const root=repoRootByOwner(ownerId);
+  const ids=new Set([ownerId,...((root?.collaboratorMemberIds||root?.allowedMemberIds||[]).filter(Boolean))]);
+  return ids;
+}
+function fileToDataUrl(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>rej(new Error('Falha ao ler o arquivo.'));r.readAsDataURL(file)})}
+function renderRepoPackagePeople(){
+  const wrap=$('#repoPackagePeople');if(!wrap)return;
+  const q=($('#repoPackagePeopleSearch')?.value||'').trim().toLowerCase();
+  const ownerId=(repoPackageUploadContext==='personal'||!isAdmin)?myId:($('#repoPackageOwner')?.value||myId);
+  const root=rootAllowedMemberIds(ownerId);
+  const checked=new Set([...wrap.querySelectorAll('input[type="checkbox"]:checked')].map(x=>x.value));
+  wrap.innerHTML=state.members.filter(m=>m.status!=='inativo'&&m.id!==ownerId&&(!q||m.nome.toLowerCase().includes(q))).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>{
+    const viaRoot=root.has(m.id)&&m.id!==ownerId;
+    return `<label class="repo-share-row"><input type="checkbox" value="${m.id}" ${checked.has(m.id)||viaRoot?'checked':''} ${viaRoot?'disabled':''}><span><b>${esc(m.nome)}</b><small>${viaRoot?'Já tem acesso ao repositório inteiro':esc(NIVEIS[m.nivel]?.label||m.programa||'Integrante da Rede')}</small></span></label>`;
+  }).join('')||'<div class="hint">Nenhuma pessoa encontrada.</div>';
+}
+function updateRepoPackageAccessUI(){
+  const mode=document.querySelector('input[name="repoPackageAccess"]:checked')?.value||'private';
+  const row=$('#repoPackagePeopleRow');if(row)row.style.display=mode==='selected'?'block':'none';
+  if(mode==='selected')renderRepoPackagePeople();
+}
 function selectedRepoPackageExtraIds(ownerId,mode){const ids=new Set();if(mode==='group')state.members.filter(m=>m.status!=='inativo'&&m.id!==ownerId).forEach(m=>ids.add(m.id));if(mode==='selected')document.querySelectorAll('#repoPackagePeople input[type="checkbox"]:checked:not(:disabled)').forEach(x=>ids.add(x.value));return[...ids]}
 function selectedRepoPackageAllowedIds(ownerId,mode){const ids=rootAllowedMemberIds(ownerId),extra=selectedRepoPackageExtraIds(ownerId,mode);extra.forEach(id=>ids.add(id));if(repoPackageUploadContext!=='personal')ids.add(myId);return[...ids]}
 async function saveRepoPackage(){const btn=$('#repoPackageSaveBtn'),ownerId=(repoPackageUploadContext==='personal'||!isAdmin)?myId:$('#repoPackageOwner').value,title=$('#repoPackageTitle').value.trim(),purpose=$('#repoPackagePurpose').value,purposeOther=$('#repoPackagePurposeOther').value.trim(),mode=document.querySelector('input[name="repoPackageAccess"]:checked')?.value||'private';if(!ownerId)return toast('Defina o proprietário.');if(!title)return toast('Dê um nome à pasta.');if(purpose==='outro'&&!purposeOther)return toast('Descreva o propósito.');if(!repoPackageSelectedFiles.length&&repoPackageUploadContext!=='personal')return toast('Escolha pelo menos um arquivo.');const folderExtraMemberIds=selectedRepoPackageExtraIds(ownerId,mode),rootSharedMemberIds=[...rootAllowedMemberIds(ownerId)].filter(id=>id!==ownerId),allowedMemberIds=selectedRepoPackageAllowedIds(ownerId,mode);const f=FB(),uid=window.auth.currentUser.uid,owner=memberById(ownerId),actor=currentActor(),ref=f.doc(f.collection(window.db,'rede_repository_packages')),ownerUid=(state.users||[]).find(u=>u.memberId===ownerId)?.uid||'';try{btn.disabled=true;await f.setDoc(ref,{title,purpose,purposeOther,accessMode:mode,allowedMemberIds,folderExtraMemberIds,rootSharedMemberIds,personalRepo:repoPackageUploadContext==='personal',ownerMemberId:ownerId,ownerUid,ownerName:owner?.nome||'',createdByUid:uid,createdByMemberId:myId,createdByName:actor?.name||myName||'',fileCount:0,ts:f.serverTimestamp(),updatedAt:f.serverTimestamp()});let ok=0;for(let i=0;i<repoPackageSelectedFiles.length;i++){const file=repoPackageSelectedFiles[i];btn.textContent=`Enviando ${i+1}/${repoPackageSelectedFiles.length}…`;const dataUrl=await fileToDataUrl(file),up=await fbUploadFile('repo_'+ref.id,dataUrl,file.name),child=f.doc(f.collection(ref,'files'));await f.setDoc(child,{fileName:file.name,title:file.name.replace(/\.[^.]+$/,''),url:up.url,storagePath:up.path,size:file.size,mimeType:file.type||'',ext:inferFileExt('',file.name),order:i,createdByUid:uid,ts:f.serverTimestamp()});ok++}await f.updateDoc(ref,{fileCount:ok,updatedAt:f.serverTimestamp()});const recipients=allowedMemberIds.filter(id=>id&&id!==myId);await Promise.allSettled(recipients.map(id=>createRepoNotification(id,{kind:'repositorio_pacote',sourceType:'repositorio_pacote',sourceId:ref.id,ownerId,title:'📁 Pasta compartilhada com você',message:`${actor?.name||'Um Carbonauta'} compartilhou “${title}” (${ok} arquivo${ok===1?'':'s'}).`})));closeOverlay('repoPackageUploadOverlay');toast(ok?`Pasta criada com ${ok} arquivo${ok===1?'':'s'}.`:'Pasta criada. Agora você pode adicionar arquivos quando quiser.');repoViewMode=repoPackageUploadContext==='personal'?'mine':repoViewMode;renderPubs()}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou a pasta. Publique as regras P20.':(e.message||'Erro ao enviar a pasta.'))}finally{btn.disabled=false;btn.textContent=repoPackageUploadContext==='personal'?'Criar pasta':'Enviar conjunto'}}
@@ -6537,16 +6673,23 @@ if($('#newPostBtn')) $('#newPostBtn').onclick=()=>openPostModal('atualizacao'); 
 
 $('#addPhotoBtn').onclick=openPhotoModal;
 $('#gPickBtn').onclick=()=>$('#gFile').click();
-$('#gFile').onchange=e=>handleGalleryFile(e.target.files[0]);
+$('#gFile').onchange=e=>{handleGalleryFiles(e.target.files);e.target.value=''};
 $('#gProjeto').onchange=e=>{$('#gProjetoOutroRow').style.display=e.target.value==='__outro'?'block':'none'};
 const gPasteZone=$('#gPasteZone');
 if(gPasteZone){
   gPasteZone.addEventListener('paste',e=>{const item=[...(e.clipboardData?.items||[])].find(x=>x.type?.startsWith('image/'));if(item){e.preventDefault();handleGalleryFile(item.getAsFile(),true)}});
   gPasteZone.addEventListener('dragover',e=>{e.preventDefault();gPasteZone.classList.add('drag')});
   gPasteZone.addEventListener('dragleave',()=>gPasteZone.classList.remove('drag'));
-  gPasteZone.addEventListener('drop',e=>{e.preventDefault();gPasteZone.classList.remove('drag');const file=[...(e.dataTransfer?.files||[])].find(x=>x.type.startsWith('image/'));if(file)handleGalleryFile(file,true)});
+  gPasteZone.addEventListener('drop',e=>{e.preventDefault();gPasteZone.classList.remove('drag');handleGalleryFiles([...(e.dataTransfer?.files||[])],true)});
 }
 $('#savePhotoBtn').onclick=savePhoto;
+['fProjeto','fPessoa','fAno','fTipo'].forEach(id=>{const el=$('#'+id);if(el)el.onchange=renderFotos});
+if($('#fBusca'))$('#fBusca').oninput=()=>{clearTimeout(window.__fBuscaT);window.__fBuscaT=setTimeout(renderFotos,180)};
+if($('#fLimpar'))$('#fLimpar').onclick=()=>{['fProjeto','fPessoa','fAno','fTipo','fBusca'].forEach(id=>{const el=$('#'+id);if(el)el.value=''});renderFotos()};
+if($('#fotosSelectBtn'))$('#fotosSelectBtn').onclick=toggleFotoSelecting;
+if($('#muralSelAll'))$('#muralSelAll').onclick=()=>{fotosFiltradas().forEach(p=>fotoSelected.add(p.id));renderFotos()};
+if($('#muralSelNone'))$('#muralSelNone').onclick=()=>{fotoSelected.clear();renderFotos()};
+if($('#muralZipBtn'))$('#muralZipBtn').onclick=downloadSelectedPhotos;
 $('#lbClose').onclick=closeLightbox;
 $('#lbDel').onclick=deleteLightboxPhoto;
 $('#lightbox').addEventListener('click',e=>{if(e.target.id==='lightbox')closeLightbox()});
@@ -6648,7 +6791,7 @@ window.CARBONAUTAS_BUILD='P25-FOTOS-LEGIVEIS-20260910';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P25-20260910',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P25-20260911',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });

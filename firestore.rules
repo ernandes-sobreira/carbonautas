@@ -452,7 +452,21 @@ service cloud.firestore {
           && resource.data.ownerUid == request.auth.uid;
       }
 
-      allow read: if hasProfile()
+      // P25: leitura do documento inexistente.
+      // Quando a raiz ainda nao existe, resource e null e a regra antiga
+      // gerava permission-denied em vez de "nao existe". Com isso o app
+      // nunca conseguia criar a raiz do Meu Repositorio.
+      allow get: if hasProfile()
+        && (
+          (resource == null && memberId == myMemberId())
+          || (
+            resource != null
+            && resource.data.allowedMemberIds is list
+            && myMemberId() in resource.data.allowedMemberIds
+          )
+        );
+
+      allow list: if hasProfile()
         && resource.data.allowedMemberIds is list
         && myMemberId() in resource.data.allowedMemberIds;
 
