@@ -467,7 +467,6 @@ service cloud.firestore {
         );
 
       allow list: if hasProfile()
-        && resource.data.allowedMemberIds is list
         && myMemberId() in resource.data.allowedMemberIds;
 
       allow create: if hasProfile()
@@ -525,8 +524,11 @@ service cloud.firestore {
         );
       }
 
+      // P25: sem o teste "is list" na consulta. A listagem do app usa
+      // where('allowedMemberIds','array-contains',meuId); o motor de regras
+      // consegue provar o "in" a partir desse filtro, mas nao o "is list",
+      // e a consulta inteira era negada.
       allow read: if hasProfile()
-        && resource.data.allowedMemberIds is list
         && myMemberId() in resource.data.allowedMemberIds;
 
       allow create: if hasProfile()

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Carbonautas · Science OS · P25</title>
+<title>Carbonautas · Science OS · P25b</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P22">
 <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P22">
@@ -2968,7 +2968,7 @@ const SEED_VINCULOS = [
 ];
 
 /* ============ STATE ============ */
-let state = { members: [], chat: [], schedule: [], privateSchedule: [], photos: [], publicacoes: [], repositoryPackages: [], personalRepoRoots: [], personalRepoRoot: null, activities: [], feed: [], comments: [], reactions: [], notifications: [], users: [], privateThreads: [], privateDirectory: [], linhas: DEFAULT_LINHAS.slice(), settings: {groupLink:''} };
+let state = { repoPackagesError:'', members: [], chat: [], schedule: [], privateSchedule: [], photos: [], publicacoes: [], repositoryPackages: [], personalRepoRoots: [], personalRepoRoot: null, activities: [], feed: [], comments: [], reactions: [], notifications: [], users: [], privateThreads: [], privateDirectory: [], linhas: DEFAULT_LINHAS.slice(), settings: {groupLink:''} };
 let hiddenNiveis = new Set();
 let hiddenLinhas = new Set();
 let selectedId = null;
@@ -3240,9 +3240,10 @@ function subscribeAll(){
         state.repositoryPackages=snap.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>{
           const ta=a.ts?.toMillis?a.ts.toMillis():0,tb=b.ts?.toMillis?b.ts.toMillis():0;return tb-ta;
         });
+        state.repoPackagesError='';
         if(currentView==='pubs')renderPubs();
         if($('#repoOverlay')?.classList.contains('open'))renderMemberRepository();
-      },e=>{console.warn('Dossiês privados indisponíveis:',e);state.repositoryPackages=[];}));
+      },e=>{console.error('Meu Repositório: consulta de pastas bloqueada:',e);state.repositoryPackages=[];state.repoPackagesError=(e?.code||'erro')+': '+(e?.message||'');if(currentView==='pubs')renderPubs();toast('Não consegui listar as pastas do repositório ('+(e?.code||'erro')+'). Veja o aviso na aba Repositório.');}));
     }catch(e){console.warn('Não consegui iniciar a consulta de dossiês:',e)}
   }
   // P20 · RAÍZES DOS REPOSITÓRIOS PESSOAIS
@@ -5055,7 +5056,11 @@ function renderMyRepository(){
   if($('#repoMyFileCount'))$('#repoMyFileCount').textContent=folders.reduce((n,p)=>n+Number(p.fileCount||0),0);
   if($('#repoMyCollabCount'))$('#repoMyCollabCount').textContent=collabs.length;
   const strip=$('#repoRootCollaborators');if(strip)strip.innerHTML=collabs.length?collabs.map(id=>`<span class="repo-collab-chip">👤 ${esc(memberById(id)?.nome||id)}</span>`).join(''):'<span class="repo-collab-chip none">🔒 Ninguém além de você tem acesso ao repositório inteiro.</span>';
-  const wrap=$('#repoPersonalFolders');if(wrap)wrap.innerHTML=folders.length?folders.map(p=>renderRepoFolderCard(p,false)).join(''):'<div class="repo-empty-modern" style="grid-column:1/-1"><b>Seu repositório está vazio.</b>Crie a primeira pasta para artigos, instrumentos, dados, scripts ou qualquer material que queira guardar.</div>';
+  const wrap=$('#repoPersonalFolders');if(!wrap)return;
+  const diag=[];
+  if(state.repoPackagesError)diag.push(`<b>O Firestore bloqueou a listagem das pastas.</b> Código: <code>${esc(state.repoPackagesError)}</code>. A pasta pode ter sido criada e não aparecer. Publique o <code>firestore.rules</code> desta versão no Console e recarregue.`);
+  if(authProfile?.memberId&&myId&&authProfile.memberId!==myId)diag.push(`<b>Vínculo inconsistente.</b> Sua conta (rede_users) aponta para <code>${esc(authProfile.memberId)}</code>, mas a tela usa <code>${esc(myId)}</code>. As regras usam o primeiro, então nada criado com o segundo aparece. Peça ao coordenador para corrigir o vínculo em Pessoas.`);
+  wrap.innerHTML=(diag.length?`<div class="repo-empty-modern" style="grid-column:1/-1;border-color:#e0912e;background:#fff8ee">${diag.join('<br><br>')}</div>`:'')+(folders.length?folders.map(p=>renderRepoFolderCard(p,false)).join(''):(diag.length?'':'<div class="repo-empty-modern" style="grid-column:1/-1"><b>Seu repositório está vazio.</b>Crie a primeira pasta para artigos, instrumentos, dados, scripts ou qualquer material que queira guardar.</div>'));
 }
 function renderSharedRepository(){
   const roots=(state.personalRepoRoots||[]).filter(r=>r.ownerMemberId!==myId && (r.allowedMemberIds||[]).includes(myId));
@@ -6791,7 +6796,7 @@ window.CARBONAUTAS_BUILD='P25-FOTOS-LEGIVEIS-20260910';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P25-20260911',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P25b-20260911',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });

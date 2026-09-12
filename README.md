@@ -20,6 +20,10 @@ Plataforma da Rede Carbonautas (LIPAN/LEFA/CELBE, UNEMAT). Arquivo unico `index.
 
 ## CHANGELOG
 
+### P25b · 2026-09-11
+- Regras: removido o teste `is list` na leitura de `rede_repository_packages` e `rede_personal_repositories`, que podia negar a consulta de listagem inteira. **Publicar `firestore.rules`.**
+- Meu Repositorio mostra na tela o motivo quando o Firestore bloqueia a listagem ou quando o vinculo conta/pessoa esta inconsistente, em vez de ficar vazio em silencio.
+
 ### P25 · 2026-09-11
 - Corrigido: quatro funcoes chamadas mas inexistentes no `index.html` (`renderRepoPackagePeople`, `updateRepoPackageAccessUI`, `rootAllowedMemberIds`, `fileToDataUrl`). A primeira quebrava o script na inicializacao e deixava sem evento os botoes Criar pasta, Publicar e o chat privado. A segunda impedia o modal Nova pasta de abrir. Isso era a causa de "Meu Repositorio nao abre para salvar".
 - Corrigido (regras): leitura de `rede_personal_repositories/{id}` inexistente devolvia permission-denied e a raiz privada nunca era criada. Agora `get` e `list` sao separados. **Publicar `firestore.rules`.**
