@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Carbonautas</title>
-<link rel="manifest" href="./manifest.webmanifest">
-<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P22">
-<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P22">
-<link rel="apple-touch-icon" href="./icon-192.png?v=P22">
+<link rel="manifest" href="./manifest.webmanifest?v=P28">
+<link id="dynamicFavicon" rel="icon" type="image/png" sizes="64x64" href="./favicon-64.png?v=P28">
+<link rel="icon" type="image/png" sizes="32x32" href="./favicon-32.png?v=P28">
+<link rel="apple-touch-icon" href="./icon-192.png?v=P28">
 <meta name="theme-color" content="#08152B">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -264,6 +264,20 @@
   .repo-dedupe-btn.has-dupes{background:#fff0e7!important;border-color:#ffb88f!important;color:#8a3f13!important;font-weight:900}.repo-dedupe-btn.clean{opacity:.65}
   @media(max-width:760px){.review-thread-shell{grid-template-columns:1fr;min-height:0}.review-version-list{max-height:230px}.review-chat-body{height:44vh;min-height:260px}.review-chat-msg{max-width:92%}}
 
+
+  /* ===== P28 · Medalhas + Google Agenda + Jogo ===== */
+  .medal-scroll,.game-scroll{height:100%;overflow:auto;padding:22px}
+  .medal-wrap,.game-wrap{max-width:1080px;margin:0 auto}
+  .medal-hero{display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;padding:18px;border-radius:18px;background:linear-gradient(135deg,#071827,#123C55);color:#fff;box-shadow:0 12px 28px rgba(7,24,39,.14);margin-bottom:14px}
+  .medal-hero h2,.game-head h2{font-family:'Fraunces',serif;margin:0 0 4px;font-size:28px}.medal-hero p,.game-head p{margin:0;color:#B9D1DF;line-height:1.45;font-size:13px}
+  .medal-nav{margin-left:auto;display:flex;align-items:center;gap:6px;flex-wrap:wrap}.medal-nav button{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);color:#fff;border-radius:10px;padding:8px 10px;cursor:pointer}.medal-nav .month{font-weight:900;min-width:155px;text-align:center}
+  .medal-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(280px,.75fr);gap:14px}.medal-card{border:1px solid var(--line);border-radius:18px;background:#fff;padding:16px}.medal-card h3{margin:0 0 4px;font-size:17px}.medal-sub{font-size:12px;color:var(--ink-3);margin-bottom:12px}
+  .podium{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-items:end;margin:8px 0 16px}.podium-person{border:1px solid var(--line);border-radius:16px;padding:14px 10px;text-align:center;background:#FBFDFE}.podium-person.first{padding-top:24px;background:linear-gradient(180deg,#FFFBE9,#fff)}.podium-person .med{font-size:34px}.podium-person b{display:block;font-size:13px;margin-top:5px}.podium-person strong{display:block;font-family:'Space Grotesk';font-size:24px;margin-top:4px;color:#073B4C}.podium-person small{color:var(--ink-3)}
+  .rank-list{display:flex;flex-direction:column;gap:6px}.rank-row{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:9px;align-items:center;padding:9px 10px;border:1px solid var(--line);border-radius:12px}.rank-row.me{border-color:#55B8C4;background:#F0FCFD}.rank-pos{font-weight:950;text-align:center}.rank-name{min-width:0;font-size:13px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rank-points{font-family:'Space Grotesk';font-weight:800;color:#073B4C}
+  .score-rules{display:flex;flex-direction:column;gap:7px}.score-rule{display:flex;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:11px;background:#F5F8FA;font-size:12px}.score-rule b{color:#073B4C}.medal-status{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 10px;background:#E9F8F7;color:#0E5C63;font-size:11px;font-weight:900;margin-top:8px}
+  .game-head{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}.game-head p{color:var(--ink-3)}.game-frame-shell{height:calc(100vh - 180px);min-height:560px;border-radius:20px;overflow:hidden;border:1px solid #173C4D;background:#071112;box-shadow:0 14px 36px rgba(4,22,31,.18)}.game-frame-shell iframe{width:100%;height:100%;border:0;display:block}
+  .google-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #C9DAE5;background:#fff;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:800;color:#29495C;cursor:pointer}.google-chip.ok{border-color:#9AD9B7;background:#EEFBF4;color:#187246}.google-status{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:#F5F8FA;border:1px solid var(--line);font-size:12px;margin-bottom:12px}.google-dot{width:9px;height:9px;border-radius:50%;background:#94A3B8}.google-dot.ok{background:#22C55E}.google-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;background:#0C2230;color:#D7F5FF;border-radius:8px;padding:3px 6px;font-size:11px}
+  @media(max-width:760px){.medal-scroll,.game-scroll{padding:12px}.medal-grid{grid-template-columns:1fr}.podium{grid-template-columns:1fr}.podium-person.first{order:-1}.game-frame-shell{height:calc(100dvh - 160px);min-height:480px}.medal-nav{margin-left:0;width:100%;justify-content:center}}
 
   /* ===== Agenda P27 ===== */
   .ag-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
@@ -1618,7 +1632,7 @@
 <div class="auth-gate" id="authGate">
   <div class="auth-card">
     <div class="auth-brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P22" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P28" alt="Carbonautas · carbono em ligação"></div>
       <div><h2>Carbonautas</h2><p>Acompanhamento · projetos · rede</p></div>
     </div>
     <div class="auth-login" id="authLoginPane">
@@ -1654,7 +1668,7 @@
 </div>
 
 <div class="loading" id="loading">
-  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P22" alt="Carbonautas · carbono em ligação"></div>
+  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P28" alt="Carbonautas · carbono em ligação"></div>
   <p id="loadingMsg">Conectando à rede…</p>
 </div>
 
@@ -1666,7 +1680,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
     </button>
     <div class="brand">
-      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P22" alt="Carbonautas · carbono em ligação"></div>
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P28" alt="Carbonautas · carbono em ligação"></div>
       <div>
         <h1>Carbonautas</h1>
         <div class="sub">LIPAN · LEFA · CELBE</div>
@@ -1733,7 +1747,7 @@
     <aside class="app-menu-drawer" id="appMenuDrawer" role="dialog" aria-modal="true" aria-label="Navegação do Carbonautas">
       <div class="app-menu-head">
         <div class="app-menu-brand">
-          <img src="./icon-192.png?v=P22" alt="" class="app-menu-logo">
+          <img src="./icon-192.png?v=P28" alt="" class="app-menu-logo">
           <div><b>Carbonautas</b><small>Escolha onde quer ir</small></div>
         </div>
         <button type="button" class="app-menu-close" id="appMenuClose" aria-label="Fechar menu">×</button>
@@ -1743,6 +1757,8 @@
         <button type="button" class="app-nav-card c-red" data-app-view="painel"><span class="app-nav-icon">⚡</span><b>Painel</b><small>O que precisa de você</small></button>
         <button type="button" class="app-nav-card c-green" data-app-view="rede"><span class="app-nav-icon">🕸️</span><b>Pessoas</b><small>Rede e acompanhamento</small></button>
         <button type="button" class="app-nav-card c-yellow" data-app-view="crono"><span class="app-nav-icon">📅</span><b>Agenda</b><small>Prazos e eventos</small></button>
+        <button type="button" class="app-nav-card c-cyan" data-app-view="medalhas"><span class="app-nav-icon">🏅</span><b>Medalhas</b><small>Ranking mensal dos Carbonautas</small></button>
+        <button type="button" class="app-nav-card c-pink" data-app-view="jogo"><span class="app-nav-icon">🎮</span><b>Jogo</b><small>Uma pausa no ciclo do carbono</small></button>
         <button type="button" class="app-nav-card c-violet" data-app-view="mensagens"><span class="app-nav-icon">💬</span><b>Conversas</b><small>Equipe e privadas</small></button>
         <button type="button" class="app-nav-card c-pink" data-app-view="mural"><span class="app-nav-icon">📸</span><b>Mural</b><small>Avisos e fotos</small></button>
         <button type="button" class="app-nav-card c-cyan" data-app-view="lab"><span class="app-nav-icon">🧪</span><b>Lab</b><small>Análises e figuras</small></button>
@@ -1757,7 +1773,7 @@
       <div class="dash-hero">
         <div><h2>O que precisa da minha atenção?</h2><p id="dashGreeting">Prazos, correções, bolsas, check-ins, produtos e pessoas que precisam de acompanhamento.</p></div>
         <div class="spacer"></div>
-        <div class="dash-hero-actions"><button class="btn" id="dashCheckinBtn">✓ Check-in mensal</button><button class="btn" id="dashProductBtn">🎯 Registrar produto</button><button class="btn primary" id="dashDossierBtn">📚 Dossiê</button><button class="btn" id="dashBackupBtn" style="display:none">📦 Backup Excel</button></div>
+        <div class="dash-hero-actions"><button class="btn" id="dashCheckinBtn">✓ Check-in mensal</button><button class="btn" id="dashProductBtn">🎯 Registrar produto</button><button class="btn" id="dashMedalsBtn">🏅 Medalhas</button><button class="btn" id="dashGameBtn">🎮 Jogo</button><button class="btn primary" id="dashDossierBtn">📚 Dossiê</button><button class="btn" id="dashBackupBtn" style="display:none">📦 Backup Excel</button></div>
       </div>
       <div class="dash-kpis" id="dashKpis"></div>
       <div class="dash-grid">
@@ -1849,6 +1865,7 @@
             <button type="button" data-ag-mode="ano">Ano</button>
             <button type="button" data-ag-mode="lista">Lista</button>
           </div>
+          <button class="google-chip" id="googleCalendarBtn" type="button" title="Sincronizar sua agenda particular com o Google Agenda">G · Google Agenda</button>
           <button class="btn ghost ag-filter-btn" id="agFilterBtn" type="button">Filtros</button>
           <button class="btn primary ag-new" id="agNewBtn" type="button">＋ Novo</button>
         </div>
@@ -1874,6 +1891,28 @@
     </div>
   </div>
 
+
+  <!-- ============ VIEW: MEDALHAS ============ -->
+  <div class="view" id="viewMedalhas">
+    <div class="medal-scroll"><div class="medal-wrap">
+      <div class="medal-hero">
+        <div><h2>🏅 Quadro de Medalhas</h2><p>Ações acadêmicas reais viram pontos. O mês corrente é provisório; meses encerrados ficam registrados como resultado final.</p><div class="medal-status" id="medalStatus">Carregando ranking…</div></div>
+        <div class="medal-nav"><button type="button" id="medalPrev">‹</button><div class="month" id="medalMonth">Mês</div><button type="button" id="medalNext">›</button><button type="button" id="medalToday">Mês atual</button></div>
+      </div>
+      <div class="medal-grid">
+        <section class="medal-card"><h3>Pódio</h3><div class="medal-sub">Somente alunos entram no ranking; coordenação não concorre.</div><div id="medalBoard"></div></section>
+        <aside class="medal-card"><h3>Como pontua</h3><div class="medal-sub">Mensagens e reações não dão pontos, para evitar spam.</div><div class="score-rules" id="scoreRules"></div></aside>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ============ VIEW: JOGO ============ -->
+  <div class="view" id="viewJogo">
+    <div class="game-scroll"><div class="game-wrap">
+      <div class="game-head"><div><h2>🎮 Carbonauta</h2><p>Sete mundos do ciclo do carbono. Completar o ciclo vale pontos no ranking, no máximo uma vez por dia.</p></div><div class="spacer"></div><button class="btn" type="button" id="reloadGameBtn">↻ Reiniciar jogo</button></div>
+      <div class="game-frame-shell"><iframe id="carbonautaGameFrame" src="./game.html?v=P28" title="Jogo Carbonauta" allow="autoplay; fullscreen"></iframe></div>
+    </div></div>
+  </div>
 
   <!-- ============ VIEW: ACOMPANHAMENTO ============ -->
   <div class="view" id="viewTrack">
@@ -2913,6 +2952,26 @@
   </div>
 </div>
 
+<div class="overlay" id="googleCalendarOverlay"><div class="modal" style="max-width:690px">
+  <div class="modal-h"><h2>🔒 Google Agenda + Carbonautas</h2><div class="spacer"></div><button class="btn ghost" data-close="googleCalendarOverlay">Fechar</button></div>
+  <div class="modal-b">
+    <div class="notice"><b>Privacidade preservada.</b><div class="hint">Somente itens da sua seção <b>“Só para mim”</b> são sincronizados. O token do Google fica apenas na sessão do navegador e não é salvo no Firebase.</div></div>
+    <div class="google-status"><span class="google-dot" id="googleStatusDot"></span><b id="googleStatusText">Google Agenda não conectado.</b></div>
+    <div id="googleAdminConfig" style="display:none">
+      <div class="fg"><label>OAuth Client ID do Google (aplicativo Web)</label><input id="googleClientIdInput" placeholder="xxxxxxxxxxxx-xxxxxxxx.apps.googleusercontent.com"></div>
+      <div class="hint">No Google Cloud, autorize a origem JavaScript <span class="google-code">https://ernandes-sobreira.github.io</span>. Não existe “client secret” no HTML.</div>
+      <button class="btn" type="button" id="saveGoogleClientIdBtn" style="margin-top:9px">Salvar Client ID para a Rede</button>
+      <hr style="border:0;border-top:1px solid var(--line);margin:14px 0">
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn primary" type="button" id="connectGoogleCalendarBtn">Conectar meu Google Agenda</button>
+      <button class="btn" type="button" id="syncAllGoogleBtn">↑ Enviar meus privados ao Google</button>
+      <button class="btn" type="button" id="pullGoogleBtn">↓ Trazer alterações do Google</button>
+    </div>
+    <div class="hint" style="margin-top:10px">Sem Client ID configurado, o botão <b>G</b> ao lado de um compromisso ainda abre a tela do Google Agenda para você salvar manualmente.</div>
+  </div>
+</div>
+
 <div class="overlay" id="notifyOverlay"><div class="modal" style="max-width:620px">
   <div class="modal-h"><h2>🔔 Notificações</h2><div class="spacer"></div><button class="btn ghost" data-close="notifyOverlay">Fechar</button></div>
   <div class="modal-b">
@@ -3040,7 +3099,7 @@ const SEED_VINCULOS = [
 ];
 
 /* ============ STATE ============ */
-let state = { repoPackagesError:'', members: [], chat: [], schedule: [], privateSchedule: [], photos: [], publicacoes: [], repositoryPackages: [], personalRepoRoots: [], personalRepoRoot: null, activities: [], feed: [], comments: [], reactions: [], notifications: [], users: [], privateThreads: [], privateDirectory: [], linhas: DEFAULT_LINHAS.slice(), settings: {groupLink:''} };
+let state = { repoPackagesError:'', members: [], chat: [], schedule: [], privateSchedule: [], points: [], photos: [], publicacoes: [], repositoryPackages: [], personalRepoRoots: [], personalRepoRoot: null, activities: [], feed: [], comments: [], reactions: [], notifications: [], users: [], privateThreads: [], privateDirectory: [], linhas: DEFAULT_LINHAS.slice(), settings: {groupLink:'',googleCalendarClientId:''} };
 let hiddenNiveis = new Set();
 let hiddenLinhas = new Set();
 let selectedId = null;
@@ -3294,6 +3353,14 @@ function subscribeAll(){
       },err=>{console.error('Agenda privada:',err);state.privateSchedule=[];if(err?.code==='permission-denied')toast('Agenda privada precisa da regra P18 no Firestore.');}));
     }catch(e){console.error('Agenda privada:',e);}
   }
+  // P28 · PONTOS DO MÊS — ranking/medalhas
+  try{
+    const pointsQ=f.query(f.collection(window.db,'rede_points_events'),f.where('monthKey','==',monthKey()));
+    subscriptions.push(f.onSnapshot(pointsQ,snap=>{
+      state.points=snap.docs.map(d=>({...d.data(),id:d.id}));
+      if(currentView==='medalhas' && medalMonthKey()===monthKey()) renderMedalsFrom(state.points);
+    },err=>{console.error('Pontos/medalhas:',err);state.points=[];}));
+  }catch(e){console.error('Pontos/medalhas:',e);}
   // PHOTOS
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_photos'),f.orderBy('ts','desc')),snap=>{
     state.photos=snap.docs.map(d=>({...d.data(),id:d.id}));
@@ -4510,7 +4577,7 @@ function buildCronoItems(){
   })));
   (state.privateSchedule||[]).forEach(p=>items.push({
     kind:'privado', id:p.id, titulo:p.titulo, data:p.data, hora:p.hora||'', desc:p.descricao||'',
-    feito:!!p.feito, ownerName:'Só eu', ownerColor:'#A78BFA', ownerId:myId, nivel:null, privado:true
+    feito:!!p.feito, ownerName:'Só eu', ownerColor:'#A78BFA', ownerId:myId, nivel:null, privado:true, googleEventId:p.googleEventId||'', googleHtmlLink:p.googleHtmlLink||'', googleSyncedAt:p.googleSyncedAt||null
   }));
   return items.filter(x=>x.data);
 }
@@ -4542,6 +4609,7 @@ function agItemHtml(it,showDate){
       ${it.desc?`<div class="ag-desc">${esc(it.desc)}</div>`:''}
     </div>
     <div class="ag-act">
+      ${it.kind==='privado'?`<button onclick="syncPrivateToGoogle('${it.id}')" title="${it.googleEventId?'Atualizar no Google Agenda':'Enviar ao Google Agenda'}" style="font-weight:950;color:${it.googleEventId?'#187246':'#315D78'}">${it.googleEventId?'G✓':'G'}</button>`:''}
       <button class="${it.feito?'ok':''}" ${canToggle?'':'disabled style="opacity:.3"'} onclick="toggleCronoItem('${it.kind}','${it.id}')" title="Concluir / reabrir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></button>
       ${canDel?`<button onclick="openCronoManage('${it.kind}','${it.id}')" title="Editar ou excluir">⋯</button>`:''}
     </div>
@@ -4717,6 +4785,7 @@ async function toggleCronoItem(kind,id){
     prazos[idx].feito=novoEstado;
     if(novoEstado){ const cb=$('#cFeitos'); if(cb) cb.checked=true; }
     await fbSetMember(mid,{prazos});
+    if(novoEstado)await awardPoints(mid,'deadline_done',`${mid}_${idx}_${prazos[idx].data||''}`,'Prazo concluído');
     toast(novoEstado?'Prazo marcado como concluído.':'Prazo reaberto.');
   }
 }
@@ -4815,6 +4884,41 @@ async function saveMyPrazo(){
     editingPrazoTarget=null;
   }catch(e){console.error(e);toast('Erro ao salvar prazo.')}
 }
+
+/* ============ P28 · GOOGLE AGENDA PRIVADA ============ */
+let googleCalendarToken='',googleCalendarTokenExpiry=0,googleTokenClient=null,googleGISPromise=null;
+function googleClientId(){return String(state.settings?.googleCalendarClientId||'').trim()}
+function loadGoogleGIS(){if(window.google?.accounts?.oauth2)return Promise.resolve();if(googleGISPromise)return googleGISPromise;googleGISPromise=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.async=true;s.defer=true;s.onload=()=>resolve();s.onerror=()=>reject(new Error('Não foi possível carregar a autorização do Google.'));document.head.appendChild(s)});return googleGISPromise}
+function googleConnected(){return !!googleCalendarToken&&Date.now()<googleCalendarTokenExpiry-30000}
+function refreshGoogleUi(){const ok=googleConnected(),dot=$('#googleStatusDot'),txt=$('#googleStatusText'),btn=$('#googleCalendarBtn');if(dot)dot.classList.toggle('ok',ok);if(txt)txt.textContent=ok?'Google Agenda conectado nesta sessão.':'Google Agenda não conectado.';if(btn){btn.classList.toggle('ok',ok);btn.textContent=ok?'G✓ · Google Agenda':'G · Google Agenda'}}
+function openGoogleCalendarSettings(){if($('#googleAdminConfig'))$('#googleAdminConfig').style.display=isAdmin?'block':'none';if($('#googleClientIdInput'))$('#googleClientIdInput').value=googleClientId();refreshGoogleUi();openOverlay('googleCalendarOverlay')}
+async function saveGoogleClientId(){if(!isAdmin)return toast('Somente a coordenação configura a integração.');const id=$('#googleClientIdInput').value.trim();if(id&&!id.endsWith('.apps.googleusercontent.com'))return toast('Esse Client ID não parece ser do Google OAuth.');try{await FB().setDoc(FB().doc(window.db,'rede_settings','app'),{googleCalendarClientId:id},{merge:true});toast(id?'Client ID do Google salvo.':'Integração do Google desativada.')}catch(e){console.error(e);toast('Não consegui salvar a configuração do Google.')}}
+async function ensureGoogleCalendarToken(forcePrompt=false){const cid=googleClientId();if(!cid)return false;if(googleConnected()&&!forcePrompt)return true;await loadGoogleGIS();return await new Promise((resolve,reject)=>{try{googleTokenClient=google.accounts.oauth2.initTokenClient({client_id:cid,scope:'https://www.googleapis.com/auth/calendar.events',callback:resp=>{if(resp?.error){reject(new Error(resp.error));return}googleCalendarToken=resp.access_token||'';googleCalendarTokenExpiry=Date.now()+(Number(resp.expires_in||3500)*1000);refreshGoogleUi();resolve(!!googleCalendarToken)}});googleTokenClient.requestAccessToken({prompt:forcePrompt?'consent':''})}catch(e){reject(e)}})}
+function nextIsoDate(iso){const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+1);return agIso(d)}
+function googleEventBody(ev){const base=(ev.descricao||'').trim(),desc=(base?base+'\n\n':'')+'Sincronizado a partir da agenda privada do Carbonautas.';const body={summary:ev.titulo||'Compromisso Carbonautas',description:desc,visibility:'private',extendedProperties:{private:{carbonautasApp:'1',carbonautasPrivateId:String(ev.id||'')}}};if(ev.hora){const d=new Date(`${ev.data}T${ev.hora}:00`),end=new Date(d.getTime()+60*60*1000);body.start={dateTime:d.toISOString()};body.end={dateTime:end.toISOString()}}else{body.start={date:ev.data};body.end={date:nextIsoDate(ev.data)}}return body}
+function googleTemplateUrl(ev){const body=googleEventBody(ev),p=new URLSearchParams({action:'TEMPLATE',text:body.summary,details:body.description});if(ev.hora){const s=new Date(`${ev.data}T${ev.hora}:00`),e=new Date(s.getTime()+60*60*1000),fmt=d=>d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');p.set('dates',fmt(s)+'/'+fmt(e))}else{p.set('dates',ev.data.replace(/-/g,'')+'/'+nextIsoDate(ev.data).replace(/-/g,''))}return 'https://calendar.google.com/calendar/render?'+p.toString()}
+async function googleApi(path,opts={}){if(!googleConnected())throw new Error('Google Agenda não conectado.');const r=await fetch('https://www.googleapis.com/calendar/v3'+path,{...opts,headers:{Authorization:'Bearer '+googleCalendarToken,'Content-Type':'application/json',...(opts.headers||{})}});if(!r.ok){const t=await r.text();const e=new Error('Google Agenda: '+r.status+' '+t.slice(0,180));e.status=r.status;throw e}if(r.status===204)return null;return await r.json()}
+async function syncPrivateToGoogle(id){const ev=(state.privateSchedule||[]).find(x=>x.id===id);if(!ev)return toast('Compromisso privado não encontrado.');if(!googleClientId()){window.open(googleTemplateUrl(ev),'_blank','noopener');toast('Abri o Google Agenda. Depois de salvar, o evento fica na sua própria agenda.');return}try{const ok=await ensureGoogleCalendarToken();if(!ok)throw new Error('Autorize o Google Agenda.');const body=googleEventBody(ev);let data=null;if(ev.googleEventId){try{data=await googleApi(`/calendars/primary/events/${encodeURIComponent(ev.googleEventId)}`,{method:'PATCH',body:JSON.stringify(body)})}catch(e){if(e.status!==404)throw e}}if(!data)data=await googleApi('/calendars/primary/events',{method:'POST',body:JSON.stringify(body)});await FB().updateDoc(FB().doc(window.db,'rede_private_schedule',id),{googleEventId:data.id||'',googleHtmlLink:data.htmlLink||'',googleSyncedAt:FB().serverTimestamp()});toast('🔒 Compromisso sincronizado com seu Google Agenda.')}catch(e){console.error(e);toast(e.message||'Não consegui sincronizar com o Google Agenda.')}}
+async function syncAllPrivateToGoogle(){if(!(state.privateSchedule||[]).length)return toast('Você ainda não tem compromissos privados.');try{if(!googleClientId()){toast('Configure o Client ID do Google ou use o botão G de cada compromisso.');return}await ensureGoogleCalendarToken();for(const ev of state.privateSchedule)await syncPrivateToGoogle(ev.id);toast('Agenda privada enviada ao Google.')}catch(e){console.error(e);toast(e.message||'Falha ao sincronizar a agenda.')}}
+function localDatePartsFromGoogle(start){if(start?.date)return{data:start.date,hora:''};if(!start?.dateTime)return null;const d=new Date(start.dateTime);return{data:agIso(d),hora:String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')}}
+async function pullGoogleToCarbonautas(){if(!googleClientId())return toast('A coordenação ainda não configurou o Client ID do Google.');try{await ensureGoogleCalendarToken();const min=new Date();min.setFullYear(min.getFullYear()-1);const max=new Date();max.setFullYear(max.getFullYear()+2);const qs=new URLSearchParams({privateExtendedProperty:'carbonautasApp=1',timeMin:min.toISOString(),timeMax:max.toISOString(),singleEvents:'true',maxResults:'2500'});const data=await googleApi('/calendars/primary/events?'+qs.toString());let n=0;for(const ge of (data.items||[])){const localId=ge.extendedProperties?.private?.carbonautasPrivateId;if(!localId)continue;const local=(state.privateSchedule||[]).find(x=>x.id===localId);if(!local)continue;const dt=localDatePartsFromGoogle(ge.start);if(!dt)continue;let desc=String(ge.description||'').replace(/\n\nSincronizado a partir da agenda privada do Carbonautas\.$/,'').trim();await FB().updateDoc(FB().doc(window.db,'rede_private_schedule',localId),{titulo:ge.summary||local.titulo,data:dt.data,hora:dt.hora,descricao:desc,googleEventId:ge.id||local.googleEventId||'',googleHtmlLink:ge.htmlLink||'',googleSyncedAt:FB().serverTimestamp(),updatedAt:FB().serverTimestamp()});n++}toast(n?`${n} compromisso${n===1?' atualizado':'s atualizados'} a partir do Google.`:'Nenhuma alteração do Carbonautas encontrada no Google.')}catch(e){console.error(e);toast(e.message||'Não consegui trazer as alterações do Google.')}}
+
+/* ============ P28 · PONTOS E MEDALHAS ============ */
+const POINT_VALUES={activity_created:10,activity_completed:10,checkin:20,product:15,repo_package:20,publication:20,photo:6,feed:5,help_post:12,deadline_done:8,game_complete:10};
+const POINT_LABELS={activity_created:'Acompanhamento registrado',activity_completed:'Acompanhamento concluído',checkin:'Check-in mensal',product:'Produto registrado',repo_package:'Pasta no repositório',publication:'Publicação no repositório',photo:'Foto com metadados',feed:'Publicação no mural',help_post:'Ajuda / colaboração no mural',deadline_done:'Prazo concluído',game_complete:'Ciclo do jogo completo'};
+function safePointId(s){return String(s||'x').replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,420)}
+function dayKey(d=new Date()){return agIso(d)}
+async function awardPoints(memberId,action,sourceId,label=''){if(!authUser?.uid||!memberId||!POINT_VALUES[action])return;const target=memberById(memberId);if(!target||target.nivel==='coord')return;const id=`p_${safePointId(memberId)}_${safePointId(action)}_${safePointId(sourceId)}`,f=FB(),ref=f.doc(window.db,'rede_points_events',id);try{const snap=await f.getDoc(ref);if(snap.exists())return;await f.setDoc(ref,{memberId,memberName:target.nome||'',actorUid:authUser.uid,action,points:POINT_VALUES[action],label:(POINT_LABELS[action]||action).slice(0,240),sourceId:String(sourceId||'').slice(0,500),monthKey:monthKey(),dayKey:dayKey(),createdAt:f.serverTimestamp()});}catch(e){if(e?.code!=='permission-denied')console.warn('Pontuação:',e)}}
+let medalCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1),medalLoadedKey='',medalLoadedPoints=[];
+function medalMonthKey(){return monthKey(medalCursor)}
+function medalMonthLabel(){const s=medalCursor.toLocaleDateString('pt-BR',{month:'long',year:'numeric'});return s.charAt(0).toUpperCase()+s.slice(1)}
+function isPastMedalMonth(mk){return mk<monthKey()}
+function pointTotals(points){const map={};for(const p of points||[]){const m=memberById(p.memberId);if(!m||m.nivel==='coord')continue;const r=map[p.memberId]||(map[p.memberId]={memberId:p.memberId,name:m.nome||p.memberName||'Carbonauta',points:0,actions:0});r.points+=Number(p.points||0);r.actions++}return Object.values(map).sort((a,b)=>b.points-a.points||b.actions-a.actions||a.name.localeCompare(b.name,'pt-BR'))}
+function renderScoreRules(){const host=$('#scoreRules');if(!host)return;const rows=[['Check-in mensal','+20'],['Pasta no repositório','+20'],['Publicação/arquivo científico','+20'],['Produto registrado','+15'],['Ajuda útil no mural','+12'],['Acompanhamento registrado','+10'],['Acompanhamento concluído','+10'],['Jogo completo (1x/dia)','+10'],['Prazo concluído','+8'],['Foto com metadados','+6'],['Publicação comum no mural','+5']];host.innerHTML=rows.map(([a,b])=>`<div class="score-rule"><span>${esc(a)}</span><b>${b}</b></div>`).join('')}
+function renderMedalsFrom(points){const board=$('#medalBoard');if(!board)return;const mk=medalMonthKey(),rank=pointTotals(points),final=isPastMedalMonth(mk),my=rank.find(x=>x.memberId===myId);$('#medalMonth').textContent=medalMonthLabel();$('#medalNext').disabled=mk>=monthKey();$('#medalStatus').textContent=final?'🏁 Resultado final do mês':`⏱ Ranking provisório${my?` · você tem ${my.points} pontos`:''}`;const medals=['🥇','🥈','🥉'];const top=rank.slice(0,3);const podium=top.length?`<div class="podium">${top.map((r,i)=>`<div class="podium-person ${i===0?'first':''}"><div class="med">${medals[i]}</div><b>${esc(r.name)}</b><strong>${r.points}</strong><small>${r.actions} aç${r.actions===1?'ão':'ões'}</small></div>`).join('')}</div>`:'';const list=rank.length?`<div class="rank-list">${rank.map((r,i)=>`<div class="rank-row ${r.memberId===myId?'me':''}"><div class="rank-pos">${i<3?medals[i]:(i+1)+'º'}</div><div class="rank-name">${esc(r.name)}${r.memberId===myId?' · você':''}</div><div class="rank-points">${r.points} pts</div></div>`).join('')}</div>`:'<div class="ag-empty">Ainda não há pontos neste mês.</div>';board.innerHTML=podium+list;renderScoreRules()}
+async function renderMedals(){const mk=medalMonthKey();$('#medalMonth').textContent=medalMonthLabel();if(mk===monthKey()){medalLoadedKey=mk;medalLoadedPoints=state.points||[];renderMedalsFrom(medalLoadedPoints);return}if(medalLoadedKey===mk){renderMedalsFrom(medalLoadedPoints);return}$('#medalBoard').innerHTML='<div class="ag-empty">Carregando mês…</div>';try{const f=FB(),q=f.query(f.collection(window.db,'rede_points_events'),f.where('monthKey','==',mk)),snap=await f.getDocs(q);medalLoadedKey=mk;medalLoadedPoints=snap.docs.map(d=>({...d.data(),id:d.id}));renderMedalsFrom(medalLoadedPoints)}catch(e){console.error(e);$('#medalBoard').innerHTML='<div class="ag-empty">Não foi possível carregar o ranking.</div>'}}
+function shiftMedalMonth(n){medalCursor=new Date(medalCursor.getFullYear(),medalCursor.getMonth()+n,1);if(medalMonthKey()>monthKey())medalCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);medalLoadedKey='';renderMedals()}
+function reportGameReward(score){const k=dayKey();awardPoints(myId,'game_complete',k,`Jogo completo · ${Math.round(Number(score)||0).toLocaleString('pt-BR')} pontos no jogo`).then(()=>{if(currentView==='medalhas')renderMedals()});toast('🏅 Ciclo completo: +10 pontos no ranking de hoje.')}
 
 /* ============ MURAL (CHAT) ============ */
 let lastSeenQuick=+(localStorage.getItem('rede_lastSeenQuick')||0);
@@ -5124,7 +5228,8 @@ async function savePhoto(){
     for(let i=0;i<imgs.length;i++){
       btn.textContent=imgs.length>1?`Enviando ${i+1}/${imgs.length}…`:'Enviando…';
       const {url,path}=await fbUploadImage('galeria',imgs[i]);
-      await FB().addDoc(FB().collection(window.db,'rede_photos'),{url,storagePath:path,legenda:$('#gCap').value.trim(),projeto,acao:$('#gAcao').value.trim(),dataRealizacao:$('#gData').value,tipoImagem:$('#gTipoImagem').value,autor:$('#gAutor').value.trim(),autorId:myId||null,authorUid:window.auth.currentUser?.uid||'',ts:FB().serverTimestamp()});
+      const photoRef=await FB().addDoc(FB().collection(window.db,'rede_photos'),{url,storagePath:path,legenda:$('#gCap').value.trim(),projeto,acao:$('#gAcao').value.trim(),dataRealizacao:$('#gData').value,tipoImagem:$('#gTipoImagem').value,autor:$('#gAutor').value.trim(),autorId:myId||null,authorUid:window.auth.currentUser?.uid||'',ts:FB().serverTimestamp()});
+      await awardPoints(myId,'photo',photoRef.id,$('#gAcao').value.trim()||projeto||'Foto com metadados');
       ok++;
     }
     closeOverlay('photoOverlay');toast(ok===1?'Imagem publicada.':`${ok} imagens publicadas.`);
@@ -5311,7 +5416,7 @@ function updateRepoPackageAccessUI(){
 }
 function selectedRepoPackageExtraIds(ownerId,mode){const ids=new Set();if(mode==='group')state.members.filter(m=>m.status!=='inativo'&&m.id!==ownerId).forEach(m=>ids.add(m.id));if(mode==='selected')document.querySelectorAll('#repoPackagePeople input[type="checkbox"]:checked:not(:disabled)').forEach(x=>ids.add(x.value));return[...ids]}
 function selectedRepoPackageAllowedIds(ownerId,mode){const ids=rootAllowedMemberIds(ownerId),extra=selectedRepoPackageExtraIds(ownerId,mode);extra.forEach(id=>ids.add(id));if(repoPackageUploadContext!=='personal')ids.add(myId);return[...ids]}
-async function saveRepoPackage(){const btn=$('#repoPackageSaveBtn'),ownerId=(repoPackageUploadContext==='personal'||!isAdmin)?myId:$('#repoPackageOwner').value,title=$('#repoPackageTitle').value.trim(),purpose=$('#repoPackagePurpose').value,purposeOther=$('#repoPackagePurposeOther').value.trim(),mode=document.querySelector('input[name="repoPackageAccess"]:checked')?.value||'private';if(!ownerId)return toast('Defina o proprietário.');if(!title)return toast('Dê um nome à pasta.');if(purpose==='outro'&&!purposeOther)return toast('Descreva o propósito.');if(!repoPackageSelectedFiles.length&&repoPackageUploadContext!=='personal')return toast('Escolha pelo menos um arquivo.');const folderExtraMemberIds=selectedRepoPackageExtraIds(ownerId,mode),rootSharedMemberIds=[...rootAllowedMemberIds(ownerId)].filter(id=>id!==ownerId),allowedMemberIds=selectedRepoPackageAllowedIds(ownerId,mode);const f=FB(),uid=window.auth.currentUser.uid,owner=memberById(ownerId),actor=currentActor(),ref=f.doc(f.collection(window.db,'rede_repository_packages')),ownerUid=(state.users||[]).find(u=>u.memberId===ownerId)?.uid||'';try{btn.disabled=true;await f.setDoc(ref,{title,purpose,purposeOther,accessMode:mode,allowedMemberIds,folderExtraMemberIds,rootSharedMemberIds,personalRepo:repoPackageUploadContext==='personal',ownerMemberId:ownerId,ownerUid,ownerName:owner?.nome||'',createdByUid:uid,createdByMemberId:myId,createdByName:actor?.name||myName||'',fileCount:0,ts:f.serverTimestamp(),updatedAt:f.serverTimestamp()});let ok=0;for(let i=0;i<repoPackageSelectedFiles.length;i++){const file=repoPackageSelectedFiles[i];btn.textContent=`Enviando ${i+1}/${repoPackageSelectedFiles.length}…`;const dataUrl=await fileToDataUrl(file),up=await fbUploadFile('repo_'+ref.id,dataUrl,file.name),child=f.doc(f.collection(ref,'files'));await f.setDoc(child,{fileName:file.name,title:file.name.replace(/\.[^.]+$/,''),url:up.url,storagePath:up.path,size:file.size,mimeType:file.type||'',ext:inferFileExt('',file.name),order:i,createdByUid:uid,ts:f.serverTimestamp()});ok++}await f.updateDoc(ref,{fileCount:ok,updatedAt:f.serverTimestamp()});const recipients=allowedMemberIds.filter(id=>id&&id!==myId);await Promise.allSettled(recipients.map(id=>createRepoNotification(id,{kind:'repositorio_pacote',sourceType:'repositorio_pacote',sourceId:ref.id,ownerId,title:'📁 Pasta compartilhada com você',message:`${actor?.name||'Um Carbonauta'} compartilhou “${title}” (${ok} arquivo${ok===1?'':'s'}).`})));closeOverlay('repoPackageUploadOverlay');toast(ok?`Pasta criada com ${ok} arquivo${ok===1?'':'s'}.`:'Pasta criada. Agora você pode adicionar arquivos quando quiser.');repoViewMode=repoPackageUploadContext==='personal'?'mine':repoViewMode;renderPubs()}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou a pasta. Publique as regras P20.':(e.message||'Erro ao enviar a pasta.'))}finally{btn.disabled=false;btn.textContent=repoPackageUploadContext==='personal'?'Criar pasta':'Enviar conjunto'}}
+async function saveRepoPackage(){const btn=$('#repoPackageSaveBtn'),ownerId=(repoPackageUploadContext==='personal'||!isAdmin)?myId:$('#repoPackageOwner').value,title=$('#repoPackageTitle').value.trim(),purpose=$('#repoPackagePurpose').value,purposeOther=$('#repoPackagePurposeOther').value.trim(),mode=document.querySelector('input[name="repoPackageAccess"]:checked')?.value||'private';if(!ownerId)return toast('Defina o proprietário.');if(!title)return toast('Dê um nome à pasta.');if(purpose==='outro'&&!purposeOther)return toast('Descreva o propósito.');if(!repoPackageSelectedFiles.length&&repoPackageUploadContext!=='personal')return toast('Escolha pelo menos um arquivo.');const folderExtraMemberIds=selectedRepoPackageExtraIds(ownerId,mode),rootSharedMemberIds=[...rootAllowedMemberIds(ownerId)].filter(id=>id!==ownerId),allowedMemberIds=selectedRepoPackageAllowedIds(ownerId,mode);const f=FB(),uid=window.auth.currentUser.uid,owner=memberById(ownerId),actor=currentActor(),ref=f.doc(f.collection(window.db,'rede_repository_packages')),ownerUid=(state.users||[]).find(u=>u.memberId===ownerId)?.uid||'';try{btn.disabled=true;await f.setDoc(ref,{title,purpose,purposeOther,accessMode:mode,allowedMemberIds,folderExtraMemberIds,rootSharedMemberIds,personalRepo:repoPackageUploadContext==='personal',ownerMemberId:ownerId,ownerUid,ownerName:owner?.nome||'',createdByUid:uid,createdByMemberId:myId,createdByName:actor?.name||myName||'',fileCount:0,ts:f.serverTimestamp(),updatedAt:f.serverTimestamp()});let ok=0;for(let i=0;i<repoPackageSelectedFiles.length;i++){const file=repoPackageSelectedFiles[i];btn.textContent=`Enviando ${i+1}/${repoPackageSelectedFiles.length}…`;const dataUrl=await fileToDataUrl(file),up=await fbUploadFile('repo_'+ref.id,dataUrl,file.name),child=f.doc(f.collection(ref,'files'));await f.setDoc(child,{fileName:file.name,title:file.name.replace(/\.[^.]+$/,''),url:up.url,storagePath:up.path,size:file.size,mimeType:file.type||'',ext:inferFileExt('',file.name),order:i,createdByUid:uid,ts:f.serverTimestamp()});ok++}await f.updateDoc(ref,{fileCount:ok,updatedAt:f.serverTimestamp()});await awardPoints(ownerId,'repo_package',ref.id,title);const recipients=allowedMemberIds.filter(id=>id&&id!==myId);await Promise.allSettled(recipients.map(id=>createRepoNotification(id,{kind:'repositorio_pacote',sourceType:'repositorio_pacote',sourceId:ref.id,ownerId,title:'📁 Pasta compartilhada com você',message:`${actor?.name||'Um Carbonauta'} compartilhou “${title}” (${ok} arquivo${ok===1?'':'s'}).`})));closeOverlay('repoPackageUploadOverlay');toast(ok?`Pasta criada com ${ok} arquivo${ok===1?'':'s'}.`:'Pasta criada. Agora você pode adicionar arquivos quando quiser.');repoViewMode=repoPackageUploadContext==='personal'?'mine':repoViewMode;renderPubs()}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou a pasta. Publique as regras P20.':(e.message||'Erro ao enviar a pasta.'))}finally{btn.disabled=false;btn.textContent=repoPackageUploadContext==='personal'?'Criar pasta':'Enviar conjunto'}}
 
 async function deleteRepositoryPackage(id){const p=state.repositoryPackages.find(x=>x.id===id);if(!p||!canManageRepoPackage(p))return toast('Você não pode excluir este conjunto.');if(!confirm(`Excluir “${p.title||'este conjunto'}” e seus arquivos?`))return;try{const f=FB(),pref=f.doc(window.db,'rede_repository_packages',id),snap=await f.getDocs(f.collection(pref,'files'));for(const d of snap.docs){const x=d.data();if(x.storagePath){try{await f.deleteObject(f.sRef(window.storage,x.storagePath))}catch(_e){}}await f.deleteDoc(d.ref)}await f.deleteDoc(pref);closeOverlay('repoPackageOverlay');toast('Conjunto excluído.')}catch(e){console.error(e);toast(e.message||'Não foi possível excluir o conjunto.')}}
 window.openRepositoryPackage=openRepositoryPackage;window.deleteRepositoryPackage=deleteRepositoryPackage;
@@ -5320,7 +5425,7 @@ async function addFilesToRepositoryPackage(id){const p=state.repositoryPackages.
 async function uploadAdditionalRepoFiles(files){const id=pendingRepoAddFilesId,p=state.repositoryPackages.find(x=>x.id===id);pendingRepoAddFilesId='';if(!p||!canManageRepoPackage(p))return;const list=[...(files||[])];if(!list.length)return;if(list.length>20)return toast('Envie no máximo 20 arquivos por vez.');const tooBig=list.find(f=>f.size>15*1024*1024);if(tooBig)return toast(`“${tooBig.name}” passa de 15 MB.`);const f=FB(),pref=f.doc(window.db,'rede_repository_packages',id),uid=window.auth.currentUser.uid;try{toast('Enviando arquivos…');let added=0,base=Number(p.fileCount||0);for(let i=0;i<list.length;i++){const file=list[i],dataUrl=await fileToDataUrl(file),up=await fbUploadFile('repo_'+id,dataUrl,file.name),child=f.doc(f.collection(pref,'files'));await f.setDoc(child,{fileName:file.name,title:file.name.replace(/\.[^.]+$/,''),url:up.url,storagePath:up.path,size:file.size,mimeType:file.type||'',ext:inferFileExt('',file.name),order:base+i,createdByUid:uid,ts:f.serverTimestamp()});added++}await f.updateDoc(pref,{fileCount:base+added,updatedAt:f.serverTimestamp()});toast(`${added} arquivo${added===1?' adicionado':'s adicionados'}.`);if($('#repoPackageOverlay')?.classList.contains('open'))await openRepositoryPackage(id)}catch(e){console.error(e);toast(e.message||'Não foi possível adicionar os arquivos.')}}
 async function deleteRepositoryPackageFile(packageId,fileId){const p=state.repositoryPackages.find(x=>x.id===packageId);if(!p||!canManageRepoPackage(p))return;if(!confirm('Excluir este arquivo da pasta?'))return;const f=FB(),ref=f.doc(window.db,'rede_repository_packages',packageId,'files',fileId);try{const snap=await f.getDoc(ref),x=snap.exists()?snap.data():null;if(x?.storagePath){try{await f.deleteObject(f.sRef(window.storage,x.storagePath))}catch(_e){}}await f.deleteDoc(ref);await f.updateDoc(f.doc(window.db,'rede_repository_packages',packageId),{fileCount:Math.max(0,Number(p.fileCount||1)-1),updatedAt:f.serverTimestamp()});toast('Arquivo removido.');await openRepositoryPackage(packageId)}catch(e){console.error(e);toast(e.message||'Não foi possível excluir o arquivo.')}}
 function inferGeneralCategory(fileName=''){const e=inferFileExt('',fileName);if(['xlsx','xls','csv'].includes(e))return'dados';if(['ppt','pptx'].includes(e))return'apresentacao';if(['doc','docx','odt','rtf'].includes(e))return'artigo';return'outro'}
-async function publishRepositoryPackageFile(packageId,fileId){const p=state.repositoryPackages.find(x=>x.id===packageId);if(!p||!canManageRepoPackage(p))return toast('Somente o proprietário pode publicar este arquivo.');if(!confirm('Publicar este arquivo no Repositório Geral? Ele ficará visível para toda a Rede.'))return;const f=FB();try{const snap=await f.getDoc(f.doc(window.db,'rede_repository_packages',packageId,'files',fileId));if(!snap.exists())throw new Error('Arquivo não encontrado.');const x=snap.data(),ref=f.doc(window.db,'rede_publicacoes',`pkg_${packageId}_${fileId}`),m=memberById(p.ownerMemberId),uid=window.auth.currentUser.uid,categoria=inferGeneralCategory(x.fileName);await f.setDoc(ref,{memberId:p.ownerMemberId,ownerUid:uid,createdByUid:uid,memberNome:m?.nome||p.ownerName||myName||'',categoria,categoriaOutro:categoria==='outro'?'Arquivo do Meu Repositório':'',titulo:x.title||x.fileName||'Arquivo',tipo:'arquivo',url:x.url||'',fileName:x.fileName||'',sourcePersonalRepo:true,sourcePackageId:packageId,sourcePackageFileId:fileId,ts:f.serverTimestamp()});toast('Publicado no Repositório Geral.');repoViewMode='general';renderPubs()}catch(e){console.error(e);toast(e.message||'Não foi possível publicar.')}}
+async function publishRepositoryPackageFile(packageId,fileId){const p=state.repositoryPackages.find(x=>x.id===packageId);if(!p||!canManageRepoPackage(p))return toast('Somente o proprietário pode publicar este arquivo.');if(!confirm('Publicar este arquivo no Repositório Geral? Ele ficará visível para toda a Rede.'))return;const f=FB();try{const snap=await f.getDoc(f.doc(window.db,'rede_repository_packages',packageId,'files',fileId));if(!snap.exists())throw new Error('Arquivo não encontrado.');const x=snap.data(),ref=f.doc(window.db,'rede_publicacoes',`pkg_${packageId}_${fileId}`),m=memberById(p.ownerMemberId),uid=window.auth.currentUser.uid,categoria=inferGeneralCategory(x.fileName);await f.setDoc(ref,{memberId:p.ownerMemberId,ownerUid:uid,createdByUid:uid,memberNome:m?.nome||p.ownerName||myName||'',categoria,categoriaOutro:categoria==='outro'?'Arquivo do Meu Repositório':'',titulo:x.title||x.fileName||'Arquivo',tipo:'arquivo',url:x.url||'',fileName:x.fileName||'',sourcePersonalRepo:true,sourcePackageId:packageId,sourcePackageFileId:fileId,ts:f.serverTimestamp()});await awardPoints(p.ownerMemberId,'publication',ref.id,x.title||x.fileName||'Arquivo');toast('Publicado no Repositório Geral.');repoViewMode='general';renderPubs()}catch(e){console.error(e);toast(e.message||'Não foi possível publicar.')}}
 function repoRootByOwner(ownerId){return (state.personalRepoRoots||[]).find(r=>r.ownerMemberId===ownerId)||(ownerId===myId?state.personalRepoRoot:null)}
 function renderPersonalRepoSharePeople(){const q=($('#personalRepoShareSearch')?.value||'').trim().toLowerCase(),selected=new Set(repoRootCollaborators()),wrap=$('#personalRepoShareList');if(!wrap)return;wrap.innerHTML=state.members.filter(m=>m.status!=='inativo'&&m.id!==myId&&(!q||m.nome.toLowerCase().includes(q))).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>`<label class="repo-share-row"><input type="checkbox" value="${m.id}" ${selected.has(m.id)?'checked':''}><span><b>${esc(m.nome)}</b><small>${esc(NIVEIS[m.nivel]?.label||m.programa||'Integrante da Rede')}</small></span></label>`).join('')}
 function openPersonalRepoSharing(){if(!myId)return;$('#personalRepoShareSearch').value='';renderPersonalRepoSharePeople();openOverlay('personalRepoShareOverlay')}
@@ -5993,12 +6098,14 @@ async function savePublicacao(){
         ref=f.doc(window.db,'rede_publicacoes',reviewVersionDocId(reviewThreadId,reviewVersion));
       }
       await f.setDoc(ref,{memberId:autorId,ownerUid:uid,createdByUid:uid,memberNome:m?m.nome:'',categoria,categoriaOutro,titulo:baseTitle,tipo:'arquivo',url,fileName:pubFileName,contentHash,reviewFlow:true,reviewThreadId,reviewVersion,reviewStatus,reviewReviewerId,reviewReturnToId,reviewNextRecipientId,reviewParentId:parentId,reviewSenderId:actor?.id||myId||'',reviewSenderName:actor?.name||'',reviewBaseTitle:baseTitle,reviewNote,ts:f.serverTimestamp()});
+      await awardPoints(autorId,'publication',ref.id,`${baseTitle} · versão ${reviewVersion}`);
       if(reviewNote)try{const root=pubReviewContext?reviewRootFor(pubReviewContext):{...pubReviewContext,id:ref.id,reviewThreadId:ref.id,reviewFlow:true,reviewReviewerId,reviewReturnToId,reviewBaseTitle:baseTitle,titulo:baseTitle};await addReviewThreadMessage(reviewThreadId,reviewNote,root,{notify:false})}catch(e){console.warn('Arquivo salvo, mas a mensagem inicial não pôde ser registrada:',e)}
       const next=memberById(reviewNextRecipientId);
       await createRepoNotification(reviewNextRecipientId,{sourceId:ref.id,ownerId:autorId,title:reviewVersion===1?'✍️ Arquivo para correção':(reviewStatus==='correcao_devolvida'?'✅ Correção devolvida':'⬆️ Nova versão para revisar'),message:`${baseTitle} · versão ${reviewVersion}${reviewNote?' · '+reviewNote:''}${next?' · agora com '+next.nome:''}`});
       closeOverlay('pubOverlay');pubReviewContext=null;toast(reviewVersion===1?'Arquivo enviado para correção e destinatário notificado.':reviewStatus==='correcao_devolvida'?'Correção devolvida e autor notificado.':'Nova versão enviada e revisor notificado.');
     }else{
-      await FB().addDoc(FB().collection(window.db,'rede_publicacoes'),{memberId:autorId,ownerUid:(autorId===myId ? uid : ((state.users||[]).find(u=>u.memberId===autorId)?.uid||'')),createdByUid:uid,memberNome:m?m.nome:'',categoria,categoriaOutro,titulo,tipo:tipoFinal,url,fileName:pubTipo==='arquivo'?pubFileName:'',contentHash:pubTipo==='arquivo'?contentHash:'',ts:FB().serverTimestamp()});
+      const pubRef=await FB().addDoc(FB().collection(window.db,'rede_publicacoes'),{memberId:autorId,ownerUid:(autorId===myId ? uid : ((state.users||[]).find(u=>u.memberId===autorId)?.uid||'')),createdByUid:uid,memberNome:m?m.nome:'',categoria,categoriaOutro,titulo,tipo:tipoFinal,url,fileName:pubTipo==='arquivo'?pubFileName:'',contentHash:pubTipo==='arquivo'?contentHash:'',ts:FB().serverTimestamp()});
+      await awardPoints(autorId,'publication',pubRef.id,titulo);
       closeOverlay('pubOverlay');toast('Publicação adicionada.');
     }
   }catch(e){
@@ -6113,7 +6220,7 @@ async function notifyAcompanhamentoOwner(ownerId,meta={}){if(!isAdmin||!ownerId|
 async function saveActivity(){
   const ownerId=isAdmin?$('#activityOwnerSel').value:myId,type=$('#activityType').value;let title=$('#activityName').value.trim();if(!title)title=ACTIVITY_TYPES[type]||'Acompanhamento';if(!ownerId){toast('Selecione o Carbonauta.');return}
   const startDate=$('#activityStart').value,dueDate=$('#activityDue').value;if(startDate&&dueDate&&startDate>dueDate){toast('A data final não pode ser anterior ao início.');return}const m=memberById(ownerId),data={ownerId,ownerUid:(state.users||[]).find(u=>u.memberId===ownerId)?.uid || (ownerId===myId ? (window.auth.currentUser?.uid||'') : ''),ownerName:m?.nome||'',type,status:$('#activityStatus').value,title,description:$('#activityDesc').value.trim(),startDate,dueDate,progress:+$('#activityProgress').value||0,updatedAt:FB().serverTimestamp()};
-  try{let savedId=editingActivityId||'',wasNew=!editingActivityId;if(editingActivityId){await FB().setDoc(FB().doc(window.db,'rede_activities',editingActivityId),data,{merge:true})}else{const ref=await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});savedId=ref.id}if(isAdmin&&ownerId!==myId){const notifyNew=wasNew&&['pendencia','correcao','entrega'].includes(type);const notifyReturn=!wasNew&&type==='correcao'&&['devolvido','aprovado'].includes(data.status);if(notifyNew||notifyReturn)await notifyAcompanhamentoOwner(ownerId,{kind:type,title:type==='correcao'?'✍️ Correção no acompanhamento':type==='pendencia'?'⚠️ Nova pendência':'📌 Nova entrega / prazo',message:`${title}${dueDate?' · prazo '+fmtDate(dueDate):''}`,sourceId:savedId})}closeOverlay('activityOverlay');toast('Acompanhamento salvo.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou o acompanhamento.':'Erro ao salvar acompanhamento.')}
+  try{let savedId=editingActivityId||'',wasNew=!editingActivityId;if(editingActivityId){await FB().setDoc(FB().doc(window.db,'rede_activities',editingActivityId),data,{merge:true})}else{const ref=await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});savedId=ref.id}if(wasNew)await awardPoints(ownerId,'activity_created',savedId,title);if(['concluido','aprovado','feito'].includes(String(data.status||'').toLowerCase())||Number(data.progress)>=100)await awardPoints(ownerId,'activity_completed',savedId,title);if(isAdmin&&ownerId!==myId){const notifyNew=wasNew&&['pendencia','correcao','entrega'].includes(type);const notifyReturn=!wasNew&&type==='correcao'&&['devolvido','aprovado'].includes(data.status);if(notifyNew||notifyReturn)await notifyAcompanhamentoOwner(ownerId,{kind:type,title:type==='correcao'?'✍️ Correção no acompanhamento':type==='pendencia'?'⚠️ Nova pendência':'📌 Nova entrega / prazo',message:`${title}${dueDate?' · prazo '+fmtDate(dueDate):''}`,sourceId:savedId})}closeOverlay('activityOverlay');toast('Acompanhamento salvo.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou o acompanhamento.':'Erro ao salvar acompanhamento.')}
 }
 async function deleteActivity(){if(!editingActivityId||!confirm('Excluir este registro de acompanhamento?'))return;const a=state.activities.find(x=>x.id===editingActivityId);if(!a||!(isAdmin||isMe(a.ownerId)))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_activities',editingActivityId));closeOverlay('activityOverlay');toast('Registro excluído.')}catch(e){console.error(e);toast('Erro ao excluir.')}}
 
@@ -6162,9 +6269,9 @@ function renderPainel(){
 function _fillOwnerSelect(selId,ownerPreset=''){const sel=$(selId),ordered=[...state.members].filter(m=>m.status!=='egresso').sort((a,b)=>a.nome.localeCompare(b.nome));sel.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');sel.value=ownerPreset||myId||ordered[0]?.id||''}
 function openCheckin(ownerPreset=''){if(!myId&&!isAdmin){toast('Vincule seu perfil ao login.');return}_fillOwnerSelect('#checkinOwner',ownerPreset);$('#checkinOwnerRow').style.display=isAdmin?'block':'none';const owner=isAdmin?$('#checkinOwner').value:myId,mk=monthKey();$('#checkinMonth').value=mk;const a=state.activities.find(x=>x.ownerId===owner&&x.type==='checkin'&&x.checkinMonth===mk);$('#checkinDid').value=a?.checkinDid||'';$('#checkinDelivered').value=a?.checkinDelivered||'';$('#checkinDifficulty').value=a?.checkinDifficulty||'';$('#checkinNext').value=a?.checkinNext||'';openOverlay('checkinOverlay')}
 function loadCheckinForSelection(){const owner=isAdmin?$('#checkinOwner').value:myId,mk=$('#checkinMonth').value||monthKey(),a=state.activities.find(x=>x.ownerId===owner&&x.type==='checkin'&&x.checkinMonth===mk);$('#checkinDid').value=a?.checkinDid||'';$('#checkinDelivered').value=a?.checkinDelivered||'';$('#checkinDifficulty').value=a?.checkinDifficulty||'';$('#checkinNext').value=a?.checkinNext||''}
-async function saveCheckin(){const ownerId=isAdmin?$('#checkinOwner').value:myId,mk=$('#checkinMonth').value||monthKey();if(!ownerId){toast('Selecione o Carbonauta.');return}const m=memberById(ownerId),did=$('#checkinDid').value.trim(),del=$('#checkinDelivered').value.trim(),dif=$('#checkinDifficulty').value.trim(),next=$('#checkinNext').value.trim();if(!did&&!del&&!dif&&!next){toast('Preencha ao menos uma informação do check-in.');return}const data={ownerId,ownerUid:(state.users||[]).find(u=>u.memberId===ownerId)?.uid||(ownerId===myId?(window.auth.currentUser?.uid||''):''),ownerName:m?.nome||'',type:'checkin',status:'concluido',title:`Check-in mensal · ${monthLabel(mk)}`,description:next||did,checkinMonth:mk,checkinDid:did,checkinDelivered:del,checkinDifficulty:dif,checkinNext:next,startDate:mk+'-01',progress:100,updatedAt:FB().serverTimestamp()};const existing=state.activities.find(x=>x.ownerId===ownerId&&x.type==='checkin'&&x.checkinMonth===mk);try{if(existing)await FB().setDoc(FB().doc(window.db,'rede_activities',existing.id),data,{merge:true});else await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});closeOverlay('checkinOverlay');toast('Check-in salvo.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou o check-in.':'Erro ao salvar check-in.') }}
+async function saveCheckin(){const ownerId=isAdmin?$('#checkinOwner').value:myId,mk=$('#checkinMonth').value||monthKey();if(!ownerId){toast('Selecione o Carbonauta.');return}const m=memberById(ownerId),did=$('#checkinDid').value.trim(),del=$('#checkinDelivered').value.trim(),dif=$('#checkinDifficulty').value.trim(),next=$('#checkinNext').value.trim();if(!did&&!del&&!dif&&!next){toast('Preencha ao menos uma informação do check-in.');return}const data={ownerId,ownerUid:(state.users||[]).find(u=>u.memberId===ownerId)?.uid||(ownerId===myId?(window.auth.currentUser?.uid||''):''),ownerName:m?.nome||'',type:'checkin',status:'concluido',title:`Check-in mensal · ${monthLabel(mk)}`,description:next||did,checkinMonth:mk,checkinDid:did,checkinDelivered:del,checkinDifficulty:dif,checkinNext:next,startDate:mk+'-01',progress:100,updatedAt:FB().serverTimestamp()};const existing=state.activities.find(x=>x.ownerId===ownerId&&x.type==='checkin'&&x.checkinMonth===mk);try{if(existing)await FB().setDoc(FB().doc(window.db,'rede_activities',existing.id),data,{merge:true});else await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});await awardPoints(ownerId,'checkin',`${ownerId}_${mk}`,`Check-in · ${monthLabel(mk)}`);closeOverlay('checkinOverlay');toast('Check-in salvo.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou o check-in.':'Erro ao salvar check-in.') }}
 function openProduct(ownerPreset=''){if(!myId&&!isAdmin){toast('Vincule seu perfil ao login.');return}_fillOwnerSelect('#productOwner',ownerPreset);$('#productOwnerRow').style.display=isAdmin?'block':'none';$('#productType').value='artigo';$('#productTitle').value='';$('#productStatus').value='planejado';$('#productDue').value='';$('#productNotes').value='';openOverlay('productOverlay')}
-async function saveProduct(){const ownerId=isAdmin?$('#productOwner').value:myId,title=$('#productTitle').value.trim();if(!ownerId||!title){toast('Informe o Carbonauta e o produto.');return}const m=memberById(ownerId),ptype=$('#productType').value,data={ownerId,ownerUid:(state.users||[]).find(u=>u.memberId===ownerId)?.uid||(ownerId===myId?(window.auth.currentUser?.uid||''):''),ownerName:m?.nome||'',type:'produto',productType:ptype,status:$('#productStatus').value,title,description:$('#productNotes').value.trim(),dueDate:$('#productDue').value,startDate:new Date().toISOString().slice(0,10),progress:$('#productStatus').value==='concluido'?100:$('#productStatus').value==='revisao'?80:$('#productStatus').value==='andamento'?45:5,updatedAt:FB().serverTimestamp()};try{await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});closeOverlay('productOverlay');toast('Produto registrado.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou o produto.':'Erro ao registrar produto.')}}
+async function saveProduct(){const ownerId=isAdmin?$('#productOwner').value:myId,title=$('#productTitle').value.trim();if(!ownerId||!title){toast('Informe o Carbonauta e o produto.');return}const m=memberById(ownerId),ptype=$('#productType').value,data={ownerId,ownerUid:(state.users||[]).find(u=>u.memberId===ownerId)?.uid||(ownerId===myId?(window.auth.currentUser?.uid||''):''),ownerName:m?.nome||'',type:'produto',productType:ptype,status:$('#productStatus').value,title,description:$('#productNotes').value.trim(),dueDate:$('#productDue').value,startDate:new Date().toISOString().slice(0,10),progress:$('#productStatus').value==='concluido'?100:$('#productStatus').value==='revisao'?80:$('#productStatus').value==='andamento'?45:5,updatedAt:FB().serverTimestamp()};try{const ref=await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});await awardPoints(ownerId,'product',ref.id,title);closeOverlay('productOverlay');toast('Produto registrado.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou o produto.':'Erro ao registrar produto.')}}
 function dossierRowsFor(m){const acts=state.activities.filter(a=>a.ownerId===m.id).sort((a,b)=>_activityTime(b)-_activityTime(a)),repo=memberRepositoryItems(m.id),cron=buildCronoItems().filter(x=>x.ownerId===m.id);return {acts,repo,cron,checkins:acts.filter(a=>a.type==='checkin'),products:acts.filter(a=>a.type==='produto')}}
 function dossierHTML(m){const {acts,repo,cron,checkins,products}=dossierRowsFor(m),nv=NIVEIS[m.nivel]||{color:'#607d8b',short:m.nivel||''},h=memberHealth(m);const table=acts.length?`<table class="dossier-table"><thead><tr><th>Tipo</th><th>Registro</th><th>Status</th><th>Data/prazo</th></tr></thead><tbody>${acts.map(a=>`<tr><td>${esc(ACTIVITY_TYPES[a.type]||a.type)}</td><td><b>${esc(a.title||'')}</b>${a.description?'<br>'+esc(a.description):''}</td><td>${esc(ACTIVITY_STATUS[a.status]||a.status||'')}</td><td>${esc(a.dueDate?fmtDate(a.dueDate):a.startDate?fmtDate(a.startDate):'')}</td></tr>`).join('')}</tbody></table>`:'<div class="dash-empty">Sem registros.</div>';return `<article class="dossier-sheet"><div class="dossier-head"><div class="dossier-avatar" style="background:${nv.color}">${m.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m.nome)}</div><div><div class="dossier-name">${esc(m.nome)}</div><div class="dossier-meta">${esc(nv.short)}${m.programa?' · '+esc(m.programa):''}${m.bolsista?' · Bolsista':''} · Saúde: ${h.level==='green'?'em dia':h.level==='yellow'?'atenção':'intervenção'}</div></div></div><section class="dossier-section"><h3>★ Pergunta científica</h3><div class="dossier-question">${esc(m.perguntaCientifica||'Ainda não preenchida.')}</div></section><section class="dossier-section"><h3>Identidade do projeto</h3><table class="dossier-table"><tr><th>Objetivo</th><td>${esc(m.objetivoProjeto||'—')}</td></tr><tr><th>Público atendido</th><td>${esc(m.grupoAtendido||'—')}</td></tr><tr><th>Visibilidade</th><td>${esc(m.ideiaVisibilidade||'—')}</td></tr><tr><th>Outros</th><td>${esc(m.projetoOutros||'—')}</td></tr></table></section><section class="dossier-section"><h3>Acompanhamento (${acts.length})</h3>${table}</section><section class="dossier-section"><h3>Produtos (${products.length}) · Check-ins (${checkins.length}) · Repositório (${repo.length}) · Prazos (${cron.length})</h3><div class="dash-sub">O Excel do dossiê contém as tabelas completas de cada bloco.</div></section></article>`}
 function refreshDossierPerson(){const sel=$('#dossierPerson'),cur=sel.value;const list=(isAdmin?state.members:state.members.filter(m=>m.id===myId)).sort((a,b)=>a.nome.localeCompare(b.nome));sel.innerHTML=list.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');sel.value=list.some(m=>m.id===cur)?cur:(myId&&list.some(m=>m.id===myId)?myId:list[0]?.id||'')}
@@ -6235,7 +6342,8 @@ async function saveFeedPost(){
     if(postFileData){toast('Enviando anexo…');const up=await fbUploadAny('rede_feed','post_'+a.id,postFileData,postFileName);fileUrl=up.url;storagePath=up.path}
     const para=dest==='all'?null:dest,paraNome=para?(memberById(para)?.nome||''):'';
     const ref=await FB().addDoc(FB().collection(window.db,'rede_feed'),{authorId:a.id,authorUid:window.auth.currentUser?.uid||'',authorName:a.name,authorFoto:a.foto,kind:$('#postKind').value,title,text,externalUrl:$('#postUrl').value.trim(),fileUrl,fileName:postFileName,storagePath,para,paraNome,ts:FB().serverTimestamp()});
-    try{await createMuralNotifications(dest,{kind:$('#postKind').value,title:(paraNome?'Para '+paraNome+': ':'')+(title||muralKindMeta($('#postKind').value).label),message:text||title||'Nova publicação no Mural',sourceType:'mural-post',sourceId:ref.id})}catch(ne){console.warn('Publicou, mas não notificou:',ne);toast('Publicado, mas o Firebase bloqueou a notificação.')}
+    const postKind=$('#postKind').value,pointAction=postKind.startsWith('ajuda_')?'help_post':'feed';await awardPoints(a.id,pointAction,ref.id,title||muralKindMeta(postKind).label);
+    try{await createMuralNotifications(dest,{kind:postKind,title:(paraNome?'Para '+paraNome+': ':'')+(title||muralKindMeta(postKind).label),message:text||title||'Nova publicação no Mural',sourceType:'mural-post',sourceId:ref.id})}catch(ne){console.warn('Publicou, mas não notificou:',ne);toast('Publicado, mas o Firebase bloqueou a notificação.')}
     closeOverlay('postOverlay');toast(paraNome?'Publicado e '+paraNome+' foi notificado.':'Publicado e o grupo foi notificado.');
   }catch(e){console.error(e);const msg=e?.code==='permission-denied'?'Permissão negada pelo Firestore. Verifique as regras de publicações do mural.':(e?.message||'Erro ao publicar no mural.');toast(msg)}
 }
@@ -6598,7 +6706,9 @@ const VIEW_GROUPS={
   agenda:{views:['crono']},
   conversas:{views:['mensagens','conversas'],labels:{mensagens:'Equipe',conversas:'Privadas'},badges:{mensagens:'msgBadge',conversas:'privateBadge'}},
   mural:{views:['mural','fotos'],labels:{mural:'Mural',fotos:'Fotos'},badges:{mural:'muralBadge'}},
-  lab:{views:['lab']}
+  lab:{views:['lab']},
+  medalhas:{views:['medalhas']},
+  jogo:{views:['jogo']}
 };
 function groupOfView(v){return Object.keys(VIEW_GROUPS).find(g=>VIEW_GROUPS[g].views.includes(v))||v}
 function renderSubNav(v){
@@ -6616,7 +6726,7 @@ function switchView(v){
   $$('.view').forEach(el=>el.classList.remove('on'));
   $$('.tab').forEach(el=>el.classList.toggle('on',(el.dataset.group||el.dataset.view)===grp));
   renderSubNav(v);
-  const map={painel:'viewPainel',rede:'viewRede',crono:'viewCrono',track:'viewTrack',lab:'viewLab',feed:'viewFeed',mensagens:'viewMensagens',conversas:'viewConversas',mural:'viewMural',fotos:'viewFotos',pubs:'viewPubs'};
+  const map={painel:'viewPainel',rede:'viewRede',crono:'viewCrono',track:'viewTrack',lab:'viewLab',feed:'viewFeed',mensagens:'viewMensagens',conversas:'viewConversas',mural:'viewMural',fotos:'viewFotos',pubs:'viewPubs',medalhas:'viewMedalhas',jogo:'viewJogo'};
   map[v] && $('#'+map[v]).classList.add('on');
   if(v==='painel') renderPainel();
   if(v==='rede') renderAll();
@@ -6629,6 +6739,7 @@ function switchView(v){
   if(v==='mural'){ renderMural(); markChatSeen(); }
   if(v==='fotos') renderFotos();
   if(v==='pubs'){ renderPubs(); checkScienceEngine(); }
+  if(v==='medalhas') renderMedals();
   $('#side').classList.remove('open');
   if($('#appMenuBackdrop')){ $('#appMenuBackdrop').classList.remove('open'); $('#appMenuBackdrop').setAttribute('aria-hidden','true'); }
 }
@@ -6777,6 +6888,16 @@ $('#cronoEditBtn').onclick=editCronoSelected;
 $('#cronoDeleteBtn').onclick=deleteCronoSelected;
 $('#cNivel').onchange=renderCrono; $('#cTipo').onchange=renderCrono;
 $('#cMeus').onchange=renderCrono; $('#cFeitos').onchange=renderCrono;
+if($('#googleCalendarBtn'))$('#googleCalendarBtn').onclick=openGoogleCalendarSettings;
+if($('#saveGoogleClientIdBtn'))$('#saveGoogleClientIdBtn').onclick=saveGoogleClientId;
+if($('#connectGoogleCalendarBtn'))$('#connectGoogleCalendarBtn').onclick=async()=>{try{if(!googleClientId())return toast('A coordenação precisa cadastrar o Client ID do Google.');await ensureGoogleCalendarToken(true);toast('Google Agenda conectado nesta sessão.')}catch(e){console.error(e);toast(e.message||'Não consegui conectar ao Google Agenda.')}};
+if($('#syncAllGoogleBtn'))$('#syncAllGoogleBtn').onclick=syncAllPrivateToGoogle;
+if($('#pullGoogleBtn'))$('#pullGoogleBtn').onclick=pullGoogleToCarbonautas;
+if($('#medalPrev'))$('#medalPrev').onclick=()=>shiftMedalMonth(-1);
+if($('#medalNext'))$('#medalNext').onclick=()=>shiftMedalMonth(1);
+if($('#medalToday'))$('#medalToday').onclick=()=>{medalCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);medalLoadedKey='';renderMedals()};
+if($('#reloadGameBtn'))$('#reloadGameBtn').onclick=()=>{const f=$('#carbonautaGameFrame');if(f)f.src='./game.html?v=P28&t='+Date.now()};
+window.addEventListener('message',e=>{const frame=$('#carbonautaGameFrame');if(!frame||e.source!==frame.contentWindow)return;if(location.origin!=='null'&&e.origin!==location.origin)return;const d=e.data||{};if(d.type==='carbonautas-game-result'&&d.completed===true)reportGameReward(d.score)});
 
 $('#chatInput').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(120,e.target.scrollHeight)+'px'});
 $('#chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat()}});
@@ -6793,6 +6914,8 @@ if($('#muralDirectBtn')) $('#muralDirectBtn').onclick=openRecado;
 
 $('#dashCheckinBtn').onclick=()=>openCheckin();
 $('#dashProductBtn').onclick=()=>openProduct();
+$('#dashMedalsBtn').onclick=()=>switchView('medalhas');
+$('#dashGameBtn').onclick=()=>switchView('jogo');
 $('#dashDossierBtn').onclick=()=>openDossier();
 $('#dashNewTaskBtn').onclick=()=>openActivityPreset('pendencia');
 $('#dashProductsAllBtn').onclick=()=>switchView('track');
@@ -6931,7 +7054,7 @@ window.CARBONAUTAS_BUILD='P25-FOTOS-LEGIVEIS-20260910';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P27-20260912',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P28-20260914',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -6943,7 +7066,7 @@ waitFirebase().then(startAuth);
 <script id="carbonautas-dynamic-favicon">
 (()=>{
   const link=document.getElementById('dynamicFavicon'); if(!link)return;
-  const img=new Image(); img.src='./icon-192.png?v=P25';
+  const img=new Image(); img.src='./icon-192.png?v=P28';
   img.onload=()=>{
     const c=document.createElement('canvas'),ctx=c.getContext('2d'); c.width=c.height=64; let phase=0,last=0;
     const draw=(ts)=>{

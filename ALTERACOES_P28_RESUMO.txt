@@ -1,0 +1,13 @@
+CARBONAUTAS P28 — RESUMO
+
+- Agenda particular continua privada por UID.
+- Integração opcional com Google Calendar (OAuth individual).
+- Evento enviado ao Google com visibility=private.
+- Botões de sincronização manual nos dois sentidos.
+- Ranking mensal de pontos.
+- Pódio 🥇🥈🥉 e navegação por meses anteriores.
+- Reações/comentários/mensagens não pontuam.
+- Jogo incorporado em game.html.
+- Jogo completo dá +10 pontos, no máximo 1 vez/dia.
+- Regras Firestore completas em FIRESTORE_RULES_P28_COMPLETAS.txt.
+- Cache/PWA atualizado para P28.
