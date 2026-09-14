@@ -1,6 +1,6 @@
-const CACHE='carbonautas-p32-20260914';
+const CACHE='carbonautas-p33-20260914';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#061a28;color:white"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
-const EXTRA_SCRIPT='<script src="./calendar-sync-v2.js?v=P32-20260914"><\/script>';
+const EXTRA_SCRIPT='<script src="./calendar-sync-v2.js?v=P33-20260914"><\/script>';
 self.addEventListener('install',event=>{self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim();})());});
 self.addEventListener('message',event=>{if(event.data==='SKIP_WAITING')self.skipWaiting();});
@@ -12,7 +12,9 @@ async function navigationResponse(req){
     if(!type.includes('text/html'))return fresh;
     let html=await fresh.text();
     if(!html.includes('calendar-sync-v2.js')){
-      html=html.includes('</body>')?html.replace('</body>',EXTRA_SCRIPT+'</body>'):html+EXTRA_SCRIPT;
+      const lower=html.toLowerCase();
+      const pos=lower.lastIndexOf('</body>');
+      html=pos>=0 ? html.slice(0,pos)+EXTRA_SCRIPT+html.slice(pos) : html+EXTRA_SCRIPT;
     }
     const headers=new Headers(fresh.headers);headers.delete('content-length');headers.set('cache-control','no-store');
     return new Response(html,{status:fresh.status,statusText:fresh.statusText,headers});
