@@ -87,7 +87,6 @@
     return {items,min,max,truncated};
   }
 
-  // CREATE: somente campos aceitos pelas regras P28.
   function newPrivatePayload(ge,dt){
     return {
       titulo:safeTitle(ge.summary),
@@ -102,7 +101,6 @@
     };
   }
 
-  // UPDATE: metadados Google permitidos pelas regras P28.
   function googleMetaPayload(ge){
     return {
       googleEventId:String(ge.id||''),
@@ -174,7 +172,6 @@
           const docId=importedDocId(ge.id);
           const ref=f.doc(window.db,'rede_private_schedule',docId);
           firstPass.push({kind:'create',ref,data:newPrivatePayload(ge,dt)});
-          // A regra P28 só permite os campos Google após o documento existir.
           metadataPass.push({kind:'update',ref,data:googleMetaPayload(ge)});
           novos++;
         }
@@ -296,4 +293,29 @@
   }
 
   console.info('Carbonautas Google Sync',SYNC_VERSION,'carregado');
+})();
+
+/* P40 · ponte de notificações para instalações antigas que ainda carregam calendar-sync-v2.js?v=P33 */
+(function(){
+'use strict';
+if(window.__CARBONAUTAS_NOTIFY_P40__)return;
+window.__CARBONAUTAS_NOTIFY_P40__=true;
+let lastOpen=0;
+function e(v=''){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function arr(){try{return Array.isArray(state?.notifications)?state.notifications:[]}catch(_){return[]}}
+function ico(n){try{return typeof notificationIcon==='function'?notificationIcon(n.kind):'🔔'}catch(_){return'🔔'}}
+function when(n){try{const ms=typeof notifMillis==='function'?notifMillis(n):(n?.ts?.toMillis?n.ts.toMillis():Date.now());return new Date(ms).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}catch(_){return''}}
+function close(){const p=document.getElementById('notifyPanelP40');if(p)p.style.display='none';}
+function panel(){
+ let p=document.getElementById('notifyPanelP40');if(p)return p;
+ p=document.createElement('div');p.id='notifyPanelP40';p.style.cssText='position:fixed;inset:0;z-index:2147483647;background:rgba(3,16,27,.74);display:none;align-items:center;justify-content:center;padding:14px;overflow:auto';
+ p.innerHTML='<div style="width:min(640px,100%);max-height:90vh;background:#fff;border-radius:20px;box-shadow:0 22px 80px rgba(0,0,0,.42);overflow:hidden;display:flex;flex-direction:column"><div style="display:flex;align-items:center;padding:17px 18px;border-bottom:1px solid #dce6eb;background:#f4f8fb"><div style="font-size:24px;margin-right:10px">🔔</div><div style="flex:1"><b style="font:800 20px system-ui;color:#071827">Notificações</b><div id="notifySubP40" style="font:500 12px system-ui;color:#6c7f88;margin-top:2px"></div></div><button id="notifyCloseP40" style="border:0;background:#e8eef2;border-radius:12px;width:42px;height:42px;font-size:24px">×</button></div><div id="notifyListP40" style="padding:12px;overflow:auto;max-height:70vh"></div></div>';
+ document.body.appendChild(p);p.querySelector('#notifyCloseP40').onclick=close;p.onclick=x=>{if(x.target===p)close()};return p;
+}
+function render(){const p=panel(),l=p.querySelector('#notifyListP40'),s=p.querySelector('#notifySubP40'),a=arr(),u=a.filter(n=>!n.read).length;s.textContent=`${a.length} notificações · ${u} não lidas`;if(!a.length){l.innerHTML='<div style="padding:30px;text-align:center;color:#71838b;font:600 14px system-ui">Nenhuma notificação.</div>';return}l.innerHTML=a.slice(0,100).map(n=>`<button data-p40="${e(n.id)}" style="display:flex;width:100%;text-align:left;gap:10px;border:1px solid ${n.read?'#e2e8ec':'#9ddcf3'};background:${n.read?'#fff':'#eef9ff'};border-radius:14px;padding:12px;margin-bottom:9px"><span style="font-size:22px">${ico(n)}</span><span style="flex:1"><b style="display:block;font:800 13px system-ui;color:#10283a">${e(n.title||'Nova notificação')}</b><span style="display:block;font:500 12.5px/1.45 system-ui;color:#4a5c62;margin-top:3px">${e(n.message||'')}</span><small style="display:block;color:#7c8b90;margin-top:5px">${e(n.senderName||'Carbonauta')} · ${e(when(n))}</small></span></button>`).join('');l.querySelectorAll('[data-p40]').forEach(b=>b.onclick=async()=>{const id=b.getAttribute('data-p40');close();try{if(typeof openNotification==='function')await openNotification(id)}catch(x){console.warn('P40 abrir notificação',x)}})}
+function open(){const now=Date.now();if(now-lastOpen<180)return;lastOpen=now;render();panel().style.display='flex'}
+function intercept(ev){const b=ev.target?.closest?.('#notifyBtn');if(!b)return;ev.preventDefault();ev.stopPropagation();if(ev.stopImmediatePropagation)ev.stopImmediatePropagation();open()}
+document.addEventListener('pointerdown',intercept,true);document.addEventListener('click',intercept,true);
+window.openNotificationsP40=open;
+console.info('Carbonautas Notifications P40 carregado');
 })();
