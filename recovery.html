@@ -7,7 +7,7 @@
 <style>html,body{height:100%;margin:0;font-family:system-ui;background:#f7fbfb;color:#16262c}main{height:100%;display:grid;place-items:center}div{text-align:center;max-width:520px;padding:28px}h1{margin:0 0 10px;font-size:26px}p{color:#60757d;line-height:1.5}.ok{color:#087f5b;font-weight:700}</style>
 </head>
 <body>
-<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Limpando a versão antiga e instalando a sincronização nova da Agenda.</p></div></main>
+<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Removendo a versão antiga do aplicativo.</p></div></main>
 <script>
 (async()=>{
   const msg=document.getElementById('msg');
@@ -21,28 +21,21 @@
       await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));
     }
     if('serviceWorker' in navigator){
-      msg.textContent='Instalando a versão nova…';
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P34-20260914-2303',{updateViaCache:'none'});
+      msg.textContent='Instalando a versão P37…';
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P37-20260915',{updateViaCache:'none'});
       await reg.update();
-      const worker=reg.installing||reg.waiting||reg.active;
-      if(worker&&worker.state!=='activated'){
-        await new Promise(resolve=>{
-          const done=()=>{if(worker.state==='activated')resolve()};
-          worker.addEventListener('statechange',done);
-          setTimeout(resolve,5000);
-        });
-      }
       await navigator.serviceWorker.ready;
       if(!navigator.serviceWorker.controller){
         await new Promise(resolve=>{
-          navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true});
-          setTimeout(resolve,2500);
+          let done=false;const finish=()=>{if(done)return;done=true;resolve()};
+          navigator.serviceWorker.addEventListener('controllerchange',finish,{once:true});
+          setTimeout(finish,4000);
         });
       }
     }
-    msg.className='ok';msg.textContent='Atualização concluída. Abrindo o Carbonautas…';
-  }catch(e){console.warn(e);msg.textContent='A atualização foi aplicada. Abrindo o Carbonautas…';}
-  setTimeout(()=>location.replace('./?p34='+Date.now()),350);
+    msg.className='ok';msg.textContent='P37 instalada. Abrindo o Carbonautas…';
+  }catch(e){console.warn(e);msg.textContent='Atualização aplicada. Abrindo o Carbonautas…';}
+  setTimeout(()=>location.replace('./?build=P37&t='+Date.now()),450);
 })();
 </script>
 </body>
