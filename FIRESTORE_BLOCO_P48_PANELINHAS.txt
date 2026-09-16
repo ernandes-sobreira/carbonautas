@@ -1,0 +1,107 @@
+// ============================================================
+// CARBONAUTAS P48 — CONVERSAS EM PANELINHA
+// Cole este bloco DENTRO de:
+// service cloud.firestore { match /databases/{database}/documents { ... } }
+// Ele pressupõe as funções já existentes: signedIn(), hasProfile(),
+// myMemberId() e isCoordinator().
+// ============================================================
+
+match /rede_group_threads/{groupId} {
+
+  function groupMember() {
+    return hasProfile()
+      && resource != null
+      && resource.data.memberIds is list
+      && myMemberId() in resource.data.memberIds;
+  }
+
+  allow get, list: if groupMember();
+
+  allow create: if hasProfile()
+    && request.resource.data.keys().hasOnly([
+      'groupName',
+      'memberIds',
+      'createdByUid',
+      'createdByMemberId',
+      'createdByName',
+      'active',
+      'createdAt',
+      'updatedAt'
+    ])
+    && request.resource.data.groupName is string
+    && request.resource.data.groupName.size() >= 1
+    && request.resource.data.groupName.size() <= 80
+    && request.resource.data.memberIds is list
+    && request.resource.data.memberIds.size() >= 2
+    && request.resource.data.memberIds.size() <= 60
+    && myMemberId() in request.resource.data.memberIds
+    && request.resource.data.createdByUid == request.auth.uid
+    && request.resource.data.createdByMemberId == myMemberId()
+    && request.resource.data.createdByName is string
+    && request.resource.data.createdByName.size() <= 200
+    && request.resource.data.active == true
+    && request.resource.data.createdAt == request.time
+    && request.resource.data.updatedAt == request.time;
+
+  // Participantes podem atualizar SOMENTE o resumo da conversa.
+  // Lista de participantes, criador e nome permanecem imutáveis nesta versão.
+  allow update: if groupMember()
+    && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+      'updatedAt',
+      'lastMessage',
+      'lastSenderId'
+    ])
+    && request.resource.data.updatedAt == request.time
+    && request.resource.data.lastMessage is string
+    && request.resource.data.lastMessage.size() <= 160
+    && request.resource.data.lastSenderId == myMemberId();
+
+  allow delete: if isCoordinator()
+    || (
+      groupMember()
+      && resource.data.createdByMemberId == myMemberId()
+    );
+
+  match /messages/{messageId} {
+
+    function groupMessageMember() {
+      let g = get(
+        /databases/$(database)/documents/rede_group_threads/$(groupId)
+      );
+      return hasProfile()
+        && g.data.memberIds is list
+        && myMemberId() in g.data.memberIds;
+    }
+
+    allow read: if groupMessageMember();
+
+    allow create: if groupMessageMember()
+      && request.resource.data.keys().hasOnly([
+        'authorUid',
+        'authorMemberId',
+        'authorName',
+        'text',
+        'topic',
+        'replyTo',
+        'createdAt'
+      ])
+      && request.resource.data.authorUid == request.auth.uid
+      && request.resource.data.authorMemberId == myMemberId()
+      && request.resource.data.authorName is string
+      && request.resource.data.authorName.size() <= 200
+      && request.resource.data.text is string
+      && request.resource.data.text.size() >= 1
+      && request.resource.data.text.size() <= 5000
+      && request.resource.data.topic is string
+      && request.resource.data.topic.size() <= 80
+      && request.resource.data.createdAt == request.time;
+
+    allow update: if false;
+
+    allow delete: if groupMessageMember()
+      && (
+        resource.data.authorUid == request.auth.uid
+        || isCoordinator()
+      );
+  }
+}
