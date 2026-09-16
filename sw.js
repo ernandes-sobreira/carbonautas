@@ -1,9 +1,9 @@
-const CACHE='carbonautas-p41-20260916';
+const CACHE='carbonautas-p42-20260916';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#061a28;color:white"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
-const SYNC_SCRIPT='<script src="./calendar-sync-v4.js?v=P41-20260916"><\/script>';
-const DURATION_SCRIPT='<script src="./calendar-duration-v1.js?v=P41-20260916"><\/script>';
-const NOTIFY_SCRIPT='<script src="./notification-fix-v1.js?v=P41-20260916"><\/script>';
-const ACADEMIC_SCRIPT='<script src="./acompanhamento-medalhas-v1.js?v=P41-20260916"><\/script>';
+const SYNC_SCRIPT='<script src="./calendar-sync-v4.js?v=P42-20260916"><\/script>';
+const DURATION_SCRIPT='<script src="./calendar-duration-v1.js?v=P42-20260916"><\/script>';
+const NOTIFY_SCRIPT='<script src="./notification-fix-v1.js?v=P42-20260916"><\/script>';
+const ACADEMIC_SCRIPT='<script src="./acompanhamento-medalhas-v1.js?v=P42-20260916"><\/script>';
 self.addEventListener('install',event=>{self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim();})());});
 self.addEventListener('message',event=>{if(event.data==='SKIP_WAITING')self.skipWaiting();});
@@ -27,7 +27,7 @@ async function navigationResponse(req){
 self.addEventListener('fetch',event=>{
   const req=event.request;if(req.method!=='GET')return;const url=new URL(req.url);if(url.origin!==self.location.origin)return;
   if(req.mode==='navigate'){
-    if(url.pathname.endsWith('/recovery.html')){event.respondWith(plainFresh(req));return;}
+    if(url.pathname.endsWith('/recovery.html')||url.pathname.endsWith('/chrome-reset.html')){event.respondWith(plainFresh(req));return;}
     event.respondWith(navigationResponse(req));return;
   }
   if(url.pathname.endsWith('/index.html')||url.pathname.endsWith('/carbonautas/')){event.respondWith(navigationResponse(req));return;}
