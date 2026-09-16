@@ -24,7 +24,7 @@ async function navigationResponse(req){
     if(!html.includes('calendar-sync-v4.js'))inject+=SYNC_SCRIPT;
     if(!html.includes('notification-fix-v1.js'))inject+=NOTIFY_SCRIPT;
     if(!html.includes('ui-fixes-p44.js'))inject+=UI_SCRIPT;
-    if(!html.includes('academic-periods-p45.js'))inject+=ACAMIC_SCRIPT;
+    if(!html.includes('academic-periods-p45.js'))inject+=ACADEMIC_SCRIPT;
     if(!html.includes('chat-whatsapp-p46.js'))inject+=CHAT_SCRIPT;
     if(!html.includes('private-repo-p47.js'))inject+=PRIVATE_REPO_SCRIPT;
     if(!html.includes('panelinhas-p48.js'))inject+=GROUPS_SCRIPT;
