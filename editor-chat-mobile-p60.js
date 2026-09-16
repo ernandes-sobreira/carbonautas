@@ -124,7 +124,11 @@ function watchEditorSave60(){
     overlay.dataset.p60='1';let was=overlay.classList.contains('open');
     new MutationObserver(()=>{
       const now=overlay.classList.contains('open');
-      if(was&&!now&&pendingSaveTitle){const t=pendingSaveTitle;pendingSaveTitle='';setTimeout(()=>showAfterSave60(t),450)}
+      if(was&&!now&&pendingSaveTitle){
+        const t=pendingSaveTitle;pendingSaveTitle='';
+        const status=(document.getElementById('ooStatus')?.textContent||'');
+        if(/✅|salv|notific|id[eê]ntic|nova vers[aã]o/i.test(status))setTimeout(()=>showAfterSave60(t),450);
+      }
       was=now;
     }).observe(overlay,{attributes:true,attributeFilter:['class']});
   }
