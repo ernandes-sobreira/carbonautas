@@ -21,8 +21,8 @@
       await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));
     }
     if('serviceWorker' in navigator){
-      msg.textContent='Instalando a versão P39…';
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P39-20260915',{updateViaCache:'none'});
+      msg.textContent='Instalando a versão P41…';
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P41-20260916',{updateViaCache:'none'});
       await reg.update();
       await navigator.serviceWorker.ready;
       if(!navigator.serviceWorker.controller){
@@ -33,9 +33,9 @@
         });
       }
     }
-    msg.className='ok';msg.textContent='P39 instalada. Abrindo o Carbonautas…';
+    msg.className='ok';msg.textContent='P41 instalada. Abrindo o Carbonautas…';
   }catch(e){console.warn(e);msg.textContent='Atualização aplicada. Abrindo o Carbonautas…';}
-  setTimeout(()=>location.replace('./?build=P39&t='+Date.now()),500);
+  setTimeout(()=>location.replace('./?build=P41&t='+Date.now()),500);
 })();
 </script>
 </body>
