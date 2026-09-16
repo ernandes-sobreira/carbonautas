@@ -1,15 +1,16 @@
-const CACHE='carbonautas-p51-20260916';
+const CACHE='carbonautas-p52-20260916';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#061a28;color:white"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
-const SYNC_SCRIPT='<script src="./calendar-sync-v4.js?v=P51-20260916"><\/script>';
-const DURATION_SCRIPT='<script src="./calendar-duration-v1.js?v=P51-20260916"><\/script>';
-const NOTIFY_SCRIPT='<script src="./notification-fix-v1.js?v=P51-20260916"><\/script>';
-const UI_SCRIPT='<script src="./ui-fixes-p44.js?v=P51-20260916"><\/script>';
-const ACADEMIC_SCRIPT='<script src="./academic-periods-p45.js?v=P51-20260916"><\/script>';
-const CHAT_SCRIPT='<script src="./chat-whatsapp-p46.js?v=P51-20260916"><\/script>';
-const PRIVATE_REPO_SCRIPT='<script src="./private-repo-p47.js?v=P51-20260916"><\/script>';
-const GROUPS_SCRIPT='<script src="./panelinhas-p48.js?v=P51-20260916"><\/script>';
-const TABS_SCRIPT='<script src="./tabs-stability-p50.js?v=P51-20260916"><\/script>';
-const AGENDA_BADGE_SCRIPT='<script src="./agenda-badge-p51.js?v=P51-20260916"><\/script>';
+const SYNC_SCRIPT='<script src="./calendar-sync-v4.js?v=P52-20260916"><\/script>';
+const DURATION_SCRIPT='<script src="./calendar-duration-v1.js?v=P52-20260916"><\/script>';
+const NOTIFY_SCRIPT='<script src="./notification-fix-v1.js?v=P52-20260916"><\/script>';
+const UI_SCRIPT='<script src="./ui-fixes-p44.js?v=P52-20260916"><\/script>';
+const ACADEMIC_SCRIPT='<script src="./academic-periods-p45.js?v=P52-20260916"><\/script>';
+const CHAT_SCRIPT='<script src="./chat-whatsapp-p46.js?v=P52-20260916"><\/script>';
+const PRIVATE_REPO_SCRIPT='<script src="./private-repo-p47.js?v=P52-20260916"><\/script>';
+const GROUPS_SCRIPT='<script src="./panelinhas-p48.js?v=P52-20260916"><\/script>';
+const TABS_SCRIPT='<script src="./tabs-stability-p50.js?v=P52-20260916"><\/script>';
+const AGENDA_BADGE_SCRIPT='<script src="./agenda-badge-p51.js?v=P52-20260916"><\/script>';
+const REVIEW_FLOW_SCRIPT='<script src="./review-flow-p52.js?v=P52-20260916"><\/script>';
 self.addEventListener('install',event=>{self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim();})());});
 self.addEventListener('message',event=>{if(event.data==='SKIP_WAITING')self.skipWaiting();});
@@ -31,6 +32,7 @@ async function navigationResponse(req){
     if(!html.includes('panelinhas-p48.js'))inject+=GROUPS_SCRIPT;
     if(!html.includes('tabs-stability-p50.js'))inject+=TABS_SCRIPT;
     if(!html.includes('agenda-badge-p51.js'))inject+=AGENDA_BADGE_SCRIPT;
+    if(!html.includes('review-flow-p52.js'))inject+=REVIEW_FLOW_SCRIPT;
     if(inject){const lower=html.toLowerCase(),pos=lower.lastIndexOf('</body>');html=pos>=0?html.slice(0,pos)+inject+html.slice(pos):html+inject;}
     const headers=new Headers(fresh.headers);headers.delete('content-length');headers.set('cache-control','no-store, max-age=0');
     return new Response(html,{status:fresh.status,statusText:fresh.statusText,headers});
