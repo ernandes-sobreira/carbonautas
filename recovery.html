@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Carbonautas · Atualização P58</title>
+<title>Carbonautas · Atualização P59</title>
 <style>html,body{height:100%;margin:0;font-family:system-ui;background:#f7fbfb;color:#16262c}main{height:100%;display:grid;place-items:center}div{text-align:center;max-width:560px;padding:28px}h1{margin:0 0 10px;font-size:26px}p{color:#60757d;line-height:1.5}.ok{color:#087f5b;font-weight:700}</style>
 </head>
 <body>
-<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Preparando a versão P58.</p></div></main>
+<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Preparando a versão P59.</p></div></main>
 <script>
 (async()=>{
   const msg=document.getElementById('msg');
@@ -21,8 +21,8 @@
       await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));
     }
     if('serviceWorker' in navigator){
-      msg.textContent='Instalando a versão P58…';
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P58-20260916',{updateViaCache:'none'});
+      msg.textContent='Instalando a versão P59…';
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P59-20260916',{updateViaCache:'none'});
       await reg.update();
       await navigator.serviceWorker.ready;
       if(!navigator.serviceWorker.controller){
@@ -33,9 +33,9 @@
         });
       }
     }
-    msg.className='ok';msg.textContent='P58 instalada. Abrindo o Carbonautas…';
+    msg.className='ok';msg.textContent='P59 instalada. Abrindo o Carbonautas…';
   }catch(e){console.warn(e);msg.textContent='Atualização aplicada. Abrindo o Carbonautas…';}
-  setTimeout(()=>location.replace('./?build=P58&t='+Date.now()),500);
+  setTimeout(()=>location.replace('./?build=P59&t='+Date.now()),500);
 })();
 </script>
 </body>
