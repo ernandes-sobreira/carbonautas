@@ -44,7 +44,7 @@ function injectCss(){
   if(document.getElementById('p52ReviewStyle'))return;
   const st=document.createElement('style');st.id='p52ReviewStyle';st.textContent=`
   .p52-review-flow{margin:8px 0 5px;border:1px solid #d9e5e8;border-left:4px solid #1e88c7;border-radius:12px;background:#f8fbfc;padding:9px 11px;max-width:760px}
-  .p52-review-flow.adjust{border-left-color:#e0912e;background:#fffaf1}.p52-now{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#18323d}.p52-now>b{font-size:12.5px;line-height:1.35}.p52-label{font-size:9px;font-weight:900;letter-spacing:.08em;background:#0e5c63;color:#fff;border-radius:999px;padding:4px 7px}.p52-review-flow.adjust .p52-label{background:#b87316}.p52-last{display:flex;gap:10px 16px;flex-wrap:wrap;margin-top:5px;color:#6b7e85;font-size:10.5px;line-height:1.35}.p52-last b{color:#344e58}.review-note{margin-top:5px!important;color:#708188!important;font-size:10.5px!important}.review-note:before{content:'Observação · ';font-weight:800;color:#566b73}.review-note{padding-left:0!important}.review-note::first-letter{font-size:0}
+  .p52-review-flow.adjust{border-left-color:#e0912e;background:#fffaf1}.p52-now{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#18323d}.p52-now>b{font-size:12.5px;line-height:1.35}.p52-label{font-size:9px;font-weight:900;letter-spacing:.08em;background:#0e5c63;color:#fff;border-radius:999px;padding:4px 7px}.p52-review-flow.adjust .p52-label{background:#b87316}.p52-last{display:flex;gap:10px 16px;flex-wrap:wrap;margin-top:5px;color:#6b7e85;font-size:10.5px;line-height:1.35}.p52-last b{color:#344e58}.review-note{margin-top:5px!important;color:#708188!important;font-size:10.5px!important;padding-left:0!important}.review-note:before{content:'Observação · ';font-weight:800;color:#566b73}
   @media(max-width:700px){.p52-review-flow{padding:8px 9px}.p52-now>b{font-size:12px}.p52-last{display:grid;gap:3px}}
   `;document.head.appendChild(st);
 }
@@ -52,7 +52,6 @@ function install(){
   injectCss();
   try{window.reviewBadgeHTML=flowHTML}catch(e){console.warn('P52 review override',e)}
   try{reviewBadgeHTML=flowHTML}catch(e){}
-  // Re-renderiza o Repositório atual para aplicar o novo resumo sem recarregar dados.
   setTimeout(()=>{try{if(document.body.dataset.view==='pubs'&&typeof renderPubs==='function')renderPubs()}catch(e){}},250);
   console.info('Carbonautas fluxo de correção',VERSION,'carregado');
 }
