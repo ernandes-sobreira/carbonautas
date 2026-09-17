@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Carbonautas · Atualização P64</title>
+<title>Carbonautas · Atualização P65</title>
 <style>html,body{height:100%;margin:0;font-family:system-ui;background:#f7fbfb;color:#16262c}main{height:100%;display:grid;place-items:center}div{text-align:center;max-width:560px;padding:28px}h1{margin:0 0 10px;font-size:26px}p{color:#60757d;line-height:1.5}.ok{color:#087f5b;font-weight:700}</style>
 </head>
 <body>
-<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Instalando conversa privada 1:1 no Repositório e exclusão segura.</p></div></main>
+<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Corrigindo o botão Excluir das pastas do Repositório.</p></div></main>
 <script>
 (async()=>{
   const msg=document.getElementById('msg');
@@ -15,14 +15,14 @@
     if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));}
     if('caches' in window){const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));}
     if('serviceWorker' in navigator){
-      msg.textContent='Instalando a versão P64…';
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P64-20260917',{updateViaCache:'none'});
+      msg.textContent='Instalando a versão P65…';
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P65-20260917',{updateViaCache:'none'});
       await reg.update();await navigator.serviceWorker.ready;
       if(!navigator.serviceWorker.controller){await new Promise(resolve=>{let done=false;const finish=()=>{if(done)return;done=true;resolve()};navigator.serviceWorker.addEventListener('controllerchange',finish,{once:true});setTimeout(finish,3500);});}
     }
-    msg.className='ok';msg.textContent='P64 instalada. Repositório e conversas atualizados.';
+    msg.className='ok';msg.textContent='P65 instalada. Cada pasta terá apenas um botão Excluir.';
   }catch(e){console.warn(e);msg.textContent='Atualização aplicada. Abrindo o Carbonautas…';}
-  setTimeout(()=>location.replace('./?build=P64&t='+Date.now()),500);
+  setTimeout(()=>location.replace('./?build=P65&t='+Date.now()),500);
 })();
 </script>
 </body>
