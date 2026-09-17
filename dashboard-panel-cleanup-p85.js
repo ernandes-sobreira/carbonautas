@@ -22,7 +22,7 @@ function cardKey(card){
   m=raw.match(/activity:([^'\)]+)/);return m?`activity:${m[1]}`:'';
 }
 function ensureCss(){if(document.getElementById('p85PanelStyle'))return;const s=document.createElement('style');s.id='p85PanelStyle';s.textContent=`
-.p85-hidden-treated{display:none!important}.p85-treated-btn{background:#fff!important;color:#176b4a!important;border-color:#b9dfcc!important}.p85-treated-btn:hover{background:#effbf5!important}.p85-empty{padding:14px;color:#7c8b90;font-size:12px;text-align:center}
+.p85-hidden-treated,.p77-hidden-treated{display:none!important}.p85-treated-btn{background:#fff!important;color:#176b4a!important;border-color:#b9dfcc!important}.p85-treated-btn:hover{background:#effbf5!important}.p85-empty{padding:14px;color:#7c8b90;font-size:12px;text-align:center}
 `;document.head.appendChild(s)}
 function migrateOldReminders(){
   if(migrated)return;migrated=true;
@@ -41,11 +41,11 @@ function ensureExitButtons(){
     const b=document.createElement('button');b.type='button';b.className='btn p85-treated-btn';b.textContent='✓ Já tratei';b.title='Tira da atenção e mantém no histórico';b.onclick=e=>{e.preventDefault();e.stopPropagation();markHandled(card)};actions.appendChild(b)
   })
 }
-function hideHandled(){document.querySelectorAll('#dashAttention .p56-task').forEach(card=>{const key=cardKey(card),hide=isHandled(key);card.classList.toggle('p85-hidden-treated',hide);card.classList.remove('p77-hidden-treated')})}
+function hideHandled(){document.querySelectorAll('#dashAttention .p56-task').forEach(card=>{const key=cardKey(card),hide=isHandled(key);card.classList.toggle('p85-hidden-treated',hide);card.classList.toggle('p77-hidden-treated',hide)})}
 function recalc(){
   const sections=[...document.querySelectorAll('#dashAttention .p56-panel-section')];let total=0,week=0;
   sections.forEach((sec,i)=>{
-    const cards=[...sec.querySelectorAll('.p56-task')].filter(c=>!c.classList.contains('p85-hidden-treated'));
+    const cards=[...sec.querySelectorAll('.p56-task')].filter(c=>!c.classList.contains('p85-hidden-treated')&&!c.classList.contains('p77-hidden-treated'));
     const n=cards.length;total+=n;if(i===1)week=n;
     const count=sec.querySelector('.p56-section-head span');if(count&&count.textContent!==String(n))count.textContent=String(n);
     let em=sec.querySelector(':scope > .p85-empty');
