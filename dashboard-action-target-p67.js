@@ -3,7 +3,6 @@
 'use strict';
 const VERSION='P67';
 const BUILD='20260917';
-let baseOpenItem=null;
 
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function norm(v=''){
@@ -81,7 +80,7 @@ async function resolveTarget(a){
 }
 function ensureCss(){
   if(document.getElementById('p67Style'))return;const s=document.createElement('style');s.id='p67Style';s.textContent=`
-  .p67-linked{margin-top:13px;border:1px solid #cfe3e6;border-radius:14px;padding:11px 13px;background:#f3fbfb;display:flex;align-items:center;gap:10px}.p67-linked-ico{width:34px;height:34px;border-radius:10px;background:#dff2f3;display:grid;place-items:center;font-size:17px}.p67-linked-main{min-width:0;flex:1}.p67-linked-main b{display:block;color:#15313b;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p67-linked-main span{display:block;color:#678089;font-size:10px;margin-top:2px}.p67-searching{color:#71858d;font-size:11px}.p67-target{background:#0e5c63!important;border-color:#0e5c63!important;color:#fff!important;font-weight:850!important}.p67-chat-secondary{background:#fff!important;color:#17313d!important;border-color:#cbdade!important}.p66-edit{font-size:11px!important;color:#5f737b!important}.p66-edit::first-letter{font-size:12px}
+  .p67-linked{margin-top:13px;border:1px solid #cfe3e6;border-radius:14px;padding:11px 13px;background:#f3fbfb;display:flex;align-items:center;gap:10px}.p67-linked-ico{width:34px;height:34px;border-radius:10px;background:#dff2f3;display:grid;place-items:center;font-size:17px}.p67-linked-main{min-width:0;flex:1}.p67-linked-main b{display:block;color:#15313b;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p67-linked-main span{display:block;color:#678089;font-size:10px;margin-top:2px}.p67-searching{color:#71858d;font-size:11px;margin-top:10px}.p67-target{background:#0e5c63!important;border-color:#0e5c63!important;color:#fff!important;font-weight:850!important}.p67-chat-secondary{background:#fff!important;color:#17313d!important;border-color:#cbdade!important}.p66-edit{font-size:11px!important;color:#5f737b!important}.p66-edit::first-letter{font-size:12px}
   @media(max-width:650px){.p67-target{grid-column:1/-1}.p67-linked{align-items:flex-start}.p67-linked-main b{white-space:normal}.p66-edit{grid-column:auto}}
   `;document.head.appendChild(s);
 }
@@ -112,11 +111,19 @@ function openActivity(id){
   if(typeof window.p66OpenActivityDetail!=='function')return toastSafe('O detalhe do Painel ainda não terminou de carregar.');
   window.p66OpenActivityDetail(id);setTimeout(()=>enrichActivityDetail(id),0);
 }
-function p67OpenItem(key){const k=String(key||'');if(k.startsWith('activity:')){openActivity(k.slice(9));return}if(typeof baseOpenItem==='function')return baseOpenItem(key)}
-function install(){
-  ensureCss();if(!baseOpenItem&&typeof window.p56OpenItem==='function'&&window.p56OpenItem!==p67OpenItem)baseOpenItem=window.p56OpenItem;
-  window.p67OpenActivity=openActivity;window.p56OpenItem=p67OpenItem;
+function latestReviewForThread(tid){
+  try{return (state.publicacoes||[]).filter(p=>p.reviewFlow&&(p.reviewThreadId===tid||p.id===tid)).sort((a,b)=>Number(b.reviewVersion||1)-Number(a.reviewVersion||1))[0]||null}catch(_e){return null}
 }
-function boot(){install();setTimeout(install,1200);setTimeout(install,2400);console.info('Carbonautas',VERSION,BUILD,'ações do Painel ligadas ao destino real')}
+function openNonActivity(key){
+  const k=String(key||'');
+  try{
+    if(k.startsWith('review:')){const p=latestReviewForThread(k.slice(7));if(p){if(typeof switchView==='function')switchView('pubs');setTimeout(()=>{if(typeof window.openReviewConversation==='function')window.openReviewConversation(p.id)},120)}return}
+    if(k.startsWith('checkin:')){const rest=k.slice(8),pos=rest.lastIndexOf(':');const memberId=pos>0?rest.slice(0,pos):rest;if(typeof openCheckin==='function')openCheckin(memberId);return}
+    if(k.startsWith('bolsa:')){const rest=k.slice(6),pos=rest.lastIndexOf(':');const memberId=pos>0?rest.slice(0,pos):rest;if(typeof focusMemberTrack==='function')focusMemberTrack(memberId);return}
+  }catch(e){console.warn('P67 ação auxiliar',e)}
+}
+function p67OpenItem(key){const k=String(key||'');if(k.startsWith('activity:')){openActivity(k.slice(9));return}openNonActivity(k)}
+function install(){ensureCss();window.p67OpenActivity=openActivity;window.p56OpenItem=p67OpenItem}
+function boot(){install();setTimeout(install,1000);setTimeout(install,1800);setTimeout(install,3000);console.info('Carbonautas',VERSION,BUILD,'ações do Painel ligadas ao destino real')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
