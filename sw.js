@@ -1,5 +1,5 @@
-const CACHE='carbonautas-p84-20260917';
-const BUILD='P84';
+const CACHE='carbonautas-p85-20260917';
+const BUILD='P85';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#061a28;color:white"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
 const SYNC_SCRIPT='<script src="./calendar-sync-v4.js?v=P76-20260917"><\/script>';
 const DURATION_SCRIPT='<script src="./calendar-duration-v1.js?v=P76-20260917"><\/script>';
@@ -31,11 +31,12 @@ const DASH_CHAT_ACTION_SCRIPT='<script src="./dashboard-chat-action-p71.js?v=P76
 const DASH_DIRECT_CHAT_SCRIPT='<script src="./dashboard-direct-chat-p72.js?v=P76-20260917"><\/script>';
 const DASH_NATIVE_CHAT_SCRIPT='<script src="./dashboard-native-chat-p73.js?v=P76-20260917"><\/script>';
 const ACCESS_PASSWORD_SCRIPT='<script src="./access-password-admin-p74.js?v=P76-20260917"><\/script>';
-const DASH_PANEL_CLEANUP_SCRIPT='<script src="./dashboard-panel-cleanup-p77.js?v=P77-20260917"><\/script>';
+const DASH_PANEL_CLEANUP_SCRIPT='<script src="./dashboard-panel-cleanup-p85.js?v=P85-20260917"><\/script>';
 const PRODUCT_SIMPLIFY_SCRIPT='<script src="./product-simplify-notifications-p78.js?v=P78-20260917"><\/script>';
 const CHAT_IMAGES_SCRIPT='<script src="./chat-images-p79.js?v=P79-20260917"><\/script>';
 const GROUP_CHAT_NOTIFY_SCRIPT='<script src="./group-chat-notifications-p80.js?v=P80-20260917"><\/script>';
-const PWA_MOBILE_FIX_SCRIPT='<script src="./pwa-mobile-fix-p82.js?v=P84-20260917"><\/script>';
+const PWA_MOBILE_FIX_SCRIPT='<script src="./pwa-mobile-fix-p85.js?v=P85-20260917"><\/script>';
+const MOBILE_CHAT_COMPOSER_SCRIPT='<script src="./mobile-chat-composer-p85.js?v=P85-20260917"><\/script>';
 
 async function forceRefreshClients(){
   const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
@@ -98,11 +99,12 @@ async function navigationResponse(req){
     if(!html.includes('dashboard-direct-chat-p72.js'))inject+=DASH_DIRECT_CHAT_SCRIPT;
     if(!html.includes('dashboard-native-chat-p73.js'))inject+=DASH_NATIVE_CHAT_SCRIPT;
     if(!html.includes('access-password-admin-p74.js'))inject+=ACCESS_PASSWORD_SCRIPT;
-    if(!html.includes('dashboard-panel-cleanup-p77.js'))inject+=DASH_PANEL_CLEANUP_SCRIPT;
+    if(!html.includes('dashboard-panel-cleanup-p85.js'))inject+=DASH_PANEL_CLEANUP_SCRIPT;
     if(!html.includes('product-simplify-notifications-p78.js'))inject+=PRODUCT_SIMPLIFY_SCRIPT;
     if(!html.includes('chat-images-p79.js'))inject+=CHAT_IMAGES_SCRIPT;
     if(!html.includes('group-chat-notifications-p80.js'))inject+=GROUP_CHAT_NOTIFY_SCRIPT;
-    if(!html.includes('pwa-mobile-fix-p82.js'))inject+=PWA_MOBILE_FIX_SCRIPT;
+    if(!html.includes('pwa-mobile-fix-p85.js'))inject+=PWA_MOBILE_FIX_SCRIPT;
+    if(!html.includes('mobile-chat-composer-p85.js'))inject+=MOBILE_CHAT_COMPOSER_SCRIPT;
     if(inject){const lower=html.toLowerCase(),pos=lower.lastIndexOf('</body>');html=pos>=0?html.slice(0,pos)+inject+html.slice(pos):html+inject;}
     const headers=new Headers(fresh.headers);headers.delete('content-length');headers.set('cache-control','no-store, max-age=0');
     return new Response(html,{status:fresh.status,statusText:fresh.statusText,headers});
