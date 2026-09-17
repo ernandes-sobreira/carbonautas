@@ -1,4 +1,5 @@
-const CACHE='carbonautas-p80-20260917';
+const CACHE='carbonautas-p81-20260917';
+const BUILD='P81';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#061a28;color:white"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
 const SYNC_SCRIPT='<script src="./calendar-sync-v4.js?v=P76-20260917"><\/script>';
 const DURATION_SCRIPT='<script src="./calendar-duration-v1.js?v=P76-20260917"><\/script>';
@@ -35,7 +36,22 @@ const PRODUCT_SIMPLIFY_SCRIPT='<script src="./product-simplify-notifications-p78
 const CHAT_IMAGES_SCRIPT='<script src="./chat-images-p79.js?v=P79-20260917"><\/script>';
 const GROUP_CHAT_NOTIFY_SCRIPT='<script src="./group-chat-notifications-p80.js?v=P80-20260917"><\/script>';
 self.addEventListener('install',event=>{self.skipWaiting();});
-self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim();})());});
+self.addEventListener('activate',event=>{event.waitUntil((async()=>{
+  const keys=await caches.keys();
+  await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));
+  await self.clients.claim();
+  const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+  await Promise.all(clients.map(c=>{
+    try{
+      const u=new URL(c.url);
+      if(u.pathname.endsWith('/recovery.html')||u.pathname.endsWith('/chrome-reset.html'))return null;
+      if(u.searchParams.get('build')===BUILD)return null;
+      u.searchParams.set('build',BUILD);
+      u.searchParams.set('swrefresh',Date.now().toString());
+      return c.navigate(u.href).catch(()=>null);
+    }catch(_e){return null}
+  }));
+})());});
 self.addEventListener('message',event=>{if(event.data==='SKIP_WAITING')self.skipWaiting();});
 async function plainFresh(req){try{return await fetch(req,{cache:'no-store'})}catch(e){return new Response(OFFLINE_HTML,{headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}})}}
 async function navigationResponse(req){
