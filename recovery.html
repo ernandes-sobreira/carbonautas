@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Carbonautas · Atualização P76</title>
+<title>Carbonautas · Atualização P77</title>
 <style>html,body{height:100%;margin:0;font-family:system-ui;background:#f7fbfb;color:#16262c}main{height:100%;display:grid;place-items:center}div{text-align:center;max-width:560px;padding:28px}h1{margin:0 0 10px;font-size:26px}p{color:#60757d;line-height:1.5}.ok{color:#087f5b;font-weight:700}</style>
 </head>
 <body>
-<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Corrigindo a identificação exata das demandas e a abertura das conversas do Painel.</p></div></main>
+<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Fazendo a conversa aparecer na frente e limpando do Painel os itens que você já tratou.</p></div></main>
 <script>
 (async()=>{
   const msg=document.getElementById('msg');
@@ -15,14 +15,14 @@
     if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));}
     if('caches' in window){const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));}
     if('serviceWorker' in navigator){
-      msg.textContent='Instalando a versão P76…';
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P76-20260917',{updateViaCache:'none'});
+      msg.textContent='Instalando a versão P77…';
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P77-20260917',{updateViaCache:'none'});
       await reg.update();await navigator.serviceWorker.ready;
       if(!navigator.serviceWorker.controller){await new Promise(resolve=>{let done=false;const finish=()=>{if(done)return;done=true;resolve()};navigator.serviceWorker.addEventListener('controllerchange',finish,{once:true});setTimeout(finish,3500);});}
     }
-    msg.className='ok';msg.textContent='P76 instalada. Pedidos do Painel agora levam a demanda correta e abrem a conversa correspondente.';
+    msg.className='ok';msg.textContent='P77 instalada. Conversas abertas ficam visíveis e itens lembrados saem da lista de atenção.';
   }catch(e){console.warn(e);msg.textContent='Atualização aplicada. Abrindo o Carbonautas…';}
-  setTimeout(()=>location.replace('./?build=P76&t='+Date.now()),500);
+  setTimeout(()=>location.replace('./?build=P77&t='+Date.now()),500);
 })();
 </script>
 </body>
