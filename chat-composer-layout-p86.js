@@ -4,6 +4,7 @@
 const VERSION='P86';
 let ro=null;
 const q=(s,r=document)=>r.querySelector(s);
+function canonicalize(){try{const u=new URL(location.href);if(u.searchParams.get('build')!==VERSION){u.searchParams.set('build',VERSION);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}}
 function ensureCss(){
   if(q('#p86ComposerStyle'))return;
   const s=document.createElement('style');s.id='p86ComposerStyle';s.textContent=`
@@ -61,9 +62,9 @@ function bindResize(){
   if(ro)return;ro=new ResizeObserver(()=>measure());
   const p=q('.private-composer-zone'),g=q('.p46-compose');if(p)ro.observe(p);if(g)ro.observe(g)
 }
-function tick(){ensureCss();autoGrow(q('#privateInput'),44,132);autoGrow(q('#p46Input'),44,118);bindResize();syncViewport()}
+function tick(){canonicalize();ensureCss();autoGrow(q('#privateInput'),44,132);autoGrow(q('#p46Input'),44,118);bindResize();syncViewport()}
 if(window.visualViewport){window.visualViewport.addEventListener('resize',syncViewport);window.visualViewport.addEventListener('scroll',syncViewport)}
-window.addEventListener('resize',syncViewport);
+window.addEventListener('resize',syncViewport);window.addEventListener('focus',()=>{canonicalize();syncViewport()});
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',tick,{once:true});else tick();
 setInterval(tick,1200);
 console.info('Carbonautas',VERSION,'composer PC/mobile carregado');
