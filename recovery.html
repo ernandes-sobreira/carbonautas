@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Carbonautas · Atualização P78</title>
+<title>Carbonautas · Atualização P79</title>
 <style>html,body{height:100%;margin:0;font-family:system-ui;background:#f7fbfb;color:#16262c}main{height:100%;display:grid;place-items:center}div{text-align:center;max-width:560px;padding:28px}h1{margin:0 0 10px;font-size:26px}p{color:#60757d;line-height:1.5}.ok{color:#087f5b;font-weight:700}</style>
 </head>
 <body>
-<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Organizando check-in, novidades, ações do dia e simplificando a navegação.</p></div></main>
+<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Ativando fotos e prints nas Conversas e mantendo o resumo diário logo após o check-in.</p></div></main>
 <script>
 (async()=>{
   const msg=document.getElementById('msg');
@@ -15,14 +15,14 @@
     if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));}
     if('caches' in window){const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));}
     if('serviceWorker' in navigator){
-      msg.textContent='Instalando a versão P78…';
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P78-20260917',{updateViaCache:'none'});
+      msg.textContent='Instalando a versão P79…';
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P79-20260917',{updateViaCache:'none'});
       await reg.update();await navigator.serviceWorker.ready;
       if(!navigator.serviceWorker.controller){await new Promise(resolve=>{let done=false;const finish=()=>{if(done)return;done=true;resolve()};navigator.serviceWorker.addEventListener('controllerchange',finish,{once:true});setTimeout(finish,3500);});}
     }
-    msg.className='ok';msg.textContent='P78 instalada. Check-in, notificações e ações do dia agora ficam no mesmo fluxo.';
+    msg.className='ok';msg.textContent='P79 instalada. Conversas agora aceitam foto/print e Ctrl+V, sem mudar o modelo que já funciona.';
   }catch(e){console.warn(e);msg.textContent='Atualização aplicada. Abrindo o Carbonautas…';}
-  setTimeout(()=>location.replace('./?build=P78&t='+Date.now()),500);
+  setTimeout(()=>location.replace('./?build=P79&t='+Date.now()),500);
 })();
 </script>
 </body>
