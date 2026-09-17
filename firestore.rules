@@ -216,7 +216,6 @@ service cloud.firestore {
         || isMine(memberId);
     }
 
-
     // ============================================================
     // CARBONAUTAS — CRONOGRAMA
     // ============================================================
@@ -337,9 +336,12 @@ service cloud.firestore {
           || (publicationCollaborator() && validCollaboratorOfficeUpdate())
         );
 
+      // P64: quem criou/enviou pode excluir; coordenação continua podendo
+      // excluir itens do Repositório Geral. Não amplia acesso a chats privados.
       allow delete: if signedIn()
         && (
           resource.data.ownerUid == request.auth.uid
+          || resource.data.get('createdByUid', '') == request.auth.uid
           || isCoordinator()
         );
 
@@ -510,9 +512,10 @@ service cloud.firestore {
 
 
     // ============================================================
-    // CARBONAUTAS P13 — DOSSIÊS / MÚLTIPLOS ARQUIVOS PRIVADOS
-    // Cada usuário só consulta dossiês cujo memberId está explicitamente
-    // presente em allowedMemberIds. O coordenador NÃO ganha leitura extra.
+    // CARBONAUTAS P13/P64 — DOSSIÊS / MÚLTIPLOS ARQUIVOS
+    // Privados continuam privados. A coordenação só recebe poder extra de
+    // exclusão quando a pasta é explicitamente "Toda a Rede" e NÃO nasceu
+    // dentro de Meu Repositório (personalRepo != true).
     // ============================================================
 
     match /rede_repository_packages/{packageId} {
@@ -522,6 +525,12 @@ service cloud.firestore {
           resource.data.get('createdByUid', '') == request.auth.uid
           || resource.data.ownerMemberId == myMemberId()
         );
+      }
+
+      function publicPackageCoordinator() {
+        return isCoordinator()
+          && resource.data.get('accessMode', '') == 'group'
+          && resource.data.get('personalRepo', false) != true;
       }
 
       // P25: sem o teste "is list" na consulta. A listagem do app usa
@@ -553,7 +562,8 @@ service cloud.firestore {
         && request.resource.data.ownerMemberId in request.resource.data.allowedMemberIds
         && request.resource.data.accessMode in ['private', 'selected', 'group'];
 
-      allow delete: if packageManager();
+      allow delete: if packageManager()
+        || publicPackageCoordinator();
 
       match /files/{fileId} {
 
@@ -570,6 +580,12 @@ service cloud.firestore {
           );
         }
 
+        function parentPublicCoordinator() {
+          return isCoordinator()
+            && parentPackage().data.get('accessMode', '') == 'group'
+            && parentPackage().data.get('personalRepo', false) != true;
+        }
+
         allow read: if hasProfile()
           && parentPackage().data.allowedMemberIds is list
           && myMemberId() in parentPackage().data.allowedMemberIds;
@@ -577,7 +593,10 @@ service cloud.firestore {
         allow create: if parentManager()
           && request.resource.data.createdByUid == request.auth.uid;
 
-        allow update, delete: if parentManager();
+        allow update: if parentManager();
+
+        allow delete: if parentManager()
+          || parentPublicCoordinator();
 
         // P22 — conversa de um arquivo do Meu Repositório.
         // Herda a ACL da pasta: só quem pode abrir a pasta pode ler/conversar.
