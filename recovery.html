@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Carbonautas · Atualização P69</title>
+<title>Carbonautas · Atualização P70</title>
 <style>html,body{height:100%;margin:0;font-family:system-ui;background:#f7fbfb;color:#16262c}main{height:100%;display:grid;place-items:center}div{text-align:center;max-width:560px;padding:28px}h1{margin:0 0 10px;font-size:26px}p{color:#60757d;line-height:1.5}.ok{color:#087f5b;font-weight:700}</style>
 </head>
 <body>
-<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Fazendo cada item do Painel mostrar a próxima ação real: corrigir, abrir documento ou pedir o arquivo.</p></div></main>
+<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Removendo ações duplicadas e escolhendo o pedido certo para cada tipo de demanda.</p></div></main>
 <script>
 (async()=>{
   const msg=document.getElementById('msg');
@@ -15,14 +15,14 @@
     if('serviceWorker' in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));}
     if('caches' in window){const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));}
     if('serviceWorker' in navigator){
-      msg.textContent='Instalando a versão P69…';
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P69-20260917',{updateViaCache:'none'});
+      msg.textContent='Instalando a versão P70…';
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P70-20260917',{updateViaCache:'none'});
       await reg.update();await navigator.serviceWorker.ready;
       if(!navigator.serviceWorker.controller){await new Promise(resolve=>{let done=false;const finish=()=>{if(done)return;done=true;resolve()};navigator.serviceWorker.addEventListener('controllerchange',finish,{once:true});setTimeout(finish,3500);});}
     }
-    msg.className='ok';msg.textContent='P69 instalada. O Painel agora leva para resolver, e não para editar o cadastro.';
+    msg.className='ok';msg.textContent='P70 instalada. Agora cada demanda mostra uma única ação principal e o pedido adequado.';
   }catch(e){console.warn(e);msg.textContent='Atualização aplicada. Abrindo o Carbonautas…';}
-  setTimeout(()=>location.replace('./?build=P69&t='+Date.now()),500);
+  setTimeout(()=>location.replace('./?build=P70&t='+Date.now()),500);
 })();
 </script>
 </body>
