@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Carbonautas · Atualização P85</title>
+<title>Carbonautas · Atualização P86</title>
 <style>html,body{height:100%;margin:0;font-family:system-ui;background:#f7fbfb;color:#16262c}main{height:100%;display:grid;place-items:center}div{text-align:center;max-width:560px;padding:28px}h1{margin:0 0 10px;font-size:26px}p{color:#60757d;line-height:1.5}.ok{color:#087f5b;font-weight:700}</style>
 </head>
 <body>
-<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Corrigindo o campo de mensagens no celular e estabilizando o Painel.</p></div></main>
+<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Ajustando a barra de mensagens no PC e no celular.</p></div></main>
 <script>
 (async()=>{
   const msg=document.getElementById('msg');
@@ -15,9 +15,9 @@
   try{
     if('caches' in window){const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));}
     if('serviceWorker' in navigator){
-      msg.textContent='Instalando a versão P85…';
+      msg.textContent='Instalando a versão P86…';
       const changed=new Promise(resolve=>{let done=false;const finish=()=>{if(done)return;done=true;resolve()};navigator.serviceWorker.addEventListener('controllerchange',finish,{once:true});setTimeout(finish,6500)});
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P85-20260917',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P86-20260917',{updateViaCache:'none'});
       await reg.update();
       if(reg.installing){await new Promise(resolve=>{const w=reg.installing;const finish=()=>{if(['installed','activated','redundant'].includes(w.state))resolve()};w.addEventListener('statechange',finish);finish();setTimeout(resolve,4500)})}
       if(reg.waiting)reg.waiting.postMessage('SKIP_WAITING');
@@ -26,9 +26,9 @@
       const worker=live?.active||live?.waiting||live?.installing;if(worker)worker.postMessage('FORCE_REFRESH_ALL');
       await wait(500)
     }
-    msg.className='ok';msg.textContent='P85 instalada. Mensagens mobile corrigidas e Painel estabilizado.';
+    msg.className='ok';msg.textContent='P86 instalada. Barra de mensagens corrigida.';
   }catch(e){console.warn(e);msg.textContent='Atualização aplicada. Abrindo o Carbonautas…'}
-  setTimeout(()=>location.replace('./?build=P85&t='+Date.now()),600);
+  setTimeout(()=>location.replace('./?build=P86&t='+Date.now()),600);
 })();
 </script>
 </body>
