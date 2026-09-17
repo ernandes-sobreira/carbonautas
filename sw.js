@@ -1,5 +1,5 @@
-const CACHE='carbonautas-p83-20260917';
-const BUILD='P83';
+const CACHE='carbonautas-p84-20260917';
+const BUILD='P84';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#061a28;color:white"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
 const SYNC_SCRIPT='<script src="./calendar-sync-v4.js?v=P76-20260917"><\/script>';
 const DURATION_SCRIPT='<script src="./calendar-duration-v1.js?v=P76-20260917"><\/script>';
@@ -35,7 +35,7 @@ const DASH_PANEL_CLEANUP_SCRIPT='<script src="./dashboard-panel-cleanup-p77.js?v
 const PRODUCT_SIMPLIFY_SCRIPT='<script src="./product-simplify-notifications-p78.js?v=P78-20260917"><\/script>';
 const CHAT_IMAGES_SCRIPT='<script src="./chat-images-p79.js?v=P79-20260917"><\/script>';
 const GROUP_CHAT_NOTIFY_SCRIPT='<script src="./group-chat-notifications-p80.js?v=P80-20260917"><\/script>';
-const PWA_MOBILE_FIX_SCRIPT='<script src="./pwa-mobile-fix-p82.js?v=P83-20260917"><\/script>';
+const PWA_MOBILE_FIX_SCRIPT='<script src="./pwa-mobile-fix-p82.js?v=P84-20260917"><\/script>';
 
 async function forceRefreshClients(){
   const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
@@ -49,7 +49,6 @@ async function forceRefreshClients(){
     }catch(_e){return null}
   }));
 }
-
 self.addEventListener('install',event=>{self.skipWaiting();});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{
   const keys=await caches.keys();
