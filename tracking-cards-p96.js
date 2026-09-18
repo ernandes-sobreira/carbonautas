@@ -1,134 +1,36 @@
 /* Carbonautas P96 · Acompanhamento em cartas navegáveis, swipe e filtros */
 (function(){
 'use strict';
-const BUILD='P96';
-const $=(s,r=document)=>r.querySelector(s);
-const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const BUILD='P96',$=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
-let cards=[],visible=[],index=0,touch=null,scheduled=false,lastSignature='';
-const palette=[
-  ['#EAF6EF','#B9DEC9','#2F7D5A'],['#EAF4FA','#BDD8E7','#2A7FA8'],['#F3EEFB','#D8C9ED','#7659B2'],
-  ['#FBF3E7','#E8D2AF','#A66F24'],['#FCEFF2','#EAC7D0','#B95870'],['#E9F7F5','#B8DDD8','#238A84'],
-  ['#FCF7E5','#E7D99D','#9B7D16'],['#F0F5F4','#CBDDD8','#547D78']
-];
+let cards=[],visible=[],index=0,touch=null,scheduled=false,lastSig='';
+const palette=[['#EAF6EF','#B9DEC9','#2F7D5A'],['#EAF4FA','#BDD8E7','#2A7FA8'],['#F3EEFB','#D8C9ED','#7659B2'],['#FBF3E7','#E8D2AF','#A66F24'],['#FCEFF2','#EAC7D0','#B95870'],['#E9F7F5','#B8DDD8','#238A84'],['#FCF7E5','#E7D99D','#9B7D16'],['#F0F5F4','#CBDDD8','#547D78']];
 function hash(s=''){let h=0;for(const c of s)h=((h<<5)-h)+c.charCodeAt(0)|0;return Math.abs(h)}
-function injectCss(){
-  if($('#p96TrackStyle'))return;
-  const st=document.createElement('style');st.id='p96TrackStyle';st.textContent=`
-  #p96TrackDeck{position:sticky;top:0;z-index:35;margin:0 auto 12px;width:min(100%,980px);padding:10px 10px 8px;background:rgba(246,250,249,.94);backdrop-filter:blur(14px);border-bottom:1px solid #dfeaea}
-  #p96TrackDeck .p96-kicker{font-size:9px;font-weight:950;letter-spacing:.14em;color:#6f858d;text-transform:uppercase;margin:0 2px 7px}
-  #p96TrackDeck .p96-filters{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(130px,.8fr);gap:8px}
-  #p96TrackDeck .p96-field{position:relative;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid #d5e2e2;border-radius:15px;padding:0 12px;min-height:44px;box-shadow:0 5px 18px rgba(21,55,66,.04)}
-  #p96TrackDeck .p96-field span{font-size:16px;opacity:.7}#p96TrackDeck input,#p96TrackDeck select{width:100%;min-width:0;border:0;outline:0;background:transparent;color:#193844;font:700 12px/1.2 Inter,system-ui;padding:11px 0}
-  #p96TrackDeck .p96-deckline{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;align-items:center;gap:8px;margin-top:8px}
-  #p96TrackDeck .p96-arrow{height:42px;border:1px solid #cfdddd;background:#fff;color:#21444f;border-radius:14px;font-size:22px;font-weight:900;box-shadow:0 6px 18px rgba(19,54,66,.05)}
-  #p96TrackDeck .p96-arrow:active{transform:scale(.96)}
-  #p96TrackDeck .p96-current{text-align:center;min-width:0}.p96-current b{display:block;color:#183844;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p96-current small{display:block;margin-top:2px;color:#71878e;font-weight:800;font-size:10px}
-  #p96TrackDeck .p96-empty{display:none;margin:8px 2px 0;padding:12px;border:1px dashed #cadada;border-radius:14px;text-align:center;color:#73878d;font-size:12px;background:#fff}
-  .p96-person-card{position:relative!important;width:min(100%,980px)!important;margin:0 auto 22px!important;border:1px solid var(--p96-border,#d9e5e5)!important;border-top:5px solid var(--p96-accent,#168f94)!important;border-radius:28px!important;background:linear-gradient(180deg,var(--p96-soft,#f6fbfa) 0,rgba(255,255,255,.98) 24%,#fff 100%)!important;box-shadow:0 18px 42px rgba(21,55,66,.09)!important;overflow:hidden!important;transform-origin:center top}
-  .p96-person-card.p96-hidden{display:none!important}.p96-person-card.p96-active{display:block!important;animation:p96In .30s cubic-bezier(.2,.8,.2,1) both}
-  .p96-person-card:before{content:"";position:absolute;inset:0 0 auto;height:110px;background:linear-gradient(110deg,var(--p96-soft,#eff8f6),rgba(255,255,255,0));pointer-events:none;z-index:0}
-  .p96-person-card>*{position:relative;z-index:1}.p96-person-card .btn{border-radius:14px!important}.p96-person-card .primary{background:#168f94!important;border-color:#168f94!important}
-  .p96-bottomnav{width:min(100%,980px);margin:-10px auto 100px;display:grid;grid-template-columns:1fr auto 1fr;gap:9px;align-items:center;padding:0 10px}
-  .p96-bottomnav button{height:46px;border:1px solid #cfdddd;background:#fff;color:#21444f;border-radius:15px;font-weight:900}.p96-bottomnav .next{justify-self:stretch;background:#168f94;color:#fff;border-color:#168f94}.p96-bottomnav .prev{justify-self:stretch}.p96-bottomnav b{min-width:76px;text-align:center;color:#526b73;font-size:11px}
-  @keyframes p96In{from{opacity:.15;transform:translateX(var(--p96-enter,18px)) scale(.99)}to{opacity:1;transform:none}}
-  @media(max-width:680px){
-    #p96TrackDeck{padding:8px 8px 7px;margin-bottom:8px}#p96TrackDeck .p96-filters{grid-template-columns:1fr 132px;gap:6px}#p96TrackDeck .p96-field{min-height:42px;border-radius:13px;padding:0 9px}#p96TrackDeck input,#p96TrackDeck select{font-size:11px}
-    #p96TrackDeck .p96-deckline{grid-template-columns:40px minmax(0,1fr) 40px;margin-top:6px}.p96-arrow{height:40px!important;border-radius:13px!important}
-    .p96-person-card{width:calc(100% - 12px)!important;margin:0 6px 16px!important;border-radius:24px!important}.p96-bottomnav{width:calc(100% - 12px);margin:-4px 6px 92px;padding:0}.p96-bottomnav button{height:44px;font-size:12px}
-    #softBottomNav [data-soft-view="painel"] .soft-nav-label,#softBottomNav [data-soft-view="pubs"] .soft-nav-label,#softBottomNav [data-soft-view="rede"] .soft-nav-label{font-size:9px!important;line-height:1.05!important;max-width:78px!important;white-space:normal!important;text-align:center!important}
-  }
-  @media(prefers-reduced-motion:reduce){.p96-person-card.p96-active{animation:none!important}}
-  `;document.head.appendChild(st);
-}
-function exactButton(card,label){return $$('button',card).find(b=>norm(b.textContent)===norm(label))}
-function findCardFromDossie(btn){
-  let n=btn.parentElement,steps=0;
-  while(n&&n!==document.body&&steps++<12){
-    const t=norm(n.innerText);
-    const project=t.includes('identidade do projeto')||t.includes('pergunta cientifica');
-    const actions=t.includes('registrar')&&t.includes('dossie');
-    const repo=t.includes('repositorio')||t.includes('as coisa tudo')||t.includes('arquivo');
-    if(project&&actions&&repo)return n;
-    n=n.parentElement;
-  }
-  return null;
-}
-function discoverCards(){
-  const hits=[];
-  $$('button').forEach(b=>{if(norm(b.textContent)!=='dossie')return;const c=findCardFromDossie(b);if(c&&!hits.includes(c))hits.push(c)});
-  return hits;
-}
-function lineCandidates(card){return String(card.innerText||'').split(/\n+/).map(s=>s.trim()).filter(Boolean)}
-function cardName(card){
-  const bad=/^(aten[cç][aã]o|registrar|dossi[eê]|reposit[oó]rio|as coisa tudo|identidade do projeto|editar projeto|pergunta cient[ií]fica|objetivo central|hist[oó]rico)/i;
-  const preferred=$$('[class*="name"],h2,h3,h4',card).map(e=>e.textContent.trim()).find(t=>t&&t.length<90&&!bad.test(t));
-  if(preferred)return preferred;
-  return lineCandidates(card).find(t=>t.length>1&&t.length<90&&!bad.test(t)&&!/^\+/.test(t))||'Carbonauta';
-}
-function memberType(card){
-  const t=norm(card.innerText);
-  if(/pos[- ]?dout|posdoc/.test(t))return'Pós-doutorado';
-  if(t.includes('doutorado'))return'Doutorado';
-  if(t.includes('mestrado'))return'Mestrado';
-  if(/\bic\b/.test(t)||t.includes('iniciacao cientifica'))return'IC / Graduação';
-  if(t.includes('graduacao'))return'Graduação';
-  if(/\btcc\b/.test(t))return'TCC';
-  if(t.includes('egresso'))return'Egresso';
-  return'Outros';
-}
-function colorize(card,name){const p=palette[hash(norm(name))%palette.length];card.style.setProperty('--p96-soft',p[0]);card.style.setProperty('--p96-border',p[1]);card.style.setProperty('--p96-accent',p[2])}
-function commonAncestor(nodes){if(!nodes.length)return null;let a=nodes[0].parentElement;while(a&&!nodes.every(n=>a.contains(n)))a=a.parentElement;return a||nodes[0].parentElement}
-function ensureUi(host){
-  let top=$('#p96TrackDeck');
-  if(!top){
-    top=document.createElement('section');top.id='p96TrackDeck';top.innerHTML=`<div class="p96-kicker">SIMININO E SIMININA · ACOMPANHAMENTO</div><div class="p96-filters"><label class="p96-field"><span>⌕</span><input id="p96PersonSearch" type="search" autocomplete="off" placeholder="Procurar pessoa..."></label><label class="p96-field"><span>≡</span><select id="p96TypeFilter"><option value="">Todos os tipos</option></select></label></div><div class="p96-deckline"><button class="p96-arrow p96-prev" type="button" aria-label="Pessoa anterior">‹</button><div class="p96-current"><b id="p96CurrentName">Carbonauta</b><small id="p96CurrentMeta">1 de 1</small></div><button class="p96-arrow p96-next" type="button" aria-label="Próxima pessoa">›</button></div><div class="p96-empty">Nenhuma pessoa encontrada com esses filtros.</div>`;
-    $('#p96PersonSearch',top).addEventListener('input',()=>{index=0;apply()});$('#p96TypeFilter',top).addEventListener('change',()=>{index=0;apply()});$('.p96-prev',top).addEventListener('click',()=>navigate(-1));$('.p96-next',top).addEventListener('click',()=>navigate(1));
-  }
-  let bottom=$('#p96BottomNav');
-  if(!bottom){bottom=document.createElement('div');bottom.id='p96BottomNav';bottom.className='p96-bottomnav';bottom.innerHTML=`<button class="prev" type="button">← Anterior</button><b>deslize ↔</b><button class="next" type="button">Próximo →</button>`;$('.prev',bottom).addEventListener('click',()=>navigate(-1));$('.next',bottom).addEventListener('click',()=>navigate(1));}
-  const first=cards[0];if(first&&top.parentElement!==host)host.insertBefore(top,first);else if(first&&first.previousElementSibling!==top)host.insertBefore(top,first);
-  if(bottom.parentElement!==host)host.appendChild(bottom);
-  if(!host.dataset.p96Swipe){host.dataset.p96Swipe='1';host.addEventListener('touchstart',e=>{const active=e.target.closest?.('.p96-person-card.p96-active');if(!active||e.touches.length!==1)return;touch={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now()}},{passive:true});host.addEventListener('touchend',e=>{if(!touch)return;const p=e.changedTouches[0],dx=p.clientX-touch.x,dy=p.clientY-touch.y,dt=Date.now()-touch.t;touch=null;if(dt<750&&Math.abs(dx)>52&&Math.abs(dx)>Math.abs(dy)*1.25)navigate(dx<0?1:-1)},{passive:true})}
-  return top;
-}
-function fillTypes(){const sel=$('#p96TypeFilter');if(!sel)return;const keep=sel.value;const types=[...new Set(cards.map(memberType))].sort((a,b)=>a.localeCompare(b,'pt-BR'));sel.innerHTML='<option value="">Todos os tipos</option>'+types.map(t=>`<option value="${t.replace(/"/g,'&quot;')}">${t}</option>`).join('');if(types.includes(keep))sel.value=keep}
-function apply(direction=1){
-  const q=norm($('#p96PersonSearch')?.value||''),type=$('#p96TypeFilter')?.value||'';
-  visible=cards.filter(c=>(!q||norm(cardName(c)).includes(q))&&(!type||memberType(c)===type));
-  if(index>=visible.length)index=Math.max(0,visible.length-1);
-  cards.forEach(c=>{c.classList.add('p96-person-card','p96-hidden');c.classList.remove('p96-active');c.style.removeProperty('--p96-enter');const b=exactButton(c,'Repositório');if(b)b.textContent='As coisa tudo'});
-  const empty=$('#p96TrackDeck .p96-empty');if(empty)empty.style.display=visible.length?'none':'block';
-  const bottom=$('#p96BottomNav');if(bottom)bottom.style.display=visible.length?'grid':'none';
-  if(!visible.length){$('#p96CurrentName').textContent='Sem resultado';$('#p96CurrentMeta').textContent='Ajuste os filtros';return}
-  const active=visible[index];active.classList.remove('p96-hidden');active.classList.add('p96-active');active.style.setProperty('--p96-enter',direction<0?'-24px':'24px');
-  const name=cardName(active);colorize(active,name);$('#p96CurrentName').textContent=name;$('#p96CurrentMeta').textContent=`${memberType(active)} · ${index+1} de ${visible.length}`;
-  cards.forEach(c=>colorize(c,cardName(c)));
-}
-function navigate(delta){if(!visible.length)return;index=(index+delta+visible.length)%visible.length;apply(delta);const top=$('#p96TrackDeck');if(top){try{top.scrollIntoView({behavior:'smooth',block:'start'})}catch(_e){}}}
-function renameUi(){
-  const set=(sel,txt)=>{const e=$(sel);if(e&&e.textContent.trim()!==txt)e.textContent=txt};
-  set('.tab[data-view="rede"] .tl','Siminino e Siminina');set('.tab[data-view="pubs"] .tl','As coisa tudo');set('.tab[data-view="painel"] .tl','Coisa pra resolver');
-  set('.app-nav-card[data-app-view="rede"] b','Siminino e Siminina');set('.app-nav-card[data-app-view="pubs"] b','As coisa tudo');set('.app-nav-card[data-app-view="painel"] b','Coisa pra resolver');
-  const bn={painel:'Coisa pra<br>resolver',pubs:'As coisa<br>tudo',rede:'Siminino e<br>Siminina'};Object.entries(bn).forEach(([v,html])=>{const e=$(`#softBottomNav [data-soft-view="${v}"] .soft-nav-label`);if(e&&e.innerHTML!==html)e.innerHTML=html});
-  const title=$('#repoMainTitle');if(title)title.textContent='As coisa tudo';
-  const search=$('#search');if(search&&/galera/i.test(search.placeholder||''))search.placeholder='Buscar siminino ou siminina, tema ou linha';
-  $$('#p90Deck .p90-title span').forEach(e=>{if(/arquivo vivo/i.test(e.textContent))e.textContent='AS COISA TUDO'});
-  $$('button').forEach(b=>{if(norm(b.textContent)==='repositorio')b.textContent='As coisa tudo'});
-}
-function rebuild(){
-  renameUi();const found=discoverCards();if(!found.length)return;
-  const sig=found.map(c=>cardName(c)+'|'+memberType(c)).join('||');
-  const activeName=visible[index]?cardName(visible[index]):'';cards=found;cards.forEach(c=>colorize(c,cardName(c)));
-  const host=commonAncestor(cards);if(!host)return;ensureUi(host);fillTypes();
-  if(sig!==lastSignature&&activeName){const i=cards.findIndex(c=>cardName(c)===activeName);if(i>=0)index=i}lastSignature=sig;apply(1);
-}
+function css(){if($('#p96TrackStyle'))return;const s=document.createElement('style');s.id='p96TrackStyle';s.textContent=`
+#p96TrackDeck{position:sticky;top:0;z-index:35;width:min(100%,980px);margin:0 auto 12px;padding:10px;background:rgba(246,250,249,.95);backdrop-filter:blur(14px);border-bottom:1px solid #dfeaea}
+#p96TrackDeck .p96-kicker{margin:0 2px 7px;font-size:9px;font-weight:950;letter-spacing:.14em;color:#6f858d}.p96-filters{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(128px,.8fr);gap:8px}
+.p96-field{display:flex;align-items:center;gap:7px;min-height:44px;padding:0 11px;background:#fff;border:1px solid #d5e2e2;border-radius:15px;box-shadow:0 5px 18px rgba(21,55,66,.04)}.p96-field span{font-size:16px;opacity:.7}.p96-field input,.p96-field select{width:100%;min-width:0;padding:11px 0;border:0;outline:0;background:transparent;color:#193844;font:700 12px/1.2 Inter,system-ui}
+.p96-deckline{display:grid;grid-template-columns:44px minmax(0,1fr) 44px;gap:8px;align-items:center;margin-top:8px}.p96-arrow{height:42px;border:1px solid #cfdddd;background:#fff;color:#21444f;border-radius:14px;font-size:22px;font-weight:900;box-shadow:0 6px 18px rgba(19,54,66,.05)}.p96-current{text-align:center;min-width:0}.p96-current b{display:block;color:#183844;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p96-current small{display:block;margin-top:2px;color:#71878e;font-size:10px;font-weight:800}.p96-empty{display:none;margin-top:8px;padding:12px;border:1px dashed #cadada;border-radius:14px;text-align:center;color:#73878d;font-size:12px;background:#fff}
+.p96-person-card{position:relative!important;width:min(100%,980px)!important;margin:0 auto 22px!important;border:1px solid var(--p96-border,#d9e5e5)!important;border-top:5px solid var(--p96-accent,#168f94)!important;border-radius:28px!important;background:linear-gradient(180deg,var(--p96-soft,#f6fbfa),rgba(255,255,255,.98) 24%,#fff)!important;box-shadow:0 18px 42px rgba(21,55,66,.09)!important;overflow:hidden!important;transform-origin:center top}.p96-person-card.p96-hidden{display:none!important}.p96-person-card.p96-active{display:block!important;animation:p96In .3s cubic-bezier(.2,.8,.2,1) both}.p96-person-card:before{content:"";position:absolute;inset:0 0 auto;height:110px;background:linear-gradient(110deg,var(--p96-soft,#eff8f6),rgba(255,255,255,0));pointer-events:none;z-index:0}.p96-person-card>*{position:relative;z-index:1}.p96-person-card .btn{border-radius:14px!important}.p96-person-card .primary{background:#168f94!important;border-color:#168f94!important}
+.p96-bottomnav{width:min(100%,980px);margin:-10px auto 100px;padding:0 10px;display:grid;grid-template-columns:1fr auto 1fr;gap:9px;align-items:center}.p96-bottomnav button{height:46px;border:1px solid #cfdddd;background:#fff;color:#21444f;border-radius:15px;font-weight:900}.p96-bottomnav .next{background:#168f94;color:#fff;border-color:#168f94}.p96-bottomnav b{min-width:76px;text-align:center;color:#526b73;font-size:11px}@keyframes p96In{from{opacity:.15;transform:translateX(var(--p96-enter,18px)) scale(.99)}to{opacity:1;transform:none}}
+@media(max-width:680px){#p96TrackDeck{padding:8px;margin-bottom:8px}.p96-filters{grid-template-columns:1fr 130px;gap:6px}.p96-field{min-height:42px;padding:0 9px;border-radius:13px}.p96-field input,.p96-field select{font-size:11px}.p96-deckline{grid-template-columns:40px minmax(0,1fr) 40px;margin-top:6px}.p96-arrow{height:40px;border-radius:13px}.p96-person-card{width:calc(100% - 12px)!important;margin:0 6px 16px!important;border-radius:24px!important}.p96-bottomnav{width:calc(100% - 12px);margin:-4px 6px 92px;padding:0}.p96-bottomnav button{height:44px;font-size:12px}#softBottomNav [data-soft-view="painel"] .soft-nav-label,#softBottomNav [data-soft-view="pubs"] .soft-nav-label,#softBottomNav [data-soft-view="rede"] .soft-nav-label{font-size:9px!important;line-height:1.05!important;max-width:80px!important;white-space:normal!important;text-align:center!important}}
+@media(prefers-reduced-motion:reduce){.p96-person-card.p96-active{animation:none!important}}
+`;document.head.appendChild(s)}
+function findCard(btn){let n=btn.parentElement,i=0;while(n&&n!==document.body&&i++<12){const t=norm(n.innerText);if((t.includes('identidade do projeto')||t.includes('pergunta cientifica'))&&t.includes('registrar')&&t.includes('dossie')&&(t.includes('repositorio')||t.includes('as coisa tudo')||t.includes('arquivo')))return n;n=n.parentElement}return null}
+function discover(){const out=[];$$('button').forEach(b=>{if(norm(b.textContent)!=='dossie')return;const c=findCard(b);if(c&&!out.includes(c))out.push(c)});return out}
+function cardName(c){const bad=/^(aten[cç][aã]o|registrar|dossi[eê]|reposit[oó]rio|as coisa tudo|identidade do projeto|editar projeto|pergunta cient[ií]fica|objetivo central|hist[oó]rico)/i;const p=$$('[class*="name"],h2,h3,h4',c).map(e=>e.textContent.trim()).find(t=>t&&t.length<90&&!bad.test(t));if(p)return p;return String(c.innerText||'').split(/\n+/).map(x=>x.trim()).find(t=>t.length>1&&t.length<90&&!bad.test(t)&&!/^\+/.test(t))||'Carbonauta'}
+function memberType(c){const t=norm(c.innerText);if(/pos[- ]?dout|posdoc/.test(t))return'Pós-doutorado';if(t.includes('doutorado'))return'Doutorado';if(t.includes('mestrado'))return'Mestrado';if(/\bic\b/.test(t)||t.includes('iniciacao cientifica'))return'IC / Graduação';if(t.includes('graduacao'))return'Graduação';if(/\btcc\b/.test(t))return'TCC';if(t.includes('egresso'))return'Egresso';return'Outros'}
+function color(c){const p=palette[hash(norm(cardName(c)))%palette.length];c.style.setProperty('--p96-soft',p[0]);c.style.setProperty('--p96-border',p[1]);c.style.setProperty('--p96-accent',p[2])}
+function common(nodes){let a=nodes[0]?.parentElement;while(a&&!nodes.every(n=>a.contains(n)))a=a.parentElement;return a}
+function ensureUi(host){let top=$('#p96TrackDeck');if(!top){top=document.createElement('section');top.id='p96TrackDeck';top.innerHTML=`<div class="p96-kicker">SIMININO E SIMININA · ACOMPANHAMENTO</div><div class="p96-filters"><label class="p96-field"><span>⌕</span><input id="p96PersonSearch" type="search" autocomplete="off" placeholder="Procurar pessoa..."></label><label class="p96-field"><span>≡</span><select id="p96TypeFilter"><option value="">Todos os tipos</option></select></label></div><div class="p96-deckline"><button class="p96-arrow p96-prev" type="button">‹</button><div class="p96-current"><b id="p96CurrentName">Carbonauta</b><small id="p96CurrentMeta">1 de 1</small></div><button class="p96-arrow p96-next" type="button">›</button></div><div class="p96-empty">Nenhuma pessoa encontrada com esses filtros.</div>`;$('#p96PersonSearch',top).addEventListener('input',()=>{index=0;apply()});$('#p96TypeFilter',top).addEventListener('change',()=>{index=0;apply()});$('.p96-prev',top).addEventListener('click',()=>nav(-1));$('.p96-next',top).addEventListener('click',()=>nav(1))}
+let bottom=$('#p96BottomNav');if(!bottom){bottom=document.createElement('div');bottom.id='p96BottomNav';bottom.className='p96-bottomnav';bottom.innerHTML='<button class="prev" type="button">← Anterior</button><b>deslize ↔</b><button class="next" type="button">Próximo →</button>';$('.prev',bottom).addEventListener('click',()=>nav(-1));$('.next',bottom).addEventListener('click',()=>nav(1))}
+const first=cards[0];if(first&&top.parentElement!==host)host.insertBefore(top,first);else if(first&&first.previousElementSibling!==top)host.insertBefore(top,first);if(bottom.parentElement!==host)host.appendChild(bottom);if(!host.dataset.p96Swipe){host.dataset.p96Swipe='1';host.addEventListener('touchstart',e=>{if(!e.target.closest?.('.p96-person-card.p96-active')||e.touches.length!==1)return;touch={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now()}},{passive:true});host.addEventListener('touchend',e=>{if(!touch)return;const p=e.changedTouches[0],dx=p.clientX-touch.x,dy=p.clientY-touch.y,dt=Date.now()-touch.t;touch=null;if(dt<750&&Math.abs(dx)>52&&Math.abs(dx)>Math.abs(dy)*1.25)nav(dx<0?1:-1)},{passive:true})}}
+function fillTypes(){const sel=$('#p96TypeFilter');if(!sel)return;const types=[...new Set(cards.map(memberType))].sort((a,b)=>a.localeCompare(b,'pt-BR')),sig=types.join('|');if(sel.dataset.sig===sig)return;const keep=sel.value;sel.dataset.sig=sig;sel.innerHTML='<option value="">Todos os tipos</option>'+types.map(t=>`<option value="${t.replace(/"/g,'&quot;')}">${t}</option>`).join('');if(types.includes(keep))sel.value=keep}
+function apply(dir=1){const q=norm($('#p96PersonSearch')?.value||''),type=$('#p96TypeFilter')?.value||'';visible=cards.filter(c=>(!q||norm(cardName(c)).includes(q))&&(!type||memberType(c)===type));if(index>=visible.length)index=Math.max(0,visible.length-1);cards.forEach(c=>{c.classList.add('p96-person-card','p96-hidden');c.classList.remove('p96-active');c.style.removeProperty('--p96-enter');color(c);$$('button',c).forEach(b=>{if(norm(b.textContent)==='repositorio')b.textContent='As coisa tudo'})});const empty=$('#p96TrackDeck .p96-empty'),bottom=$('#p96BottomNav');if(empty)empty.style.display=visible.length?'none':'block';if(bottom)bottom.style.display=visible.length?'grid':'none';if(!visible.length){$('#p96CurrentName').textContent='Sem resultado';$('#p96CurrentMeta').textContent='Ajuste os filtros';return}const a=visible[index];a.classList.remove('p96-hidden');a.classList.add('p96-active');a.style.setProperty('--p96-enter',dir<0?'-24px':'24px');$('#p96CurrentName').textContent=cardName(a);$('#p96CurrentMeta').textContent=`${memberType(a)} · ${index+1} de ${visible.length}`}
+function nav(d){if(!visible.length)return;index=(index+d+visible.length)%visible.length;apply(d);try{$('#p96TrackDeck')?.scrollIntoView({behavior:'smooth',block:'start'})}catch(_e){}}
+function rename(){const set=(s,t)=>{const e=$(s);if(e&&e.textContent.trim()!==t)e.textContent=t};set('.tab[data-view="rede"] .tl','Siminino e Siminina');set('.tab[data-view="pubs"] .tl','As coisa tudo');set('.tab[data-view="painel"] .tl','Coisa pra resolver');set('.app-nav-card[data-app-view="rede"] b','Siminino e Siminina');set('.app-nav-card[data-app-view="pubs"] b','As coisa tudo');set('.app-nav-card[data-app-view="painel"] b','Coisa pra resolver');const labs={painel:'Coisa pra<br>resolver',pubs:'As coisa<br>tudo',rede:'Siminino e<br>Siminina'};Object.entries(labs).forEach(([v,h])=>{const e=$(`#softBottomNav [data-soft-view="${v}"] .soft-nav-label`);if(e&&e.innerHTML!==h)e.innerHTML=h});if($('#repoMainTitle'))$('#repoMainTitle').textContent='As coisa tudo';const sr=$('#search');if(sr&&/galera/i.test(sr.placeholder||''))sr.placeholder='Buscar siminino ou siminina, tema ou linha';$$('#p90Deck .p90-title span').forEach(e=>{if(/arquivo vivo/i.test(e.textContent))e.textContent='AS COISA TUDO'});$$('button').forEach(b=>{if(norm(b.textContent)==='repositorio')b.textContent='As coisa tudo'})}
+function rebuild(){rename();const found=discover();if(!found.length)return;const sig=found.map(c=>cardName(c)+'|'+memberType(c)).join('||'),old=visible[index]?cardName(visible[index]):'';cards=found;const host=common(cards);if(!host)return;cards.forEach(color);ensureUi(host);fillTypes();if(sig!==lastSig&&old){const i=cards.findIndex(c=>cardName(c)===old);if(i>=0)index=i}lastSig=sig;apply()}
 function schedule(){if(scheduled)return;scheduled=true;setTimeout(()=>{scheduled=false;rebuild()},90)}
-function boot(){injectCss();renameUi();schedule();[350,900,1800].forEach(ms=>setTimeout(schedule,ms));
-  const obs=new MutationObserver(m=>{if(m.some(x=>x.addedNodes?.length||x.removedNodes?.length)){schedule()}else renameUi()});obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['data-view']});
-  document.addEventListener('click',e=>{const t=norm(e.target?.textContent||'');if(t==='acompanhamento'||e.target?.closest?.('[data-view="painel"]'))setTimeout(schedule,80)},true);
-  try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
-  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P96 acompanhamento em cartas carregado');
-}
+function boot(){css();rename();schedule();[350,900,1800].forEach(ms=>setTimeout(schedule,ms));new MutationObserver(ms=>{const external=ms.some(m=>(m.addedNodes?.length||m.removedNodes?.length)&&!m.target.closest?.('#p96TrackDeck'));if(external)schedule();else rename()}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['data-view']});document.addEventListener('click',e=>{if(norm(e.target?.textContent||'')==='acompanhamento'||e.target?.closest?.('[data-view="painel"]'))setTimeout(schedule,80)},true);try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P96 acompanhamento em cartas carregado')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
