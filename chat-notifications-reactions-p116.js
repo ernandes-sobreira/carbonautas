@@ -140,7 +140,7 @@ function privateReadGuard(){
 }
 function polish(){ensureCss();decorateReactions();ensurePhoneButton();privateReadGuard()}
 async function boot(){
-  ensureCss();document.addEventListener('click',interceptNotification,true);let tries=0;while(tries++<80){if(window.fbFns&&window.db&&window.auth?.currentUser)break;await sleep(250)}if(!await identity())return;subscribeMembers();subscribeGeneralChat();subscribeGroups();polish();new MutationObserver(()=>polish()).observe(document.documentElement,{subtree:true,childList:true});setInterval(polish,750);console.info('Carbonautas',VERSION,'reações + notificações dos chats carregadas')
+  ensureCss();document.addEventListener('click',interceptNotification,true);let tries=0;while(tries++<80){if(window.fbFns&&window.db&&window.auth?.currentUser)break;await sleep(250)}if(!await identity())return;subscribeMembers();subscribeGeneralChat();subscribeGroups();polish();new MutationObserver(()=>polish()).observe(document.documentElement,{subtree:true,childList:true});new MutationObserver(()=>privateReadGuard()).observe(document.body,{attributes:true,attributeFilter:['data-view']});setInterval(polish,750);console.info('Carbonautas',VERSION,'reações + notificações dos chats carregadas')
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
