@@ -1,7 +1,7 @@
-/* Carbonautas P104 · área de escrita maior + controles compactos e alinhados no mobile */
+/* Carbonautas P105 · área de escrita maior + controles compactos + topo mobile limpo */
 (function(){
 'use strict';
-const VERSION='P104';
+const VERSION='P105';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 function css(){
@@ -47,14 +47,23 @@ function css(){
     #p48Input{grid-area:input!important;width:100%!important;min-width:0!important;height:68px!important;min-height:68px!important;max-height:150px!important;padding:15px 14px!important;font-size:16px!important;line-height:1.35!important;border-radius:16px!important}
     #p48Send{grid-area:send!important;width:48px!important;height:68px!important;min-width:48px!important;max-width:48px!important;min-height:68px!important;border-radius:15px!important}
 
-    /* botão coral do topo: discreto e secundário */
-    .p103-top-plus{width:38px!important;height:38px!important;min-width:38px!important;max-width:38px!important;min-height:38px!important;max-height:38px!important;padding:0!important;border-radius:12px!important;font-size:18px!important;line-height:1!important;box-shadow:0 5px 14px rgba(244,92,120,.12)!important}
+    /* botão coral do topo: pequeno, no lugar do escudo fora do Painel */
+    .p103-top-plus,#addBtn{width:38px!important;height:38px!important;min-width:38px!important;max-width:38px!important;min-height:38px!important;max-height:38px!important;padding:0!important;border-radius:12px!important;font-size:18px!important;line-height:1!important;box-shadow:0 5px 14px rgba(244,92,120,.12)!important;display:grid!important;place-items:center!important;flex:0 0 38px!important}
+    #addBtn svg{width:15px!important;height:15px!important;margin:0!important}
+    #addBtn .bl{display:none!important}
+    body:not([data-view="painel"]) .topbar #adminBtn{display:none!important}
+    body:not([data-view="painel"]) .topbar #addBtn{order:7!important;margin:0!important}
+    body[data-view="painel"] .topbar #adminBtn{display:inline-flex!important}
+    body[data-view="painel"] .topbar #addBtn{display:none!important}
   }
   `;document.head.appendChild(s)
 }
 function markTopPlus(){
   if(innerWidth>760)return;
+  const add=$('#addBtn');
+  if(add){add.classList.add('p103-top-plus');add.title='Adicionar';add.setAttribute('aria-label','Adicionar')}
   $$('button').forEach(b=>{
+    if(b===add)return;
     if(String(b.textContent||'').trim()!=='+')return;
     if(b.closest('.private-composer,.p46-compose,.p48-compose-row,#softBottomNav'))return;
     const r=b.getBoundingClientRect();
@@ -64,6 +73,7 @@ function markTopPlus(){
 function labelTools(){
   [['#p101GeneralSticker','Figurinhas'],['#p101PrivateSticker','Figurinhas'],['#p101P48Sticker','Figurinhas'],['#p79GeneralClip','Enviar foto ou print'],['#p79PrivateClip','Enviar foto ou print']].forEach(([sel,label])=>{const el=$(sel);if(el){el.title=label;el.setAttribute('aria-label',label)}})
 }
-function boot(){css();markTopPlus();labelTools();new MutationObserver(()=>{markTopPlus();labelTools()}).observe(document.documentElement,{subtree:true,childList:true});window.addEventListener('resize',markTopPlus,{passive:true});console.info('Carbonautas',VERSION,'ferramentas alinhadas + botão superior reduzido')}
+function refreshTop(){markTopPlus()}
+function boot(){css();refreshTop();labelTools();new MutationObserver(()=>{refreshTop();labelTools()}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-view']});window.addEventListener('resize',refreshTop,{passive:true});console.info('Carbonautas',VERSION,'composer + topo mobile limpo')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
