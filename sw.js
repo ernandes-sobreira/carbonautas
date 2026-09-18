@@ -1,5 +1,5 @@
-const CACHE='carbonautas-p96-20260918';
-const BUILD='P96';
+const CACHE='carbonautas-p97-20260918';
+const BUILD='P97';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#f6faf9;color:#183844"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
 const SYNC_SCRIPT='<script src="./calendar-sync-v4.js?v=P76-20260917"><\/script>';
 const DURATION_SCRIPT='<script src="./calendar-duration-v1.js?v=P76-20260917"><\/script>';
@@ -41,7 +41,7 @@ const CHAT_COMPOSER_LAYOUT_SCRIPT='<script src="./chat-composer-layout-p86.js?v=
 const DASH_RENDER_STABILITY_SCRIPT='<script src="./dashboard-render-stability-p87.js?v=P87-20260917"><\/script>';
 const REPOSITORY_ARCHIVE_SCRIPT='<script src="./repository-archive-p88.js?v=P88-20260918"><\/script>';
 const REPOSITORY_CARD_TABLE_SCRIPT='<script src="./repository-card-table-p90.js?v=P90-20260918"><\/script>';
-const REPOSITORY_CARD_MOBILE_SCRIPT='<script src="./repository-card-mobile-p91.js?v=P96-20260918"><\/script>';
+const REPOSITORY_CARD_MOBILE_SCRIPT='<script src="./repository-card-mobile-p91.js?v=P97-20260918"><\/script>';
 
 async function forceRefreshClients(){
   const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
