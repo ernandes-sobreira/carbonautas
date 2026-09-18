@@ -1,5 +1,5 @@
-const CACHE='carbonautas-p108-20260918';
-const BUILD='P108';
+const CACHE='carbonautas-p117-20260918';
+const BUILD='P117';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#f6faf9;color:#183844"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
 const AGENDA_SOFT_STYLE='<link rel="stylesheet" href="./agenda-soft-p108.css?v=P108-20260918">';
 const SYNC_SCRIPT='<script src="./calendar-sync-v4.js?v=P76-20260917"><\/script>';
@@ -43,6 +43,8 @@ const DASH_RENDER_STABILITY_SCRIPT='<script src="./dashboard-render-stability-p8
 const REPOSITORY_ARCHIVE_SCRIPT='<script src="./repository-archive-p88.js?v=P88-20260918"><\/script>';
 const REPOSITORY_CARD_TABLE_SCRIPT='<script src="./repository-card-table-p90.js?v=P90-20260918"><\/script>';
 const REPOSITORY_CARD_MOBILE_SCRIPT='<script src="./repository-card-mobile-p91.js?v=P97-20260918"><\/script>';
+const CHAT_NOTIFY_REACT_SCRIPT='<script src="./chat-notifications-reactions-p116.js?v=P116-20260918"><\/script>';
+const MONTHLY_HIGHLIGHTS_SCRIPT='<script src="./monthly-highlights-p117.js?v=P117-20260918"><\/script>';
 
 async function forceRefreshClients(){
   const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
@@ -117,6 +119,8 @@ async function navigationResponse(req){
     if(!html.includes('repository-archive-p88.js'))inject+=REPOSITORY_ARCHIVE_SCRIPT;
     if(!html.includes('repository-card-table-p90.js'))inject+=REPOSITORY_CARD_TABLE_SCRIPT;
     if(!html.includes('repository-card-mobile-p91.js'))inject+=REPOSITORY_CARD_MOBILE_SCRIPT;
+    if(!html.includes('chat-notifications-reactions-p116.js'))inject+=CHAT_NOTIFY_REACT_SCRIPT;
+    if(!html.includes('monthly-highlights-p117.js'))inject+=MONTHLY_HIGHLIGHTS_SCRIPT;
     if(inject){const lower=html.toLowerCase(),pos=lower.lastIndexOf('</body>');html=pos>=0?html.slice(0,pos)+inject+html.slice(pos):html+inject;}
     const headers=new Headers(fresh.headers);headers.delete('content-length');headers.set('cache-control','no-store, max-age=0');
     return new Response(html,{status:fresh.status,statusText:fresh.statusText,headers});
