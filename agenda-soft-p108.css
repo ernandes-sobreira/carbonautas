@@ -1,0 +1,106 @@
+/* Carbonautas P108 · Agenda leve, clara e sem alterar a lógica */
+#viewCrono .crono-scroll{
+  background:
+    radial-gradient(700px 320px at 12% 0%, rgba(135,214,198,.13), transparent 60%),
+    radial-gradient(620px 300px at 92% 10%, rgba(160,183,242,.10), transparent 62%),
+    #fbfdfc;
+}
+#viewCrono .crono-wrap{max-width:960px;padding:30px 26px 110px}
+#viewCrono .ag-head{justify-content:center;gap:9px 8px;margin-bottom:20px}
+#viewCrono .ag-head>.spacer{display:none}
+#viewCrono .ag-nav{width:100%;justify-content:center;gap:10px}
+#viewCrono .ag-arrow{
+  width:38px;height:38px;border:0;background:transparent;border-radius:999px;
+  color:#557078;font-size:28px;transition:.16s ease;
+}
+#viewCrono .ag-arrow:hover{background:#eef7f5;color:#0f817c}
+#viewCrono .ag-title{
+  min-width:260px;text-align:center;font-size:28px;line-height:1.1;padding:0 10px;
+  letter-spacing:-.02em;color:#163844;
+}
+#viewCrono .ag-modes{border:0;background:#eef6f4;padding:3px;box-shadow:none}
+#viewCrono .ag-modes button{padding:7px 15px;color:#63767c}
+#viewCrono .ag-modes button.on{background:#fff;color:#0f7772;box-shadow:0 2px 8px rgba(23,76,74,.08)}
+#viewCrono .google-chip,
+#viewCrono .ag-filter-btn{
+  border:0!important;background:#f2f7f6!important;color:#486269!important;
+  box-shadow:none!important;border-radius:999px!important;padding:8px 12px!important;
+}
+#viewCrono .ag-new{
+  width:42px;height:42px;min-width:42px;padding:0!important;border-radius:999px!important;
+  font-size:0!important;display:grid!important;place-items:center!important;
+  background:#1a9792!important;border-color:#1a9792!important;box-shadow:0 8px 20px rgba(26,151,146,.18)!important;
+}
+#viewCrono .ag-new::after{content:'+';font-size:24px;font-weight:500;line-height:1;color:#fff}
+#viewCrono .crono-filters{background:#fff;border:1px solid #e4efed;border-radius:16px;padding:10px 12px;margin:0 0 14px;box-shadow:0 6px 18px rgba(32,70,69,.04)}
+#viewCrono .ag-new-menu{gap:8px;margin-bottom:16px}
+#viewCrono .ag-new-menu button{border:0;background:#f5faf9;border-radius:14px;box-shadow:none}
+
+#viewCrono .ag-month{gap:7px 4px;padding:4px 0 2px}
+#viewCrono .ag-dow{font-size:10px;letter-spacing:.08em;color:#8b9b9f;padding:3px 0 7px}
+#viewCrono .ag-day{
+  aspect-ratio:auto;min-height:58px;border:0;background:transparent;border-radius:18px;
+  justify-content:flex-start;padding:5px 2px 3px;gap:3px;font-size:13px;color:#50676e;
+  transition:background .15s ease,transform .15s ease;
+}
+#viewCrono .ag-day:hover{background:#f2f8f7}
+#viewCrono .ag-day>span{
+  width:35px;height:35px;border-radius:999px;display:grid;place-items:center;margin:0 auto;
+  transition:background .15s ease,color .15s ease,box-shadow .15s ease;
+}
+#viewCrono .ag-day.out{opacity:.28}
+#viewCrono .ag-day.today{border:0;color:#117d77;font-weight:800}
+#viewCrono .ag-day.today>span{box-shadow:inset 0 0 0 1.5px #1d9d96;background:#fff}
+#viewCrono .ag-day.sel{border:0;background:transparent!important;color:#0f6f6a;font-weight:800}
+#viewCrono .ag-day.sel>span{background:#dff4ef;box-shadow:0 4px 12px rgba(24,125,119,.10)}
+#viewCrono .ag-day.sel.today>span{box-shadow:inset 0 0 0 1.5px #1d9d96,0 4px 12px rgba(24,125,119,.10)}
+#viewCrono .ag-dots{min-height:8px;gap:3px;max-width:92%;align-items:center}
+#viewCrono .ag-dots i{width:5px;height:5px;border:0!important;box-shadow:none}
+#viewCrono .ag-dots b{font-size:8px;color:#7c9095}
+#viewCrono .ag-day.sel .ag-dots b{color:#607b80}
+
+#viewCrono .ag-daylist{margin-top:22px}
+#viewCrono .ag-daylist h4{
+  margin:0 0 10px;font-size:15px;letter-spacing:-.01em;text-transform:none;color:#4d676e;
+}
+#viewCrono .ag-item{
+  border:0;border-left:4px solid #c8e8e2;border-radius:16px;background:rgba(255,255,255,.94);
+  padding:12px 13px;margin-bottom:8px;box-shadow:0 7px 22px rgba(26,63,64,.055);
+}
+#viewCrono .ag-item.over{border-left-color:#ef9f9f;background:#fffafa}
+#viewCrono .ag-time{min-width:48px;color:#71878d}
+#viewCrono .ag-t{font-size:14.5px}
+#viewCrono .ag-who{font-size:11.5px}
+#viewCrono .ag-act button{border:0;background:#f3f8f7;border-radius:10px;width:31px;height:31px}
+#viewCrono .ag-empty{
+  border:0;background:#f5f9f8;border-radius:16px;padding:20px 16px;color:#829297;
+}
+#viewCrono .ag-year{gap:12px}
+#viewCrono .ag-mini{border:0;background:#fff;border-radius:16px;box-shadow:0 5px 18px rgba(27,61,62,.05)}
+#viewCrono .ag-mini.cur{box-shadow:inset 0 0 0 1.5px #55aaa4,0 5px 18px rgba(27,61,62,.05)}
+
+@media(max-width:640px){
+  #viewCrono .crono-wrap{padding:22px 16px calc(112px + env(safe-area-inset-bottom))}
+  #viewCrono .ag-head{gap:8px 6px;margin-bottom:18px}
+  #viewCrono .ag-nav{gap:5px}
+  #viewCrono .ag-arrow{width:34px;height:34px;font-size:27px}
+  #viewCrono .ag-title{min-width:0;flex:1;max-width:270px;font-size:25px;padding:0 4px}
+  #viewCrono .ag-modes button{padding:6px 12px;font-size:12px}
+  #viewCrono .google-chip{padding:7px 10px!important;font-size:11px}
+  #viewCrono .ag-filter-btn{padding:7px 10px!important;font-size:11px}
+  #viewCrono .ag-new{width:38px;height:38px;min-width:38px}
+  #viewCrono .ag-new::after{font-size:22px}
+  #viewCrono .ag-month{gap:5px 1px}
+  #viewCrono .ag-day{min-height:51px;padding-top:3px;border-radius:15px;font-size:12px}
+  #viewCrono .ag-day>span{width:32px;height:32px}
+  #viewCrono .ag-dots{gap:2px;min-height:7px}
+  #viewCrono .ag-dots i{width:4.5px;height:4.5px}
+  #viewCrono .ag-daylist{margin-top:20px}
+  #viewCrono .ag-daylist h4{font-size:14px;margin-bottom:9px}
+  #viewCrono .ag-item{padding:11px 10px;border-radius:15px;gap:8px}
+  #viewCrono .ag-time{min-width:42px;font-size:11.5px}
+  #viewCrono .ag-t{font-size:14px}
+  #viewCrono .ag-act{gap:3px}
+  #viewCrono .ag-act button{width:29px;height:29px}
+  #viewCrono .ag-empty{padding:17px 12px;font-size:12.5px}
+}
