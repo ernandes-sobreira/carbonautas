@@ -15,7 +15,7 @@ const STICKERS=[
   {wire:'🎴 Tô de olho 👀',emoji:'👀',label:'Tô de olho',tone:'sun'},
   {wire:'🎴 Café e ciência!',emoji:'☕',label:'Café e ciência!',tone:'rose'}
 ];
-let hopUntil=0,lastReadThread='',myMemberId='';
+let hopUntil=0,hopBaseline={private:0,general:0,p48:0},lastReadThread='',lastReadAt=0,myMemberId='';
 function F(){return window.fbFns}
 function stickerFor(text){return STICKERS.find(x=>x.wire===String(text||'').trim())||null}
 function css(){
@@ -49,13 +49,15 @@ function openTray(btn,target){
   const t=tray(),r=btn.getBoundingClientRect();t.dataset.target=target;t.classList.add('open');
   if(innerWidth>700){const w=Math.min(380,innerWidth-24),left=Math.max(12,Math.min(innerWidth-w-12,r.left));t.style.left=left+'px';t.style.right='auto';t.style.bottom=(innerHeight-r.top+8)+'px'}
 }
+function counts(){return {private:$$('#privateMessages .private-msg.mine').length,general:$$('.p46-msgs .p46-row.mine').length,p48:$$('.p48-msgs .p48-row.mine').length}}
+function armHop(){hopBaseline=counts();hopUntil=Date.now()+3200}
 function insertSticker(target,st){
   let input,send;
   if(target==='private'){input=$('#privateInput');send=$('#privateSendBtn')}
   else if(target==='p48'){input=$('#p48Input');send=$('#p48Send')}
   else{input=$('#p46Input');send=$('#p46Send')}
   if(!input||!send)return;
-  input.value=st.wire;input.dispatchEvent(new Event('input',{bubbles:true}));hopUntil=Date.now()+2600;closeTray();send.click();
+  input.value=st.wire;input.dispatchEvent(new Event('input',{bubbles:true}));armHop();closeTray();send.click();
 }
 function ensureButtons(){
   const pi=$('#privateInput');if(pi&&!$('#p101PrivateSticker')){const b=document.createElement('button');b.type='button';b.id='p101PrivateSticker';b.className='p101-sticker-btn';b.title='Figurinhas';b.textContent='🎴';pi.parentElement.insertBefore(b,pi);b.onclick=e=>{e.stopPropagation();openTray(b,'private')}}
@@ -74,12 +76,12 @@ function decorate(){
 function armHopFromEvent(e){
   const click=e.type==='click'&&e.target.closest?.('#privateSendBtn,#p46Send,#p48Send,.p79-tray .send');
   const key=e.type==='keydown'&&e.key==='Enter'&&!e.shiftKey&&e.target.matches?.('#privateInput,#p46Input,#p48Input');
-  if(click||key)hopUntil=Date.now()+2600;
+  if(click||key)armHop();
 }
 function hopLatest(){
   if(Date.now()>hopUntil)return;
-  const candidates=['#privateMessages .private-msg.mine','.p46-msgs .p46-row.mine','.p48-msgs .p48-row.mine'];
-  for(const sel of candidates){const all=$$(sel);const last=all.at(-1);if(last&&!last.dataset.p101Hopped){last.dataset.p101Hopped='1';last.classList.remove('p101-send-hop');void last.offsetWidth;last.classList.add('p101-send-hop');hopUntil=0;break}}
+  const now=counts(),items=[['private','#privateMessages .private-msg.mine'],['general','.p46-msgs .p46-row.mine'],['p48','.p48-msgs .p48-row.mine']];
+  for(const [key,sel] of items){if(now[key]<=hopBaseline[key])continue;const all=$$(sel),last=all.at(-1);if(last){last.classList.remove('p101-send-hop');void last.offsetWidth;last.classList.add('p101-send-hop');hopUntil=0;break}}
 }
 async function identity(){
   if(myMemberId)return myMemberId;const f=F(),uid=window.auth?.currentUser?.uid;if(!f||!uid)return '';
@@ -87,8 +89,8 @@ async function identity(){
 }
 function activePrivateThread(){return $('.private-thread.on[data-private-thread]')?.dataset.privateThread||''}
 async function readPrivateNotifications(threadId){
-  if(!threadId||threadId===lastReadThread)return;const f=F(),mid=await identity();if(!f||!mid)return;
-  try{const q=f.query(f.collection(window.db,'rede_notifications'),f.where('recipientId','==',mid));const snap=await f.getDocs(q);const docs=snap.docs.filter(d=>{const x=d.data();return !x.read&&x.kind==='private_message'&&(x.threadId===threadId||x.sourceId===threadId)});if(!docs.length){lastReadThread=threadId;return}const batch=f.writeBatch(window.db);docs.forEach(d=>batch.update(d.ref,{read:true,readAt:f.serverTimestamp()}));await batch.commit();lastReadThread=threadId;setTimeout(()=>{const badge=$('#notifyBadge');if(badge&&Number(badge.textContent||0)<=docs.length)badge.style.display='none'},60)}catch(e){console.warn('P101 leitura de notificação privada',e)}
+  const now=Date.now();if(!threadId||(threadId===lastReadThread&&now-lastReadAt<1200))return;const f=F(),mid=await identity();if(!f||!mid)return;lastReadThread=threadId;lastReadAt=now;
+  try{const q=f.query(f.collection(window.db,'rede_notifications'),f.where('recipientId','==',mid));const snap=await f.getDocs(q);const docs=snap.docs.filter(d=>{const x=d.data();return !x.read&&x.kind==='private_message'&&(x.threadId===threadId||x.sourceId===threadId)});if(!docs.length)return;const batch=f.writeBatch(window.db);docs.forEach(d=>batch.update(d.ref,{read:true,readAt:f.serverTimestamp()}));await batch.commit();setTimeout(()=>{const badge=$('#notifyBadge');if(badge&&Number(badge.textContent||0)<=docs.length)badge.style.display='none'},60)}catch(e){console.warn('P101 leitura de notificação privada',e)}
 }
 function watchPrivateOpen(){const id=activePrivateThread();if(id)readPrivateNotifications(id)}
 function bind(){
