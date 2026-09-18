@@ -1,0 +1,65 @@
+/* Carbonautas P95 · entrada/login/splash visual · SOMENTE APARÊNCIA */
+.auth-gate{
+  background:
+    radial-gradient(circle at 12% 14%,rgba(98,185,138,.16),transparent 28%),
+    radial-gradient(circle at 88% 18%,rgba(110,189,206,.14),transparent 26%),
+    radial-gradient(circle at 78% 88%,rgba(240,235,250,.9),transparent 30%),
+    linear-gradient(155deg,#f8fcfb 0%,#eef8f5 48%,#f5f8fb 100%)!important;
+  padding:24px!important;
+}
+.auth-gate:before,.auth-gate:after{content:"";position:fixed;pointer-events:none;border-radius:999px;filter:blur(1px);opacity:.52}
+.auth-gate:before{width:240px;height:240px;left:-110px;bottom:5%;background:radial-gradient(circle,#dff4ec 0 42%,transparent 43%)}
+.auth-gate:after{width:210px;height:210px;right:-95px;top:11%;background:radial-gradient(circle,#e9f4fb 0 42%,transparent 43%)}
+.auth-card{
+  position:relative!important;z-index:1!important;width:min(470px,100%)!important;
+  padding:34px!important;border-radius:30px!important;border:1px solid rgba(201,220,218,.88)!important;
+  background:rgba(255,255,255,.94)!important;backdrop-filter:blur(16px)!important;
+  box-shadow:0 28px 80px rgba(20,65,76,.13)!important;
+}
+.auth-brand{gap:14px!important;margin-bottom:26px!important;align-items:center!important}
+.auth-brand .mark{
+  width:68px!important;height:68px!important;flex:0 0 68px!important;border-radius:21px!important;
+  padding:6px!important;background:linear-gradient(145deg,#f3fbf8,#eaf6f7)!important;
+  border:1px solid #d4e8e3!important;box-shadow:0 14px 34px rgba(24,116,105,.11)!important;overflow:hidden!important;
+}
+.auth-brand .logo-img{width:100%!important;height:100%!important;object-fit:contain!important;padding:0!important;border-radius:16px!important}
+.auth-brand h2{font-family:'Space Grotesk','Inter',sans-serif!important;font-size:30px!important;line-height:1!important;color:#14364a!important;font-weight:700!important;letter-spacing:-.045em!important}
+.auth-brand p{margin-top:6px!important;color:#66818a!important;font-size:12.5px!important;line-height:1.35!important;font-weight:600!important}
+.auth-card .fg{margin-bottom:16px!important}
+.auth-card .fg label{font-size:12px!important;color:#385763!important;margin-bottom:7px!important}
+.auth-card input{border-color:#cfe1de!important;border-radius:16px!important;padding:14px 15px!important;font-size:16px!important;background:#fff!important;color:#173d4c!important;box-shadow:none!important}
+.auth-card input:focus{border-color:#6eb9ae!important;box-shadow:0 0 0 4px rgba(55,164,149,.10)!important}
+.auth-actions{gap:10px!important;margin-top:18px!important}
+#loginBtn,#registerBtn{background:#168f94!important;border-color:#168f94!important;color:#fff!important;box-shadow:0 10px 24px rgba(22,143,148,.18)!important;border-radius:15px!important;min-height:48px!important}
+#loginBtn:hover,#registerBtn:hover{background:#0f777d!important;border-color:#0f777d!important}
+#resetPasswordBtn{background:#fff!important;border:1px solid #d5e5e1!important;color:#244a59!important;border-radius:15px!important;min-height:48px!important;padding-inline:16px!important}
+.auth-switch{color:#71858d!important;margin-top:17px!important;text-align:center!important;font-size:12.5px!important}
+.auth-switch button{color:#128388!important;font-weight:800!important}
+.auth-register h3{font-family:'Space Grotesk','Inter',sans-serif!important;color:#14364a!important;letter-spacing:-.025em!important}
+.auth-msg{margin-top:12px!important}
+.auth-unlinked,.auth-card .notice,.access-note{border-radius:15px!important}
+
+/* Splash web enquanto o app inicializa */
+.loading{background:linear-gradient(155deg,#f8fcfb 0%,#eef8f5 54%,#f5f8fb 100%)!important;color:#14364a!important}
+.loading .mark{width:82px!important;height:82px!important;border-radius:24px!important;padding:7px!important;background:linear-gradient(145deg,#f3fbf8,#eaf6f7)!important;border:1px solid #d5e9e4!important;box-shadow:0 18px 46px rgba(25,96,91,.12)!important;animation:p95Float 1.8s ease-in-out infinite!important}
+.loading .logo-img{object-fit:contain!important;border-radius:18px!important}
+.loading .p95-loading-title{font-family:'Space Grotesk','Inter',sans-serif;font-size:22px;font-weight:750;color:#14364a;letter-spacing:-.035em;margin-top:1px}
+.loading .p95-loading-sub{font-size:11.5px;color:#70858d;font-weight:600;margin-top:-9px}
+@keyframes p95Float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+@media(max-width:620px){
+  .auth-gate{padding:20px!important;align-items:center!important}
+  .auth-card{padding:26px 24px!important;border-radius:26px!important;width:min(100%,430px)!important}
+  .auth-brand{margin-bottom:24px!important}
+  .auth-brand .mark{width:62px!important;height:62px!important;flex-basis:62px!important;border-radius:19px!important}
+  .auth-brand h2{font-size:27px!important}
+  .auth-brand p{font-size:11.5px!important}
+  .auth-actions{display:grid!important;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)!important;align-items:stretch!important}
+  #loginBtn,#resetPasswordBtn{width:100%!important;justify-content:center!important;padding-left:10px!important;padding-right:10px!important}
+}
+@media(max-width:380px){
+  .auth-gate{padding:14px!important}
+  .auth-card{padding:23px 19px!important}
+  .auth-brand{gap:10px!important}.auth-brand .mark{width:54px!important;height:54px!important;flex-basis:54px!important}
+  .auth-brand h2{font-size:24px!important}.auth-actions{grid-template-columns:1fr!important}
+}
