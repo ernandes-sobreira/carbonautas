@@ -3,7 +3,7 @@
   "name": "Carbonautas",
   "short_name": "Carbonautas",
   "description": "Ciência que conecta e regenera: acompanhamento, arquivos, comunicação e colaboração da Rede Carbonautas.",
-  "start_url": "./?pwa=P95",
+  "start_url": "./?pwa=P96",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
