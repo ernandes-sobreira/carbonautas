@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Carbonautas · Atualização P117</title>
+<title>Carbonautas · Atualização P118</title>
 <style>html,body{height:100%;margin:0;font-family:system-ui;background:#f6faf9;color:#183844}main{height:100%;display:grid;place-items:center}div{text-align:center;max-width:560px;padding:28px}h1{margin:0 0 10px;font-size:26px}p{color:#60757d;line-height:1.5}.ok{color:#087f5b;font-weight:700}</style>
 </head>
 <body>
-<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Carregando Destaques do mês, reações visíveis e notificações das conversas.</p></div></main>
+<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Corrigindo a janela de análise estatística no celular.</p></div></main>
 <script>
 (async()=>{
   const msg=document.getElementById('msg');
@@ -15,16 +15,16 @@
   try{
     if('caches' in window){const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));}
     if('serviceWorker' in navigator){
-      msg.textContent='Carregando a versão P117…';
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P117-20260918',{updateViaCache:'none'});
+      msg.textContent='Carregando a versão P118…';
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P118-20260918',{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting)reg.waiting.postMessage('SKIP_WAITING');
       const worker=reg.active||reg.waiting||reg.installing;if(worker)worker.postMessage('FORCE_REFRESH_ALL');
       await wait(900);
     }
-    msg.className='ok';msg.textContent='P117 pronta: Destaques do mês carregados.';
+    msg.className='ok';msg.textContent='P118 pronta: botão Executar análise sempre acessível.';
   }catch(e){console.warn(e);msg.textContent='Atualização aplicada. Abrindo o Carbonautas…'}
-  setTimeout(()=>location.replace('./?build=P117&t='+Date.now()),700);
+  setTimeout(()=>location.replace('./?build=P118&t='+Date.now()),700);
 })();
 </script>
 </body>
