@@ -1,7 +1,7 @@
-/* Carbonautas · P44 · régua de tempo + saída segura do editor */
+/* Carbonautas · P44/P115 · régua de tempo + saída segura do editor + guarda do Firebase Auth */
 (function(){
 'use strict';
-const VERSION='P44';
+const VERSION='P44+P115';
 const $=s=>document.querySelector(s);
 
 function injectCss(){
@@ -117,8 +117,59 @@ function fixOnlyOfficeExit(){
   btn.title='Sair do editor sem salvar alterações';
 }
 
+/* P115 · não deixa o usuário disparar login antes do módulo Firebase Auth terminar de carregar. */
+function authReady(){
+  return !!(window.auth&&window.fbFns&&typeof window.fbFns.signInWithEmailAndPassword==='function');
+}
+function setAuthMessage(text){
+  const m=document.getElementById('authMsg');if(m)m.textContent=text||'';
+}
+function armAuthGate(){
+  const btn=document.getElementById('loginBtn');
+  if(!btn)return;
+  if(authReady()){
+    if(btn.dataset.p115Waiting==='1'){btn.disabled=false;delete btn.dataset.p115Waiting;}
+    return;
+  }
+  btn.disabled=true;btn.dataset.p115Waiting='1';
+  setAuthMessage('Carregando acesso seguro…');
+}
+function releaseAuthGate(){
+  const btn=document.getElementById('loginBtn');
+  if(!btn||!authReady())return;
+  btn.disabled=false;delete btn.dataset.p115Waiting;
+  const m=document.getElementById('authMsg');
+  if(m&&(m.textContent||'').includes('Carregando acesso seguro'))m.textContent='';
+}
+function installAuthGuard(){
+  armAuthGate();
+  window.addEventListener('firebase-ready',()=>{releaseAuthGate();},{once:true});
+  const timer=setInterval(()=>{
+    if(authReady()){releaseAuthGate();clearInterval(timer);}
+    else armAuthGate();
+  },150);
+  setTimeout(()=>{
+    if(!authReady()){
+      const btn=document.getElementById('loginBtn');if(btn)btn.disabled=true;
+      setAuthMessage('Não consegui carregar a autenticação. Verifique a internet e atualize esta tela.');
+    }
+    clearInterval(timer);
+  },15000);
+  document.addEventListener('click',e=>{
+    const btn=e.target?.closest?.('#loginBtn');
+    if(btn&&!authReady()){
+      e.preventDefault();e.stopImmediatePropagation();armAuthGate();
+    }
+  },true);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&e.target?.id==='loginPassword'&&!authReady()){
+      e.preventDefault();e.stopImmediatePropagation();armAuthGate();
+    }
+  },true);
+}
+
 function boot(){
-  injectCss();ensurePicker();ensureRulerButtons();fixOnlyOfficeExit();
+  injectCss();ensurePicker();ensureRulerButtons();fixOnlyOfficeExit();installAuthGuard();
   setInterval(()=>{ensureRulerButtons();fixOnlyOfficeExit()},700);
   console.info('Carbonautas UI fixes',VERSION,'carregado');
 }
