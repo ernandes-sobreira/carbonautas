@@ -1,7 +1,7 @@
-/* Carbonautas P92 · Ajuste mobile + visual soft do deck do Arquivo Vivo */
+/* Carbonautas P93 · Ajuste mobile + visual soft global do Carbonautas */
 (function(){
 'use strict';
-const BUILD='P92';
+const BUILD='P93';
 function inject(){
   if(document.getElementById('p91MobileDeckStyle'))return;
   const st=document.createElement('style');
@@ -41,12 +41,21 @@ function loadSoftStyle(){
   s.dataset.carbonautasP92='1';
   document.head.appendChild(s);
 }
+function loadGlobalTheme(){
+  if(document.querySelector('script[data-carbonautas-p93]')||document.body?.classList.contains('carbonautas-soft-p93'))return;
+  const s=document.createElement('script');
+  s.src='./carbonautas-soft-theme-p93.js?v=P93-20260918';
+  s.async=false;
+  s.dataset.carbonautasP93='1';
+  document.head.appendChild(s);
+}
 function boot(){
   inject();
   loadSoftStyle();
+  loadGlobalTheme();
   try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
   window.CARBONAUTAS_RUNTIME_BUILD=BUILD;
-  console.info('Carbonautas P92 Arquivo Vivo soft carregado');
+  console.info('Carbonautas P93 tema soft global carregado');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
