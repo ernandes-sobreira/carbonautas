@@ -17,7 +17,7 @@ function installBase(){
 }
 function loadP103(){
   if(document.querySelector('script[data-carbonautas-p103]')||document.getElementById('p103ComposerStyle'))return;
-  const s=document.createElement('script');s.src='./chat-composer-p103.js?v=P103-20260918';s.async=false;s.dataset.carbonautasP103='1';document.head.appendChild(s)
+  const s=document.createElement('script');s.src='./chat-composer-p103.js?v=P103-20260918b';s.async=false;s.dataset.carbonautasP103='1';document.head.appendChild(s)
 }
 function boot(){installBase();loadP103();console.info('Carbonautas P103 compositor mobile ampliado carregado')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
