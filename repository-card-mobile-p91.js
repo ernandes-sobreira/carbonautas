@@ -1,7 +1,7 @@
-/* Carbonautas P100 · Ajuste mobile + tema + pastas/baralho + conversas estáveis + privadas compactas + voltar mobile */
+/* Carbonautas P101 · Ajuste mobile + tema + pastas/baralho + conversas estáveis + privadas compactas + voltar mobile + ZAP dinâmico */
 (function(){
 'use strict';
-const BUILD='P100';
+const BUILD='P101';
 function inject(){
   if(document.getElementById('p91MobileDeckStyle'))return;
   const st=document.createElement('style');
@@ -57,10 +57,14 @@ function loadMobileBack(){
   if(document.querySelector('script[data-carbonautas-p100-back]')||document.getElementById('p100ChatBackStyle'))return;
   const s=document.createElement('script');s.src='./chat-mobile-back-p100.js?v=P100-20260918';s.async=false;s.dataset.carbonautasP100Back='1';document.head.appendChild(s);
 }
+function loadZapDelight(){
+  if(document.querySelector('script[data-carbonautas-p101-zap]')||document.getElementById('p101ZapStyle'))return;
+  const s=document.createElement('script');s.src='./chat-zap-delight-p101.js?v=P101-20260918';s.async=false;s.dataset.carbonautasP101Zap='1';document.head.appendChild(s);
+}
 function boot(){
-  inject();loadSoftStyle();loadGlobalTheme();loadTrackingDeck();loadChatStability();loadPrivateCompact();loadMobileBack();
+  inject();loadSoftStyle();loadGlobalTheme();loadTrackingDeck();loadChatStability();loadPrivateCompact();loadMobileBack();loadZapDelight();
   try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
-  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P100 acompanhamento + conversas estáveis + saída mobile carregado');
+  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P101 acompanhamento + conversas + ZAP dinâmico carregado');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
