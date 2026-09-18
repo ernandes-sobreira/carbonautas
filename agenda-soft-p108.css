@@ -103,4 +103,19 @@
   #viewCrono .ag-act{gap:3px}
   #viewCrono .ag-act button{width:29px;height:29px}
   #viewCrono .ag-empty{padding:17px 12px;font-size:12.5px}
+
+  /* P120 · ajuste fino do modo Dia no celular: nada cortado lateralmente */
+  #viewCrono .crono-wrap{width:100%!important;max-width:100%!important;box-sizing:border-box!important;overflow-x:hidden!important}
+  #viewCrono[data-p119-mode="day"] .ag-daylist,
+  #viewCrono[data-p114-mode="day"] .ag-daylist{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;overflow:visible!important;box-sizing:border-box!important}
+  #viewCrono[data-p119-mode="day"] .ag-daylist>h4,
+  #viewCrono[data-p114-mode="day"] .ag-daylist>h4{width:100%!important;max-width:100%!important;white-space:normal!important;overflow:visible!important;box-sizing:border-box!important}
+  #viewCrono[data-p119-mode="day"] .p110-subtitle,
+  #viewCrono[data-p114-mode="day"] .p110-subtitle{display:block!important;width:100%!important;max-width:100%!important;min-width:0!important;white-space:normal!important;word-break:normal!important;overflow-wrap:normal!important;margin:0 0 10px 2px!important;box-sizing:border-box!important}
+  #viewCrono[data-p119-mode="day"] .p110-event-track,
+  #viewCrono[data-p114-mode="day"] .p110-event-track{width:100%!important;max-width:100%!important;min-width:0!important;margin:0!important;padding:12px 2px 26px!important;box-sizing:border-box!important;scroll-padding-inline:0!important;overflow-x:auto!important;overflow-y:visible!important}
+  #viewCrono[data-p119-mode="day"] .p110-event-card,
+  #viewCrono[data-p114-mode="day"] .p110-event-card{flex:0 0 calc(100% - 6px)!important;width:calc(100% - 6px)!important;min-width:calc(100% - 6px)!important;max-width:none!important;box-sizing:border-box!important}
+  #viewCrono[data-p119-mode="day"] .p110-event-nav,
+  #viewCrono[data-p114-mode="day"] .p110-event-nav{width:100%!important;max-width:100%!important;box-sizing:border-box!important;margin:-6px 0 8px!important}
 }
