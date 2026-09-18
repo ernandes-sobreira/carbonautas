@@ -1,7 +1,7 @@
-/* Carbonautas P91 · Ajuste mobile do deck de cartas do Arquivo Vivo */
+/* Carbonautas P92 · Ajuste mobile + visual soft do deck do Arquivo Vivo */
 (function(){
 'use strict';
-const BUILD='P91';
+const BUILD='P92';
 function inject(){
   if(document.getElementById('p91MobileDeckStyle'))return;
   const st=document.createElement('style');
@@ -33,11 +33,20 @@ function inject(){
   `;
   document.head.appendChild(st);
 }
+function loadSoftStyle(){
+  if(document.querySelector('script[data-carbonautas-p92]')||document.getElementById('p92SoftStyle'))return;
+  const s=document.createElement('script');
+  s.src='./repository-soft-style-p92.js?v=P92-20260918';
+  s.async=false;
+  s.dataset.carbonautasP92='1';
+  document.head.appendChild(s);
+}
 function boot(){
   inject();
+  loadSoftStyle();
   try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
   window.CARBONAUTAS_RUNTIME_BUILD=BUILD;
-  console.info('Carbonautas P91 ajuste mobile do Arquivo Vivo carregado');
+  console.info('Carbonautas P92 Arquivo Vivo soft carregado');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
