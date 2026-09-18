@@ -1,7 +1,7 @@
-/* Carbonautas P102 · Ajuste mobile + tema + pastas/baralho + conversas estáveis + privadas compactas + voltar mobile + ZAP dinâmico + composer corrigido */
+/* Carbonautas P109 · Ajuste mobile + tema + pastas/baralho + conversas estáveis + privadas compactas + voltar mobile + ZAP + agenda em baralho */
 (function(){
 'use strict';
-const BUILD='P102';
+const BUILD='P109';
 function inject(){
   if(document.getElementById('p91MobileDeckStyle'))return;
   const st=document.createElement('style');
@@ -65,10 +65,16 @@ function loadComposerP102(){
   if(document.querySelector('script[data-carbonautas-p102-composer]')||document.getElementById('p102ComposerFix'))return;
   const s=document.createElement('script');s.src='./chat-composer-p102.js?v=P102-20260918';s.async=false;s.dataset.carbonautasP102Composer='1';document.head.appendChild(s);
 }
+function loadAgendaDeckP109(){
+  if(document.getElementById('agendaDeckP109'))return;
+  const l=document.createElement('link');
+  l.id='agendaDeckP109';l.rel='stylesheet';l.href='./agenda-deck-p109.css?v=P109-20260918';
+  document.head.appendChild(l);
+}
 function boot(){
-  inject();loadSoftStyle();loadGlobalTheme();loadTrackingDeck();loadChatStability();loadPrivateCompact();loadMobileBack();loadZapDelight();loadComposerP102();
+  inject();loadSoftStyle();loadGlobalTheme();loadTrackingDeck();loadChatStability();loadPrivateCompact();loadMobileBack();loadZapDelight();loadComposerP102();loadAgendaDeckP109();
   try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
-  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P102 acompanhamento + conversas + ZAP + composer corrigido carregado');
+  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P109 agenda em pastas + baralho carregado');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
