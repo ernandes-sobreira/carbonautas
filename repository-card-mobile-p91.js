@@ -1,7 +1,7 @@
-/* Carbonautas P107 · Ajuste mobile + tema + pastas/baralho + conversas estáveis + agenda leve */
+/* Carbonautas P102 · Ajuste mobile + tema + pastas/baralho + conversas estáveis + privadas compactas + voltar mobile + ZAP dinâmico + composer corrigido */
 (function(){
 'use strict';
-const BUILD='P107';
+const BUILD='P102';
 function inject(){
   if(document.getElementById('p91MobileDeckStyle'))return;
   const st=document.createElement('style');
@@ -65,14 +65,10 @@ function loadComposerP102(){
   if(document.querySelector('script[data-carbonautas-p102-composer]')||document.getElementById('p102ComposerFix'))return;
   const s=document.createElement('script');s.src='./chat-composer-p102.js?v=P102-20260918';s.async=false;s.dataset.carbonautasP102Composer='1';document.head.appendChild(s);
 }
-function loadAgendaP107(){
-  if(document.querySelector('script[data-carbonautas-p107-agenda]')||document.getElementById('p107AgendaStyle'))return;
-  const s=document.createElement('script');s.src='./agenda-soft-p107.js?v=P107-20260918';s.async=false;s.dataset.carbonautasP107Agenda='1';document.head.appendChild(s);
-}
 function boot(){
-  inject();loadSoftStyle();loadGlobalTheme();loadTrackingDeck();loadChatStability();loadPrivateCompact();loadMobileBack();loadZapDelight();loadComposerP102();loadAgendaP107();
+  inject();loadSoftStyle();loadGlobalTheme();loadTrackingDeck();loadChatStability();loadPrivateCompact();loadMobileBack();loadZapDelight();loadComposerP102();
   try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
-  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P107 acompanhamento + conversas + agenda leve carregado');
+  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P102 acompanhamento + conversas + ZAP + composer corrigido carregado');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
