@@ -1,7 +1,7 @@
-/* Carbonautas P95 · Ajuste mobile + visual soft global + entrada */
+/* Carbonautas P96 · Ajuste mobile + tema + cartas do acompanhamento */
 (function(){
 'use strict';
-const BUILD='P95';
+const BUILD='P96';
 function inject(){
   if(document.getElementById('p91MobileDeckStyle'))return;
   const st=document.createElement('style');
@@ -35,27 +35,20 @@ function inject(){
 }
 function loadSoftStyle(){
   if(document.querySelector('script[data-carbonautas-p92]')||document.getElementById('p92SoftStyle'))return;
-  const s=document.createElement('script');
-  s.src='./repository-soft-style-p92.js?v=P92-20260918';
-  s.async=false;
-  s.dataset.carbonautasP92='1';
-  document.head.appendChild(s);
+  const s=document.createElement('script');s.src='./repository-soft-style-p92.js?v=P92-20260918';s.async=false;s.dataset.carbonautasP92='1';document.head.appendChild(s);
 }
 function loadGlobalTheme(){
-  if(document.querySelector('script[data-carbonautas-p95]')||document.body?.classList.contains('carbonautas-entry-p95'))return;
-  const s=document.createElement('script');
-  s.src='./carbonautas-soft-theme-p93.js?v=P95-20260918';
-  s.async=false;
-  s.dataset.carbonautasP95='1';
-  document.head.appendChild(s);
+  if(document.querySelector('script[data-carbonautas-p96-theme]')||document.body?.classList.contains('carbonautas-p96-names'))return;
+  const s=document.createElement('script');s.src='./carbonautas-soft-theme-p93.js?v=P96-20260918';s.async=false;s.dataset.carbonautasP96Theme='1';document.head.appendChild(s);
+}
+function loadTrackingDeck(){
+  if(document.querySelector('script[data-carbonautas-p96-track]')||document.getElementById('p96TrackStyle'))return;
+  const s=document.createElement('script');s.src='./tracking-cards-p96.js?v=P96-20260918';s.async=false;s.dataset.carbonautasP96Track='1';document.head.appendChild(s);
 }
 function boot(){
-  inject();
-  loadSoftStyle();
-  loadGlobalTheme();
+  inject();loadSoftStyle();loadGlobalTheme();loadTrackingDeck();
   try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
-  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;
-  console.info('Carbonautas P95 entrada + tema soft carregados');
+  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P96 acompanhamento navegável carregado');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
