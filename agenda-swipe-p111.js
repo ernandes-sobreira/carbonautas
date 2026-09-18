@@ -1,7 +1,7 @@
-/* Carbonautas P111 · Swipe reto e previsível na agenda. Somente interação/apresentação. */
+/* Carbonautas P112 · Swipe reto e troca real do dia. Somente interação/apresentação. */
 (function(){
 'use strict';
-const BUILD='P111';
+const BUILD='P112';
 const STYLE_ID='p111AgendaSwipeStyle';
 
 function addStyle(){
@@ -63,10 +63,30 @@ function updateEventCurrent(track,index,cards){
     if(next)next.disabled=index===cards.length-1;
   }
 }
+function selectDay(track,target){
+  if(!target)return;
+  const iso=target.dataset.iso||'';
+  /* libera os bloqueios antigos ANTES do clique que realmente seleciona o dia */
+  track._p110SuppressClickUntil=0;
+  track._p111SuppressClickUntil=0;
+  track._p112InternalClick=true;
+  target.click();
+  track._p112InternalClick=false;
+  /* depois do render, recentraliza exatamente o mesmo dia */
+  setTimeout(()=>{
+    const freshTrack=document.querySelector('#viewCrono .ag-month');
+    const fresh=iso?freshTrack?.querySelector(`.ag-day[data-iso="${iso}"]:not(.out)`):null;
+    if(freshTrack&&fresh){
+      freshTrack._p110Programmatic=true;
+      center(freshTrack,fresh,'smooth');
+      setTimeout(()=>{freshTrack._p110Programmatic=false},380);
+    }
+  },40);
+}
 
 function bindStraightSwipe(track,kind){
-  if(!track||track.dataset.p111Bound==='1')return;
-  track.dataset.p111Bound='1';
+  if(!track||track.dataset.p111Bound==='2')return;
+  track.dataset.p111Bound='2';
   const selector=kind==='day'?'.ag-day:not(.out)':'.p110-event-card';
   let active=false,locked='',pointerId=null,startX=0,startY=0,startScroll=0,startTime=0,startIndex=0,lastX=0;
 
@@ -88,7 +108,6 @@ function bindStraightSwipe(track,kind){
     if(!locked&&Math.max(Math.abs(dx),Math.abs(dy))>7){
       if(Math.abs(dx)>Math.abs(dy)*1.18){
         locked='x';track.classList.add('p111-dragging');
-        /* impede o listener do P110 de trocar o dia enquanto o dedo ainda está se movendo */
         track._p110Programmatic=true;
         try{track.setPointerCapture(e.pointerId)}catch(_e){}
       }else if(Math.abs(dy)>Math.abs(dx)*1.05){
@@ -107,27 +126,22 @@ function bindStraightSwipe(track,kind){
     const elapsed=Math.max(1,performance.now()-startTime);
     const velocity=Math.abs(dx)/elapsed;
     const cardWidth=cards[startIndex]?.offsetWidth||220;
-    const threshold=Math.min(62,Math.max(34,cardWidth*.16));
+    const threshold=Math.min(64,Math.max(38,cardWidth*.17));
     let targetIndex=startIndex;
 
     if(locked==='x'){
       e.preventDefault();
-      const decisive=Math.abs(dx)>=threshold||velocity>.42;
+      const decisive=Math.abs(dx)>=threshold||velocity>.46;
       if(decisive) targetIndex=startIndex+(dx<0?1:-1);
       targetIndex=Math.max(0,Math.min(targetIndex,cards.length-1));
-      track._p111SuppressClickUntil=Date.now()+380;
-      track._p110SuppressClickUntil=0;
 
       if(kind==='day'){
         const target=cards[targetIndex];
-        if(target){
-          /* Uma única decisão no final do gesto. O render nativo atualiza título + compromissos. */
-          if(target.classList.contains('sel')){
-            center(track,target,'smooth');
-            setTimeout(()=>{track._p110Programmatic=false},360);
-          }else{
-            target.click();
-          }
+        if(targetIndex===startIndex){
+          center(track,cards[startIndex],'smooth');
+          setTimeout(()=>{track._p110Programmatic=false},360);
+        }else{
+          selectDay(track,target);
         }
       }else{
         const target=cards[targetIndex];
@@ -135,6 +149,8 @@ function bindStraightSwipe(track,kind){
         if(target)center(track,target,'smooth');
         setTimeout(()=>{track._p110Programmatic=false},360);
       }
+      /* só bloqueia o clique físico residual DEPOIS que a seleção real já ocorreu */
+      track._p111SuppressClickUntil=Date.now()+320;
     }else{
       track._p110Programmatic=false;
     }
@@ -147,6 +163,7 @@ function bindStraightSwipe(track,kind){
   track.addEventListener('pointerup',up,{passive:false});
   track.addEventListener('pointercancel',cancel,{passive:true});
   track.addEventListener('click',e=>{
+    if(track._p112InternalClick)return;
     if((track._p111SuppressClickUntil||0)>Date.now()){
       e.preventDefault();e.stopImmediatePropagation();
     }
@@ -166,7 +183,7 @@ function boot(){
   const ob=new MutationObserver(()=>requestAnimationFrame(enhance));
   ob.observe(body,{childList:true,subtree:true});
   window.CARBONAUTAS_AGENDA_SWIPE_BUILD=BUILD;
-  console.info('Carbonautas P111 swipe reto ativo');
+  console.info('Carbonautas P112 swipe reto + troca real do dia ativo');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
