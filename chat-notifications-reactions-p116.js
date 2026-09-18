@@ -13,7 +13,7 @@ function escCss(v){try{return CSS.escape(String(v||''))}catch(_e){return String(
 function millis(ts){return ts?.toMillis?ts.toMillis():(ts?.seconds?ts.seconds*1000:+new Date(ts||0))}
 function fresh(ts){const ms=millis(ts);return !!ms&&ms>=startedAt-12000}
 function cleanId(v=''){return String(v).replace(/[^a-zA-Z0-9_-]/g,'_').slice(0,180)}
-function activeMembers(){return members.filter(m=>m?.id&&m.id!==me.memberId&&m.status!=='inativo')}
+function activeMembers(){const list=members.length?members:(S()?.members||[]);return list.filter(m=>m?.id&&m.id!==me.memberId&&m.status!=='inativo')}
 function isGeneralMessage(m){return !!m&&m.tipo!=='recado'&&m.tipo!=='chat_group_meta'&&m.tipo!=='chat_group_message'&&m.tipo!=='mural'}
 function textPreview(m,fallback){if(m?.imageUrl)return '📷 Nova foto/print na conversa.';const t=String(m?.text||'').trim();return (t||fallback).slice(0,220)}
 
@@ -22,9 +22,8 @@ async function identity(){
   try{const s=await f.getDoc(f.doc(window.db,'rede_users',uid));if(!s.exists())return false;const d=s.data();me={memberId:d.memberId||'',uid,name:d.nome||''};return !!me.memberId}catch(e){console.warn('P116 identidade',e);return false}
 }
 async function putNotification(docId,payload){
-  const f=F();if(!f||!window.db)return;
-  const ref=f.doc(window.db,'rede_notifications',docId);
-  try{const old=await f.getDoc(ref);if(old.exists())return;await f.setDoc(ref,payload)}catch(e){if(e?.code!=='permission-denied')console.warn('P116 notificação',e)}
+  const f=F();if(!f||!window.db)return;const ref=f.doc(window.db,'rede_notifications',docId);
+  try{await f.setDoc(ref,payload)}catch(e){if(e?.code!=='permission-denied')console.warn('P116 notificação',e)}
 }
 async function notifyRecipients(prefix,messageId,recipientIds,base){
   const f=F();if(!f||!me.memberId||!window.auth?.currentUser?.uid)return;
