@@ -1,7 +1,7 @@
-/* Carbonautas P98 · estabilidade das abas de conversa + composer maior */
+/* Carbonautas P104 · estabilidade das abas de conversa + composer maior */
 (function(){
 'use strict';
-const VERSION='P98';
+const VERSION='P104';
 let panelActive=false,hiddenGeneral=null,obs=null;
 const $=(s,r=document)=>r.querySelector(s);
 
@@ -10,12 +10,13 @@ function injectCss(){
   const s=document.createElement('style');
   s.id='p98ChatStableStyle';
   s.textContent=`
-  /* Enquanto Panelinha estiver ativa, P46/P48 não brigam visualmente pela aba */
-  body.p98-panel-active #subNav [data-sub-view="mensagens"]{background:#fff!important;color:#516a72!important;border-color:#d5e1e2!important;box-shadow:none!important}
-  body.p98-panel-active #subNav .p46-panel-btn{background:#168f94!important;color:#fff!important;border-color:#168f94!important;box-shadow:0 8px 22px rgba(22,143,148,.14)!important}
+  /* Panelinha só recebe destaque quando a tela real aberta é Mensagens */
+  body.p98-panel-active[data-view="mensagens"] #subNav [data-sub-view="mensagens"]{background:#fff!important;color:#516a72!important;border-color:#d5e1e2!important;box-shadow:none!important}
+  body.p98-panel-active[data-view="mensagens"] #subNav .p46-panel-btn{background:#168f94!important;color:#fff!important;border-color:#168f94!important;box-shadow:0 8px 22px rgba(22,143,148,.14)!important}
+  body:not([data-view="mensagens"]) #subNav .p46-panel-btn{background:#fff!important;color:#516a72!important;border-color:#d5e1e2!important;box-shadow:none!important}
   [data-p98-general-sentinel]{display:none!important;position:absolute!important;width:0!important;height:0!important;overflow:hidden!important;pointer-events:none!important;visibility:hidden!important}
 
-  /* Campo de conversa: mais confortável em todas as três modalidades */
+  /* Campo de conversa: confortável em todas as três modalidades */
   .private-composer-zone,.p46-compose,.p48-compose{box-sizing:border-box!important}
   #privateInput,#p46Input,#p48Input{min-height:52px!important;height:52px!important;max-height:148px!important;padding:13px 14px!important;border-radius:16px!important;line-height:1.38!important}
   .private-composer,.p46-compose-row,.p48-compose-row{align-items:flex-end!important}
@@ -67,7 +68,7 @@ function captureGeneralShell(){
 }
 
 function installSentinel(){
-  if(!panelActive)return;
+  if(!panelActive||document.body.dataset.view!=='mensagens')return;
   const view=$('#viewMensagens');
   const root=view?.querySelector('#p48GroupsRoot');
   if(!view||!root)return;
@@ -77,7 +78,6 @@ function installSentinel(){
       clone.setAttribute('data-p98-general-sentinel','1');
       root.appendChild(clone);
     }else{
-      /* fallback mínimo: evita que ensureMount() apague P48 até termos o clone completo */
       const stub=document.createElement('div');
       stub.className='p46-shell';stub.setAttribute('data-p98-general-sentinel','1');stub.setAttribute('aria-hidden','true');
       stub.innerHTML='<div id="p46ChatTitle"></div><div id="p46ChatSub"></div><div id="p46ChatIcon"></div><div id="p46Topics"></div><div id="p46SideList"></div><div id="p46Msgs"></div><div id="p46Replying"></div>';
@@ -91,21 +91,40 @@ function leavePanelMode(){
   panelActive=false;
   document.body.classList.remove('p98-panel-active');
   document.querySelectorAll('[data-p98-general-sentinel]').forEach(n=>n.remove());
+  const nav=$('#subNav');
+  nav?.querySelector('.p46-panel-btn')?.classList.remove('on');
+}
+
+function syncActualTab(){
+  const view=document.body.dataset.view||'';
+  const nav=$('#subNav');
+  if(view!=='mensagens'){
+    if(panelActive||document.body.classList.contains('p98-panel-active'))leavePanelMode();
+    if(view==='conversas'){
+      nav?.querySelector('[data-sub-view="conversas"]')?.classList.add('on');
+      nav?.querySelector('[data-sub-view="mensagens"]')?.classList.remove('on');
+      nav?.querySelector('.p46-panel-btn')?.classList.remove('on');
+    }
+    return;
+  }
+  if(panelActive){
+    nav?.querySelector('.p46-panel-btn')?.classList.add('on');
+    nav?.querySelector('[data-sub-view="mensagens"]')?.classList.remove('on');
+  }
 }
 
 function watchMensagens(){
   const view=$('#viewMensagens');
   if(!view||obs)return;
   obs=new MutationObserver(()=>{
-    if(panelActive){
-      if(view.querySelector('#p48GroupsRoot')) installSentinel();
-    }
+    syncActualTab();
+    if(panelActive&&document.body.dataset.view==='mensagens'&&view.querySelector('#p48GroupsRoot'))installSentinel();
   });
   obs.observe(view,{childList:true,subtree:true});
+  new MutationObserver(syncActualTab).observe(document.body,{attributes:true,attributeFilter:['data-view']});
 }
 
 function bindTabGuard(){
-  /* window capture acontece antes do listener capture do P48 no document */
   window.addEventListener('click',e=>{
     const panel=e.target.closest?.('#subNav .p46-panel-btn');
     if(panel){
@@ -121,16 +140,22 @@ function bindTabGuard(){
     const general=e.target.closest?.('#subNav [data-sub-view="mensagens"]');
     const priv=e.target.closest?.('#subNav [data-sub-view="conversas"]');
     if(general||priv)leavePanelMode();
+    if(priv)setTimeout(syncActualTab,0);
   },true);
 }
 
 function keepState(){
+  const view=document.body.dataset.view||'';
+  if(view!=='mensagens'){
+    leavePanelMode();
+    syncActualTab();
+    return;
+  }
   if($('#p48GroupsRoot')){
     if(!panelActive){captureGeneralShell();panelActive=true}
     installSentinel();
-  }else if(panelActive && document.body.dataset.view!=='mensagens'){
-    leavePanelMode();
   }
+  syncActualTab();
 }
 
 function grow(id,min=52,max=148){
@@ -143,7 +168,7 @@ function grow(id,min=52,max=148){
 function boot(){
   injectCss();watchMensagens();bindTabGuard();keepState();
   setInterval(()=>{keepState();grow('#privateInput');grow('#p46Input');grow('#p48Input')},450);
-  console.info('Carbonautas',VERSION,'panelinhas estáveis + campos de conversa ampliados');
+  console.info('Carbonautas',VERSION,'abas sincronizadas com a tela real + campos de conversa ampliados');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
