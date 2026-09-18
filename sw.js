@@ -1,11 +1,12 @@
-const CACHE='carbonautas-p119-20260918';
-const BUILD='P119';
+const CACHE='carbonautas-p120-20260918';
+const BUILD='P120';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#f6faf9;color:#183844"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
 const AGENDA_SOFT_STYLE='<link rel="stylesheet" href="./agenda-soft-p108.css?v=P108-20260918">';
 const LAB_RUN_STYLE='<link rel="stylesheet" href="./lab-run-mobile-p118.css?v=P118-20260918">';
 const AGENDA_DECK_SCRIPT='<script src="./agenda-deck-p110.js?v=P110-20260918"><\/script>';
 const AGENDA_SWIPE_SCRIPT='<script src="./agenda-swipe-p113.js?v=P114-20260918"><\/script>';
 const AGENDA_STABLE_MEDIA_SCRIPT='<script src="./agenda-stable-media-p119.js?v=P119-20260918"><\/script>';
+const AGENDA_MOBILE_FIT_SCRIPT='<script src="./agenda-mobile-fit-p120.js?v=P120-20260918"><\/script>';
 const SYNC_SCRIPT='<script src="./calendar-sync-v4.js?v=P76-20260917"><\/script>';
 const DURATION_SCRIPT='<script src="./calendar-duration-v1.js?v=P76-20260917"><\/script>';
 const NOTIFY_SCRIPT='<script src="./notification-fix-v1.js?v=P76-20260917"><\/script>';
@@ -86,6 +87,7 @@ async function navigationResponse(req){
     if(!html.includes('agenda-deck-p110.js'))inject+=AGENDA_DECK_SCRIPT;
     if(!html.includes('agenda-swipe-p113.js'))inject+=AGENDA_SWIPE_SCRIPT;
     if(!html.includes('agenda-stable-media-p119.js'))inject+=AGENDA_STABLE_MEDIA_SCRIPT;
+    if(!html.includes('agenda-mobile-fit-p120.js'))inject+=AGENDA_MOBILE_FIT_SCRIPT;
     if(!html.includes('calendar-duration-v1.js'))inject+=DURATION_SCRIPT;
     if(!html.includes('calendar-sync-v4.js'))inject+=SYNC_SCRIPT;
     if(!html.includes('notification-fix-v1.js'))inject+=NOTIFY_SCRIPT;
