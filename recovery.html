@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Carbonautas · Atualização P111</title>
+<title>Carbonautas · Atualização P112</title>
 <style>html,body{height:100%;margin:0;font-family:system-ui;background:#f6faf9;color:#183844}main{height:100%;display:grid;place-items:center}div{text-align:center;max-width:560px;padding:28px}h1{margin:0 0 10px;font-size:26px}p{color:#60757d;line-height:1.5}.ok{color:#087f5b;font-weight:700}</style>
 </head>
 <body>
-<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Ajustando o swipe da Agenda para ficar reto e previsível.</p></div></main>
+<main><div><h1>Atualizando o Carbonautas…</h1><p id="msg">Aplicando o swipe corrigido da Agenda.</p></div></main>
 <script>
 (async()=>{
   const msg=document.getElementById('msg');
@@ -15,16 +15,16 @@
   try{
     if('caches' in window){const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));}
     if('serviceWorker' in navigator){
-      msg.textContent='Atualizando a Agenda P111…';
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P111-20260918',{updateViaCache:'none'});
+      msg.textContent='Limpando a versão antiga e carregando a correção…';
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P112-20260918',{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting)reg.waiting.postMessage('SKIP_WAITING');
       const worker=reg.active||reg.waiting||reg.installing;if(worker)worker.postMessage('FORCE_REFRESH_ALL');
-      await wait(700);
+      await wait(850);
     }
-    msg.className='ok';msg.textContent='P111 pronta: swipe reto, uma carta por vez e rolagem vertical preservada.';
-  }catch(e){console.warn(e);msg.textContent='Atualização aplicada. Abrindo o Carbonautas…'}
-  setTimeout(()=>location.replace('./?build=P111&t='+Date.now()),650);
+    msg.className='ok';msg.textContent='P112 pronta: o swipe agora troca realmente o dia selecionado.';
+  }catch(e){console.warn(e);msg.textContent='Correção aplicada. Abrindo o Carbonautas…'}
+  setTimeout(()=>location.replace('./?build=P112&t='+Date.now()),700);
 })();
 </script>
 </body>
