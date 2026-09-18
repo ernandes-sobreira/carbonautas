@@ -1,7 +1,7 @@
-/* Carbonautas P111 · Ajuste mobile + tema + pastas/baralho + conversas estáveis + privadas compactas + voltar mobile + ZAP + agenda funcional */
+/* Carbonautas P113 · Ajuste mobile + tema + pastas/baralho + conversas estáveis + privadas compactas + voltar mobile + ZAP + agenda funcional */
 (function(){
 'use strict';
-const BUILD='P111';
+const BUILD='P113';
 function inject(){
   if(document.getElementById('p91MobileDeckStyle'))return;
   const st=document.createElement('style');
@@ -75,14 +75,14 @@ function loadAgendaDeckP110(){
   if(document.querySelector('script[data-carbonautas-p110-agenda]')||window.CARBONAUTAS_AGENDA_DECK_BUILD==='P110')return;
   const s=document.createElement('script');s.src='./agenda-deck-p110.js?v=P110-20260918';s.async=false;s.dataset.carbonautasP110Agenda='1';document.head.appendChild(s);
 }
-function loadAgendaSwipeP111(){
-  if(document.querySelector('script[data-carbonautas-p111-swipe]')||window.CARBONAUTAS_AGENDA_SWIPE_BUILD==='P111')return;
-  const s=document.createElement('script');s.src='./agenda-swipe-p111.js?v=P111-20260918';s.async=false;s.dataset.carbonautasP111Swipe='1';document.head.appendChild(s);
+function loadAgendaSwipeP113(){
+  if(document.querySelector('script[data-carbonautas-p113-swipe]')||window.CARBONAUTAS_AGENDA_SWIPE_BUILD==='P113')return;
+  const s=document.createElement('script');s.src='./agenda-swipe-p113.js?v=P113-20260918';s.async=false;s.dataset.carbonautasP113Swipe='1';document.head.appendChild(s);
 }
 function boot(){
-  inject();loadSoftStyle();loadGlobalTheme();loadTrackingDeck();loadChatStability();loadPrivateCompact();loadMobileBack();loadZapDelight();loadComposerP102();loadAgendaDeckP109();loadAgendaDeckP110();loadAgendaSwipeP111();
+  inject();loadSoftStyle();loadGlobalTheme();loadTrackingDeck();loadChatStability();loadPrivateCompact();loadMobileBack();loadZapDelight();loadComposerP102();loadAgendaDeckP109();loadAgendaDeckP110();loadAgendaSwipeP113();
   try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
-  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P111 swipe reto da agenda carregado');
+  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P113 controlador único de swipe da agenda carregado');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
