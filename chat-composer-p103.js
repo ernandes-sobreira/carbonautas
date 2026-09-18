@@ -1,12 +1,16 @@
-/* Carbonautas P105 · área de escrita maior + controles compactos + topo mobile limpo */
+/* Carbonautas P106 · área de escrita maior + controles compactos + adicionar aluno só em Rede/Acompanhamento */
 (function(){
 'use strict';
-const VERSION='P105';
+const VERSION='P106';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 function css(){
   if($('#p103ComposerStyle'))return;
   const s=document.createElement('style');s.id='p103ComposerStyle';s.textContent=`
+  /* Adicionar aluno pertence somente à Rede e ao Acompanhamento. Esta regra só esconde;
+     a autorização original continua decidindo quem pode vê-lo nessas duas telas. */
+  body:not([data-view="rede"]):not([data-view="track"]) .topbar #addBtn{display:none!important}
+
   @media(max-width:760px){
     .p46-compose{padding:8px!important}
 
@@ -47,21 +51,21 @@ function css(){
     #p48Input{grid-area:input!important;width:100%!important;min-width:0!important;height:68px!important;min-height:68px!important;max-height:150px!important;padding:15px 14px!important;font-size:16px!important;line-height:1.35!important;border-radius:16px!important}
     #p48Send{grid-area:send!important;width:48px!important;height:68px!important;min-width:48px!important;max-width:48px!important;min-height:68px!important;border-radius:15px!important}
 
-    /* botão coral do topo: pequeno, no lugar do escudo fora do Painel */
-    .p103-top-plus,#addBtn{width:38px!important;height:38px!important;min-width:38px!important;max-width:38px!important;min-height:38px!important;max-height:38px!important;padding:0!important;border-radius:12px!important;font-size:18px!important;line-height:1!important;box-shadow:0 5px 14px rgba(244,92,120,.12)!important;display:grid!important;place-items:center!important;flex:0 0 38px!important}
+    /* Atalho Adicionar aluno: compacto no mobile, sem forçar sua exibição. */
+    .p103-top-plus{width:38px!important;height:38px!important;min-width:38px!important;max-width:38px!important;min-height:38px!important;max-height:38px!important;padding:0!important;border-radius:12px!important;font-size:18px!important;line-height:1!important;box-shadow:0 5px 14px rgba(244,92,120,.12)!important;display:grid!important;place-items:center!important;flex:0 0 38px!important}
+    #addBtn{width:38px!important;height:38px!important;min-width:38px!important;max-width:38px!important;min-height:38px!important;max-height:38px!important;padding:0!important;border-radius:12px!important;font-size:18px!important;line-height:1!important;box-shadow:0 5px 14px rgba(244,92,120,.12)!important;flex:0 0 38px!important}
     #addBtn svg{width:15px!important;height:15px!important;margin:0!important}
     #addBtn .bl{display:none!important}
     body:not([data-view="painel"]) .topbar #adminBtn{display:none!important}
-    body:not([data-view="painel"]) .topbar #addBtn{order:7!important;margin:0!important}
+    body[data-view="rede"] .topbar #addBtn,body[data-view="track"] .topbar #addBtn{order:7!important;margin:0!important}
     body[data-view="painel"] .topbar #adminBtn{display:inline-flex!important}
-    body[data-view="painel"] .topbar #addBtn{display:none!important}
   }
   `;document.head.appendChild(s)
 }
 function markTopPlus(){
   if(innerWidth>760)return;
   const add=$('#addBtn');
-  if(add){add.classList.add('p103-top-plus');add.title='Adicionar';add.setAttribute('aria-label','Adicionar')}
+  if(add){add.classList.remove('p103-top-plus');add.title='Adicionar aluno';add.setAttribute('aria-label','Adicionar aluno')}
   $$('button').forEach(b=>{
     if(b===add)return;
     if(String(b.textContent||'').trim()!=='+')return;
@@ -74,6 +78,6 @@ function labelTools(){
   [['#p101GeneralSticker','Figurinhas'],['#p101PrivateSticker','Figurinhas'],['#p101P48Sticker','Figurinhas'],['#p79GeneralClip','Enviar foto ou print'],['#p79PrivateClip','Enviar foto ou print']].forEach(([sel,label])=>{const el=$(sel);if(el){el.title=label;el.setAttribute('aria-label',label)}})
 }
 function refreshTop(){markTopPlus()}
-function boot(){css();refreshTop();labelTools();new MutationObserver(()=>{refreshTop();labelTools()}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-view']});window.addEventListener('resize',refreshTop,{passive:true});console.info('Carbonautas',VERSION,'composer + topo mobile limpo')}
+function boot(){css();refreshTop();labelTools();new MutationObserver(()=>{refreshTop();labelTools()}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-view']});window.addEventListener('resize',refreshTop,{passive:true});console.info('Carbonautas',VERSION,'adicionar aluno só em Rede/Acompanhamento + composer mobile')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
