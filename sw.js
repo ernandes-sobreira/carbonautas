@@ -1,6 +1,7 @@
-const CACHE='carbonautas-p97-20260918';
-const BUILD='P97';
+const CACHE='carbonautas-p108-20260918';
+const BUILD='P108';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#f6faf9;color:#183844"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
+const AGENDA_SOFT_STYLE='<link rel="stylesheet" href="./agenda-soft-p108.css?v=P108-20260918">';
 const SYNC_SCRIPT='<script src="./calendar-sync-v4.js?v=P76-20260917"><\/script>';
 const DURATION_SCRIPT='<script src="./calendar-duration-v1.js?v=P76-20260917"><\/script>';
 const NOTIFY_SCRIPT='<script src="./notification-fix-v1.js?v=P76-20260917"><\/script>';
@@ -74,6 +75,7 @@ async function navigationResponse(req){
     const type=fresh.headers.get('content-type')||'';
     if(!type.includes('text/html'))return fresh;
     let html=await fresh.text(),inject='';
+    if(!html.includes('agenda-soft-p108.css'))inject+=AGENDA_SOFT_STYLE;
     if(!html.includes('calendar-duration-v1.js'))inject+=DURATION_SCRIPT;
     if(!html.includes('calendar-sync-v4.js'))inject+=SYNC_SCRIPT;
     if(!html.includes('notification-fix-v1.js'))inject+=NOTIFY_SCRIPT;
