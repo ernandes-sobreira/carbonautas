@@ -1,10 +1,27 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Carbonautas">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Carbonautas · carbono, regeneração, rede e navegação">
   <defs>
-    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#57C58A"/><stop offset="1" stop-color="#16999D"/></linearGradient>
-    <linearGradient id="g2" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#2FB58A"/><stop offset="1" stop-color="#117D98"/></linearGradient>
+    <linearGradient id="cycle" x1="18" y1="18" x2="78" y2="78" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6EC6A0"/>
+      <stop offset=".55" stop-color="#1AA39E"/>
+      <stop offset="1" stop-color="#297FA8"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="64" y1="13" x2="87" y2="39" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#72C98E"/>
+      <stop offset="1" stop-color="#35A985"/>
+    </linearGradient>
   </defs>
-  <path d="M47 79C27 66 17 49 19 25c18 3 31 12 37 29-1 10-4 18-9 25Z" fill="url(#g1)"/>
-  <path d="M48 79c2-27 14-47 36-60 4 24-3 44-23 57-5 3-9 4-13 3Z" fill="url(#g2)"/>
-  <path d="M47 79c0-20-5-36-17-49M48 79c6-24 16-40 30-52" fill="none" stroke="#F7FFFC" stroke-width="4" stroke-linecap="round" opacity=".9"/>
-  <path d="M38 55c6 1 11 4 15 9" fill="none" stroke="#F7FFFC" stroke-width="3.2" stroke-linecap="round" opacity=".8"/>
+  <circle cx="48" cy="48" r="42" fill="#F5FBF8"/>
+  <!-- C / ciclo do carbono e circulação do conhecimento -->
+  <path d="M70 23A32 32 0 1 0 76 66" fill="none" stroke="url(#cycle)" stroke-width="10" stroke-linecap="round"/>
+  <!-- folha / regeneração -->
+  <path d="M66 17c9-8 19-8 25-5-1 13-8 22-20 26-4-5-6-12-5-21Z" fill="url(#leaf)"/>
+  <path d="M70 33c5-5 10-9 16-13" fill="none" stroke="#F7FFFC" stroke-width="2.8" stroke-linecap="round" opacity=".9"/>
+  <!-- bússola / nautas -->
+  <path d="M35 63 49 33l4 17 17 4-30 14Z" fill="#173B50" opacity=".92"/>
+  <path d="m49 33 4 17-13 18 9-35Z" fill="#FFFFFF" opacity=".96"/>
+  <circle cx="51" cy="51" r="3.4" fill="#168F94" stroke="#fff" stroke-width="1.8"/>
+  <!-- nós / rede -->
+  <circle cx="20" cy="48" r="4.5" fill="#6EBECE" stroke="#fff" stroke-width="2"/>
+  <circle cx="31" cy="72" r="4.5" fill="#71BE91" stroke="#fff" stroke-width="2"/>
+  <circle cx="72" cy="70" r="4.5" fill="#6D91B4" stroke="#fff" stroke-width="2"/>
 </svg>
