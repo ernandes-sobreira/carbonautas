@@ -14656,5 +14656,34 @@ input,select,textarea,.mini{border-color:#cfe0de!important;background:#fff!impor
 })();
 </script>
 
+
+
+<!-- P129 · menu visual + composer abaixo do menu -->
+<style id="p129-menu-layout-fix">
+#appMenuBackdrop.open{z-index:2147483647!important}
+body.p129-menu-open .p46-compose,
+body.p129-menu-open .private-composer-zone,
+body.p129-menu-open .p48-compose{
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+</style>
+<script id="p129-menu-layout-fix-script">
+(function(){
+  'use strict';
+  function bootP129MenuFix(){
+    const menu=document.getElementById('appMenuBackdrop');
+    if(!menu)return;
+    const mural=document.querySelector('.app-nav-card[data-app-view="mural"]');
+    if(mural)mural.classList.add('app-nav-hero');
+    const sync=()=>document.body.classList.toggle('p129-menu-open',menu.classList.contains('open'));
+    sync();
+    new MutationObserver(sync).observe(menu,{attributes:true,attributeFilter:['class']});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootP129MenuFix,{once:true});
+  else bootP129MenuFix();
+})();
+</script>
+
 </body>
 </html>
