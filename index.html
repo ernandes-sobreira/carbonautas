@@ -2779,7 +2779,6 @@
         <select id="pubCategoriaSel">
           <option value="apresentacao">Apresentação</option>
           <option value="artigo">Artigo científico</option>
-          <option value="cronograma">Cronograma</option>
           <option value="dados">Dados / planilha</option>
           <option value="jogos_plataformas">Jogos e plataformas</option>
           <option value="livros_capitulos">Livros e capítulos</option>
@@ -5344,7 +5343,7 @@ async function savePhoto(){
 function refreshPubFilters(){
   const cc=$('#pubCategoria'), curC=cc.value;
   cc.innerHTML='<option value="">Todas as categorias</option>'+
-    Object.entries(CATEGORIAS).sort((a,b)=>a[1].label.localeCompare(b[1].label,'pt-BR')).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+    Object.entries(CATEGORIAS).filter(([k])=>k!=='cronograma').sort((a,b)=>a[1].label.localeCompare(b[1].label,'pt-BR')).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
   cc.value=curC;
   const cp=$('#pubPessoa'), curP=cp.value;
   const ordered=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome));
