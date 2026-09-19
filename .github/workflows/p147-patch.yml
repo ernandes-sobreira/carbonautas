@@ -1,0 +1,47 @@
+name: P147 remove cronograma repository option
+on:
+  push:
+    branches: [fix/p147-remove-cronograma-repo]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch and validate
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old=s
+          opt='          <option value="cronograma">Cronograma</option>\n'
+          if s.count(opt)!=1:
+              raise SystemExit(f'expected exactly one cronograma upload option, found {s.count(opt)}')
+          s=s.replace(opt,'',1)
+          before="Object.entries(CATEGORIAS).sort((a,b)=>a[1].label.localeCompare(b[1].label,'pt-BR')).map(([k,v])=>`<option value=\"${k}\">${v.label}</option>`).join('');"
+          after="Object.entries(CATEGORIAS).filter(([k])=>k!=='cronograma').sort((a,b)=>a[1].label.localeCompare(b[1].label,'pt-BR')).map(([k,v])=>`<option value=\"${k}\">${v.label}</option>`).join('');"
+          if before not in s:
+              raise SystemExit('refreshPubFilters pattern not found')
+          s=s.replace(before,after,1)
+          if s==old:
+              raise SystemExit('no change')
+          if '<option value="cronograma">Cronograma</option>' in s:
+              raise SystemExit('cronograma still selectable in upload modal')
+          if "Object.entries(CATEGORIAS).filter(([k])=>k!=='cronograma')" not in s:
+              raise SystemExit('cronograma filter exclusion missing')
+          if s.count("cronograma:         {label:'Cronograma'")!=1:
+              raise SystemExit('legacy cronograma compatibility entry changed unexpectedly')
+          p.write_text(s,encoding='utf-8')
+          print('P147 validation OK')
+          PY
+          git diff --check
+      - name: Commit fix
+        run: |
+          git config user.name "ernandes-sobreira"
+          git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
+          git add index.html
+          git commit -m "P147: retirar cronograma das opções do repositório" || exit 0
+          git push
