@@ -1,0 +1,39 @@
+name: Inject P132 dossier module
+on:
+  push:
+    branches: [P132-dossier-worker]
+    paths: ['.github/workflows/inject-dossier-p132.yml']
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Inject isolated dossier script
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="./modules/dossier-p132.js?v=P132-20260919"></script>'
+          if tag not in s:
+              i=s.lower().rfind('</body>')
+              if i < 0:
+                  raise SystemExit('ABORT: </body> not found')
+              s=s[:i]+tag+'\n'+s[i:]
+              p.write_text(s,encoding='utf-8')
+          assert s.count(tag)==1, 'ABORT: P132 tag count must be exactly 1'
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          if git diff --cached --quiet; then
+            echo 'No changes'
+          else
+            git commit -m 'P132: ativar dossiê gerencial isolado'
+            git push origin HEAD:main
+          fi
