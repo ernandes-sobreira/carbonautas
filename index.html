@@ -14182,7 +14182,7 @@ function injectRepo(){
   const tabs=$('#repoModeTabs');
   if(tabs&&!$('#p129Shortcuts')){
     const sc=document.createElement('div');sc.id='p129Shortcuts';
-    sc.innerHTML=`<button type="button" data-go="lab"><span>🧪</span><span><b>Laboratório de Dados</b><small>Análises e planilhas</small></span></button><button type="button" data-go="jogo"><span>🎮</span><span><b>Jogo do Carbonauta</b><small>Ciclo do carbono</small></span></button>`;
+    sc.innerHTML=`<button type="button" data-go="lab"><span>🧪</span><span><b>Laboratório de Dados</b><small>Análises e planilhas</small></span></button>`;
     sc.querySelectorAll('button').forEach(b=>b.onclick=()=>go(b.dataset.go));
     tabs.parentNode.insertBefore(sc,tabs.nextSibling);
   }
