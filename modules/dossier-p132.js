@@ -1,5 +1,5 @@
-/* Carbonautas P156 · carregador seguro
-   Mantém o núcleo da Rede, aplica orientação real e acabamento visual leve. */
+/* Carbonautas P158 · carregador seguro
+   Mantém o núcleo da Rede, aplica orientação real, acabamento visual e legenda. */
 (function(){
 'use strict';
 if(window.__CARBONAUTAS_P135_LOADER)return;
@@ -22,6 +22,7 @@ function load(src,id){
     await load('./p135-rede-acompanhamento.js?v=P157-20260919','carbonautas-p135-rede-acompanhamento');
     await load('./modules/rede-orientacao-p150.js?v=P151-20260919','carbonautas-rede-orientacao-p150');
     await load('./modules/rede-ui-p155.js?v=P157-20260919','carbonautas-rede-ui-p155');
+    await load('./modules/rede-legenda-p158.js?v=P158-20260919','carbonautas-rede-legenda-p158');
   }catch(e){console.error('Carbonautas loader',e)}
 })();
 })();
