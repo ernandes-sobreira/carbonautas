@@ -1,9 +1,10 @@
-/* Carbonautas P159 · rede de orientações reais + legenda visual
+/* Carbonautas P160 · rede de orientações reais + legenda visual + grafo estável
    - orientação usa espessura claramente proporcional ao número de registros
    - produção, projetos, orientação e outros vínculos têm linguagem visual própria
    - em cada filtro, a cor/traço da linha corresponde ao tipo selecionado
    - adiciona legenda horizontal da Rede no mobile e desktop
-   - reduz observadores e repetições para deixar a Rede mais leve
+   - deixa a simulação assentar e depois congela o grafo para não ficar pulando
+   - reduz re-renderizações repetidas
    Não grava nem altera dados do Firebase. */
 (function(){
 'use strict';
@@ -16,6 +17,9 @@ const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLo
 let mode='all';
 let orientationDocs=new Map();
 let unsubscribe=null;
+let settleTimer=0;
+let redrawTimer=0;
+let lastOrientationSignature='';
 
 function S(){try{return window.state||state||{}}catch(_e){return{}}}
 function my(){try{return window.myId||myId||''}catch(_e){return''}}
@@ -127,14 +131,9 @@ function decorateLinkStyles(){
   $$('#graph line.link').forEach(line=>{
     const d=line.__data__||{};
     resetLineStyle(line);
-
-    /* Nos filtros específicos, o visual deve representar o filtro escolhido.
-       Isso evita uma ligação de produção continuar verde/azul por carregar
-       metadados de outro vínculo de uma renderização anterior. */
     if(mode==='orientation'){styleOrientation(line,d);return;}
     if(mode==='production'){styleProduction(line);return;}
     if(mode==='projects'){styleProject(line);return;}
-
     const n=Number(d.orientationCount)||0;
     if(n){styleOrientation(line,d);return;}
     if(isProductionLink(d)){styleProduction(line);return;}
@@ -197,6 +196,26 @@ function ensureLegend(){
   return true;
 }
 
+function currentSimulation(){
+  try{
+    if(window.simulation)return window.simulation;
+    if(typeof simulation!=='undefined')return simulation;
+  }catch(_e){}
+  return null;
+}
+function settleGraph(delay=900){
+  clearTimeout(settleTimer);
+  settleTimer=setTimeout(()=>{
+    try{
+      const sim=currentSimulation();
+      if(!sim)return;
+      if(typeof sim.alphaTarget==='function')sim.alphaTarget(0);
+      if(typeof sim.alpha==='function')sim.alpha(0);
+      if(typeof sim.stop==='function')sim.stop();
+    }catch(_e){}
+  },delay);
+}
+
 function installBuildWrapper(){
   let fn=null;try{fn=window.buildLinks||buildLinks}catch(_e){}
   if(typeof fn!=='function')return false;
@@ -227,6 +246,7 @@ function installRenderWrapper(){
     afterRender();
     requestAnimationFrame(afterRender);
     setTimeout(afterRender,45);
+    settleGraph(900);
     return r;
   };
   wrapped.__p154Orientation=true;
@@ -235,7 +255,14 @@ function installRenderWrapper(){
   try{renderGraph=wrapped}catch(_e){}window.renderGraph=wrapped;return true;
 }
 function redraw(){
-  try{const t=$('#tLabels');if(t)t.checked=true;(window.renderGraph||renderGraph)?.()}catch(e){console.warn('P159 redraw',e)}
+  clearTimeout(redrawTimer);
+  redrawTimer=setTimeout(()=>{
+    try{
+      const t=$('#tLabels');if(t)t.checked=true;
+      (window.renderGraph||renderGraph)?.();
+      settleGraph(900);
+    }catch(e){console.warn('P160 redraw',e)}
+  },55);
 }
 function ensureOrientationButton(){
   const modes=$('#p135RedeToolbar .p135-modes');if(!modes)return false;
@@ -265,16 +292,22 @@ function bindModes(){
     syncLegend();
   },true);
 }
+function orientationSignature(snap){
+  try{return snap.docs.map(d=>`${d.id}:${d.updateTime?.toMillis?.()||d.data()?.updatedAt?.toMillis?.()||0}`).sort().join('|')}catch(_e){return String(snap.size||0)}
+}
 function listenOrientations(){
   if(unsubscribe)return;
   try{
     const f=typeof FB==='function'?FB():null;if(!f||!window.db)return;
     const q=f.query(f.collection(window.db,'rede_activities'),f.where('type','==','orientacao'));
     unsubscribe=f.onSnapshot(q,snap=>{
+      const signature=orientationSignature(snap);
       orientationDocs=new Map(snap.docs.map(d=>[d.id,{...d.data(),id:d.id}]));
+      if(signature===lastOrientationSignature){afterRender();return;}
+      lastOrientationSignature=signature;
       redraw();
-    },e=>console.warn('P159 orientação snapshot',e));
-  }catch(e){console.warn('P159 orientação listener',e)}
+    },e=>console.warn('P160 orientação snapshot',e));
+  }catch(e){console.warn('P160 orientação listener',e)}
 }
 function install(){
   ensureLegendCss();
@@ -290,9 +323,9 @@ function install(){
 }
 function boot(){
   install();
-  [220,700,1600].forEach(ms=>setTimeout(install,ms));
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)redraw()});
-  window.addEventListener('pageshow',redraw);
+  setTimeout(install,220);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){afterRender();settleGraph(120)}});
+  window.addEventListener('pageshow',()=>{afterRender();settleGraph(120)});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
