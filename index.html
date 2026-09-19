@@ -14685,5 +14685,168 @@ body.p129-menu-open .p48-compose{
 })();
 </script>
 
+
+
+<!-- P130 · dossiê mobile legível -->
+<style id="p130-dossier-mobile-style">
+/* O dossiê precisa ficar acima da navegação flutuante do app. */
+#dossierOverlay{z-index:2147483635!important}
+body.p130-dossier-open .soft-bottom-nav{display:none!important}
+
+#dossierOverlay .dossier-modal{
+  display:flex!important;
+  flex-direction:column!important;
+  max-height:calc(100dvh - 34px)!important;
+}
+#dossierOverlay .dossier-body{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow:auto!important;
+  -webkit-overflow-scrolling:touch;
+}
+.p130-dossier-explainer{
+  margin:14px 0 0;
+  padding:11px 13px;
+  border:1px solid #d8e8e4;
+  border-radius:14px;
+  background:linear-gradient(135deg,#eef8f5,#f4f7fb);
+  color:#47616a;
+  font-size:11px;
+  line-height:1.45;
+}
+.p130-dossier-explainer b{display:block;color:#173b4b;font-size:11.5px;margin-bottom:3px}
+
+@media(max-width:760px){
+  #dossierOverlay.open{
+    padding:0!important;
+    overflow:hidden!important;
+    align-items:stretch!important;
+    justify-content:stretch!important;
+  }
+  #dossierOverlay .dossier-modal{
+    position:fixed!important;
+    inset:0!important;
+    width:100vw!important;
+    max-width:100vw!important;
+    height:100dvh!important;
+    max-height:100dvh!important;
+    margin:0!important;
+    border-radius:0!important;
+    overflow:hidden!important;
+  }
+  #dossierOverlay .modal-h{
+    position:relative!important;
+    display:block!important;
+    flex:0 0 auto!important;
+    padding:calc(10px + env(safe-area-inset-top)) 10px 10px!important;
+  }
+  #dossierOverlay .modal-h h2{
+    font-size:18px!important;
+    line-height:1.15!important;
+    margin:0 48px 9px 2px!important;
+  }
+  #dossierOverlay .modal-h>.spacer{display:none!important}
+  #dossierOverlay .dossier-toolbar{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:6px!important;
+  }
+  #dossierPerson{
+    grid-column:1/-1!important;
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    height:43px!important;
+    font-size:13px!important;
+  }
+  #dossierOverlay .dossier-toolbar .btn{
+    width:100%!important;
+    min-width:0!important;
+    min-height:40px!important;
+    padding:7px 3px!important;
+    justify-content:center!important;
+    font-size:10.5px!important;
+    white-space:normal!important;
+    line-height:1.1!important;
+  }
+  #dossierPrintBtn{font-size:10px!important}
+  #dossierOverlay .dossier-toolbar [data-close="dossierOverlay"]{
+    position:absolute!important;
+    top:calc(9px + env(safe-area-inset-top))!important;
+    right:10px!important;
+    width:38px!important;
+    min-width:38px!important;
+    height:38px!important;
+    min-height:38px!important;
+    padding:0!important;
+    border-radius:12px!important;
+    font-size:0!important;
+    background:#eef4f3!important;
+    border:1px solid #d8e6e3!important;
+  }
+  #dossierOverlay .dossier-toolbar [data-close="dossierOverlay"]::after{
+    content:'×';
+    font-size:25px;
+    line-height:1;
+    color:#34545c;
+  }
+  #dossierOverlay .dossier-body{
+    padding:10px!important;
+    padding-bottom:calc(22px + env(safe-area-inset-bottom))!important;
+    background:#f2f7f6!important;
+  }
+  #dossierOverlay .dossier-sheet{
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    padding:14px!important;
+    border-radius:18px!important;
+    box-shadow:none!important;
+  }
+  #dossierOverlay .dossier-head{gap:10px!important;align-items:flex-start!important;padding-bottom:13px!important}
+  #dossierOverlay .dossier-avatar{width:50px!important;height:50px!important;min-width:50px!important;border-radius:15px!important}
+  #dossierOverlay .dossier-name{font-size:22px!important;line-height:1.08!important}
+  #dossierOverlay .dossier-meta{font-size:10.5px!important;line-height:1.35!important}
+  #dossierOverlay .dossier-section{margin-top:15px!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+  #dossierOverlay .dossier-section h3{font-size:16px!important;margin-bottom:7px!important}
+  #dossierOverlay .dossier-question{padding:11px 12px!important;font-size:13px!important;border-radius:12px!important}
+  #dossierOverlay .dossier-table{font-size:10.5px!important}
+  #dossierOverlay .dossier-table th,#dossierOverlay .dossier-table td{padding:7px 5px!important}
+  #dossierOverlay .dossier-section:nth-of-type(3) .dossier-table{min-width:570px!important}
+  .p130-dossier-explainer{margin-top:11px!important;font-size:10.5px!important;padding:10px 11px!important}
+}
+</style>
+<script id="p130-dossier-mobile-script">
+(function(){
+  'use strict';
+  function decorate(){
+    const sheet=document.querySelector('#dossierContent .dossier-sheet');
+    if(!sheet||sheet.querySelector('.p130-dossier-explainer'))return;
+    const head=sheet.querySelector('.dossier-head');
+    if(!head)return;
+    const info=document.createElement('div');
+    info.className='p130-dossier-explainer';
+    info.innerHTML='<b>Visão consolidada do Carbonauta</b>Reúne perfil, pergunta científica, identidade do projeto, acompanhamento, produtos, check-ins, itens do repositório e prazos. O Excel traz as tabelas completas.';
+    head.insertAdjacentElement('afterend',info);
+  }
+  function boot(){
+    const ov=document.getElementById('dossierOverlay');
+    const content=document.getElementById('dossierContent');
+    if(!ov)return;
+    const sync=()=>{
+      const open=ov.classList.contains('open');
+      document.body.classList.toggle('p130-dossier-open',open);
+      if(open)requestAnimationFrame(decorate);
+    };
+    sync();
+    new MutationObserver(sync).observe(ov,{attributes:true,attributeFilter:['class']});
+    if(content)new MutationObserver(decorate).observe(content,{childList:true,subtree:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});
+  else boot();
+})();
+</script>
+
 </body>
 </html>
