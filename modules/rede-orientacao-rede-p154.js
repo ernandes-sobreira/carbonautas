@@ -1,6 +1,8 @@
-/* Carbonautas P156 · rede de orientações reais
+/* Carbonautas P159 · rede de orientações reais + legenda visual
    - orientação usa espessura claramente proporcional ao número de registros
-   - produção e orientação têm linguagem visual diferente
+   - produção, projetos, orientação e outros vínculos têm linguagem visual própria
+   - em cada filtro, a cor/traço da linha corresponde ao tipo selecionado
+   - adiciona legenda horizontal da Rede no mobile e desktop
    - reduz observadores e repetições para deixar a Rede mais leve
    Não grava nem altera dados do Firebase. */
 (function(){
@@ -90,41 +92,53 @@ function isProjectLink(d){
   const reasons=d?.reasons||[];
   return reasons.some(r=>/projeto|pesquisa em conjunto|campo em conjunto|experimento em conjunto/.test(norm(r?.label)));
 }
+function resetLineStyle(line){
+  line.style.removeProperty('stroke');
+  line.style.removeProperty('stroke-opacity');
+  line.style.removeProperty('stroke-dasharray');
+  line.style.removeProperty('stroke-width');
+  delete line.dataset.relationVisual;
+  delete line.dataset.orientationCount;
+}
+function styleOrientation(line,d){
+  const n=Math.max(1,Number(d?.orientationCount)||1);
+  line.style.setProperty('stroke','#168f94');
+  line.style.setProperty('stroke-opacity','.92');
+  line.style.setProperty('stroke-dasharray','none');
+  line.style.setProperty('stroke-width',orientationStroke(n)+'px');
+  line.dataset.relationVisual='orientation';
+  line.dataset.orientationCount=String(n);
+}
+function styleProduction(line){
+  line.style.setProperty('stroke','#6c5ce0');
+  line.style.setProperty('stroke-opacity','.82');
+  line.style.setProperty('stroke-dasharray','8 6');
+  line.style.setProperty('stroke-width','2.7px');
+  line.dataset.relationVisual='production';
+}
+function styleProject(line){
+  line.style.setProperty('stroke','#2e9e5b');
+  line.style.setProperty('stroke-opacity','.76');
+  line.style.setProperty('stroke-dasharray','none');
+  line.style.setProperty('stroke-width','2.4px');
+  line.dataset.relationVisual='project';
+}
 function decorateLinkStyles(){
   $$('#graph line.link').forEach(line=>{
     const d=line.__data__||{};
-    line.style.removeProperty('stroke');
-    line.style.removeProperty('stroke-opacity');
-    line.style.removeProperty('stroke-dasharray');
-    line.style.removeProperty('stroke-width');
+    resetLineStyle(line);
+
+    /* Nos filtros específicos, o visual deve representar o filtro escolhido.
+       Isso evita uma ligação de produção continuar verde/azul por carregar
+       metadados de outro vínculo de uma renderização anterior. */
+    if(mode==='orientation'){styleOrientation(line,d);return;}
+    if(mode==='production'){styleProduction(line);return;}
+    if(mode==='projects'){styleProject(line);return;}
+
     const n=Number(d.orientationCount)||0;
-    if(n){
-      line.style.setProperty('stroke','#168f94');
-      line.style.setProperty('stroke-opacity','.92');
-      line.style.setProperty('stroke-dasharray','none');
-      line.style.setProperty('stroke-width',orientationStroke(n)+'px');
-      line.dataset.relationVisual='orientation';
-      line.dataset.orientationCount=String(n);
-      return;
-    }
-    if(isProductionLink(d)){
-      line.style.setProperty('stroke','#6c5ce0');
-      line.style.setProperty('stroke-opacity','.78');
-      line.style.setProperty('stroke-dasharray','8 6');
-      line.style.setProperty('stroke-width','2.5px');
-      line.dataset.relationVisual='production';
-      return;
-    }
-    if(isProjectLink(d)){
-      line.style.setProperty('stroke','#2e9e5b');
-      line.style.setProperty('stroke-opacity','.72');
-      line.style.setProperty('stroke-dasharray','none');
-      line.style.setProperty('stroke-width','2.2px');
-      line.dataset.relationVisual='project';
-      return;
-    }
-    delete line.dataset.relationVisual;
-    delete line.dataset.orientationCount;
+    if(n){styleOrientation(line,d);return;}
+    if(isProductionLink(d)){styleProduction(line);return;}
+    if(isProjectLink(d)){styleProject(line);return;}
   });
 }
 function decorateOrientationView(members){
@@ -139,6 +153,50 @@ function decorateOrientationView(members){
     insight.textContent=`${counts.size} pessoa${counts.size===1?'':'s'} com orientação · ${total} registro${total===1?'':'s'} · linha mais grossa = mais orientações`;
   }
 }
+
+function ensureLegendCss(){
+  if($('#p158RedeLegendaStyle'))return;
+  const st=document.createElement('style');
+  st.id='p158RedeLegendaStyle';
+  st.textContent=`
+.p158-rede-legend{order:5;flex:1 1 100%;display:flex;align-items:center;gap:8px;overflow-x:auto;padding:2px 0 1px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.p158-rede-legend::-webkit-scrollbar{display:none}
+.p158-legend-label{flex:0 0 auto;font-size:9px;font-weight:900;letter-spacing:.04em;text-transform:uppercase;color:#7a8d94}
+.p158-legend-item{flex:0 0 auto;display:inline-flex;align-items:center;gap:6px;min-height:26px;padding:4px 8px;border:1px solid #e0e9e7;border-radius:999px;background:#fff;color:#506970;font-size:9.5px;font-weight:800;white-space:nowrap}
+.p158-legend-item.on{border-color:#9fcfcb;background:#eef9f8;color:#173f49;box-shadow:inset 0 0 0 1px rgba(22,143,148,.08)}
+.p158-line{display:inline-block;width:28px;height:0;border-top-style:solid;border-radius:999px;flex:0 0 auto}
+.p158-line.orientation{border-top-width:5px;border-top-color:#168f94}
+.p158-line.production{border-top-width:3px;border-top-color:#6c5ce0;border-top-style:dashed}
+.p158-line.projects{border-top-width:3px;border-top-color:#2e9e5b}
+.p158-line.other{border-top-width:2px;border-top-color:#c7d6d6}
+@media(max-width:760px){.p158-rede-legend{gap:6px;padding-bottom:2px}.p158-legend-label{font-size:8.5px}.p158-legend-item{font-size:9px;min-height:25px;padding:4px 7px}.p158-line{width:24px}.p158-line.orientation{border-top-width:5px}}
+`;
+  document.head.appendChild(st);
+}
+function syncLegend(){
+  const legend=$('#p158RedeLegend');if(!legend)return;
+  $$('.p158-legend-item',legend).forEach(el=>el.classList.toggle('on',mode!=='all'&&el.dataset.mode===mode));
+}
+function ensureLegend(){
+  const bar=$('#p135RedeToolbar');if(!bar)return false;
+  let legend=$('#p158RedeLegend');
+  if(!legend){
+    legend=document.createElement('div');
+    legend.id='p158RedeLegend';
+    legend.className='p158-rede-legend';
+    legend.setAttribute('aria-label','Legenda dos tipos de ligação da Rede');
+    legend.innerHTML=`
+      <span class="p158-legend-label">Legenda</span>
+      <span class="p158-legend-item" data-mode="orientation" title="A espessura cresce conforme aumenta o número de orientações registradas"><i class="p158-line orientation"></i>Orientação · grossura = registros</span>
+      <span class="p158-legend-item" data-mode="production"><i class="p158-line production"></i>Produção</span>
+      <span class="p158-legend-item" data-mode="projects"><i class="p158-line projects"></i>Projetos</span>
+      <span class="p158-legend-item" data-mode="other"><i class="p158-line other"></i>Outros vínculos</span>`;
+    bar.appendChild(legend);
+  }
+  syncLegend();
+  return true;
+}
+
 function installBuildWrapper(){
   let fn=null;try{fn=window.buildLinks||buildLinks}catch(_e){}
   if(typeof fn!=='function')return false;
@@ -156,6 +214,8 @@ function afterRender(){
   setNamesVisible();
   decorateLinkStyles();
   decorateOrientationView(activeMembers());
+  ensureLegend();
+  syncLegend();
 }
 function installRenderWrapper(){
   let fn=null;try{fn=window.renderGraph||renderGraph}catch(_e){}
@@ -166,6 +226,7 @@ function installRenderWrapper(){
     const r=fn.apply(this,arguments);
     afterRender();
     requestAnimationFrame(afterRender);
+    setTimeout(afterRender,45);
     return r;
   };
   wrapped.__p154Orientation=true;
@@ -174,7 +235,7 @@ function installRenderWrapper(){
   try{renderGraph=wrapped}catch(_e){}window.renderGraph=wrapped;return true;
 }
 function redraw(){
-  try{const t=$('#tLabels');if(t)t.checked=true;(window.renderGraph||renderGraph)?.()}catch(e){console.warn('P156 redraw',e)}
+  try{const t=$('#tLabels');if(t)t.checked=true;(window.renderGraph||renderGraph)?.()}catch(e){console.warn('P159 redraw',e)}
 }
 function ensureOrientationButton(){
   const modes=$('#p135RedeToolbar .p135-modes');if(!modes)return false;
@@ -185,8 +246,9 @@ function ensureOrientationButton(){
     const all=$('[data-p135-mode="all"]',modes);if(all)all.insertAdjacentElement('afterend',b);else modes.prepend(b);
     b.addEventListener('click',()=>{
       mode='orientation';
+      window.__p135NetworkMode='orientation';
       $$('[data-p135-mode]',modes).forEach(x=>x.classList.remove('on'));
-      b.classList.add('on');redraw();
+      b.classList.add('on');syncLegend();redraw();
     });
   }
   b.classList.toggle('on',mode==='orientation');
@@ -198,7 +260,9 @@ function bindModes(){
   modes.addEventListener('click',e=>{
     const b=e.target.closest?.('[data-p135-mode]');if(!b)return;
     mode=b.dataset.p135Mode||'all';
+    window.__p135NetworkMode=mode;
     $('[data-p154-mode="orientation"]',modes)?.classList.remove('on');
+    syncLegend();
   },true);
 }
 function listenOrientations(){
@@ -209,21 +273,24 @@ function listenOrientations(){
     unsubscribe=f.onSnapshot(q,snap=>{
       orientationDocs=new Map(snap.docs.map(d=>[d.id,{...d.data(),id:d.id}]));
       redraw();
-    },e=>console.warn('P156 orientação snapshot',e));
-  }catch(e){console.warn('P156 orientação listener',e)}
+    },e=>console.warn('P159 orientação snapshot',e));
+  }catch(e){console.warn('P159 orientação listener',e)}
 }
 function install(){
+  ensureLegendCss();
   installBuildWrapper();
   installRenderWrapper();
   ensureOrientationButton();
   bindModes();
+  ensureLegend();
   listenOrientations();
   setNamesVisible();
   decorateLinkStyles();
+  syncLegend();
 }
 function boot(){
   install();
-  setTimeout(install,220);
+  [220,700,1600].forEach(ms=>setTimeout(install,ms));
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)redraw()});
   window.addEventListener('pageshow',redraw);
 }
