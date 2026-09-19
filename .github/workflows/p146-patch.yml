@@ -1,0 +1,96 @@
+name: P146 simplify repository categories
+on:
+  push:
+    branches: [fix/p146-repository-categories]
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply P146
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          old_opts='''        <select id="pubCategoriaSel">\n          <option value="nota_tecnica">Nota técnica</option>\n          <option value="artigo">Artigo científico</option>\n          <option value="resumo_expandido">Resumo expandido</option>\n          <option value="resumo_simples">Resumo simples</option>\n          <option value="visibilidade">Plano de visibilidade</option>\n          <option value="jogo">Jogo</option>\n          <option value="plataforma">Plataforma</option>\n          <option value="projeto">Projeto</option>\n          <option value="apresentacao">Apresentação</option>\n          <option value="cronograma">Cronograma</option>\n          <option value="relatorio">Relatório</option>\n          <option value="dados">Dados / planilha</option>\n          <option value="outro">Outro</option>\n        </select>'''
+          new_opts='''        <select id="pubCategoriaSel">\n          <option value="apresentacao">Apresentação</option>\n          <option value="artigo">Artigo científico</option>\n          <option value="cronograma">Cronograma</option>\n          <option value="dados">Dados / planilha</option>\n          <option value="jogos_plataformas">Jogos e plataformas</option>\n          <option value="livros_capitulos">Livros e capítulos</option>\n          <option value="nota_tecnica">Nota técnica</option>\n          <option value="outro">Outro</option>\n          <option value="visibilidade">Plano de visibilidade</option>\n          <option value="projetos_relatorios">Projetos e relatórios</option>\n          <option value="resumos">Resumos</option>\n          <option value="video">Vídeo</option>\n        </select>'''
+          assert old_opts in s, 'publication category select block not found'
+          s=s.replace(old_opts,new_opts,1)
+
+          pattern=r"const CATEGORIAS = \{.*?\n\};\nconst LAB_CONTEXT_LABELS="
+          m=re.search(pattern,s,re.S)
+          assert m, 'CATEGORIAS block not found'
+          new_block="""const CATEGORIAS = {\n  apresentacao:       {label:'Apresentação',            color:'#6C5CE0'},\n  artigo:             {label:'Artigo científico',       color:'#1E88C7'},\n  cronograma:         {label:'Cronograma',              color:'#E0912E'},\n  dados:              {label:'Dados / planilha',        color:'#1E88C7'},\n  jogos_plataformas:  {label:'Jogos e plataformas',     color:'#D6497A'},\n  livros_capitulos:   {label:'Livros e capítulos',      color:'#8A6A45'},\n  nota_tecnica:       {label:'Nota técnica',            color:'#0E5C63'},\n  outro:              {label:'Outro',                   color:'#7c8b90'},\n  visibilidade:       {label:'Plano de visibilidade',   color:'#E0912E'},\n  projetos_relatorios:{label:'Projetos e relatórios',   color:'#2E9E5B'},\n  resumos:            {label:'Resumos',                 color:'#4F8D63'},\n  video:              {label:'Vídeo',                   color:'#C75A5A'},\n};\nconst REPO_CATEGORY_ALIASES = {\n  resumo_expandido:'resumos', resumo_simples:'resumos', resumo:'resumos',\n  jogo:'jogos_plataformas', plataforma:'jogos_plataformas',\n  projeto:'projetos_relatorios', relatorio:'projetos_relatorios',\n  livro:'livros_capitulos', capitulo:'livros_capitulos'\n};\nfunction repoCategoryKey(key=''){ return REPO_CATEGORY_ALIASES[key]||key||'outro'; }\nconst LAB_CONTEXT_LABELS="""
+          s=s[:m.start()]+new_block+s[m.end():]
+
+          old="Object.entries(CATEGORIAS).map(([k,v])=>`<option value=\"${k}\">${v.label}</option>`).join('');"
+          new="Object.entries(CATEGORIAS).sort((a,b)=>a[1].label.localeCompare(b[1].label,'pt-BR')).map(([k,v])=>`<option value=\"${k}\">${v.label}</option>`).join('');"
+          assert old in s, 'refreshPubFilters categories expression not found'
+          s=s.replace(old,new,1)
+
+          old="if(cat) list=list.filter(p=>p.categoria===cat);"
+          new="if(cat) list=list.filter(p=>repoCategoryKey(p.categoria)===cat);"
+          assert old in s, 'category filter line not found'
+          s=s.replace(old,new,1)
+
+          old="    const cfg=CATEGORIAS[p.categoria]||CATEGORIAS.outro;\n    const catLabel = p.categoria==='outro' && p.categoriaOutro ? p.categoriaOutro : cfg.label;"
+          new="    const normalizedCategory=repoCategoryKey(p.categoria);\n    const cfg=CATEGORIAS[normalizedCategory]||CATEGORIAS.outro;\n    const catLabel = normalizedCategory==='outro' && p.categoriaOutro ? p.categoriaOutro : cfg.label;"
+          assert old in s, 'publication category render block not found'
+          s=s.replace(old,new,1)
+
+          old="kind:(CATEGORIAS[p.categoria]?.label||p.categoriaOutro||p.categoria||'Publicação')"
+          new="kind:(CATEGORIAS[repoCategoryKey(p.categoria)]?.label||p.categoriaOutro||p.categoria||'Publicação')"
+          assert old in s, 'member repository category label not found'
+          s=s.replace(old,new,1)
+
+          old="$('#pubCategoriaSel').value=reviewContext?.categoria||'artigo';"
+          new="$('#pubCategoriaSel').value=repoCategoryKey(reviewContext?.categoria||'artigo');"
+          assert old in s, 'review category assignment not found'
+          s=s.replace(old,new,1)
+
+          old="$('#pubOutroRow').style.display=reviewContext?.categoria==='outro'?'block':'none';"
+          new="$('#pubOutroRow').style.display=repoCategoryKey(reviewContext?.categoria)==='outro'?'block':'none';"
+          assert old in s, 'review outro display line not found'
+          s=s.replace(old,new,1)
+
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validate P146
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          expected=['Apresentação','Artigo científico','Cronograma','Dados / planilha','Jogos e plataformas','Livros e capítulos','Nota técnica','Outro','Plano de visibilidade','Projetos e relatórios','Resumos','Vídeo']
+          pos=[]
+          block=s[s.index('<select id="pubCategoriaSel">'):s.index('</select>',s.index('<select id="pubCategoriaSel">'))]
+          for label in expected:
+              assert label in block, f'missing {label}'
+              pos.append(block.index(label))
+          assert pos==sorted(pos), 'modal categories are not alphabetic'
+          assert 'Resumo expandido</option>' not in block
+          assert 'Resumo simples</option>' not in block
+          assert '<option value="jogo">Jogo</option>' not in block
+          assert '<option value="plataforma">Plataforma</option>' not in block
+          assert '<option value="projeto">Projeto</option>' not in block
+          assert '<option value="relatorio">Relatório</option>' not in block
+          assert "resumo_expandido:'resumos'" in s
+          assert "jogo:'jogos_plataformas'" in s
+          assert "projeto:'projetos_relatorios'" in s
+          assert "livro:'livros_capitulos'" in s
+          assert "repoCategoryKey(p.categoria)===cat" in s
+          assert "CATEGORIAS[repoCategoryKey(p.categoria)]?.label" in s
+          print('P146 validation OK')
+          PY
+          git diff --check
+      - name: Commit P146
+        run: |
+          git config user.name "ernandes-sobreira"
+          git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
+          git add index.html
+          git commit -m "P146: simplificar categorias do repositório" || exit 0
+          git push
