@@ -93,9 +93,10 @@ block=r'''
 })();
 </script>
 '''
-if s.count('</body>')!=1:
-    raise SystemExit('unexpected body close count')
-s=s.replace('</body>',block+'\n</body>',1)
+pos=s.rfind('</body>')
+if pos<0:
+    raise SystemExit('final body close not found')
+s=s[:pos]+block+'\n'+s[pos:]
 
 for rid in ['dashNewTaskBtn','dashAttention','dashHealth','dashProductsAllBtn','dashProducts','dashCheckin']:
     count=s.count(f'id="{rid}"')
