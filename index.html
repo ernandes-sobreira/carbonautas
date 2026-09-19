@@ -1785,7 +1785,7 @@
       <div class="dash-grid">
         <section class="dash-card"><div class="dash-card-head"><div><h3>⚡ Atenção agora</h3><div class="dash-sub">O que merece ação primeiro.</div></div><div class="spacer"></div><button class="btn" id="dashNewTaskBtn">＋ Pendência</button></div><div class="attention-list" id="dashAttention"></div></section>
         <aside style="display:flex;flex-direction:column;gap:14px">
-          <section class="dash-card"><div class="dash-card-head"><div><h3>🚦 Saúde dos projetos</h3><div class="dash-sub">Verde = em dia; amarelo = atenção; vermelho = intervenção.</div></div></div><div id="dashHealth"></div></section>
+          <section class="dash-card p139-health-card" id="dashHealthCard"><div class="dash-card-head p139-health-head" role="button" tabindex="0" aria-expanded="false"><div><h3>🚦 Saúde dos projetos</h3><div class="dash-sub">Verde = em dia; amarelo = atenção; vermelho = intervenção.</div></div><div class="spacer"></div><button class="btn p139-health-toggle" type="button" id="dashHealthToggle" aria-expanded="false">Ver</button></div><div id="dashHealth"></div></section>
           <section class="dash-card"><div class="dash-card-head"><div><h3>🗓 Check-in mensal</h3><div class="dash-sub">Uma fotografia curta do mês.</div></div></div><div id="dashCheckin"></div></section>
           <section class="dash-card"><div class="dash-card-head"><div><h3>🎯 Produtos e entregas</h3><div class="dash-sub">Artigos, relatórios, eventos, plataformas e outros resultados.</div></div><div class="spacer"></div><button class="btn" id="dashProductsAllBtn">Ver</button></div><div id="dashProducts"></div></section>
         </aside>
@@ -6318,6 +6318,37 @@ function exportDossierExcel(){const id=$('#dossierPerson').value,m=memberById(id
 function exportDossierCsv(){const id=$('#dossierPerson').value,m=memberById(id);if(!m)return;const {acts}=dossierRowsFor(m),rows=[['Nome','Tipo','Título','Status','Início','Prazo','Descrição'],...acts.map(a=>[m.nome,ACTIVITY_TYPES[a.type]||a.type,a.title||'',ACTIVITY_STATUS[a.status]||a.status,a.startDate||'',a.dueDate||'',a.description||''])];const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n');const b=new Blob([csv],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.csv`;a.click();URL.revokeObjectURL(u)}
 function exportDossierWord(){const m=memberById($('#dossierPerson').value);if(!m)return;const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Dossiê · ${esc(m.nome)}</title><style>body{font-family:Arial,sans-serif;margin:32px;color:#152b38}h1,h2,h3{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:11pt}td,th{border:1px solid #ddd;padding:7px;text-align:left}.dossier-question{padding:14px;background:#f2efff;border:1px solid #d7cdfa}</style></head><body><h1>Dossiê do Carbonauta</h1>${dossierHTML(m)}
 
+
+<!-- P139 · Saúde dos projetos recolhida por padrão -->
+<style id="p139HealthCollapseStyle">
+#dashHealthCard #dashHealth{display:none!important}
+#dashHealthCard .p139-health-head{margin-bottom:0!important;cursor:pointer;user-select:none;align-items:center!important}
+#dashHealthCard:not(.p139-health-open) .dash-sub{display:none!important}
+#dashHealthCard.p139-health-open #dashHealth{display:block!important}
+#dashHealthCard.p139-health-open .p139-health-head{margin-bottom:12px!important}
+#dashHealthCard .p139-health-toggle{margin-left:auto;min-width:58px;justify-content:center}
+@media(max-width:620px){#dashHealthCard{padding:14px 14px!important}#dashHealthCard .p139-health-head h3{font-size:18px!important;margin:0!important}#dashHealthCard .p139-health-head{min-height:42px!important}#dashHealthCard .p139-health-toggle{padding:7px 10px!important;font-size:11px!important}}
+</style>
+<script id="p139HealthCollapseScript">
+(function(){
+'use strict';
+if(window.__CARBONAUTAS_HEALTH_COLLAPSE_P139)return;
+window.__CARBONAUTAS_HEALTH_COLLAPSE_P139=true;
+function setup(){
+  const card=document.getElementById('dashHealthCard'),head=card?.querySelector('.p139-health-head'),btn=document.getElementById('dashHealthToggle');
+  if(!card||!head||!btn)return false;
+  const setOpen=open=>{card.classList.toggle('p139-health-open',open);head.setAttribute('aria-expanded',String(open));btn.setAttribute('aria-expanded',String(open));btn.textContent=open?'Fechar':'Ver'};
+  setOpen(false);
+  const toggle=()=>setOpen(!card.classList.contains('p139-health-open'));
+  btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();toggle()});
+  head.addEventListener('click',e=>{if(e.target.closest('button'))return;toggle()});
+  head.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('button')){e.preventDefault();toggle()}});
+  return true;
+}
+if(!setup())document.addEventListener('DOMContentLoaded',setup,{once:true});
+window.CARBONAUTAS_HEALTH_COLLAPSE_BUILD='P139';
+})();
+</script>
 
 </body></html>`;const blob=new Blob(['\ufeff',html],{type:'application/msword'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.doc`;a.click();URL.revokeObjectURL(u)}
 function printDossier(){const m=memberById($('#dossierPerson').value);if(!m)return;const w=window.open('','_blank');w.document.write(`<html><head><title>Dossiê · ${esc(m.nome)}</title><style>body{font-family:Arial,sans-serif;margin:30px;color:#152b38}h1,h2,h3{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:12px}td,th{border-bottom:1px solid #ddd;padding:7px;text-align:left}.dossier-question{padding:14px;background:#f2efff;border:1px solid #d7cdfa;border-radius:10px}</style></head><body>${dossierHTML(m)}</body></html>`);w.document.close();setTimeout(()=>w.print(),350)}
