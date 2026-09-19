@@ -1,0 +1,56 @@
+name: Teste P129 mobile anonimo
+
+on:
+  push:
+    branches: [P129-staging]
+    paths: ['.github/workflows/test-p129-mobile.yml']
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preparar navegador
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1
+          npm i playwright-core@1.55.0 >/dev/null 2>&1
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME" || { echo 'Chrome/Chromium nao encontrado no runner'; exit 1; }
+          echo "CHROME=$CHROME" >> "$GITHUB_ENV"
+      - name: Abrir como celular em contexto novo
+        shell: bash
+        run: |
+          cat > /tmp/probe.js <<'NODE'
+          const {chromium}=require('playwright-core');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,executablePath:process.env.CHROME,args:['--no-sandbox']});
+            const context=await browser.newContext({
+              viewport:{width:412,height:915},
+              deviceScaleFactor:2.625,
+              isMobile:true,
+              hasTouch:true,
+              userAgent:'Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36'
+            });
+            const page=await context.newPage();
+            const navs=[];
+            page.on('framenavigated',f=>{if(f===page.mainFrame())navs.push(f.url())});
+            page.on('console',m=>console.log('browser:',m.type(),m.text()));
+            const url='https://ernandes-sobreira.github.io/carbonautas/?p129-mobile-probe='+Date.now();
+            await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
+            await page.waitForTimeout(9000);
+            const out=await page.evaluate(()=>({
+              build:window.CARBONAUTAS_BUILD||null,
+              runtime:window.CARBONAUTAS_RUNTIME_BUILD||null,
+              href:location.href,
+              navType:performance.getEntriesByType('navigation')[0]?.type||null,
+              swControlled:!!navigator.serviceWorker?.controller
+            }));
+            console.log('RESULTADO',JSON.stringify({...out,mainNavigations:navs.length,urls:navs}));
+            if(out.build!=='P129-MENOS-20260919')throw new Error('build inesperada: '+out.build);
+            if(navs.length!==1)throw new Error('a pagina navegou/recarregou sozinha; navegacoes='+navs.length);
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+          node /tmp/probe.js
