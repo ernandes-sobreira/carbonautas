@@ -1,0 +1,64 @@
+style	agenda-soft-p108.css	<style data-src="agenda-soft-p108.css">
+style	lab-run-mobile-p118.css	<style data-src="lab-run-mobile-p118.css">
+script	agenda-deck-p110.js	<script data-src="agenda-deck-p110.js" data-carbonautas-p110-agenda="1">
+script	agenda-swipe-p113.js	<script data-src="agenda-swipe-p113.js" data-carbonautas-p113-swipe="1">
+script	agenda-stable-media-p121.js	<script data-src="agenda-stable-media-p121.js">
+script	agenda-mobile-fit-p120.js	<script data-src="agenda-mobile-fit-p120.js">
+script	agenda-no-flicker-p122.js	<script data-src="agenda-no-flicker-p122.js">
+script	calendar-sync-v4.js	<script data-src="calendar-sync-v4.js">
+script	calendar-duration-v1.js	<script data-src="calendar-duration-v1.js">
+script	notification-fix-v1.js	<script data-src="notification-fix-v1.js">
+script	ui-fixes-p44.js	<script data-src="ui-fixes-p44.js">
+script	academic-periods-p45.js	<script data-src="academic-periods-p45.js">
+script	chat-whatsapp-p46.js	<script data-src="chat-whatsapp-p46.js">
+script	private-repo-p47.js	<script data-src="private-repo-p47.js">
+script	panelinhas-p48.js	<script data-src="panelinhas-p48.js">
+script	tabs-stability-p50.js	<script data-src="tabs-stability-p50.js">
+script	agenda-badge-p51.js	<script data-src="agenda-badge-p51.js">
+script	review-flow-p52.js	<script data-src="review-flow-p52.js">
+script	repository-ui-p54.js	<script data-src="repository-ui-p54.js">
+script	repository-actions-p55.js	<script data-src="repository-actions-p55.js">
+script	dashboard-medals-p56.js	<script data-src="dashboard-medals-p56.js">
+script	mobile-medals-p57.js	<script data-src="mobile-medals-p57.js">
+script	mobile-repo-rescue-p58.js	<script data-src="mobile-repo-rescue-p58.js">
+script	repo-checkin-ui-p59.js	<script data-src="repo-checkin-ui-p59.js">
+script	editor-safe-p62.js	<script data-src="editor-safe-p62.js">
+script	repository-cleanup-p63.js	<script data-src="repository-cleanup-p63.js">
+script	repository-private-chat-p64.js	<script data-src="repository-private-chat-p64.js">
+script	repository-delete-dedupe-p65.js	<script data-src="repository-delete-dedupe-p65.js">
+script	dashboard-action-detail-p66.js	<script data-src="dashboard-action-detail-p66.js">
+script	dashboard-action-target-p67.js	<script data-src="dashboard-action-target-p67.js">
+script	dashboard-clarity-p68.js	<script data-src="dashboard-clarity-p68.js">
+script	dashboard-resolve-flow-p69.js	<script data-src="dashboard-resolve-flow-p69.js">
+script	dashboard-smart-request-p70.js	<script data-src="dashboard-smart-request-p70.js">
+script	dashboard-chat-action-p71.js	<script data-src="dashboard-chat-action-p71.js">
+script	dashboard-direct-chat-p72.js	<script data-src="dashboard-direct-chat-p72.js">
+script	dashboard-native-chat-p73.js	<script data-src="dashboard-native-chat-p73.js">
+script	access-password-admin-p74.js	<script data-src="access-password-admin-p74.js">
+script	dashboard-panel-cleanup-p85.js	<script data-src="dashboard-panel-cleanup-p85.js">
+script	product-simplify-notifications-p78.js	<script data-src="product-simplify-notifications-p78.js">
+script	chat-images-p79.js	<script data-src="chat-images-p79.js">
+script	group-chat-notifications-p80.js	<script data-src="group-chat-notifications-p80.js">
+script	pwa-mobile-fix-p85.js	<script data-src="pwa-mobile-fix-p85.js">
+script	mobile-chat-composer-p85.js	<script data-src="mobile-chat-composer-p85.js">
+script	chat-composer-layout-p86.js	<script data-src="chat-composer-layout-p86.js">
+script	dashboard-render-stability-p87.js	<script data-src="dashboard-render-stability-p87.js">
+script	repository-archive-p88.js	<script data-src="repository-archive-p88.js">
+script	repository-card-table-p90.js	<script data-src="repository-card-table-p90.js">
+script	repository-card-mobile-p91.js	<script data-src="repository-card-mobile-p91.js">
+script	chat-notifications-reactions-p116.js	<script data-src="chat-notifications-reactions-p116.js" id="carbonautasP116Script">
+script	monthly-highlights-p117.js	<script data-src="monthly-highlights-p117.js">
+script	highlight-reactions-p123.js	<script data-src="highlight-reactions-p123.js">
+script	repository-soft-style-p92.js	<script data-src="repository-soft-style-p92.js" data-carbonautas-p92="1">
+script	carbonautas-soft-theme-p93.js	<script data-src="carbonautas-soft-theme-p93.js" data-carbonautas-p97-theme="1">
+script	tracking-folders-p97.js	<script data-src="tracking-folders-p97.js" data-carbonautas-p97-track="1">
+script	chat-stability-p98.js	<script data-src="chat-stability-p98.js" data-carbonautas-p98-chat="1">
+script	private-empty-compact-p99.js	<script data-src="private-empty-compact-p99.js" data-carbonautas-p99-private="1">
+script	chat-mobile-back-p100.js	<script data-src="chat-mobile-back-p100.js" data-carbonautas-p100-back="1">
+script	chat-zap-delight-p101.js	<script data-src="chat-zap-delight-p101.js" data-carbonautas-p101-zap="1">
+script	chat-composer-p102.js	<script data-src="chat-composer-p102.js" data-carbonautas-p102-composer="1">
+script	chat-composer-p103.js	<script data-src="chat-composer-p103.js" data-carbonautas-p103="1">
+style	agenda-deck-p109.css	<style id="agendaDeckP109" data-src="agenda-deck-p109.css">
+style	carbonautas-soft-theme-p93.css	<style id="carbonautasSoftThemeP93" data-src="carbonautas-soft-theme-p93.css">
+style	carbonautas-identity-p94.css	<style id="carbonautasIdentityP94" data-src="carbonautas-identity-p94.css">
+style	carbonautas-entry-p95.css	<style id="carbonautasEntryP95" data-src="carbonautas-entry-p95.css">
