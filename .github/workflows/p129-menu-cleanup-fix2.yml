@@ -1,0 +1,103 @@
+name: P129 corrigir posicao da limpeza de menu
+
+on:
+  push:
+    branches:
+      - P129-menu-cleanup-fix2
+
+permissions:
+  contents: write
+
+jobs:
+  patch-main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Corrigir posicao do hotfix
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          patch = r'''
+          <!-- P129 · interface enxuta: Jogo e Medalhas fora da navegação; dados históricos preservados -->
+          <style id="p129-hide-game-medals-final">
+          .app-nav-card[data-app-view="medalhas"],
+          .app-nav-card[data-app-view="jogo"],
+          .tab[data-view="medalhas"],
+          .tab[data-view="jogo"],
+          #dashMedalsBtn,
+          #dashGameBtn,
+          #viewMedalhas,
+          #viewJogo{display:none!important}
+          </style>
+          <script id="p129-hide-game-medals-final-script">
+          (function(){
+            'use strict';
+            const blocked=new Set(['medalhas','jogo']);
+            function clean(){
+              document.querySelectorAll('.app-nav-card[data-app-view="medalhas"],.app-nav-card[data-app-view="jogo"],.tab[data-view="medalhas"],.tab[data-view="jogo"],#dashMedalsBtn,#dashGameBtn').forEach(el=>el.remove());
+              const v=document.body?.dataset?.view;
+              if(blocked.has(v)&&typeof window.switchView==='function'){
+                try{window.switchView('painel')}catch(_e){}
+              }
+            }
+            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',clean,{once:true});else clean();
+            window.addEventListener('load',clean,{once:true});
+            console.info('Carbonautas P129: Jogo e Medalhas removidos da interface; dados preservados.');
+          })();
+          </script>
+          '''
+
+          # Remove a inserção anterior, que caiu dentro de um template de exportação Word.
+          if patch in s:
+              s = s.replace(patch, '', 1)
+
+          marker = 'p129-hide-game-medals-final'
+          if marker in s:
+              raise SystemExit('ERRO: marcador residual encontrado antes da reinserção.')
+
+          pos = s.rfind('</body>')
+          if pos < 0:
+              raise SystemExit('ERRO: fechamento real </body> não encontrado.')
+
+          s = s[:pos] + patch + '\n' + s[pos:]
+
+          if s.count(marker) != 2:
+              raise SystemExit(f'ERRO: contagem inesperada do marcador: {s.count(marker)}')
+          if s.rfind(marker) < int(len(s) * 0.90):
+              raise SystemExit('ERRO: hotfix não ficou no final do documento.')
+
+          p.write_text(s, encoding='utf-8')
+          print('Hotfix reposicionado corretamente no final do index.html.')
+          PY
+
+      - name: Validar exportacao Word e hotfix final
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          assert 'function exportDossierWord()' in s
+          assert 'p129-hide-game-medals-final' in s
+          assert s.rfind('p129-hide-game-medals-final') > s.rfind('function exportDossierWord()')
+          assert s.rstrip().endswith('</html>')
+          print('Validação estrutural OK.')
+          PY
+
+      - name: Commit e push em main
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'P129: corrigir retirada de jogo e medalhas no final da pagina'
+          git push origin HEAD:main
