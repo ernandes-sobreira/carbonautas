@@ -6,19 +6,47 @@ Plataforma da Rede Carbonautas (LIPAN/LEFA/CELBE, UNEMAT). Arquivo unico `index.
 
 | Caminho | Uso |
 |---|---|
-| `index.html`, `sw.js`, `manifest.webmanifest`, icones | Publicar no GitHub Pages (raiz) |
+| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P126 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
+| `sw.js` | Service worker. So cache e pagina offline. Nao injeta mais nada no HTML |
+| `game.html`, `recovery.html`, `chrome-reset.html`, `manifest.webmanifest`, icones | Publicar junto na raiz |
 | `firestore.rules` | Unica fonte das regras. Publicar no Console do Firebase. Contem tambem as regras de outros sistemas (`projects/`) |
-| `vps/` | Scripts ja aplicados no VPS. Guardados so como referencia e para reinstalacao |
-| `docs-antigos/` | LEIA-ME de patches anteriores (P4 a P24). Historico, nao precisa ler |
+| `index.html.sha512` | Hash da versao publicada (registro INPI). Regerar a cada publicacao |
+| `backups/` | Ponto de restauracao: o repositorio exatamente como estava antes da consolidacao (P126, 19/09/2026) |
+| `vps/` | Scripts ja aplicados no VPS. Referencia e reinstalacao |
+| `docs-antigos/` | LEIA-ME, checklists e copias antigas de regras. Historico |
+
+## Ponto de restauracao
+
+O arquivo `backups/carbonautas-P126-2026-09-19-antes-da-consolidacao.zip` contem a raiz completa anterior (index.html P28 + sw.js P123 + 80 arquivos de patch). Para voltar a ela: apagar a raiz, descompactar o zip na raiz e publicar.
+
+No Git, marcar o commit anterior a este antes de enviar a P127:
+
+```
+git tag -a P126-pre-consolidacao -m "Ultima versao com patches injetados pelo sw.js"
+git push origin P126-pre-consolidacao
+```
+
+Para restaurar por Git: `git checkout P126-pre-consolidacao -- .`
 
 ## Como atualizar
 
-1. Substituir `index.html`, `sw.js` e `manifest.webmanifest` na raiz do GitHub.
-2. Se o CHANGELOG da versao disser "regras", publicar `firestore.rules` no Console.
-3. Se disser "VPS", rodar o script indicado em `vps/` uma vez.
-4. Testar em janela anonima. O service worker limpa o cache antigo sozinho.
+1. Editar `index.html`. Nao criar mais arquivos `*-pNN.js`; a alteracao entra no proprio `index.html`, na camada correspondente ou no codigo base.
+2. Trocar a constante `CACHE` no `sw.js` e o `?v=` do registro do service worker no `index.html` a cada publicacao.
+3. Se a alteracao mexer em regras, publicar `firestore.rules` no Console. Se mexer no VPS, guardar o script em `vps/`.
+4. Testar em janela anonima.
 
 ## CHANGELOG
+
+### P127 · 2026-09-19 · Consolidacao
+- `index.html` passa a conter as 64 camadas (49 scripts e 2 CSS que o `sw.js` injetava, mais 9 scripts e 4 CSS que a camada P91 carregava em cadeia), na mesma ordem de execucao de antes. Primeira visita ja abre a versao completa; nao depende mais do service worker instalar e recarregar a pagina.
+- `sw.js` reduzido a cache e pagina offline.
+- Corrigido erro de sintaxe em `dashboard-clarity-p68.js` (chave faltando na funcao `decorateReview`). Esse arquivo era carregado em producao mas o navegador o descartava inteiro, entao a separacao "Precisa de voce / So acompanhar" do Painel nunca chegou a funcionar. Agora funciona.
+- Removidos 15 arquivos que nenhum caminho carregava: acompanhamento-medalhas-v1, agenda-soft-p107, agenda-stable-media-p119, agenda-swipe-p111, calendar-sync-v2 e v3, chat-notifications-reactions-p124 (identico ao p116), dashboard-panel-cleanup-p77, editor-chat-mobile-p60, editor-mobile-edit-p61, pwa-mobile-fix-p82, repository-card-deck-p89, repository-ui-p53, tabs-stability-p49, tracking-cards-p96. Nenhum deles estava no ar.
+- Removido `app-p28-base.html` (copia identica do `index.html` antigo).
+- Raiz limpa: scripts de VPS em `vps/`, documentos antigos em `docs-antigos/`, copia integral da versao anterior em `backups/`.
+- Nao alterado: regras, VPS, dados, comportamento visual das telas.
+
+
 
 ### P27 · 2026-09-12
 - Agenda reconstruida com tres visoes: Mes (grade com pontos coloridos por tipo, vermelho quando atrasado, toque no dia mostra a lista do dia), Ano (12 mini-meses com intensidade por quantidade, toque abre o mes) e Lista (Atrasado, Hoje, Esta semana, Este mes, Depois, Concluido).
