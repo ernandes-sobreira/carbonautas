@@ -23,6 +23,7 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import textwrap
 
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
@@ -30,41 +31,35 @@ jobs:
           if marker in s:
               raise SystemExit('Hotfix visual P129 já aplicado; nada a fazer.')
 
-          block = r'''
-
-<!-- P129 · menu visual + composer abaixo do menu -->
-<style id="p129-menu-layout-fix">
-/* O menu deve ficar acima de qualquer composer fixo das conversas. */
-#appMenuBackdrop.open{z-index:2147483647!important}
-
-/* Enquanto o menu global está aberto, nenhum campo de conversa pode ficar por cima dele. */
-body.p129-menu-open .p46-compose,
-body.p129-menu-open .private-composer-zone,
-body.p129-menu-open .p48-compose{
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-</style>
-<script id="p129-menu-layout-fix-script">
-(function(){
-  'use strict';
-  function bootP129MenuFix(){
-    const menu=document.getElementById('appMenuBackdrop');
-    if(!menu)return;
-
-    /* Fecha a grade com Ó nóis! largo, usando exatamente o estilo do card hero do repositório. */
-    const mural=document.querySelector('.app-nav-card[data-app-view="mural"]');
-    if(mural)mural.classList.add('app-nav-hero');
-
-    const sync=()=>document.body.classList.toggle('p129-menu-open',menu.classList.contains('open'));
-    sync();
-    new MutationObserver(sync).observe(menu,{attributes:true,attributeFilter:['class']});
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootP129MenuFix,{once:true});
-  else bootP129MenuFix();
-})();
-</script>
-'''
+          block = textwrap.dedent('''
+          
+          <!-- P129 · menu visual + composer abaixo do menu -->
+          <style id="p129-menu-layout-fix">
+          #appMenuBackdrop.open{z-index:2147483647!important}
+          body.p129-menu-open .p46-compose,
+          body.p129-menu-open .private-composer-zone,
+          body.p129-menu-open .p48-compose{
+            visibility:hidden!important;
+            pointer-events:none!important;
+          }
+          </style>
+          <script id="p129-menu-layout-fix-script">
+          (function(){
+            'use strict';
+            function bootP129MenuFix(){
+              const menu=document.getElementById('appMenuBackdrop');
+              if(!menu)return;
+              const mural=document.querySelector('.app-nav-card[data-app-view="mural"]');
+              if(mural)mural.classList.add('app-nav-hero');
+              const sync=()=>document.body.classList.toggle('p129-menu-open',menu.classList.contains('open'));
+              sync();
+              new MutationObserver(sync).observe(menu,{attributes:true,attributeFilter:['class']});
+            }
+            if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootP129MenuFix,{once:true});
+            else bootP129MenuFix();
+          })();
+          </script>
+          ''')
 
           pos = s.rfind('</body>')
           if pos < 0:
