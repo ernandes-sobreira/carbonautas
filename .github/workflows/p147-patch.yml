@@ -9,15 +9,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Patch repository category selectors
+      - name: Patch and record
         run: |
-          perl -0pi -e 's#<option value="cronograma">Cronograma</option>##g' index.html
-          perl -0pi -e 's#Object\.entries\(CATEGORIAS\)\.sort\(#Object.entries(CATEGORIAS).filter(([k])=>k!=="cronograma").sort(#' index.html
-      - name: Commit fix
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          target1='<option value="cronograma">Cronograma</option>'
+          target2='Object.entries(CATEGORIAS).sort('
+          before1=s.count(target1); before2=s.count(target2)
+          s=s.replace(target1,'',1)
+          s=s.replace(target2,"Object.entries(CATEGORIAS).filter(([k])=>k!=='cronograma').sort(",1)
+          after1=s.count(target1); after2=s.count(target2)
+          p.write_text(s,encoding='utf-8')
+          Path('p147-debug.txt').write_text(f'before_option={before1}\nbefore_filter={before2}\nafter_option={after1}\nafter_filter={after2}\nnew_filter={s.count("Object.entries(CATEGORIAS).filter(([k])=>k!==\'cronograma\').sort(")}\n',encoding='utf-8')
+          PY
+      - name: Commit patch and report
         run: |
           git config user.name "ernandes-sobreira"
           git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
-          git add index.html
-          git diff --cached --quiet && exit 1 || true
+          git add index.html p147-debug.txt
           git commit -m "P147: retirar cronograma das opções do repositório"
           git push
