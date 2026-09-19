@@ -1,0 +1,77 @@
+name: Publicar P129 v2
+
+on:
+  push:
+    branches: [P129-staging]
+    paths: ['.github/workflows/publish-p129-v2.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Verificar ponto de partida
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED='68b70a05d7d99ee8819a3c148b7ac731d45120f9'
+          test "$(git rev-parse HEAD)" = "$EXPECTED"
+          git fetch origin refs/tags/P127-pre-P129:refs/tags/P127-pre-P129
+          test "$(git rev-parse 'P127-pre-P129^{}')" = "$EXPECTED"
+
+      - name: Reconstruir P129 auditada
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin P129-staging:refs/remotes/origin/P129-staging
+          : > /tmp/p129-index.patch
+          for n in 01 02 03 04 05 06 07; do git show "origin/P129-staging:.p129/index.patch.part${n}" >> /tmp/p129-index.patch; done
+          : > /tmp/p129-supp.patch
+          for n in 01 02; do git show "origin/P129-staging:.p129/supp.patch.part${n}" >> /tmp/p129-supp.patch; done
+          cp firestore.rules /tmp/firestore.rules.P127
+          find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf -- {} +
+          git checkout HEAD -- .
+          cp /tmp/firestore.rules.P127 firestore.rules
+          git apply --check /tmp/p129-index.patch
+          git apply /tmp/p129-index.patch
+          git apply --check /tmp/p129-supp.patch
+          git apply /tmp/p129-supp.patch
+          git show origin/P129-staging:.p129/P128_lembretes_email.js > vps/P128_lembretes_email.js
+
+      - name: Auditar antes de publicar
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git hash-object index.html)" = 'c79549a7e1b0d29821eb241b6eed1e6a372b3114'
+          test "$(git hash-object README.md)" = '4bf4886d7f2df98f64cd66956f150f857948460a'
+          test "$(git hash-object sw.js)" = '422e0f0ca988b32b3fad7b667fcb312bdb32967b'
+          test "$(git hash-object index.html.sha512)" = '6d23be90413530471cbaa6dfffcc6031dac412c1'
+          test "$(git hash-object vps/P128_ONLYOFFICE_LEVE.txt)" = '6cbcb6d29ef8c10dbbad30dd6be4e6d145888555'
+          test "$(git hash-object vps/P128_lembretes_email.js)" = '348f16ef69bfddc43199db84c16862335532181c'
+          test "$(git hash-object firestore.rules)" = 'b5a6adf7bb8ccab9000f4644a5718ab7a9a26c50'
+          git diff --quiet -- firestore.rules
+          sha512sum -c index.html.sha512
+          test -z "$(find . -maxdepth 1 -type f \( -name '*-p[0-9]*.js' -o -name '*.css' \) -print)"
+          grep -q "window.CARBONAUTAS_BUILD='P129-MENOS-20260919'" index.html
+          grep -q "const hadController=!!navigator.serviceWorker.controller" index.html
+          ! grep -q 'c.navigate' sw.js
+          ! grep -q 'forceRefreshClients' sw.js
+          echo 'AUDITORIA P129 OK'
+
+      - name: Commit e push
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git diff --cached --quiet -- firestore.rules
+          git commit -m 'P129: menos na tela, bibliotecas sob demanda, sem reload na primeira visita'
+          git push origin HEAD:main
