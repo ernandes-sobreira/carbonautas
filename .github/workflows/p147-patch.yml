@@ -45,3 +45,4 @@ jobs:
           git add index.html
           git commit -m "P147: retirar cronograma das opções do repositório" || exit 0
           git push
+# trigger validation
