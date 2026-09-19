@@ -1,0 +1,40 @@
+name: P141 native products collapse
+on:
+  push:
+    branches: [fix/p141-products-native-details]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply native details patch
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='''          <section class="dash-card"><div class="dash-card-head"><div><h3>🎯 Produtos e entregas</h3><div class="dash-sub">Artigos, relatórios, eventos, plataformas e outros resultados.</div></div><div class="spacer"></div><button class="btn" id="dashProductsAllBtn">Ver</button></div><div id="dashProducts"></div></section>'''
+          new='''          <details class="dash-card" id="dashProductsCard"><summary class="dash-card-head" style="cursor:pointer;list-style:none"><div><h3>🎯 Produtos e entregas</h3><div class="dash-sub">Artigos, relatórios, eventos, plataformas e outros resultados.</div></div><div class="spacer"></div><span class="btn">Ver / fechar</span></summary><div id="dashProducts"></div></details>'''
+          if s.count(old)!=1:
+              raise SystemExit(f'expected exactly 1 products block, found {s.count(old)}')
+          s=s.replace(old,new)
+          p.write_text(s,encoding='utf-8')
+      - name: Validate isolated change
+        shell: bash
+        run: |
+          git diff --check
+          grep -q '<details class="dash-card" id="dashProductsCard">' index.html
+          grep -q 'id="dashProducts"' index.html
+          grep -q '<details class="dash-card" id="dashHealthCard">' index.html
+          ! grep -q 'p139HealthCollapseScript' index.html
+      - name: Commit
+        shell: bash
+        run: |
+          git config user.name 'ernandes-sobreira'
+          git config user.email '156730719+ernandes-sobreira@users.noreply.github.com'
+          git add index.html
+          git commit -m 'P141: recolher Produtos e entregas com details nativo'
+          git push
