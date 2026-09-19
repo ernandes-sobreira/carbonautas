@@ -1,5 +1,5 @@
-/* Carbonautas P153 · carregador seguro
-   Mantém o núcleo da Rede intacto e encadeia módulos isolados depois dele. */
+/* Carbonautas P154 · carregador seguro
+   Mantém o núcleo da Rede e aplica a camada de orientação real depois dele. */
 (function(){
 'use strict';
 if(window.__CARBONAUTAS_P135_LOADER)return;
@@ -20,8 +20,8 @@ function load(src,id){
   try{
     await load('./modules/dossier-p133-original.js?v=P133-20260919','carbonautas-dossier-p133-original');
     await load('./p135-rede-acompanhamento.js?v=P135-20260919','carbonautas-p135-rede-acompanhamento');
-    await load('./modules/rede-orientacao-p150.js?v=P153-20260919','carbonautas-rede-orientacao-p150');
-    await load('./modules/rede-orientacao-linhas-p152.js?v=P153-20260919','carbonautas-rede-orientacao-linhas-p152');
+    await load('./modules/rede-orientacao-p150.js?v=P151-20260919','carbonautas-rede-orientacao-p150');
+    await load('./modules/rede-orientacao-rede-p154.js?v=P154-20260919','carbonautas-rede-orientacao-rede-p154');
   }catch(e){console.error('Carbonautas loader',e)}
 })();
 })();

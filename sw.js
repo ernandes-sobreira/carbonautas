@@ -1,7 +1,6 @@
-/* Carbonautas · service worker P134
-   Só faz cache de recursos e página offline. Não recarrega abas ao ativar; a atualização acontece na próxima abertura.
-   Não injeta scripts no HTML: todas as camadas estão dentro do index.html. */
-const CACHE='carbonautas-p134-20260919';
+/* Carbonautas · service worker P154
+   Cache de recursos e página offline. Atualização ocorre na próxima abertura/reload. */
+const CACHE='carbonautas-p154-20260919';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#f6faf9;color:#183844"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
 
 self.addEventListener('install',()=>{self.skipWaiting();});
