@@ -1,0 +1,37 @@
+name: P137 diagnose access roster
+on:
+  push:
+    branches: ["fix/access-collapse-2026-09-19"]
+    paths: [".github/workflows/diag-p137.yml"]
+permissions:
+  contents: write
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/access-collapse-2026-09-19
+      - name: Locate access roster source
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text(encoding='utf-8')
+          pats=['Acessos','Atenção agora','Atencao agora','lastSeen','presence','presenca','acesso','nunca']
+          out=[]
+          for p in pats:
+              out.append('\n===== '+p+' =====\n')
+              for m in list(re.finditer(re.escape(p),s,re.I))[:30]:
+                  a=max(0,m.start()-1800); b=min(len(s),m.end()+2400)
+                  out.append(s[a:b])
+                  out.append('\n---\n')
+          Path('diag-p137.txt').write_text(''.join(out),encoding='utf-8')
+          PY
+      - name: Commit diagnostic
+        run: |
+          git config user.name "ernandes-sobreira"
+          git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
+          git add diag-p137.txt
+          git commit -m "chore: diagnosticar bloco de acessos P137"
+          git push origin HEAD:fix/access-collapse-2026-09-19
