@@ -1,0 +1,51 @@
+name: P144 home order
+on:
+  push:
+    branches:
+      - fix/p144-home-order
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply P144
+        run: python .github/p144_patch.py
+      - name: Validate P144
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "P144 already applied; nothing to commit"
+            exit 0
+          fi
+          git diff --check
+          test "$(git diff --name-only)" = "index.html"
+          grep -q 'id="p144HomeOrderStyle"' index.html
+          grep -q 'id="p144HomeOrderController"' index.html
+          grep -q "function relocateToday(){return}" index.html
+          grep -q "const hero=\$('#viewPainel .dash-hero')" index.html
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text(encoding='utf-8')
+          m=re.search(r'<script id="p144HomeOrderController">(.*?)</script>',s,re.S)
+          if not m: raise SystemExit('P144 script not found')
+          Path('/tmp/p144.js').write_text(m.group(1),encoding='utf-8')
+          for rid in ['dashNewTaskBtn','dashAttention','dashHealth','dashProductsAllBtn','dashProducts','dashCheckin']:
+              c=s.count(f'id="{rid}"')
+              if c!=1: raise SystemExit(f'{rid}: {c}')
+          if 'setInterval' in m.group(1): raise SystemExit('interval forbidden')
+          print('P144 structural validation OK')
+          PY
+          node --check /tmp/p144.js
+      - name: Commit P144
+        shell: bash
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name 'ernandes-sobreira'
+          git config user.email '156730719+ernandes-sobreira@users.noreply.github.com'
+          git add index.html
+          git commit -m 'P144: ordenar capa e recolher resumo de hoje'
+          git push
