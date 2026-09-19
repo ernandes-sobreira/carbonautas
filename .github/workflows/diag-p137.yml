@@ -1,4 +1,4 @@
-name: P137 collapse access roster
+name: P137 repair placement
 on:
   push:
     branches: ["fix/access-collapse-2026-09-19"]
@@ -6,75 +6,54 @@ on:
 permissions:
   contents: write
 jobs:
-  patch:
+  repair:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           ref: fix/access-collapse-2026-09-19
-      - name: Apply P137
+      - name: Move P137 to real body end
         run: |
           python - <<'PY'
           from pathlib import Path
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
-          marker = '<!-- P137 · acessos recolhidos no painel -->'
-          if marker not in s:
-              patch = r'''<!-- P137 · acessos recolhidos no painel -->
-          <style id="p137AccessCollapseStyle">
-          #p128Presence{margin:0 0 10px!important}
-          #p128Presence .p128-head{display:flex!important;align-items:center!important;gap:8px!important;margin:0!important;padding:9px 11px!important;min-height:42px!important;border:1px solid #dfe9e6!important;border-radius:13px!important;background:#f8fbfa!important;cursor:pointer!important;user-select:none!important}
-          #p128Presence .p128-head:before{content:'👥';font-size:13px;line-height:1}
-          #p128Presence .p128-head:after{content:'Ver';margin-left:auto;flex:0 0 auto;color:#0f777b;font-size:10.5px;font-weight:850;padding:4px 8px;border:1px solid #cfe4df;border-radius:999px;background:#fff}
-          #p128Presence .p128-grid{display:none!important;margin-top:7px!important}
-          #p128Presence.p137-access-open .p128-grid{display:grid!important}
-          #p128Presence.p137-access-open .p128-head:after{content:'Fechar'}
-          @media(max-width:620px){#p128Presence .p128-head{padding:8px 9px!important;min-height:40px!important;font-size:12px!important}#p128Presence .p128-head small{font-size:10.5px!important}#p128Presence.p137-access-open .p128-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
-          </style>
-          <script id="p137AccessCollapseScript">
-          (function(){
-          'use strict';
-          if(window.__CARBONAUTAS_ACCESS_COLLAPSE_P137)return;
-          window.__CARBONAUTAS_ACCESS_COLLAPSE_P137=true;
-          document.addEventListener('click',function(e){
-            const head=e.target.closest?.('#p128Presence .p128-head');
-            if(!head)return;
-            const box=head.closest('#p128Presence');
-            if(!box)return;
-            box.classList.toggle('p137-access-open');
-          },true);
-          document.addEventListener('keydown',function(e){
-            if(e.key!=='Enter'&&e.key!==' ')return;
-            const head=e.target.closest?.('#p128Presence .p128-head');
-            if(!head)return;
-            e.preventDefault();
-            head.closest('#p128Presence')?.classList.toggle('p137-access-open');
-          },true);
-          document.addEventListener('focusin',function(e){
-            const head=e.target.closest?.('#p128Presence .p128-head');
-            if(head&&!head.hasAttribute('tabindex'))head.setAttribute('tabindex','0');
-          },true);
-          window.CARBONAUTAS_ACCESS_COLLAPSE_BUILD='P137';
-          })();
-          </script>
-          '''
-              if '</body>' not in s:
-                  raise SystemExit('body end not found')
-              s = s.replace('</body>', patch + '\n</body>', 1)
-              p.write_text(s, encoding='utf-8')
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          marker='<!-- P137 · acessos recolhidos no painel -->'
+          a=s.find(marker)
+          if a<0:
+              raise SystemExit('P137 marker missing')
+          script_end=s.find('</script>',a)
+          if script_end<0:
+              raise SystemExit('P137 script end missing')
+          b=script_end+len('</script>')
+          block=s[a:b]
+          s=s[:a]+s[b:]
+          body_end=s.rfind('</body>')
+          if body_end<0:
+              raise SystemExit('real body end missing')
+          s=s[:body_end]+block+'\n\n'+s[body_end:]
+          p.write_text(s,encoding='utf-8')
           PY
-      - name: Validate P137
+      - name: Validate placement
         run: |
           git diff --check
-          grep -q 'P137 · acessos recolhidos no painel' index.html
-          grep -q '#p128Presence .p128-grid{display:none!important' index.html
-          grep -q 'p137-access-open' index.html
-          grep -q "content:'Ver'" index.html
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          marker='<!-- P137 · acessos recolhidos no painel -->'
+          assert s.count(marker)==1
+          assert s.find(marker)>s.find("window.CARBONAUTAS_DESKTOP_AGENDA_BUILD=BUILD")
+          assert s.find(marker)<s.rfind('</body>')
+          assert '#p128Presence .p128-grid{display:none!important' in s
+          assert "content:'Ver'" in s
+          assert 'p137-access-open' in s
+          print('P137 placement OK')
+          PY
           node -e "const fs=require('fs');const s=fs.readFileSync('index.html','utf8');const m=s.match(/<script id=\"p137AccessCollapseScript\">([\s\S]*?)<\/script>/);if(!m)process.exit(2);new Function(m[1]);console.log('P137 JS OK')"
-      - name: Commit P137
+      - name: Commit repair
         run: |
           git config user.name "ernandes-sobreira"
           git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
           git add index.html
-          git commit -m "P137: recolher acessos no painel principal"
+          git commit -m "P137: posicionar recolhimento de acessos no fim da aplicação"
           git push origin HEAD:fix/access-collapse-2026-09-19
