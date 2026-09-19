@@ -1,0 +1,62 @@
+ async function startSync(){if(started||!window.db||!F()||!window.auth?.currentUser)return;started=true;try{const p=await getProfile();if(!p?.memberId){started=false;return}memberRef=F().doc(window.db,'rede_members',p.memberId);const snap=await F().getDoc(memberRef);if(!snap.exists()){started=false;return}const remote=snap.data()?.[CLOUD_FIELD]?.entries||{};entries=mergeEntries(remote,localAsEntries());applyEntriesToLocal(entries);await writeCloud();unsub?.();unsub=F().onSnapshot(memberRef,s=>{if(!s.exists())return;const r=s.data()?.[CLOUD_FIELD]?.entries||{};const merged=mergeEntries(r,entries);entries=merged;applyEntriesToLocal(entries);if(!same(trimEntries(r),entries))setTimeout(writeCloud,100)},e=>console.warn('P85 painel cloud read',e));wrapActions()}catch(e){started=false;console.warn('P85 iniciar sync',e)}}
+ function waitSync(){if(window.db&&F()&&window.auth?.currentUser)startSync();else setTimeout(waitSync,450)}
+ async function checkUpdate(){if(!('serviceWorker' in navigator))return;try{const reg=await navigator.serviceWorker.getRegistration('./');if(!reg)return;await reg.update();if(reg.waiting)reg.waiting.postMessage('SKIP_WAITING')}catch(e){console.warn('P85 update check',e)}}
+-if('serviceWorker' in navigator){let reloading=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)return;reloading=true;const u=new URL(location.href);u.searchParams.set('build',BUILD);u.searchParams.set('apprefresh',Date.now().toString());location.replace(u.href)});window.addEventListener('focus',()=>{checkUpdate();startSync();polish()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkUpdate();startSync();polish()}});setTimeout(checkUpdate,1000)}
++if('serviceWorker' in navigator){let reloading=false;const hadController=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading||!hadController)return;reloading=true;const u=new URL(location.href);u.searchParams.set('build',BUILD);u.searchParams.set('apprefresh',Date.now().toString());location.replace(u.href)});window.addEventListener('focus',()=>{checkUpdate();startSync();polish()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkUpdate();startSync();polish()}});setTimeout(checkUpdate,1000)}
+ const target=q('#viewPainel')||document.body;new MutationObserver(m=>{if(m.some(x=>x.addedNodes?.length||x.removedNodes?.length))schedule()}).observe(target,{childList:true,subtree:true});
+ canonicalize();ensureStyle();polish();waitSync();setInterval(()=>{wrapActions();reconcileLocal()},2600);
+ window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P85 PC/app unificados e estáveis');
+@@ -13946,6 +13963,229 @@ function boot(){css();refreshTop();labelTools();new MutationObserver(()=>{refres
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+ })();
+ 
++</script>
++<script data-src="p128-simplify.js">
++/* Carbonautas P128 · menos coisas na tela
++   1) Medalhas e pontos saem da interface (os dados continuam no Firestore).
++   2) Check-in com texto sai. Entrar no app já registra presença (rede_members.lastSeenAt).
++   3) Coordenação vê no Painel quem entrou e quando. Só a coordenação.
++   4) Linha do tempo por pessoa dentro de Pessoas (prazos, tarefas, arquivos, fotos, destaques).
++   5) O jogo só carrega quando a tela do jogo é aberta. */
++(function(){
++'use strict';
++if(window.__CARBONAUTAS_P128)return;
++window.__CARBONAUTAS_P128=true;
++const BUILD='P128';
++
++/* ---------- CSS ---------- */
++const css=`
++#dashMedalsBtn,.p56-medal-summary,.p57-usage-head,.p57-usage-body,.p57-usage-grid,.p57-periods,.p57-use-card,.p57-use-chip,.p57-use-break,
++.p59-checkin-bar,.p59-checkin-card{display:none!important}
++#p128Presence{margin:0 0 14px}
++#p128Presence .p128-head{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;font-weight:800;color:#162e39}
++#p128Presence .p128-head small{font-weight:600;color:#71868b}
++#p128Presence .p128-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
++#p128Presence .p128-chip{display:flex;align-items:center;gap:7px;padding:6px 9px;border:1px solid #dfe9e6;border-radius:12px;background:#fff;font-size:12px;min-width:0}
++#p128Presence .p128-chip i{width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:#c9d4d1}
++#p128Presence .p128-chip.hoje i{background:#20b96a}
++#p128Presence .p128-chip.semana i{background:#e0b02e}
++#p128Presence .p128-chip.longe i{background:#e5646f}
++#p128Presence .p128-chip b{font-weight:700;color:#183844;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
++#p128Presence .p128-chip span{color:#71868b;margin-left:auto;white-space:nowrap}
++#p128Timeline{margin-top:14px;padding-top:12px;border-top:1px solid #e3ecea}
++#p128Timeline h4{margin:0 0 8px;font-size:13px;font-weight:800;color:#162e39}
++#p128Timeline ol{list-style:none;margin:0;padding:0 0 0 14px;border-left:2px solid #dfe9e6}
++#p128Timeline li{position:relative;padding:0 0 9px 12px;font-size:12px;line-height:1.35;color:#2d4a52}
++#p128Timeline li:before{content:'';position:absolute;left:-19px;top:5px;width:8px;height:8px;border-radius:50%;background:#168f94}
++#p128Timeline li.over:before{background:#e5646f}
++#p128Timeline li.done:before{background:#20b96a}
++#p128Timeline li time{display:block;font-size:11px;color:#71868b}
++#p128Timeline .p128-more{margin-top:4px;border:1px solid #dfe9e6;background:#fff;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:700;color:#176e6a;cursor:pointer}
++#p128Timeline .p128-empty{font-size:12px;color:#71868b}
++`;
++function ensureCss(){if(document.getElementById('p128Style'))return;const s=document.createElement('style');s.id='p128Style';s.textContent=css;document.head.appendChild(s)}
++
++/* ---------- utilidades seguras ---------- */
++const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
++function me(){try{return typeof myId!=='undefined'?myId:''}catch(_e){return''}}
++function admin(){try{return !!isAdmin}catch(_e){return false}}
++function st(){try{return state||{}}catch(_e){return{}}}
++function ms(v){if(!v)return 0;try{if(typeof v.toMillis==='function')return v.toMillis();if(v.seconds)return v.seconds*1000;if(typeof v==='string'){if(/^\d{4}-\d{2}-\d{2}$/.test(v))return new Date(v+'T12:00:00').getTime();const t=Date.parse(v);return isNaN(t)?0:t}if(typeof v==='number')return v;if(v instanceof Date)return v.getTime()}catch(_e){}return 0}
++function dayIso(d){const x=d||new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')}
++function fmtShort(t){if(!t)return'';return new Date(t).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}
