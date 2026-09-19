@@ -1,0 +1,36 @@
+name: P149 inspect network relations
+on:
+  push:
+    branches: [fix/p149]
+permissions:
+  contents: write
+jobs:
+  inspect:
+    if: github.event.head_commit.message != 'P149 inspect output'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract relevant code
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          pats=['function buildLinks','const buildLinks','let buildLinks','connections','reasons','openMember','saveMember','memberModal','isCoordinator','rede_members','addDoc(','updateDoc(','setDoc(','p135RedeToolbar','p135-rede-toolbar']
+          out=[]
+          for p in pats:
+            out.append('\n### '+p+'\n')
+            start=0; n=0
+            while True:
+              i=s.find(p,start)
+              if i<0 or n>=8: break
+              out.append(f'-- pos={i} --\n'+s[max(0,i-2200):min(len(s),i+5200)]+'\n')
+              start=i+len(p); n+=1
+          Path('p149-inspect.txt').write_text(''.join(out),encoding='utf-8')
+          PY
+      - name: Commit output
+        run: |
+          git config user.name "ernandes-sobreira"
+          git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
+          git add p149-inspect.txt
+          git commit -m "P149 inspect output"
+          git push
