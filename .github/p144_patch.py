@@ -1,5 +1,4 @@
 from pathlib import Path
-import re
 
 p=Path('index.html')
 s=p.read_text(encoding='utf-8')
@@ -97,9 +96,10 @@ if s.count('</body>')!=1:
     raise SystemExit('unexpected body close count')
 s=s.replace('</body>',block+'\n</body>',1)
 
-for rid in ['dashNewTaskBtn','dashAttention','dashHealth','dashProductsAllBtn','dashProducts','dashCheckin','p117Highlights']:
-    if rid!='p117Highlights' and s.count(f'id="{rid}"')!=1:
-        raise SystemExit(f'{rid} id count invalid: {s.count(f"id=\"{rid}\"")}')
+for rid in ['dashNewTaskBtn','dashAttention','dashHealth','dashProductsAllBtn','dashProducts','dashCheckin']:
+    count=s.count(f'id="{rid}"')
+    if count!=1:
+        raise SystemExit(f'{rid} id count invalid: {count}')
 if 'setInterval' in block:
     raise SystemExit('P144 must not add intervals')
 if s.count('id="p144TodayDetails"'):
