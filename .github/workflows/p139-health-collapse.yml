@@ -1,0 +1,44 @@
+name: P139 collapse health section
+on:
+  push:
+    branches: ["fix/p139-health-collapse"]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/p139-health-collapse
+      - name: Apply patch
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='<section class="dash-card"><div class="dash-card-head"><div><h3>🚦 Saúde dos projetos</h3><div class="dash-sub">Verde = em dia; amarelo = atenção; vermelho = intervenção.</div></div></div><div id="dashHealth"></div></section>'
+          new='<section class="dash-card p139-health-card" id="dashHealthCard"><div class="dash-card-head p139-health-head" role="button" tabindex="0" aria-expanded="false"><div><h3>🚦 Saúde dos projetos</h3><div class="dash-sub">Verde = em dia; amarelo = atenção; vermelho = intervenção.</div></div><div class="spacer"></div><button class="btn p139-health-toggle" type="button" id="dashHealthToggle" aria-expanded="false">Ver</button></div><div id="dashHealth"></div></section>'
+          if old not in s:
+              raise SystemExit('P139 health section target not found')
+          s=s.replace(old,new,1)
+          marker='''\n<!-- P139 · Saúde dos projetos recolhida por padrão -->\n<style id="p139HealthCollapseStyle">\n#dashHealthCard #dashHealth{display:none!important}\n#dashHealthCard .p139-health-head{margin-bottom:0!important;cursor:pointer;user-select:none;align-items:center!important}\n#dashHealthCard:not(.p139-health-open) .dash-sub{display:none!important}\n#dashHealthCard.p139-health-open #dashHealth{display:block!important}\n#dashHealthCard.p139-health-open .p139-health-head{margin-bottom:12px!important}\n#dashHealthCard .p139-health-toggle{margin-left:auto;min-width:58px;justify-content:center}\n@media(max-width:620px){#dashHealthCard{padding:14px 14px!important}#dashHealthCard .p139-health-head h3{font-size:18px!important;margin:0!important}#dashHealthCard .p139-health-head{min-height:42px!important}#dashHealthCard .p139-health-toggle{padding:7px 10px!important;font-size:11px!important}}\n</style>\n<script id="p139HealthCollapseScript">\n(function(){\n'use strict';\nif(window.__CARBONAUTAS_HEALTH_COLLAPSE_P139)return;\nwindow.__CARBONAUTAS_HEALTH_COLLAPSE_P139=true;\nfunction setup(){\n  const card=document.getElementById('dashHealthCard'),head=card?.querySelector('.p139-health-head'),btn=document.getElementById('dashHealthToggle');\n  if(!card||!head||!btn)return false;\n  const setOpen=open=>{card.classList.toggle('p139-health-open',open);head.setAttribute('aria-expanded',String(open));btn.setAttribute('aria-expanded',String(open));btn.textContent=open?'Fechar':'Ver'};\n  setOpen(false);\n  const toggle=()=>setOpen(!card.classList.contains('p139-health-open'));\n  btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();toggle()});\n  head.addEventListener('click',e=>{if(e.target.closest('button'))return;toggle()});\n  head.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&!e.target.closest('button')){e.preventDefault();toggle()}});\n  return true;\n}\nif(!setup())document.addEventListener('DOMContentLoaded',setup,{once:true});\nwindow.CARBONAUTAS_HEALTH_COLLAPSE_BUILD='P139';\n})();\n</script>\n'''
+          if 'p139HealthCollapseStyle' in s:
+              raise SystemExit('P139 already present')
+          s=s.replace('\n</body>',marker+'\n</body>',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validate
+        run: |
+          git diff --check
+          grep -q 'id="dashHealthCard"' index.html
+          grep -q 'id="dashHealthToggle"' index.html
+          grep -q 'p139-health-open' index.html
+          grep -q 'CARBONAUTAS_HEALTH_COLLAPSE_BUILD' index.html
+      - name: Commit
+        run: |
+          git config user.name "ernandes-sobreira"
+          git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
+          git add index.html
+          git commit -m "P139: recolher Saúde dos projetos no painel"
+          git push origin HEAD:fix/p139-health-collapse
