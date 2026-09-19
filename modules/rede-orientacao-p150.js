@@ -1,6 +1,6 @@
-/* Carbonautas P151 · acompanhamento acadêmico
+/* Carbonautas P153 · acompanhamento acadêmico
    Todos os membros da Rede são orientados ou coorientados da coordenação.
-   Por isso orientação não é filtro de rede: fica no perfil e no dossiê. */
+   O modo Orientações representa registros reais de acompanhamento, não inferência textual. */
 (function(){
 'use strict';
 if(window.__CARBONAUTAS_P151_ACADEMICO)return;
@@ -20,10 +20,9 @@ function orientationActivities(id){return (S().activities||[]).filter(a=>(a.owne
 function simplifyNetwork(){
   const bar=$('#p135RedeToolbar');
   if(!bar)return;
-  const orient=$('[data-p135-mode="orientation"]',bar),all=$('[data-p135-mode="all"]',bar);
-  if(orient?.classList.contains('on'))all?.click();
-  orient?.remove();
-  const sub=$('.p135-rede-title small',bar);if(sub)sub.textContent='Projetos, produção e outras conexões entre os Carbonautas';
+  const orient=$('[data-p135-mode="orientation"]',bar);
+  if(orient){orient.textContent='Orientações';orient.title='Orientações registradas no acompanhamento acadêmico';}
+  const sub=$('.p135-rede-title small',bar);if(sub)sub.textContent='Projetos, produção e intensidade do acompanhamento acadêmico';
 }
 
 async function setAcademicRole(studentId,role){
@@ -35,7 +34,7 @@ async function setAcademicRole(studentId,role){
     m.vinculoCoordenador=role;
     toastSafe(role==='coorientado'?'Marcado como coorientado.':'Marcado como orientado.');
     decorateDetail();
-  }catch(e){console.error('P151 vínculo acadêmico',e);toastSafe('Não foi possível salvar o vínculo acadêmico.');}
+  }catch(e){console.error('P153 vínculo acadêmico',e);toastSafe('Não foi possível salvar o vínculo acadêmico.');}
 }
 
 function buildSection(studentId){
@@ -93,12 +92,15 @@ function closeModal(){const ov=$('#p151OrientationOverlay');if(ov)ov.hidden=true
 async function saveOrientation(){
   const id=modalId,m=member(id),date=$('#p151Date')?.value||today(),note=($('#p151Note')?.value||'').trim();if(!id||!m)return;if(!note)return toastSafe('Escreva rapidamente o que foi orientado.');
   const btn=$('#p151Save');if(btn){btn.disabled=true;btn.textContent='Salvando…'}
+  const nextCount=orientationActivities(id).length+1;
   try{
     const f=typeof FB==='function'?FB():null;if(!f)throw new Error('Firebase indisponível');
     const ownerUid=(S().users||[]).find(u=>u.memberId===id)?.uid||'',coord=member(my());
     await f.addDoc(f.collection(window.db,'rede_activities'),{ownerId:id,ownerUid,ownerName:m.nome||'',type:'orientacao',status:'concluido',title:`Orientação · ${m.nome||'Carbonauta'}`,description:note,startDate:date,dueDate:date,progress:100,orientadorId:my(),orientadorName:coord?.nome||'',vinculoCoordenador:roleOf(m)||'',updatedAt:f.serverTimestamp(),createdAt:f.serverTimestamp()});
-    toastSafe('Orientação registrada no dossiê.');closeModal();setTimeout(decorateDetail,250);
-  }catch(e){console.error('P151 registro de orientação',e);toastSafe('Não foi possível registrar a orientação.');}
+    window.dispatchEvent(new CustomEvent('carbonautas:orientation-saved',{detail:{memberId:id,count:nextCount}}));
+    toastSafe('Orientação registrada no dossiê.');closeModal();
+    [250,900,2200].forEach(ms=>setTimeout(()=>{decorateDetail();try{(window.renderGraph||renderGraph)?.()}catch(_e){}},ms));
+  }catch(e){console.error('P153 registro de orientação',e);toastSafe('Não foi possível registrar a orientação.');}
   finally{if(btn){btn.disabled=false;btn.textContent='Salvar no dossiê'}}
 }
 
