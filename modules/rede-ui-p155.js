@@ -13,7 +13,7 @@ const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 
 function orientationStroke(n){
   n=Math.max(1,Number(n)||1);
-  return Math.min(3.4,1.35+0.70*Math.sqrt(n));
+  return Math.min(3.8,1.8+0.5*(n-1));
 }
 
 function polishOrientationLines(){
