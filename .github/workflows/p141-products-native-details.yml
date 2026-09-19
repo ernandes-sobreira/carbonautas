@@ -28,7 +28,7 @@ jobs:
           git diff --check
           grep -q '<details class="dash-card" id="dashProductsCard">' index.html
           grep -q 'id="dashProducts"' index.html
-          grep -q '<details class="dash-card" id="dashHealthCard">' index.html
+          grep -q 'p140-health-details' index.html
           ! grep -q 'p139HealthCollapseScript' index.html
       - name: Commit
         shell: bash
