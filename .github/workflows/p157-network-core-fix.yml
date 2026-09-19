@@ -10,7 +10,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Repair network architecture
-        run: python .github/scripts/p157_patch.py
+        run: |
+          python .github/scripts/p157_patch.py
+          python .github/scripts/p157_fix_p135_syntax.py
       - name: Syntax and diff checks
         run: |
           node --check p135-rede-acompanhamento.js
