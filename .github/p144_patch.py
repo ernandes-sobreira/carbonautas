@@ -3,7 +3,8 @@ from pathlib import Path
 p=Path('index.html')
 s=p.read_text(encoding='utf-8')
 if 'p144HomeOrderStyle' in s:
-    raise SystemExit('P144 already applied')
+    print('P144 already applied')
+    raise SystemExit(0)
 
 old_today="function relocateToday(){const hero=q('#viewPainel .dash-hero'),card=q('#p78TodayCard');if(hero&&card&&hero.nextElementSibling!==card)hero.insertAdjacentElement('afterend',card)}"
 new_today="function relocateToday(){return}"
