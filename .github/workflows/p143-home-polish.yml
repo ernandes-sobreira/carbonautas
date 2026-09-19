@@ -1,5 +1,7 @@
 name: P143 home polish
 on:
+  push:
+    branches: [fix/p142-home-command-center]
   workflow_dispatch:
 permissions:
   contents: write
@@ -76,13 +78,17 @@ jobs:
       - name: Validate
         run: |
           git diff --check
-          test "$(git diff --name-only)" = "index.html"
           grep -q '#viewPainel .p142-accordion summary' index.html
           ! grep -q '#viewDashboard .p142-accordion' index.html
-      - name: Commit
+      - name: Commit if changed
         run: |
           git config user.name 'ernandes-sobreira'
           git config user.email '156730719+ernandes-sobreira@users.noreply.github.com'
-          git add index.html
-          git commit -m 'P143: sofisticar capa expansível sem alterar JavaScript'
-          git push
+          if git diff --quiet; then
+            echo 'No changes needed'
+          else
+            test "$(git diff --name-only)" = "index.html"
+            git add index.html
+            git commit -m 'P143: sofisticar capa expansível sem alterar JavaScript'
+            git push
+          fi
