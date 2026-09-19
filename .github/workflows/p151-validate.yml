@@ -9,10 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Syntax check
         run: node --check modules/rede-orientacao-p150.js
       - name: Scope check
         run: |
-          git diff --check HEAD~1 HEAD
+          git diff --check 4ff15ee4220a8b4bbf3907475b3d85920cafac89..HEAD
           grep -q "vinculoCoordenador" modules/rede-orientacao-p150.js
           grep -q "data-p135-mode=\"orientation\"" p135-rede-acompanhamento.js
