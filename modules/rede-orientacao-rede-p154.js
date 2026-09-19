@@ -1,10 +1,11 @@
-/* Carbonautas P160 · rede de orientações reais + legenda visual + grafo estável
-   - orientação usa espessura claramente proporcional ao número de registros
+/* Carbonautas P161 · rede estável + controles alinhados + enquadramento real
+   - orientação usa espessura proporcional ao número de registros
    - produção, projetos, orientação e outros vínculos têm linguagem visual própria
-   - em cada filtro, a cor/traço da linha corresponde ao tipo selecionado
-   - adiciona legenda horizontal da Rede no mobile e desktop
-   - deixa a simulação assentar e depois congela o grafo para não ficar pulando
-   - reduz re-renderizações repetidas
+   - mantém a legenda horizontal da Rede
+   - deixa a simulação assentar e depois congela o grafo
+   - respeita o controle Nomes em vez de reativá-lo à força
+   - alinha Nomes e Vínculos extra dentro de Ajustes
+   - transforma o botão de quatro setas em um enquadramento real da rede
    Não grava nem altera dados do Firebase. */
 (function(){
 'use strict';
@@ -19,6 +20,7 @@ let orientationDocs=new Map();
 let unsubscribe=null;
 let settleTimer=0;
 let redrawTimer=0;
+let fitRetryTimer=0;
 let lastOrientationSignature='';
 
 function S(){try{return window.state||state||{}}catch(_e){return{}}}
@@ -81,11 +83,12 @@ function mergeOrientation(base,members){
 function activeMembers(){
   try{return typeof visibleMembers==='function'?visibleMembers():(S().members||[])}catch(_e){return S().members||[]}
 }
-function setNamesVisible(){
-  const toggle=$('#tLabels');if(toggle)toggle.checked=true;
+function syncNamesVisibility(){
+  const toggle=$('#tLabels');
+  const show=toggle?!!toggle.checked:true;
   $$('#graph g.node').forEach(g=>{
     const d=g.__data__,t=$('text',g);
-    if(t&&d?.nome)t.textContent=d.nome;
+    if(t&&d?.nome)t.textContent=show?d.nome:'';
   });
 }
 function isProductionLink(d){
@@ -172,6 +175,41 @@ function ensureLegendCss(){
 `;
   document.head.appendChild(st);
 }
+function ensureControlCss(){
+  if($('#p161RedeControlsStyle'))return;
+  const st=document.createElement('style');
+  st.id='p161RedeControlsStyle';
+  st.textContent=`
+#p135RedeSettings .graph-controls{
+  box-sizing:border-box!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  align-items:stretch!important;gap:8px!important;padding:9px!important;margin-top:12px!important;width:100%!important
+}
+#p135RedeSettings .graph-controls select{
+  grid-column:1/-1!important;width:100%!important;min-height:42px!important;margin:0!important;padding:0 11px!important;box-sizing:border-box!important
+}
+#p135RedeSettings .graph-controls .toggle{
+  box-sizing:border-box!important;display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  gap:8px!important;width:100%!important;min-width:0!important;min-height:44px!important;margin:0!important;padding:0 10px!important;
+  border:1px solid #dce8e6!important;border-radius:12px!important;background:#f9fcfb!important;color:#385761!important;
+  font-size:12px!important;line-height:1.15!important;font-weight:800!important;white-space:nowrap!important
+}
+#p135RedeSettings .graph-controls .toggle input{
+  flex:0 0 auto!important;width:17px!important;height:17px!important;margin:0!important
+}
+#p135RedeSettings #fitBtn{
+  grid-column:1/-1!important;box-sizing:border-box!important;width:100%!important;min-height:44px!important;margin:0!important;padding:0 12px!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;border-radius:12px!important;font-weight:850!important
+}
+#p135RedeSettings #fitBtn svg{width:17px!important;height:17px!important;flex:0 0 auto!important}
+#p135RedeSettings #fitBtn .p161-fit-label{display:inline!important}
+#p135RedeSettings #fitBtn.p161-fit-ok{background:#edf9f7!important;border-color:#9fd3cd!important;color:#126f73!important}
+@media(max-width:360px){
+  #p135RedeSettings .graph-controls{grid-template-columns:1fr!important}
+  #p135RedeSettings .graph-controls select,#p135RedeSettings #fitBtn{grid-column:1!important}
+}
+`;
+  document.head.appendChild(st);
+}
 function syncLegend(){
   const legend=$('#p158RedeLegend');if(!legend)return;
   $$('.p158-legend-item',legend).forEach(el=>el.classList.toggle('on',mode!=='all'&&el.dataset.mode===mode));
@@ -215,6 +253,69 @@ function settleGraph(delay=900){
     }catch(_e){}
   },delay);
 }
+function currentZoomBehavior(){
+  try{
+    if(window.zoomBehavior)return window.zoomBehavior;
+    if(typeof zoomBehavior!=='undefined')return zoomBehavior;
+  }catch(_e){}
+  return null;
+}
+function fitFeedback(ok){
+  const btn=$('#fitBtn');if(!btn)return;
+  btn.classList.toggle('p161-fit-ok',!!ok);
+  clearTimeout(btn.__p161FeedbackTimer);
+  btn.__p161FeedbackTimer=setTimeout(()=>btn.classList.remove('p161-fit-ok'),850);
+}
+function fitGraphToView(retry=true){
+  const graph=$('#graph'),zoomG=$('#graph g.zoomG');
+  if(!graph||!zoomG)return false;
+  let box=null;
+  try{box=zoomG.getBBox()}catch(_e){}
+  if(!box||!Number.isFinite(box.width)||!Number.isFinite(box.height)||box.width<2||box.height<2){
+    if(retry){
+      clearTimeout(fitRetryTimer);
+      try{(window.renderGraph||renderGraph)?.()}catch(_e){}
+      fitRetryTimer=setTimeout(()=>fitGraphToView(false),180);
+    }
+    return false;
+  }
+  const r=graph.getBoundingClientRect(),W=r.width||600,H=r.height||400,pad=Math.max(24,Math.min(46,Math.min(W,H)*.07));
+  const usableW=Math.max(40,W-pad*2),usableH=Math.max(40,H-pad*2);
+  const scale=Math.max(.35,Math.min(2.4,Math.min(usableW/Math.max(1,box.width),usableH/Math.max(1,box.height))));
+  const cx=box.x+box.width/2,cy=box.y+box.height/2,tx=W/2-scale*cx,ty=H/2-scale*cy;
+  const d3ref=window.d3,zb=currentZoomBehavior();
+  try{
+    if(d3ref&&zb&&d3ref.zoomIdentity){
+      const transform=d3ref.zoomIdentity.translate(tx,ty).scale(scale);
+      const selection=d3ref.select(graph);
+      selection.interrupt();
+      selection.transition().duration(320).call(zb.transform,transform);
+    }else{
+      zoomG.setAttribute('transform',`translate(${tx},${ty}) scale(${scale})`);
+    }
+    settleGraph(0);
+    fitFeedback(true);
+    try{if(typeof toast==='function')toast('Rede enquadrada na tela.')}catch(_e){}
+    return true;
+  }catch(e){
+    console.warn('P161 enquadramento',e);fitFeedback(false);return false;
+  }
+}
+function bindGraphControls(){
+  const btn=$('#fitBtn');
+  if(btn){
+    btn.type='button';
+    btn.title='Enquadrar toda a rede na tela';
+    btn.setAttribute('aria-label','Enquadrar toda a rede na tela');
+    if(!$('.p161-fit-label',btn)){
+      const span=document.createElement('span');span.className='p161-fit-label';span.textContent='Enquadrar rede';btn.appendChild(span);
+    }
+    if(!btn.dataset.p161Bound){
+      btn.dataset.p161Bound='1';
+      btn.onclick=e=>{e.preventDefault();e.stopPropagation();fitGraphToView(true)};
+    }
+  }
+}
 
 function installBuildWrapper(){
   let fn=null;try{fn=window.buildLinks||buildLinks}catch(_e){}
@@ -230,18 +331,18 @@ function installBuildWrapper(){
   try{buildLinks=wrapped}catch(_e){}window.buildLinks=wrapped;return true;
 }
 function afterRender(){
-  setNamesVisible();
+  syncNamesVisibility();
   decorateLinkStyles();
   decorateOrientationView(activeMembers());
   ensureLegend();
   syncLegend();
+  bindGraphControls();
 }
 function installRenderWrapper(){
   let fn=null;try{fn=window.renderGraph||renderGraph}catch(_e){}
   if(typeof fn!=='function')return false;
   if(fn.__p154Orientation)return true;
   const wrapped=function(){
-    const t=$('#tLabels');if(t)t.checked=true;
     const r=fn.apply(this,arguments);
     afterRender();
     requestAnimationFrame(afterRender);
@@ -258,10 +359,9 @@ function redraw(){
   clearTimeout(redrawTimer);
   redrawTimer=setTimeout(()=>{
     try{
-      const t=$('#tLabels');if(t)t.checked=true;
       (window.renderGraph||renderGraph)?.();
       settleGraph(900);
-    }catch(e){console.warn('P160 redraw',e)}
+    }catch(e){console.warn('P161 redraw',e)}
   },55);
 }
 function ensureOrientationButton(){
@@ -306,24 +406,26 @@ function listenOrientations(){
       if(signature===lastOrientationSignature){afterRender();return;}
       lastOrientationSignature=signature;
       redraw();
-    },e=>console.warn('P160 orientação snapshot',e));
-  }catch(e){console.warn('P160 orientação listener',e)}
+    },e=>console.warn('P161 orientação snapshot',e));
+  }catch(e){console.warn('P161 orientação listener',e)}
 }
 function install(){
   ensureLegendCss();
+  ensureControlCss();
   installBuildWrapper();
   installRenderWrapper();
   ensureOrientationButton();
   bindModes();
   ensureLegend();
+  bindGraphControls();
   listenOrientations();
-  setNamesVisible();
+  syncNamesVisibility();
   decorateLinkStyles();
   syncLegend();
 }
 function boot(){
   install();
-  setTimeout(install,220);
+  [220,700].forEach(ms=>setTimeout(()=>{install();bindGraphControls()},ms));
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){afterRender();settleGraph(120)}});
   window.addEventListener('pageshow',()=>{afterRender();settleGraph(120)});
 }
