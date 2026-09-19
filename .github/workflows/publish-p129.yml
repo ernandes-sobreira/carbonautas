@@ -1,4 +1,4 @@
-# retry: 2
+# retry: 3
 name: Publicar P129
 
 on:
@@ -36,13 +36,9 @@ jobs:
           set -euo pipefail
           git fetch origin P129-staging:refs/remotes/origin/P129-staging
           : > /tmp/p129-index.patch
-          for n in 01 02 03 04 05 06 07; do
-            git show "origin/P129-staging:.p129/index.patch.part${n}" >> /tmp/p129-index.patch
-          done
+          for n in 01 02 03 04 05 06 07; do git show "origin/P129-staging:.p129/index.patch.part${n}" >> /tmp/p129-index.patch; done
           : > /tmp/p129-supp.patch
-          for n in 01 02; do
-            git show "origin/P129-staging:.p129/supp.patch.part${n}" >> /tmp/p129-supp.patch
-          done
+          for n in 01 02; do git show "origin/P129-staging:.p129/supp.patch.part${n}" >> /tmp/p129-supp.patch; done
           cp firestore.rules /tmp/firestore.rules.P127
           git hash-object /tmp/firestore.rules.P127 | grep -qx 'b5a6adf7bb8ccab9000f4644a5718ab7a9a26c50'
 
@@ -62,9 +58,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -f index.html
-          test -f sw.js
-          test -f manifest.webmanifest
+          for f in index.html README.md sw.js index.html.sha512 vps/P128_ONLYOFFICE_LEVE.txt vps/P128_lembretes_email.js firestore.rules; do
+            test -f "$f" || { echo "FALTA $f"; exit 1; }
+            echo "$f $(git hash-object "$f")"
+          done
           test "$(git hash-object index.html)" = 'c79549a7e1b0d29821eb241b6eed1e6a372b3114'
           test "$(git hash-object README.md)" = '4bf4886d7f2df98f64cd66956f150f857948460a'
           test "$(git hash-object sw.js)" = '422e0f0ca988b32b3fad7b667fcb312bdb32967b'
@@ -72,9 +69,10 @@ jobs:
           test "$(git hash-object vps/P128_ONLYOFFICE_LEVE.txt)" = '6cbcb6d29ef8c10dbbad30dd6be4e6d145888555'
           test "$(git hash-object vps/P128_lembretes_email.js)" = '348f16ef69bfddc43199db84c16862335532181c'
           test "$(git hash-object firestore.rules)" = 'b5a6adf7bb8ccab9000f4644a5718ab7a9a26c50'
-          git diff --quiet -- firestore.rules
+          git diff --quiet -- firestore.rules || { echo 'firestore.rules teve diff'; git diff -- firestore.rules; exit 1; }
           sha512sum -c index.html.sha512
-          test -z "$(find . -maxdepth 1 -type f \( -name '*-p[0-9]*.js' -o -name '*.css' \) -print)"
+          LOOSE="$(find . -maxdepth 1 -type f \( -name '*-p[0-9]*.js' -o -name '*.css' \) -print)"
+          test -z "$LOOSE" || { echo "arquivos soltos: $LOOSE"; exit 1; }
           grep -q "window.CARBONAUTAS_BUILD='P129-MENOS-20260919'" index.html
           grep -q "const hadController=!!navigator.serviceWorker.controller" index.html
           ! grep -q 'c.navigate' sw.js
