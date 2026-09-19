@@ -1,4 +1,4 @@
-/* Carbonautas P151 · carregador seguro
+/* Carbonautas P152 · carregador seguro
    Mantém o núcleo da Rede intacto e encadeia módulos isolados depois dele. */
 (function(){
 'use strict';
@@ -21,6 +21,7 @@ function load(src,id){
     await load('./modules/dossier-p133-original.js?v=P133-20260919','carbonautas-dossier-p133-original');
     await load('./p135-rede-acompanhamento.js?v=P135-20260919','carbonautas-p135-rede-acompanhamento');
     await load('./modules/rede-orientacao-p150.js?v=P151-20260919','carbonautas-rede-orientacao-p150');
+    await load('./modules/rede-orientacao-linhas-p152.js?v=P152-20260919','carbonautas-rede-orientacao-linhas-p152');
   }catch(e){console.error('Carbonautas loader',e)}
 })();
 })();
