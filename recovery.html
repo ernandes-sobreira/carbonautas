@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Carbonautas · Agenda P125</title>
+<title>Carbonautas · Agenda P126</title>
 <style>html,body{height:100%;margin:0;font-family:system-ui;background:#f6faf9;color:#183844}main{height:100%;display:grid;place-items:center}div{text-align:center;max-width:560px;padding:28px}h1{margin:0 0 10px;font-size:26px}p{color:#60757d;line-height:1.5}.ok{color:#087f5b;font-weight:700}</style>
 </head>
 <body>
-<main><div><h1>Estabilizando a Agenda…</h1><p id="msg">Removendo definitivamente o controlador antigo que fazia o calendário piscar.</p></div></main>
+<main><div><h1>Corrigindo a Agenda na origem…</h1><p id="msg">Impedindo reconstruções do calendário quando os dados não mudaram.</p></div></main>
 <script>
 (async()=>{
   const msg=document.getElementById('msg');
@@ -18,24 +18,24 @@
       await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));
     }
     if('serviceWorker' in navigator){
-      msg.textContent='Limpando scripts antigos da Agenda…';
+      msg.textContent='Limpando cache e recarregando o motor da Agenda…';
       const regs=await navigator.serviceWorker.getRegistrations();
       for(const r of regs){if(r.scope.includes('/carbonautas/')){try{await r.unregister()}catch(_e){}}}
-      await wait(350);
-      const reg=await navigator.serviceWorker.register('./sw.js?agenda=P125&t='+Date.now(),{updateViaCache:'none'});
+      await wait(400);
+      const reg=await navigator.serviceWorker.register('./sw.js?agenda=P126&t='+Date.now(),{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting)reg.waiting.postMessage('SKIP_WAITING');
       const worker=reg.active||reg.waiting||reg.installing;
       if(worker)worker.postMessage('FORCE_REFRESH_ALL');
-      await wait(1300);
+      await wait(1500);
     }
     msg.className='ok';
-    msg.textContent='P125 aplicada: somente o P114 controla posição e swipe da Agenda.';
+    msg.textContent='P126 aplicada: atualizações irrelevantes do Firebase não recriam mais a Agenda.';
   }catch(e){
     console.warn(e);
     msg.textContent='Atualização aplicada. Abrindo o Carbonautas…';
   }
-  setTimeout(()=>location.replace('./?agenda=P125&t='+Date.now()),700);
+  setTimeout(()=>location.replace('./?agenda=P126&t='+Date.now()),800);
 })();
 </script>
 </body>
