@@ -1,0 +1,29 @@
+name: P148 inspect Rede filter trigger
+on:
+  push:
+    branches: [fix/p148-remove-ajustes-rede]
+permissions:
+  contents: write
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract filter trigger context
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          out=[]
+          for needle in ['Filtros da Rede','p145','side', 'p135RedeSettingsBtn']:
+              i=s.find(needle)
+              out.append(f'### {needle}\npos={i}\n'+(s[max(0,i-1400):min(len(s),i+2800)] if i>=0 else 'NOT FOUND'))
+          Path('p148-filter-inspect.txt').write_text('\n\n'.join(out),encoding='utf-8')
+          PY
+      - name: Commit report
+        run: |
+          git config user.name "ernandes-sobreira"
+          git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
+          git add p148-filter-inspect.txt
+          git commit -m "chore: inspect P148 filter trigger" || exit 0
+          git push
