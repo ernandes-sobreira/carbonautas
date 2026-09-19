@@ -1,0 +1,482 @@
+### Ajustes da Rede
+toolbar';bar.innerHTML=`<div class="p135-rede-heading"><b>Rede</b><small>pessoas e relações</small></div><button type="button" class="p135-rede-settings-btn" id="p135RedeSettingsBtn">⚙ Ajustes</button><div class="p135-rede-modes"><button class="p135-rede-mode on" data-p135-mode="all">Todos</button><button class="p135-rede-mode" data-p135-mode="orientacao">Orientação</button><button class="p135-rede-mode" data-p135-mode="projetos">Projetos</button><button class="p135-rede-mode" data-p135-mode="producao">Produção</button></div><div class="p135-rede-insight" id="p135RedeInsight"></div>`;main.before(bar);
+  const search=$('.topbar .search')||$('.search');if(search)bar.insertBefore(search,$('.p135-rede-modes',bar));
+  const modal=document.createElement('div');modal.id='p135RedeSettings';modal.hidden=true;modal.innerHTML=`<section class="p135-settings-sheet"><div class="p135-settings-head"><b>Ajustes da Rede</b><button type="button" class="p135-settings-close" aria-label="Fechar">×</button></div><div id="p135SettingsBody"></div></section>`;document.body.appendChild(modal);const body=$('#p135SettingsBody',modal),side=$('.side',main),controls=$('.graph-controls',wrap);if(side)body.appendChild(side);if(controls)body.appendChild(controls);
+  $('#p135RedeSettingsBtn',bar).onclick=()=>{modal.hidden=false};$('.p135-settings-close',modal).onclick=()=>{modal.hidden=true;requestAnimationFrame(redraw)};modal.addEventListener('click',e=>{if(e.target===modal){modal.hidden=true;requestAnimationFrame(redraw)}});
+  bar.querySelectorAll('[data-p135-mode]').forEach(b=>b.onclick=()=>{window.__p135NetworkMode=b.dataset.p135Mode;bar.querySelectorAll('[data-p135-mode]').forEach(x=>x.classList.toggle('on',x===b));redraw()});
+  requestAnimationFrame(()=>{redraw();try{fitView()}catch(_e){}});
+}
+function boot(){install();if(document.body.dataset.view==='rede')setTimeout(()=>{install();redraw()},80);new MutationObserver(ms=>{if(ms.some(m=>m.type==='attributes'&&m.attributeName==='data-view')&&document.body.dataset.view==='rede')setTimeout(()=>{install();redraw()},60)}).observe(document.body,{attributes:true,attributeFilter:['data-view']});window.addEventListener('resize',()=>{if(document.body.dataset.view==='rede')setTimeout(redraw,100)},{passive:true})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
+
+
+<!-- P136 · Desktop amplo + Agenda funcional e estável -->
+<style id="p136DesktopAgendaStyle">
+@media (min-width:921px){
+  #viewPainel .dash-wrap{
+    max-width:1480px!important;width:calc(100% - 64px)!important;
+    padding:28px 0 80px!important;
+  }
+  #viewPainel .dash-hero{
+    min-height:154px!important;
+
+---
+
+count=1
+
+### ⚙ Ajustes
+ow.__p135NetworkMode||'all';const label={all:'todas as relações',orientacao:'orientação identificada',projetos:'projetos/linhas',producao:'produção identificada'}[mode]||mode;out.textContent=`${members.length} pessoas · ${links.length} conexões · ${label}. Relações sem categoria permanecem em Todos.`}catch(_e){out.textContent='Relações sem categoria permanecem em Todos.'}}
+function redraw(){try{window.renderGraph?.()}catch(_e){try{renderGraph()}catch(_e2){}}setTimeout(insight,80)}
+function install(){const view=$('#viewRede'),main=$('#viewRede .main'),wrap=$('#viewRede .graph-wrap');if(!view||!main||!wrap||$('.p135-rede-toolbar',view))return;
+  const bar=document.createElement('div');bar.className='p135-rede-toolbar';bar.innerHTML=`<div class="p135-rede-heading"><b>Rede</b><small>pessoas e relações</small></div><button type="button" class="p135-rede-settings-btn" id="p135RedeSettingsBtn">⚙ Ajustes</button><div class="p135-rede-modes"><button class="p135-rede-mode on" data-p135-mode="all">Todos</button><button class="p135-rede-mode" data-p135-mode="orientacao">Orientação</button><button class="p135-rede-mode" data-p135-mode="projetos">Projetos</button><button class="p135-rede-mode" data-p135-mode="producao">Produção</button></div><div class="p135-rede-insight" id="p135RedeInsight"></div>`;main.before(bar);
+  const search=$('.topbar .search')||$('.search');if(search)bar.insertBefore(search,$('.p135-rede-modes',bar));
+  const modal=document.createElement('div');modal.id='p135RedeSettings';modal.hidden=true;modal.innerHTML=`<section class="p135-settings-sheet"><div class="p135-settings-head"><b>Ajustes da Rede</b><button type="button" class="p135-settings-close" aria-label="Fechar">×</button></div><div id="p135SettingsBody"></div></section>`;document.body.appendChild(modal);const body=$('#p135SettingsBody',modal),side=$('.side',main),controls=$('.graph-controls',wrap);if(side)body.appendChild(side);if(controls)body.appendChild(controls);
+  $('#p135RedeSettingsBtn',bar).onclick=()=>{modal.hidden=false};$('.p135-settings-close',modal).onclick=()=>{modal.hidden=true;requestAnimationFrame(redraw)};modal.addEventListener('click',e=>{if(e.target===modal){modal.hidden=true;requestAnimationFrame(redraw)}});
+  bar.querySelectorAll('[data-p135-mode]').forEach(b=>b.onclick=()=>{window.__p135NetworkMode=b.dataset.p135Mode;bar.querySelectorAll('[data-p135-mode]').forEach(x=>x.classList.toggle('on',x===b));redraw()});
+  requestAnimationFrame(()=>{redraw();try{fitView()}catch(_e){}});
+}
+function boot(){install();if(document.body.dataset.view==='rede')setTimeout(()=>{install();redraw()},80);new MutationObserver(ms=>{if(ms.some(m=>m.type==='attributes'&&m.attributeName==='d
+
+---
+
+count=1
+
+### p135RedeSettings
+Space Grotesk','Inter',sans-serif;color:#14364a}.p135-rede-heading small{color:#73878f;font-size:10.5px;font-weight:750;white-space:nowrap}
+.p135-rede-toolbar>.search{order:2;flex:1 1 230px;max-width:none;min-width:170px;margin:0}
+.p135-rede-modes{order:3;display:flex;gap:5px;overflow:auto;scrollbar-width:none;flex:1 1 100%}.p135-rede-modes::-webkit-scrollbar{display:none}.p135-rede-mode{border:1px solid #d7e4e2;background:#fff;color:#506b74;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:850;white-space:nowrap}.p135-rede-mode.on{background:#168f94;border-color:#168f94;color:#fff}
+.p135-rede-settings-btn{margin-left:auto;border:1px solid #d5e3e1;background:#fff;color:#244b58;border-radius:12px;padding:8px 10px;font-size:12px;font-weight:850}
+.p135-rede-insight{order:4;flex:1 1 100%;font-size:10.5px;color:#71858d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#p135RedeSettings[hidden]{display:none!important}#p135RedeSettings{position:fixed;inset:0;z-index:2147483300;display:grid;place-items:end;background:rgba(10,31,40,.42);backdrop-filter:blur(5px)}
+.p135-settings-sheet{width:min(430px,100%);max-height:min(82dvh,760px);overflow:auto;background:#fbfefd;border-radius:24px 24px 0 0;border:1px solid #d7e6e3;box-shadow:0 -20px 60px rgba(12,42,52,.22);padding:15px 14px calc(18px + env(safe-area-inset-bottom))}
+.p135-settings-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}.p135-settings-head b{font-size:18px;flex:1}.p135-settings-close{width:38px;height:38px;border:0;border-radius:12px;background:#edf5f3;font-size:20px}
+#p135RedeSettings .side{display:block!important;width:auto!important;flex:auto!important;border:0!important;padding:0!important;overflow:visible!important;background:transparent!important}
+#p135RedeSettings .graph-controls{position:static!important;display:flex!important;margin-top:12px;box-shadow:none!important;background:#fff!important;width:100%;border-radius:15px!important;align-items:center!important}
+.p135-health-reasons{display:flex;flex-direction:column;gap:7px}.p135-health-reason{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:12px;background:#f7faf9;border:1px solid #dfeae8}.p135-health-reason b{font-size:12px;color:#25434e}.p135-health-reason span{font-size:11px;color:#6b7f87;text-align:right}.p135-health-reason.overdue{background:#fff0f2;border-color:#f0cbd2}.p135-health-reason.soon{background:#fff8e9;border-color:#f0ddb0}
+.p135-snapshot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.p135-snapshot>div{border:1px solid #dce8e6;background:#fff;border-radius:14px;padding:10px;min-width:0}.p135-sn
+
+---
+
+p135-rede-heading small{color:#73878f;font-size:10.5px;font-weight:750;white-space:nowrap}
+.p135-rede-toolbar>.search{order:2;flex:1 1 230px;max-width:none;min-width:170px;margin:0}
+.p135-rede-modes{order:3;display:flex;gap:5px;overflow:auto;scrollbar-width:none;flex:1 1 100%}.p135-rede-modes::-webkit-scrollbar{display:none}.p135-rede-mode{border:1px solid #d7e4e2;background:#fff;color:#506b74;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:850;white-space:nowrap}.p135-rede-mode.on{background:#168f94;border-color:#168f94;color:#fff}
+.p135-rede-settings-btn{margin-left:auto;border:1px solid #d5e3e1;background:#fff;color:#244b58;border-radius:12px;padding:8px 10px;font-size:12px;font-weight:850}
+.p135-rede-insight{order:4;flex:1 1 100%;font-size:10.5px;color:#71858d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#p135RedeSettings[hidden]{display:none!important}#p135RedeSettings{position:fixed;inset:0;z-index:2147483300;display:grid;place-items:end;background:rgba(10,31,40,.42);backdrop-filter:blur(5px)}
+.p135-settings-sheet{width:min(430px,100%);max-height:min(82dvh,760px);overflow:auto;background:#fbfefd;border-radius:24px 24px 0 0;border:1px solid #d7e6e3;box-shadow:0 -20px 60px rgba(12,42,52,.22);padding:15px 14px calc(18px + env(safe-area-inset-bottom))}
+.p135-settings-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}.p135-settings-head b{font-size:18px;flex:1}.p135-settings-close{width:38px;height:38px;border:0;border-radius:12px;background:#edf5f3;font-size:20px}
+#p135RedeSettings .side{display:block!important;width:auto!important;flex:auto!important;border:0!important;padding:0!important;overflow:visible!important;background:transparent!important}
+#p135RedeSettings .graph-controls{position:static!important;display:flex!important;margin-top:12px;box-shadow:none!important;background:#fff!important;width:100%;border-radius:15px!important;align-items:center!important}
+.p135-health-reasons{display:flex;flex-direction:column;gap:7px}.p135-health-reason{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:12px;background:#f7faf9;border:1px solid #dfeae8}.p135-health-reason b{font-size:12px;color:#25434e}.p135-health-reason span{font-size:11px;color:#6b7f87;text-align:right}.p135-health-reason.overdue{background:#fff0f2;border-color:#f0cbd2}.p135-health-reason.soon{background:#fff8e9;border-color:#f0ddb0}
+.p135-snapshot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.p135-snapshot>div{border:1px solid #dce8e6;background:#fff;border-radius:14px;padding:10px;min-width:0}.p135-snapshot span,.p135-snapshot small{display:block;co
+
+---
+
+color:#244b58;border-radius:12px;padding:8px 10px;font-size:12px;font-weight:850}
+.p135-rede-insight{order:4;flex:1 1 100%;font-size:10.5px;color:#71858d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#p135RedeSettings[hidden]{display:none!important}#p135RedeSettings{position:fixed;inset:0;z-index:2147483300;display:grid;place-items:end;background:rgba(10,31,40,.42);backdrop-filter:blur(5px)}
+.p135-settings-sheet{width:min(430px,100%);max-height:min(82dvh,760px);overflow:auto;background:#fbfefd;border-radius:24px 24px 0 0;border:1px solid #d7e6e3;box-shadow:0 -20px 60px rgba(12,42,52,.22);padding:15px 14px calc(18px + env(safe-area-inset-bottom))}
+.p135-settings-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}.p135-settings-head b{font-size:18px;flex:1}.p135-settings-close{width:38px;height:38px;border:0;border-radius:12px;background:#edf5f3;font-size:20px}
+#p135RedeSettings .side{display:block!important;width:auto!important;flex:auto!important;border:0!important;padding:0!important;overflow:visible!important;background:transparent!important}
+#p135RedeSettings .graph-controls{position:static!important;display:flex!important;margin-top:12px;box-shadow:none!important;background:#fff!important;width:100%;border-radius:15px!important;align-items:center!important}
+.p135-health-reasons{display:flex;flex-direction:column;gap:7px}.p135-health-reason{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:12px;background:#f7faf9;border:1px solid #dfeae8}.p135-health-reason b{font-size:12px;color:#25434e}.p135-health-reason span{font-size:11px;color:#6b7f87;text-align:right}.p135-health-reason.overdue{background:#fff0f2;border-color:#f0cbd2}.p135-health-reason.soon{background:#fff8e9;border-color:#f0ddb0}
+.p135-snapshot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.p135-snapshot>div{border:1px solid #dce8e6;background:#fff;border-radius:14px;padding:10px;min-width:0}.p135-snapshot span,.p135-snapshot small{display:block;color:#788b91;font-size:9px;font-weight:750}.p135-snapshot b{display:block;margin:4px 0 3px;color:#21424d;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#viewTrack #p97Folders .p97-toolbar{grid-template-columns:1fr!important}#viewTrack #p97Folders .p97-toolbar .p97-field:not(.person),#viewTrack #p97Folders .p97-sort,#viewTrack #p97Folders .p97-actionline{display:none!important}#viewTrack .p97-summarychips{display:none!important}.p135-folder-reason{flex:1;min-width:0;background:rgba(255,255,255,.74);border:1px solid rgba(80,120,125,.12);border-radius:10px;padding:7px 9px;color:#526b72;font-size:10.5px;font
+
+---
+
+text-overflow:ellipsis}
+#p135RedeSettings[hidden]{display:none!important}#p135RedeSettings{position:fixed;inset:0;z-index:2147483300;display:grid;place-items:end;background:rgba(10,31,40,.42);backdrop-filter:blur(5px)}
+.p135-settings-sheet{width:min(430px,100%);max-height:min(82dvh,760px);overflow:auto;background:#fbfefd;border-radius:24px 24px 0 0;border:1px solid #d7e6e3;box-shadow:0 -20px 60px rgba(12,42,52,.22);padding:15px 14px calc(18px + env(safe-area-inset-bottom))}
+.p135-settings-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}.p135-settings-head b{font-size:18px;flex:1}.p135-settings-close{width:38px;height:38px;border:0;border-radius:12px;background:#edf5f3;font-size:20px}
+#p135RedeSettings .side{display:block!important;width:auto!important;flex:auto!important;border:0!important;padding:0!important;overflow:visible!important;background:transparent!important}
+#p135RedeSettings .graph-controls{position:static!important;display:flex!important;margin-top:12px;box-shadow:none!important;background:#fff!important;width:100%;border-radius:15px!important;align-items:center!important}
+.p135-health-reasons{display:flex;flex-direction:column;gap:7px}.p135-health-reason{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:12px;background:#f7faf9;border:1px solid #dfeae8}.p135-health-reason b{font-size:12px;color:#25434e}.p135-health-reason span{font-size:11px;color:#6b7f87;text-align:right}.p135-health-reason.overdue{background:#fff0f2;border-color:#f0cbd2}.p135-health-reason.soon{background:#fff8e9;border-color:#f0ddb0}
+.p135-snapshot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.p135-snapshot>div{border:1px solid #dce8e6;background:#fff;border-radius:14px;padding:10px;min-width:0}.p135-snapshot span,.p135-snapshot small{display:block;color:#788b91;font-size:9px;font-weight:750}.p135-snapshot b{display:block;margin:4px 0 3px;color:#21424d;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#viewTrack #p97Folders .p97-toolbar{grid-template-columns:1fr!important}#viewTrack #p97Folders .p97-toolbar .p97-field:not(.person),#viewTrack #p97Folders .p97-sort,#viewTrack #p97Folders .p97-actionline{display:none!important}#viewTrack .p97-summarychips{display:none!important}.p135-folder-reason{flex:1;min-width:0;background:rgba(255,255,255,.74);border:1px solid rgba(80,120,125,.12);border-radius:10px;padding:7px 9px;color:#526b72;font-size:10.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:760px){
+  .p135-rede-toolbar{padding:7px 8px}.p135-rede-heading{flex:1}.p135-rede-heading b{font-size
+
+---
+
+s):[];const mode=window.__p135NetworkMode||'all';const label={all:'todas as relações',orientacao:'orientação identificada',projetos:'projetos/linhas',producao:'produção identificada'}[mode]||mode;out.textContent=`${members.length} pessoas · ${links.length} conexões · ${label}. Relações sem categoria permanecem em Todos.`}catch(_e){out.textContent='Relações sem categoria permanecem em Todos.'}}
+function redraw(){try{window.renderGraph?.()}catch(_e){try{renderGraph()}catch(_e2){}}setTimeout(insight,80)}
+function install(){const view=$('#viewRede'),main=$('#viewRede .main'),wrap=$('#viewRede .graph-wrap');if(!view||!main||!wrap||$('.p135-rede-toolbar',view))return;
+  const bar=document.createElement('div');bar.className='p135-rede-toolbar';bar.innerHTML=`<div class="p135-rede-heading"><b>Rede</b><small>pessoas e relações</small></div><button type="button" class="p135-rede-settings-btn" id="p135RedeSettingsBtn">⚙ Ajustes</button><div class="p135-rede-modes"><button class="p135-rede-mode on" data-p135-mode="all">Todos</button><button class="p135-rede-mode" data-p135-mode="orientacao">Orientação</button><button class="p135-rede-mode" data-p135-mode="projetos">Projetos</button><button class="p135-rede-mode" data-p135-mode="producao">Produção</button></div><div class="p135-rede-insight" id="p135RedeInsight"></div>`;main.before(bar);
+  const search=$('.topbar .search')||$('.search');if(search)bar.insertBefore(search,$('.p135-rede-modes',bar));
+  const modal=document.createElement('div');modal.id='p135RedeSettings';modal.hidden=true;modal.innerHTML=`<section class="p135-settings-sheet"><div class="p135-settings-head"><b>Ajustes da Rede</b><button type="button" class="p135-settings-close" aria-label="Fechar">×</button></div><div id="p135SettingsBody"></div></section>`;document.body.appendChild(modal);const body=$('#p135SettingsBody',modal),side=$('.side',main),controls=$('.graph-controls',wrap);if(side)body.appendChild(side);if(controls)body.appendChild(controls);
+  $('#p135RedeSettingsBtn',bar).onclick=()=>{modal.hidden=false};$('.p135-settings-close',modal).onclick=()=>{modal.hidden=true;requestAnimationFrame(redraw)};modal.addEventListener('click',e=>{if(e.target===modal){modal.hidden=true;requestAnimationFrame(redraw)}});
+  bar.querySelectorAll('[data-p135-mode]').forEach(b=>b.onclick=()=>{window.__p135NetworkMode=b.dataset.p135Mode;bar.querySelectorAll('[data-p135-mode]').forEach(x=>x.classList.toggle('on',x===b));redraw()});
+  requestAnimationFrame(()=>{redraw();try{fitView()}catch(_e){}});
+}
+function boot(){install();if(document.body.dataset.view==='rede')setTimeout(()=>{install();redraw()},80);new MutationObserver(ms=>{if(ms.some(m=>m.type==='attributes'&
+
+---
+
+!view||!main||!wrap||$('.p135-rede-toolbar',view))return;
+  const bar=document.createElement('div');bar.className='p135-rede-toolbar';bar.innerHTML=`<div class="p135-rede-heading"><b>Rede</b><small>pessoas e relações</small></div><button type="button" class="p135-rede-settings-btn" id="p135RedeSettingsBtn">⚙ Ajustes</button><div class="p135-rede-modes"><button class="p135-rede-mode on" data-p135-mode="all">Todos</button><button class="p135-rede-mode" data-p135-mode="orientacao">Orientação</button><button class="p135-rede-mode" data-p135-mode="projetos">Projetos</button><button class="p135-rede-mode" data-p135-mode="producao">Produção</button></div><div class="p135-rede-insight" id="p135RedeInsight"></div>`;main.before(bar);
+  const search=$('.topbar .search')||$('.search');if(search)bar.insertBefore(search,$('.p135-rede-modes',bar));
+  const modal=document.createElement('div');modal.id='p135RedeSettings';modal.hidden=true;modal.innerHTML=`<section class="p135-settings-sheet"><div class="p135-settings-head"><b>Ajustes da Rede</b><button type="button" class="p135-settings-close" aria-label="Fechar">×</button></div><div id="p135SettingsBody"></div></section>`;document.body.appendChild(modal);const body=$('#p135SettingsBody',modal),side=$('.side',main),controls=$('.graph-controls',wrap);if(side)body.appendChild(side);if(controls)body.appendChild(controls);
+  $('#p135RedeSettingsBtn',bar).onclick=()=>{modal.hidden=false};$('.p135-settings-close',modal).onclick=()=>{modal.hidden=true;requestAnimationFrame(redraw)};modal.addEventListener('click',e=>{if(e.target===modal){modal.hidden=true;requestAnimationFrame(redraw)}});
+  bar.querySelectorAll('[data-p135-mode]').forEach(b=>b.onclick=()=>{window.__p135NetworkMode=b.dataset.p135Mode;bar.querySelectorAll('[data-p135-mode]').forEach(x=>x.classList.toggle('on',x===b));redraw()});
+  requestAnimationFrame(()=>{redraw();try{fitView()}catch(_e){}});
+}
+function boot(){install();if(document.body.dataset.view==='rede')setTimeout(()=>{install();redraw()},80);new MutationObserver(ms=>{if(ms.some(m=>m.type==='attributes'&&m.attributeName==='data-view')&&document.body.dataset.view==='rede')setTimeout(()=>{install();redraw()},60)}).observe(document.body,{attributes:true,attributeFilter:['data-view']});window.addEventListener('resize',()=>{if(document.body.dataset.view==='rede')setTimeout(redraw,100)},{passive:true})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
+
+
+<!-- P136 · Desktop amplo + Agenda funcional e estável -->
+<style id="p136DesktopAgendaStyle">
+@media (min-width:921px){
+  #viewPainel .dash-wrap{
+    max-width:1480px!important;width:
+
+---
+
+">Orientação</button><button class="p135-rede-mode" data-p135-mode="projetos">Projetos</button><button class="p135-rede-mode" data-p135-mode="producao">Produção</button></div><div class="p135-rede-insight" id="p135RedeInsight"></div>`;main.before(bar);
+  const search=$('.topbar .search')||$('.search');if(search)bar.insertBefore(search,$('.p135-rede-modes',bar));
+  const modal=document.createElement('div');modal.id='p135RedeSettings';modal.hidden=true;modal.innerHTML=`<section class="p135-settings-sheet"><div class="p135-settings-head"><b>Ajustes da Rede</b><button type="button" class="p135-settings-close" aria-label="Fechar">×</button></div><div id="p135SettingsBody"></div></section>`;document.body.appendChild(modal);const body=$('#p135SettingsBody',modal),side=$('.side',main),controls=$('.graph-controls',wrap);if(side)body.appendChild(side);if(controls)body.appendChild(controls);
+  $('#p135RedeSettingsBtn',bar).onclick=()=>{modal.hidden=false};$('.p135-settings-close',modal).onclick=()=>{modal.hidden=true;requestAnimationFrame(redraw)};modal.addEventListener('click',e=>{if(e.target===modal){modal.hidden=true;requestAnimationFrame(redraw)}});
+  bar.querySelectorAll('[data-p135-mode]').forEach(b=>b.onclick=()=>{window.__p135NetworkMode=b.dataset.p135Mode;bar.querySelectorAll('[data-p135-mode]').forEach(x=>x.classList.toggle('on',x===b));redraw()});
+  requestAnimationFrame(()=>{redraw();try{fitView()}catch(_e){}});
+}
+function boot(){install();if(document.body.dataset.view==='rede')setTimeout(()=>{install();redraw()},80);new MutationObserver(ms=>{if(ms.some(m=>m.type==='attributes'&&m.attributeName==='data-view')&&document.body.dataset.view==='rede')setTimeout(()=>{install();redraw()},60)}).observe(document.body,{attributes:true,attributeFilter:['data-view']});window.addEventListener('resize',()=>{if(document.body.dataset.view==='rede')setTimeout(redraw,100)},{passive:true})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
+
+
+<!-- P136 · Desktop amplo + Agenda funcional e estável -->
+<style id="p136DesktopAgendaStyle">
+@media (min-width:921px){
+  #viewPainel .dash-wrap{
+    max-width:1480px!important;width:calc(100% - 64px)!important;
+    padding:28px 0 80px!important;
+  }
+  #viewPainel .dash-hero{
+    min-height:154px!important;display:grid!important;
+    grid-template-columns:minmax(320px,1fr) minmax(600px,1.35fr)!important;
+    align-items:center!important;gap:34px!important;padding:28px 32px!important;
+  }
+  #viewPainel .dash-hero>.spacer{display:none!important}
+  #viewPainel .dash-hero-actions{
+    width:100%!important;display:grid!important;
+    grid-template-columns:repea
+
+---
+
+count=7
+
+### Filtros da Rede
+<div class="p142-body"><div class="p142-body-actions"><button class="btn" id="dashProductsAllBtn">Abrir área completa</button></div><div id="dashProducts"></div></div>
+          </details>
+          <details class="p142-accordion p142-checkin-last">
+            <summary><span class="p142-icon">🗓</span><span class="p142-label"><b>Check-in mensal</b><small>Fechamento rápido do mês.</small></span><span class="p142-toggle"><span class="p142-show">Ver</span><span class="p142-hide">Fechar</span></span></summary>
+            <div class="p142-body"><div id="dashCheckin"></div></div>
+          </details>
+        </section>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ============ VIEW: REDE ============ -->
+  <div class="view" id="viewRede">
+    <div class="stats" id="stats"></div>
+    <button type="button" class="rede-filter-fab" id="redeFiltersBtn" aria-label="Abrir filtros da Rede">⚙️ <span>Filtros da Rede</span></button>
+    <div class="main">
+      <aside class="side" id="side">
+        <div class="side-mobile-head"><div><b>Filtros da Rede</b><small>Refine pessoas e conexões</small></div><button type="button" id="sideCloseBtn" aria-label="Fechar filtros">×</button></div>
+        <div class="block" id="peopleAdminBlock" style="display:none">
+          <h3>Administração da rede</h3>
+          <button class="btn primary" id="managePeopleBtn" style="width:100%;justify-content:center;margin-bottom:8px">Gerenciar alunos</button>
+          <div class="hint">Somente o coordenador pode adicionar ou excluir pessoas.</div>
+        </div>
+        <div class="block">
+          <h3>Nível <span class="hint" style="text-transform:none;letter-spacing:0">(clique para ver só um)</span></h3>
+          <div id="legend"></div>
+        </div>
+        <div class="block">
+          <h3>Linha de pesquisa</h3>
+          <button class="btn ghost" id="manageLinhasBtn" style="width:100%;justify-content:flex-start;padding:6px 8px;margin-bottom:8px;font-size:12.5px;color:var(--agua)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            Gerenciar linhas
+          </button>
+          <div id="linhaFilters"></div>
+        </div>
+        <div class="block">
+          <div class="field-row">
+            <label>Programa</label>
+            <select class="mini" id="fPrograma"><option value="">Todos</option></select>
+          </div>
+          <div class="field-row">
+            <label>Situação</label>
+            <select class="mini" id="fStatus">
+              <option value="">Todas</option>
+              <option value="ativo">Ativo</
+
+---
+
+d="dashProducts"></div></div>
+          </details>
+          <details class="p142-accordion p142-checkin-last">
+            <summary><span class="p142-icon">🗓</span><span class="p142-label"><b>Check-in mensal</b><small>Fechamento rápido do mês.</small></span><span class="p142-toggle"><span class="p142-show">Ver</span><span class="p142-hide">Fechar</span></span></summary>
+            <div class="p142-body"><div id="dashCheckin"></div></div>
+          </details>
+        </section>
+      </div>
+    </div></div>
+  </div>
+
+  <!-- ============ VIEW: REDE ============ -->
+  <div class="view" id="viewRede">
+    <div class="stats" id="stats"></div>
+    <button type="button" class="rede-filter-fab" id="redeFiltersBtn" aria-label="Abrir filtros da Rede">⚙️ <span>Filtros da Rede</span></button>
+    <div class="main">
+      <aside class="side" id="side">
+        <div class="side-mobile-head"><div><b>Filtros da Rede</b><small>Refine pessoas e conexões</small></div><button type="button" id="sideCloseBtn" aria-label="Fechar filtros">×</button></div>
+        <div class="block" id="peopleAdminBlock" style="display:none">
+          <h3>Administração da rede</h3>
+          <button class="btn primary" id="managePeopleBtn" style="width:100%;justify-content:center;margin-bottom:8px">Gerenciar alunos</button>
+          <div class="hint">Somente o coordenador pode adicionar ou excluir pessoas.</div>
+        </div>
+        <div class="block">
+          <h3>Nível <span class="hint" style="text-transform:none;letter-spacing:0">(clique para ver só um)</span></h3>
+          <div id="legend"></div>
+        </div>
+        <div class="block">
+          <h3>Linha de pesquisa</h3>
+          <button class="btn ghost" id="manageLinhasBtn" style="width:100%;justify-content:flex-start;padding:6px 8px;margin-bottom:8px;font-size:12.5px;color:var(--agua)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            Gerenciar linhas
+          </button>
+          <div id="linhaFilters"></div>
+        </div>
+        <div class="block">
+          <div class="field-row">
+            <label>Programa</label>
+            <select class="mini" id="fPrograma"><option value="">Todos</option></select>
+          </div>
+          <div class="field-row">
+            <label>Situação</label>
+            <select class="mini" id="fStatus">
+              <option value="">Todas</option>
+              <option value="ativo">Ativo</option>
+              <option value="egresso">Egresso</option>
+            </select>
+          </div>
+          <span class="link-clear" i
+
+---
+
+count=2
+
+### graph-controls
+    radial-gradient(1200px 600px at 60% -10%,#f4faf9,transparent),
+    var(--white);overflow:hidden}
+  svg.graph{width:100%;height:100%;display:block;cursor:grab}
+  svg.graph:active{cursor:grabbing}
+  .link{stroke:#c7d6d6;stroke-opacity:.55}
+  .link.hl{stroke:var(--petrol);stroke-opacity:.9}
+  .link.aux{stroke:var(--indigo);stroke-opacity:.4;stroke-dasharray:3 3}
+  .link.aux.hl{stroke:var(--indigo);stroke-opacity:.85}
+  .node circle{stroke:#fff;stroke-width:2.5;cursor:pointer;transition:filter .12s}
+  .node.egresso circle{stroke-dasharray:3 2.5}
+  .node.dim{opacity:.16}
+  .node .ring{fill:none;stroke:var(--ink);stroke-width:2.5;opacity:0}
+  .node.sel .ring{opacity:1}
+  .node text{
+    font-family:'Inter';font-size:11px;font-weight:600;fill:var(--ink);pointer-events:none;
+    paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round;
+  }
+  .node text.plat{fill:var(--agua)}
+  .graph-controls{
+    position:absolute;left:14px;bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+    background:rgba(255,255,255,.86);backdrop-filter:blur(6px);border:1px solid var(--line);
+    border-radius:12px;padding:7px 9px;box-shadow:var(--shadow);
+  }
+  .graph-controls select{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px;background:#fff;outline:0}
+  .toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);font-weight:600;padding:6px 8px;border-radius:8px}
+  .toggle input{accent-color:var(--petrol)}
+  .empty-graph{position:absolute;inset:0;display:none;place-items:center;color:var(--ink-3);font-size:14px;text-align:center;padding:30px}
+
+  /* Detail panel */
+  .detail{
+    width:0;flex:0 0 0;border-left:1px solid var(--line);background:var(--white);overflow:hidden;
+    transition:width .22s ease,flex-basis .22s ease;
+  }
+  .detail.open{width:360px;flex:0 0 360px}
+  .detail-inner{width:360px;height:100%;overflow-y:auto;padding:0 0 40px}
+  .dh{position:relative;padding:22px 22px 18px;border-bottom:1px solid var(--line)}
+  .dh .close{position:absolute;top:14px;right:14px}
+  .avatar{
+    width:66px;height:66px;border-radius:18px;object-fit:cover;background:var(--panel);
+    display:grid;place-items:center;font-family:'Fraunces';font-weight:600;font-size:26px;color:#fff;
+    box-shadow:var(--shadow);flex:0 0 auto;
+  }
+  .dh-top{display:flex;gap:14px;align-items:center}
+  .dh h2{font-family:'Fraunces';font-weight:600;font-size:20px;margin:0 0 4px;line-height:1.1;letter-spacing:-.01em}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;color:#fff}
+  .pill.sub{background:var(--panel);color:var(--ink-2)}
+  .pill-row{display
+
+---
+
+opacity:.9}
+  .link.aux{stroke:var(--indigo);stroke-opacity:.4;stroke-dasharray:3 3}
+  .link.aux.hl{stroke:var(--indigo);stroke-opacity:.85}
+  .node circle{stroke:#fff;stroke-width:2.5;cursor:pointer;transition:filter .12s}
+  .node.egresso circle{stroke-dasharray:3 2.5}
+  .node.dim{opacity:.16}
+  .node .ring{fill:none;stroke:var(--ink);stroke-width:2.5;opacity:0}
+  .node.sel .ring{opacity:1}
+  .node text{
+    font-family:'Inter';font-size:11px;font-weight:600;fill:var(--ink);pointer-events:none;
+    paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round;
+  }
+  .node text.plat{fill:var(--agua)}
+  .graph-controls{
+    position:absolute;left:14px;bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+    background:rgba(255,255,255,.86);backdrop-filter:blur(6px);border:1px solid var(--line);
+    border-radius:12px;padding:7px 9px;box-shadow:var(--shadow);
+  }
+  .graph-controls select{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px;background:#fff;outline:0}
+  .toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);font-weight:600;padding:6px 8px;border-radius:8px}
+  .toggle input{accent-color:var(--petrol)}
+  .empty-graph{position:absolute;inset:0;display:none;place-items:center;color:var(--ink-3);font-size:14px;text-align:center;padding:30px}
+
+  /* Detail panel */
+  .detail{
+    width:0;flex:0 0 0;border-left:1px solid var(--line);background:var(--white);overflow:hidden;
+    transition:width .22s ease,flex-basis .22s ease;
+  }
+  .detail.open{width:360px;flex:0 0 360px}
+  .detail-inner{width:360px;height:100%;overflow-y:auto;padding:0 0 40px}
+  .dh{position:relative;padding:22px 22px 18px;border-bottom:1px solid var(--line)}
+  .dh .close{position:absolute;top:14px;right:14px}
+  .avatar{
+    width:66px;height:66px;border-radius:18px;object-fit:cover;background:var(--panel);
+    display:grid;place-items:center;font-family:'Fraunces';font-weight:600;font-size:26px;color:#fff;
+    box-shadow:var(--shadow);flex:0 0 auto;
+  }
+  .dh-top{display:flex;gap:14px;align-items:center}
+  .dh h2{font-family:'Fraunces';font-weight:600;font-size:20px;margin:0 0 4px;line-height:1.1;letter-spacing:-.01em}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;color:#fff}
+  .pill.sub{background:var(--panel);color:var(--ink-2)}
+  .pill-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .dsec{padding:16px 22px;border-bottom:1px solid var(--line-2)}
+  .dsec .lab{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:700;margin-bottom:7px}
+  .dsec p{margin:0;font-size:13.5px;line-
+
+---
+
+Gerenciar linhas
+          </button>
+          <div id="linhaFilters"></div>
+        </div>
+        <div class="block">
+          <div class="field-row">
+            <label>Programa</label>
+            <select class="mini" id="fPrograma"><option value="">Todos</option></select>
+          </div>
+          <div class="field-row">
+            <label>Situação</label>
+            <select class="mini" id="fStatus">
+              <option value="">Todas</option>
+              <option value="ativo">Ativo</option>
+              <option value="egresso">Egresso</option>
+            </select>
+          </div>
+          <span class="link-clear" id="clearFilters">Limpar filtros</span>
+        </div>
+      </aside>
+
+      <div class="graph-wrap">
+        <svg class="graph" id="graph"></svg>
+        <div class="empty-graph" id="emptyGraph">Nenhum membro corresponde aos filtros.</div>
+        <div class="graph-controls">
+          <select id="grouping">
+            <option value="free">Força livre</option>
+            <option value="linha">Agrupar por linha</option>
+            <option value="nivel">Agrupar por nível</option>
+          </select>
+          <label class="toggle"><input type="checkbox" id="tLabels" checked> Nomes</label>
+          <label class="toggle" title="Vínculos organizacionais e hub, além de linhas de pesquisa compartilhadas"><input type="checkbox" id="tHubLinks" checked> Vínculos extra</label>
+          <button class="btn ghost" id="fitBtn" title="Recentralizar" style="padding:6px 9px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <aside class="detail" id="detail"><div class="detail-inner" id="detailInner"></div></aside>
+    </div>
+  </div>
+
+  <!-- ============ VIEW: CRONOGRAMA ============ -->
+  <div class="view" id="viewCrono">
+    <div class="crono-scroll">
+      <div class="crono-wrap">
+        <div class="ag-head">
+          <div class="ag-nav">
+            <button class="ag-arrow" id="agPrev" type="button" aria-label="Anterior">‹</button>
+            <button class="ag-title" id="agTitle" type="button" title="Ir para hoje">Agenda</button>
+            <button class="ag-arrow" id="agNext" type="button" aria-label="Próximo">›</button>
+          </div>
+          <div class="spacer"></div>
+          <div class="ag-modes" id="agModes">
+            <button type="button" data-ag-mode="mes" class="on">Mês</button>
+            <button type="button" data-ag-mode="ano">Ano</button>
+            <button type="button" data-ag-mode="lista">Lista</button>
+          </div>
+     
+
+---
+
+psis}
+#p135RedeSettings[hidden]{display:none!important}#p135RedeSettings{position:fixed;inset:0;z-index:2147483300;display:grid;place-items:end;background:rgba(10,31,40,.42);backdrop-filter:blur(5px)}
+.p135-settings-sheet{width:min(430px,100%);max-height:min(82dvh,760px);overflow:auto;background:#fbfefd;border-radius:24px 24px 0 0;border:1px solid #d7e6e3;box-shadow:0 -20px 60px rgba(12,42,52,.22);padding:15px 14px calc(18px + env(safe-area-inset-bottom))}
+.p135-settings-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}.p135-settings-head b{font-size:18px;flex:1}.p135-settings-close{width:38px;height:38px;border:0;border-radius:12px;background:#edf5f3;font-size:20px}
+#p135RedeSettings .side{display:block!important;width:auto!important;flex:auto!important;border:0!important;padding:0!important;overflow:visible!important;background:transparent!important}
+#p135RedeSettings .graph-controls{position:static!important;display:flex!important;margin-top:12px;box-shadow:none!important;background:#fff!important;width:100%;border-radius:15px!important;align-items:center!important}
+.p135-health-reasons{display:flex;flex-direction:column;gap:7px}.p135-health-reason{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 10px;border-radius:12px;background:#f7faf9;border:1px solid #dfeae8}.p135-health-reason b{font-size:12px;color:#25434e}.p135-health-reason span{font-size:11px;color:#6b7f87;text-align:right}.p135-health-reason.overdue{background:#fff0f2;border-color:#f0cbd2}.p135-health-reason.soon{background:#fff8e9;border-color:#f0ddb0}
+.p135-snapshot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.p135-snapshot>div{border:1px solid #dce8e6;background:#fff;border-radius:14px;padding:10px;min-width:0}.p135-snapshot span,.p135-snapshot small{display:block;color:#788b91;font-size:9px;font-weight:750}.p135-snapshot b{display:block;margin:4px 0 3px;color:#21424d;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#viewTrack #p97Folders .p97-toolbar{grid-template-columns:1fr!important}#viewTrack #p97Folders .p97-toolbar .p97-field:not(.person),#viewTrack #p97Folders .p97-sort,#viewTrack #p97Folders .p97-actionline{display:none!important}#viewTrack .p97-summarychips{display:none!important}.p135-folder-reason{flex:1;min-width:0;background:rgba(255,255,255,.74);border:1px solid rgba(80,120,125,.12);border-radius:10px;padding:7px 9px;color:#526b72;font-size:10.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:760px){
+  .p135-rede-toolbar{padding:7px 8px}.p135-rede-heading{flex:1}.p135-rede-heading b{font-size:20px}.p135-rede-h
+
+---
+
+de on" data-p135-mode="all">Todos</button><button class="p135-rede-mode" data-p135-mode="orientacao">Orientação</button><button class="p135-rede-mode" data-p135-mode="projetos">Projetos</button><button class="p135-rede-mode" data-p135-mode="producao">Produção</button></div><div class="p135-rede-insight" id="p135RedeInsight"></div>`;main.before(bar);
+  const search=$('.topbar .search')||$('.search');if(search)bar.insertBefore(search,$('.p135-rede-modes',bar));
+  const modal=document.createElement('div');modal.id='p135RedeSettings';modal.hidden=true;modal.innerHTML=`<section class="p135-settings-sheet"><div class="p135-settings-head"><b>Ajustes da Rede</b><button type="button" class="p135-settings-close" aria-label="Fechar">×</button></div><div id="p135SettingsBody"></div></section>`;document.body.appendChild(modal);const body=$('#p135SettingsBody',modal),side=$('.side',main),controls=$('.graph-controls',wrap);if(side)body.appendChild(side);if(controls)body.appendChild(controls);
+  $('#p135RedeSettingsBtn',bar).onclick=()=>{modal.hidden=false};$('.p135-settings-close',modal).onclick=()=>{modal.hidden=true;requestAnimationFrame(redraw)};modal.addEventListener('click',e=>{if(e.target===modal){modal.hidden=true;requestAnimationFrame(redraw)}});
+  bar.querySelectorAll('[data-p135-mode]').forEach(b=>b.onclick=()=>{window.__p135NetworkMode=b.dataset.p135Mode;bar.querySelectorAll('[data-p135-mode]').forEach(x=>x.classList.toggle('on',x===b));redraw()});
+  requestAnimationFrame(()=>{redraw();try{fitView()}catch(_e){}});
+}
+function boot(){install();if(document.body.dataset.view==='rede')setTimeout(()=>{install();redraw()},80);new MutationObserver(ms=>{if(ms.some(m=>m.type==='attributes'&&m.attributeName==='data-view')&&document.body.dataset.view==='rede')setTimeout(()=>{install();redraw()},60)}).observe(document.body,{attributes:true,attributeFilter:['data-view']});window.addEventListener('resize',()=>{if(document.body.dataset.view==='rede')setTimeout(redraw,100)},{passive:true})}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
+
+
+<!-- P136 · Desktop amplo + Agenda funcional e estável -->
+<style id="p136DesktopAgendaStyle">
+@media (min-width:921px){
+  #viewPainel .dash-wrap{
+    max-width:1480px!important;width:calc(100% - 64px)!important;
+    padding:28px 0 80px!important;
+  }
+  #viewPainel .dash-hero{
+    min-height:154px!important;display:grid!important;
+    grid-template-columns:minmax(320px,1fr) minmax(600px,1.35fr)!important;
+    align-items:center!important;gap:34px!important;padding:28px 32px!important;
+  }
+  #viewPainel .dash-hero>.spacer{display:none!important}
+  #viewPainel .
+
+---
+
+count=5
