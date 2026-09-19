@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect relevant UI source
+      - name: Inspect graph controls and navigation
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
           s=Path('index.html').read_text(encoding='utf-8')
-          terms=['Vínculo extra','Vinculo extra','vínculo extra','vinculo extra','vinculoExtra','extraVinculo','arrow','chevron','prev','next','seta','setas','p97','p128']
           low=s.lower()
+          terms=['function fitView','fitView','fitBtn','zoomG','d3.zoom','getBBox','navigateDeck','p97Prev','p97Next','p97DeckPrev','p97DeckNext','p90Prev','p90Next','graph-controls']
           for term in terms:
               needle=term.lower()
               print('\n\n===== TERM:',term,'=====')
@@ -26,10 +26,10 @@ jobs:
               while True:
                   i=low.find(needle,pos)
                   if i<0: break
-                  a=max(0,i-900); b=min(len(s),i+1800)
+                  a=max(0,i-1800); b=min(len(s),i+3200)
                   print('\n--- hit',n+1,'at',i,'---\n')
                   print(s[a:b])
                   pos=i+len(needle); n+=1
-                  if n>=12: break
+                  if n>=8: break
               if n==0: print('(no hits)')
           PY
