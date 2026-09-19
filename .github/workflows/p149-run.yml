@@ -1,0 +1,37 @@
+name: P149 run structured links patch
+on:
+  push:
+    branches: [fix/p149]
+permissions:
+  contents: write
+jobs:
+  patch:
+    if: "${{ github.event.head_commit.message == 'chore: run P149 patch' }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply patch
+        run: python tools/p149_patch.py
+      - name: Validate P149 script
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('index.html').read_text(encoding='utf-8')
+          assert s.count('id="p149NetworkRelationsScript"')==1
+          assert s.count('id="p149NetworkRelationsStyle"')==1
+          assert 'relationType:p149VinculoMode(v)' in s
+          assert "networkMode!=='all' && !p149MemberHasRelation" in s
+          m=re.search(r'<script id="p149NetworkRelationsScript">(.*?)</script>',s,re.S)
+          assert m
+          Path('/tmp/p149.js').write_text(m.group(1),encoding='utf-8')
+          PY
+          node --check /tmp/p149.js
+          git diff --check
+      - name: Commit index only
+        run: |
+          git config user.name "ernandes-sobreira"
+          git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
+          git add index.html
+          git commit -m "P149: vínculos estruturados na Rede"
+          git push
