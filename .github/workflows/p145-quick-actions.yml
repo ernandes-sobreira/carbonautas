@@ -1,0 +1,40 @@
+name: P145 quick actions home
+on:
+  push:
+    branches: [fix/p145-quick-actions-home]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply P145
+        run: python .github/p145_patch.py
+      - name: Validate P145
+        run: |
+          git diff --check
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          assert s.count('p145QuickActionsStyle') == 1
+          assert "wrap.id='p145QuickActions'" in s
+          assert '<b>Atalhos rápidos</b>' in s
+          assert "home.previousElementSibling!==host" in s
+          for rid in ['dashNewTaskBtn','dashAttention','dashHealth','dashProductsAllBtn','dashProducts','dashCheckin','dashBackupBtn']:
+              assert s.count(f'id="{rid}"') == 1, (rid,s.count(f'id="{rid}"'))
+          block=s[s.index('/* p145QuickActionsStyle'):s.index('</style>',s.index('/* p145QuickActionsStyle'))]
+          assert 'setInterval' not in block
+          print('P145 structural validation OK')
+          PY
+      - name: Commit P145
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "index.html already patched"
+            exit 0
+          fi
+          git config user.name "ernandes-sobreira"
+          git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
+          git add index.html
+          git commit -m "P145: recolher atalhos e remover duplicação de atenção"
+          git push
