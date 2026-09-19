@@ -1,0 +1,35 @@
+name: P160 UI audit
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/p160-ui-audit.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect relevant UI source
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          terms=['Vínculo extra','Vinculo extra','vínculo extra','vinculo extra','vinculoExtra','extraVinculo','arrow','chevron','prev','next','seta','setas','p97','p128']
+          low=s.lower()
+          for term in terms:
+              needle=term.lower()
+              print('\n\n===== TERM:',term,'=====')
+              pos=0; n=0
+              while True:
+                  i=low.find(needle,pos)
+                  if i<0: break
+                  a=max(0,i-900); b=min(len(s),i+1800)
+                  print('\n--- hit',n+1,'at',i,'---\n')
+                  print(s[a:b])
+                  pos=i+len(needle); n+=1
+                  if n>=12: break
+              if n==0: print('(no hits)')
+          PY
