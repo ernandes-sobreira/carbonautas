@@ -1,0 +1,22 @@
+name: Validate P153 orientation network
+on:
+  push:
+    branches: [fix/p152-orientation-weight-lines]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: |
+          node --check modules/rede-orientacao-p150.js
+          node --check modules/rede-orientacao-linhas-p152.js
+          node --check modules/dossier-p132.js
+      - name: Behavior markers
+        run: |
+          grep -q "Orientações" modules/rede-orientacao-p150.js
+          grep -q "carbonautas:orientation-saved" modules/rede-orientacao-p150.js
+          grep -q "optimisticCounts" modules/rede-orientacao-linhas-p152.js
+          grep -q "mode==='orientation'" modules/rede-orientacao-linhas-p152.js
