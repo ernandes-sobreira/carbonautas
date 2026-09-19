@@ -19,10 +19,9 @@ function load(src,id){
 (async()=>{
   try{
     await load('./modules/dossier-p133-original.js?v=P133-20260919','carbonautas-dossier-p133-original');
-    await load('./p135-rede-acompanhamento.js?v=P135-20260919','carbonautas-p135-rede-acompanhamento');
+    await load('./p135-rede-acompanhamento.js?v=P157-20260919','carbonautas-p135-rede-acompanhamento');
     await load('./modules/rede-orientacao-p150.js?v=P151-20260919','carbonautas-rede-orientacao-p150');
-    await load('./modules/rede-orientacao-rede-p154.js?v=P156-20260919','carbonautas-rede-orientacao-rede-p154');
-    await load('./modules/rede-ui-p155.js?v=P156-20260919','carbonautas-rede-ui-p155');
+    await load('./modules/rede-ui-p155.js?v=P157-20260919','carbonautas-rede-ui-p155');
   }catch(e){console.error('Carbonautas loader',e)}
 })();
 })();

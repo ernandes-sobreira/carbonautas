@@ -1,0 +1,14 @@
+orientation_width=True
+separate_force=True
+typed_join=True
+orientation_css=True
+production_css=True
+single_mode_controller=True
+p154_removed=True
+p155_cache_p157=True
+orientation_px=1:3.2,2:5.0,3:6.8,4:8.6,5+:10.4cap
+orientation=teal solid
+production=purple dashed
+projects=green solid
+orientation_count_source=state.activities
+physics=forceWeight; visuals=visualWidth
