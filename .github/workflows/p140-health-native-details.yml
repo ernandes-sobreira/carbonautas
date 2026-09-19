@@ -1,0 +1,36 @@
+name: P140 native health collapse
+on:
+  push:
+    branches: ["fix/p140-health-native-details"]
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply native details patch
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='''          <section class="dash-card"><div class="dash-card-head"><div><h3>🚦 Saúde dos projetos</h3><div class="dash-sub">Verde = em dia; amarelo = atenção; vermelho = intervenção.</div></div></div><div id="dashHealth"></div></section>'''
+          new='''          <details class="dash-card p140-health-details" style="padding:0;overflow:hidden"><summary style="display:flex;align-items:center;gap:12px;padding:18px;cursor:pointer;list-style:none"><div><h3 style="margin:0">🚦 Saúde dos projetos</h3></div><div class="spacer"></div><span class="btn" style="pointer-events:none">Ver / fechar</span></summary><div style="padding:0 18px 18px"><div class="dash-sub" style="margin-bottom:12px">Verde = em dia; amarelo = atenção; vermelho = intervenção.</div><div id="dashHealth"></div></div></details>'''
+          count=s.count(old)
+          if count != 1:
+              raise SystemExit(f'Expected exactly 1 health block, found {count}')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+      - name: Validate isolated change
+        run: |
+          git diff --check
+          grep -q 'p140-health-details' index.html
+          test "$(grep -o 'id="dashHealth"' index.html | wc -l)" -eq 1
+          ! grep -q 'p139HealthCollapseScript' index.html
+      - name: Commit
+        run: |
+          git config user.name "ernandes-sobreira"
+          git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
+          git add index.html
+          git commit -m "P140: recolher Saúde dos projetos com details nativo"
+          git push
