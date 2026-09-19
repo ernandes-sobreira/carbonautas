@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Carbonautas · Conversas P127</title>
+<title>Carbonautas · Dossiê P130</title>
 <style>html,body{height:100%;margin:0;font-family:system-ui;background:#f6faf9;color:#183844}main{height:100%;display:grid;place-items:center}div{text-align:center;max-width:560px;padding:28px}h1{margin:0 0 10px;font-size:26px}p{color:#60757d;line-height:1.5}.ok{color:#087f5b;font-weight:700}</style>
 </head>
 <body>
-<main><div><h1>Corrigindo as conversas…</h1><p id="msg">Sincronizando Fofoca geral, Panelinha e Privadas com a tela realmente aberta.</p></div></main>
+<main><div><h1>Ajustando o Dossiê…</h1><p id="msg">Liberando a tela inteira no celular e retirando a barra inferior de cima do relatório.</p></div></main>
 <script>
 (async()=>{
   const msg=document.getElementById('msg');
@@ -15,19 +15,19 @@
   try{
     if('caches' in window){const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));}
     if('serviceWorker' in navigator){
-      msg.textContent='Limpando a regra antiga que deixava Panelinha verde…';
+      msg.textContent='Limpando a versão antiga do Dossiê…';
       const regs=await navigator.serviceWorker.getRegistrations();
       for(const r of regs){if(r.scope.includes('/carbonautas/')){try{await r.unregister()}catch(_e){}}}
       await wait(350);
-      const reg=await navigator.serviceWorker.register('./sw.js?tabs=P127&t='+Date.now(),{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?dossier=P130&t='+Date.now(),{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting)reg.waiting.postMessage('SKIP_WAITING');
       const worker=reg.active||reg.waiting||reg.installing;if(worker)worker.postMessage('FORCE_REFRESH_ALL');
       await wait(1300);
     }
-    msg.className='ok';msg.textContent='P127 aplicada: a aba verde agora acompanha a conversa realmente aberta.';
-  }catch(e){console.warn(e);msg.textContent='Correção aplicada. Abrindo o Carbonautas…'}
-  setTimeout(()=>location.replace('./?tabs=P127&t='+Date.now()),700);
+    msg.className='ok';msg.textContent='P130 aplicada: o Dossiê agora ocupa a tela e rola por dentro.';
+  }catch(e){console.warn(e);msg.textContent='Atualização aplicada. Abrindo o Carbonautas…'}
+  setTimeout(()=>location.replace('./?dossier=P130&t='+Date.now()),700);
 })();
 </script>
 </body>
