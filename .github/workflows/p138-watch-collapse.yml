@@ -1,0 +1,60 @@
+name: P138 collapse watch section
+on:
+  push:
+    branches: ["fix/p138-watch-collapse"]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/p138-watch-collapse
+      - name: Make watch section compact by default
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          old_css="""  .p68-section{margin-bottom:18px}.p68-section-head{display:flex;align-items:center;gap:8px;margin:4px 0 10px;font-weight:900;color:#162e39}.p68-section-head span{margin-left:auto;min-width:27px;height:27px;border-radius:999px;background:#edf4f5;display:grid;place-items:center;font-size:12px;color:#38545d}.p68-section-sub{font-size:11px;color:#71858d;font-weight:500;margin-top:2px}
+"""
+          new_css="""  .p68-section{margin-bottom:18px}.p68-section-head{display:flex;align-items:center;gap:8px;margin:4px 0 10px;font-weight:900;color:#162e39}.p68-section-head span{margin-left:auto;min-width:27px;height:27px;border-radius:999px;background:#edf4f5;display:grid;place-items:center;font-size:12px;color:#38545d}.p68-section-sub{font-size:11px;color:#71858d;font-weight:500;margin-top:2px}
+  .p138-watch-section{margin-bottom:12px}.p138-watch-section .p68-section-head{margin:4px 0 0;padding:10px 11px;border:1px solid #dfe8e7;border-radius:14px;background:#fbfdfd;cursor:pointer;user-select:none;min-height:48px}.p138-watch-section .p68-section-head:hover{background:#f6faf9}.p138-watch-toggle{flex:0 0 auto;border:1px solid #cfe2df;background:#fff;color:#0e6f73;border-radius:999px;padding:5px 9px;font-size:10.5px;font-weight:900;line-height:1}.p138-watch-section.p138-watch-collapsed>.p68-section-head~*{display:none!important}.p138-watch-section.p138-watch-collapsed .p68-section-sub{display:none}.p138-watch-section.p138-watch-open .p68-section-head{margin-bottom:10px;background:#fffdf8;border-color:#eadfcb}.p138-watch-section.p138-watch-open .p138-watch-toggle{background:#f8f4ec;color:#70501b;border-color:#e4d6be}
+  @media(max-width:620px){.p138-watch-section .p68-section-head{padding:9px 10px;min-height:44px}.p138-watch-section .p68-section-head>div{font-size:12.5px}.p138-watch-section .p68-section-head span{min-width:25px;height:25px;font-size:11px}.p138-watch-toggle{font-size:10px;padding:4px 8px}}
+"""
+          if old_css not in s:
+              raise SystemExit('P138 CSS target not found')
+          s=s.replace(old_css,new_css,1)
+
+          old_fn="""function section(title,sub,count,nodes){const wrap=document.createElement('div');wrap.className='p68-section';wrap.innerHTML=`<div class=\"p68-section-head\"><div>${title}<div class=\"p68-section-sub\">${sub}</div></div><span>${count}</span></div>`;if(nodes.length)nodes.forEach(n=>wrap.appendChild(n));else{const e=document.createElement('div');e.className='p68-empty';e.textContent=title.includes('Precisa')?'Nada pendente.':'Nada por enquanto.';wrap.appendChild(e)}return wrap}
+"""
+          new_fn="""function section(title,sub,count,nodes){const wrap=document.createElement('div'),collapsible=title.includes('Só acompanhar');wrap.className='p68-section'+(collapsible?' p138-watch-section p138-watch-collapsed':'');wrap.innerHTML=`<div class=\"p68-section-head\"${collapsible?' role=\"button\" tabindex=\"0\" aria-expanded=\"false\"':''}><div>${title}<div class=\"p68-section-sub\">${sub}</div></div><span>${count}</span>${collapsible?'<b class=\"p138-watch-toggle\">Ver</b>':''}</div>`;if(nodes.length)nodes.forEach(n=>wrap.appendChild(n));else{const e=document.createElement('div');e.className='p68-empty';e.textContent=title.includes('Precisa')?'Nada pendente.':'Nada por enquanto.';wrap.appendChild(e)}if(collapsible){const head=wrap.querySelector('.p68-section-head'),label=wrap.querySelector('.p138-watch-toggle'),toggle=()=>{const open=!wrap.classList.contains('p138-watch-open');wrap.classList.toggle('p138-watch-open',open);wrap.classList.toggle('p138-watch-collapsed',!open);head.setAttribute('aria-expanded',open?'true':'false');if(label)label.textContent=open?'Fechar':'Ver'};head.addEventListener('click',toggle);head.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle()}})}return wrap}
+"""
+          if old_fn not in s:
+              raise SystemExit('P138 section() target not found')
+          s=s.replace(old_fn,new_fn,1)
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Validate
+        run: |
+          git diff --check
+          grep -q 'p138-watch-section' index.html
+          grep -q 'p138-watch-toggle' index.html
+          grep -q "title.includes('Só acompanhar')" index.html
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          assert 'p138-watch-collapsed>.p68-section-head~*{display:none!important}' in s
+          assert 'aria-expanded=\\"false\\"' in s
+          assert "label.textContent=open?'Fechar':'Ver'" in s
+          print('P138 validation OK')
+          PY
+      - name: Commit patch
+        run: |
+          git config user.name "ernandes-sobreira"
+          git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
+          git add index.html
+          git commit -m "P138: recolher Só acompanhar no painel"
+          git push origin HEAD:fix/p138-watch-collapse
