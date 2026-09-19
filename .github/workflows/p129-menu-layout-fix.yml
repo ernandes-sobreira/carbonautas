@@ -1,0 +1,89 @@
+name: P129 menu visual e composer
+
+on:
+  push:
+    branches:
+      - P129-menu-layout-fix
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Aplicar ajuste visual do menu
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = '<!-- P129 · menu visual + composer abaixo do menu -->'
+          if marker in s:
+              raise SystemExit('Hotfix visual P129 já aplicado; nada a fazer.')
+
+          block = r'''
+
+<!-- P129 · menu visual + composer abaixo do menu -->
+<style id="p129-menu-layout-fix">
+/* O menu deve ficar acima de qualquer composer fixo das conversas. */
+#appMenuBackdrop.open{z-index:2147483647!important}
+
+/* Enquanto o menu global está aberto, nenhum campo de conversa pode ficar por cima dele. */
+body.p129-menu-open .p46-compose,
+body.p129-menu-open .private-composer-zone,
+body.p129-menu-open .p48-compose{
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+</style>
+<script id="p129-menu-layout-fix-script">
+(function(){
+  'use strict';
+  function bootP129MenuFix(){
+    const menu=document.getElementById('appMenuBackdrop');
+    if(!menu)return;
+
+    /* Fecha a grade com Ó nóis! largo, usando exatamente o estilo do card hero do repositório. */
+    const mural=document.querySelector('.app-nav-card[data-app-view="mural"]');
+    if(mural)mural.classList.add('app-nav-hero');
+
+    const sync=()=>document.body.classList.toggle('p129-menu-open',menu.classList.contains('open'));
+    sync();
+    new MutationObserver(sync).observe(menu,{attributes:true,attributeFilter:['class']});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootP129MenuFix,{once:true});
+  else bootP129MenuFix();
+})();
+</script>
+'''
+
+          pos = s.rfind('</body>')
+          if pos < 0:
+              raise SystemExit('ERRO: </body> não encontrado')
+          s = s[:pos] + block + '\n' + s[pos:]
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Conferir hotfix
+        run: |
+          git diff --check
+          grep -q 'p129-menu-layout-fix' index.html
+          grep -q 'mural.classList.add' index.html
+          grep -q 'p129-menu-open' index.html
+
+      - name: Commit e push em main
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'P129: menu equilibrado e mensagem abaixo do menu'
+          git push origin HEAD:main
