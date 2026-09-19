@@ -3,7 +3,7 @@
   "name": "Carbonautas",
   "short_name": "Carbonautas",
   "description": "Ciência que conecta e regenera: acompanhamento, arquivos, comunicação e colaboração da Rede Carbonautas.",
-  "start_url": "./?pwa=P96",
+  "start_url": "./?pwa=P133&brand=P133",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
@@ -11,9 +11,15 @@
   "theme_color": "#F6FAF9",
   "icons": [
     {
-      "src": "./carbonautas-app-icon-p95.svg?v=P95",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "./icon-192.png?v=P133",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png?v=P133",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]

@@ -1,18 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Carbonautas">
-  <defs>
-    <linearGradient id="bg" x1="40" y1="30" x2="470" y2="490" gradientUnits="userSpaceOnUse"><stop stop-color="#F9FCFB"/><stop offset="1" stop-color="#EAF6F3"/></linearGradient>
-    <linearGradient id="cycle" x1="120" y1="110" x2="400" y2="400" gradientUnits="userSpaceOnUse"><stop stop-color="#6EC6A0"/><stop offset=".55" stop-color="#1AA39E"/><stop offset="1" stop-color="#297FA8"/></linearGradient>
-    <linearGradient id="leaf" x1="350" y1="72" x2="455" y2="182" gradientUnits="userSpaceOnUse"><stop stop-color="#72C98E"/><stop offset="1" stop-color="#35A985"/></linearGradient>
-  </defs>
-  <rect x="16" y="16" width="480" height="480" rx="128" fill="url(#bg)"/>
-  <circle cx="256" cy="256" r="186" fill="#F6FBF9" stroke="#D8EBE6" stroke-width="8"/>
-  <path d="M365 136A150 150 0 1 0 396 343" fill="none" stroke="url(#cycle)" stroke-width="46" stroke-linecap="round"/>
-  <path d="M350 111c50-44 104-43 136-25-5 68-42 116-105 136-22-29-31-67-31-111Z" fill="url(#leaf)"/>
-  <path d="M370 196c27-30 55-53 87-72" fill="none" stroke="#F7FFFC" stroke-width="13" stroke-linecap="round" opacity=".92"/>
-  <path d="M194 334 266 176l20 90 92 23-158 76Z" fill="#173B50" opacity=".94"/>
-  <path d="m266 176 20 90-66 99 46-189Z" fill="#FFFFFF" opacity=".97"/>
-  <circle cx="278" cy="274" r="18" fill="#168F94" stroke="#fff" stroke-width="9"/>
-  <circle cx="109" cy="257" r="22" fill="#6EBECE" stroke="#fff" stroke-width="10"/>
-  <circle cx="168" cy="382" r="22" fill="#71BE91" stroke="#fff" stroke-width="10"/>
-  <circle cx="385" cy="373" r="22" fill="#6D91B4" stroke="#fff" stroke-width="10"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Carbonautas"><defs><linearGradient id="orbit" x1="80" y1="420" x2="430" y2="80" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#005b7a"/><stop offset=".52" stop-color="#118f82"/><stop offset="1" stop-color="#55c784"/></linearGradient><linearGradient id="leafA" x1="160" y1="340" x2="330" y2="145" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#005875"/><stop offset=".55" stop-color="#087f7e"/><stop offset="1" stop-color="#20a681"/></linearGradient><linearGradient id="leafB" x1="235" y1="365" x2="335" y2="175" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#78d39a"/><stop offset=".48" stop-color="#4ec68e"/><stop offset="1" stop-color="#179c7d"/></linearGradient></defs><g fill="none" stroke="url(#orbit)" stroke-width="22" stroke-linecap="round"><path d="M126 116 A176 176 0 0 1 332 72"/><path d="M393 128 A176 176 0 0 1 414 274"/><path d="M369 367 A176 176 0 0 1 137 392"/><path d="M91 335 A176 176 0 0 1 91 181"/></g><circle cx="102" cy="139" r="25" fill="#05617b"/><circle cx="366" cy="112" r="48" fill="#49c586"/><circle cx="102" cy="366" r="39" fill="#086b80"/><circle cx="405" cy="311" r="22" fill="#6bd092"/><path d="M257 370C201 315 186 260 209 218c25-45 76-62 121-110 5 65 0 133-33 188-15 25-27 46-40 74Z" fill="url(#leafA)"/><path d="M257 370c8-74 26-109 51-144 20-29 27-67 22-118 28 77 28 148 4 200-14 31-39 51-77 62Z" fill="url(#leafB)"/><path d="M244 366c13-62 32-108 60-145 11-15 19-29 27-45-10 37-25 69-45 96-20 28-33 57-42 94Z" fill="#fff"/></svg>
