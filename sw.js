@@ -1,5 +1,5 @@
-const CACHE='carbonautas-p122-20260918';
-const BUILD='P122';
+const CACHE='carbonautas-p123-20260918';
+const BUILD='P123';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#f6faf9;color:#183844"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
 const AGENDA_SOFT_STYLE='<link rel="stylesheet" href="./agenda-soft-p108.css?v=P108-20260918">';
 const LAB_RUN_STYLE='<link rel="stylesheet" href="./lab-run-mobile-p118.css?v=P118-20260918">';
@@ -51,6 +51,7 @@ const REPOSITORY_CARD_TABLE_SCRIPT='<script src="./repository-card-table-p90.js?
 const REPOSITORY_CARD_MOBILE_SCRIPT='<script src="./repository-card-mobile-p91.js?v=P97-20260918"><\/script>';
 const CHAT_NOTIFY_REACT_SCRIPT='<script src="./chat-notifications-reactions-p116.js?v=P116-20260918"><\/script>';
 const MONTHLY_HIGHLIGHTS_SCRIPT='<script src="./monthly-highlights-p117.js?v=P117-20260918"><\/script>';
+const HIGHLIGHT_REACTIONS_SCRIPT='<script src="./highlight-reactions-p123.js?v=P123-20260918"><\/script>';
 
 async function forceRefreshClients(){
   const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
@@ -133,6 +134,7 @@ async function navigationResponse(req){
     if(!html.includes('repository-card-mobile-p91.js'))inject+=REPOSITORY_CARD_MOBILE_SCRIPT;
     if(!html.includes('chat-notifications-reactions-p116.js'))inject+=CHAT_NOTIFY_REACT_SCRIPT;
     if(!html.includes('monthly-highlights-p117.js'))inject+=MONTHLY_HIGHLIGHTS_SCRIPT;
+    if(!html.includes('highlight-reactions-p123.js'))inject+=HIGHLIGHT_REACTIONS_SCRIPT;
     if(inject){const lower=html.toLowerCase(),pos=lower.lastIndexOf('</body>');html=pos>=0?html.slice(0,pos)+inject+html.slice(pos):html+inject;}
     const headers=new Headers(fresh.headers);headers.delete('content-length');headers.set('cache-control','no-store, max-age=0');
     return new Response(html,{status:fresh.status,statusText:fresh.statusText,headers});
