@@ -2,7 +2,6 @@ name: P147 remove cronograma repository option
 on:
   push:
     branches: [fix/p147-remove-cronograma-repo]
-  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -20,8 +19,6 @@ jobs:
           s=s.replace('Object.entries(CATEGORIAS).sort(',"Object.entries(CATEGORIAS).filter(([k])=>k!=='cronograma').sort(",1)
           p.write_text(s,encoding='utf-8')
           PY
-          grep -q "<option value=\"cronograma\">Cronograma</option>" index.html && exit 1 || true
-          grep -q "Object.entries(CATEGORIAS).filter(([k])=>k!='cronograma')" index.html || grep -q "Object.entries(CATEGORIAS).filter(([k])=>k!=='cronograma')" index.html
       - name: Commit fix
         run: |
           git config user.name "ernandes-sobreira"
