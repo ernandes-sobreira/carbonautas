@@ -1,0 +1,5 @@
+before_option=0
+before_filter=0
+after_option=0
+after_filter=0
+new_filter=1
