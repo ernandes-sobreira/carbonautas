@@ -33,7 +33,15 @@ function polishTimeline(){
   const detail=$('#viewRede #detail');
   if(!detail)return;
   const timeline=$('#p128Timeline',detail);
-  if(timeline)timeline.setAttribute('aria-label','Linha do tempo da pessoa');
+  if(!timeline)return;
+  timeline.setAttribute('aria-label','Linha do tempo da pessoa');
+  $$('li',timeline).forEach(li=>{
+    Array.from(li.childNodes).forEach(node=>{
+      if(node.nodeType===3&&node.textContent){
+        node.textContent=node.textContent.replace(/Orientação\s*·\s*Orientação\s*·\s*/i,'Orientação · ');
+      }
+    });
+  });
 }
 
 function polish(){
@@ -74,7 +82,8 @@ function injectCss(){
     -webkit-overflow-scrolling:touch;
   }
   #viewRede #detail .dh{padding:18px 18px 15px!important}
-  #viewRede #detail .sec{padding-left:18px!important;padding-right:18px!important}
+  #viewRede #detail .dsec{padding:14px 18px!important}
+  #viewRede #detail .dactions{padding:14px 18px!important;gap:8px!important}
 
   #viewRede #p128Timeline{
     margin:8px 18px 0!important;
