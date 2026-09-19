@@ -1,6 +1,8 @@
-/* Carbonautas P154 · rede de orientações reais
-   Usa apenas registros type=orientacao de rede_activities.
-   Mantém o núcleo do grafo e força nomes visíveis no Chrome/PWA. */
+/* Carbonautas P156 · rede de orientações reais
+   - orientação usa espessura claramente proporcional ao número de registros
+   - produção e orientação têm linguagem visual diferente
+   - reduz observadores e repetições para deixar a Rede mais leve
+   Não grava nem altera dados do Firebase. */
 (function(){
 'use strict';
 if(window.__CARBONAUTAS_P154_ORIENTATION_NETWORK)return;
@@ -11,7 +13,7 @@ const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 let mode='all';
 let orientationDocs=new Map();
-let buildWrapped=false, renderWrapped=false, unsubscribe=null;
+let unsubscribe=null;
 
 function S(){try{return window.state||state||{}}catch(_e){return{}}}
 function my(){try{return window.myId||myId||''}catch(_e){return''}}
@@ -40,12 +42,17 @@ function orientationSummary(members){
   });
   return {coord,counts,total};
 }
-function widthWeight(n){return Math.min(1.33,.28+.34*Math.sqrt(Math.max(1,n)))}
+
+function orientationStroke(n){
+  n=Math.max(1,Number(n)||1);
+  return Math.min(8.5,3+1.6*(n-1));
+}
+function orientationWeight(n){return Math.min(8,2.4+1.25*Math.max(0,n-1))}
 function orientationLinks(members){
   const {coord,counts}=orientationSummary(members);
   if(!coord)return [];
   return [...counts.entries()].map(([owner,n])=>({
-    source:coord.id,target:owner,w:widthWeight(n),aux:true,orientationCount:n,
+    source:coord.id,target:owner,w:orientationWeight(n),aux:false,orientationCount:n,
     reasons:[{type:'orientacao',label:`Orientação registrada · ${n} registro${n===1?'':'s'}`}]
   }));
 }
@@ -75,6 +82,51 @@ function setNamesVisible(){
     if(t&&d?.nome)t.textContent=d.nome;
   });
 }
+function isProductionLink(d){
+  const reasons=d?.reasons||[];
+  return reasons.some(r=>norm(r?.type)==='producao'||/produ|artigo|publica|cap[ií]tulo|coautor|manuscrito/.test(norm(r?.label)));
+}
+function isProjectLink(d){
+  const reasons=d?.reasons||[];
+  return reasons.some(r=>/projeto|pesquisa em conjunto|campo em conjunto|experimento em conjunto/.test(norm(r?.label)));
+}
+function decorateLinkStyles(){
+  $$('#graph line.link').forEach(line=>{
+    const d=line.__data__||{};
+    line.style.removeProperty('stroke');
+    line.style.removeProperty('stroke-opacity');
+    line.style.removeProperty('stroke-dasharray');
+    line.style.removeProperty('stroke-width');
+    const n=Number(d.orientationCount)||0;
+    if(n){
+      line.style.setProperty('stroke','#168f94');
+      line.style.setProperty('stroke-opacity','.92');
+      line.style.setProperty('stroke-dasharray','none');
+      line.style.setProperty('stroke-width',orientationStroke(n)+'px');
+      line.dataset.relationVisual='orientation';
+      line.dataset.orientationCount=String(n);
+      return;
+    }
+    if(isProductionLink(d)){
+      line.style.setProperty('stroke','#6c5ce0');
+      line.style.setProperty('stroke-opacity','.78');
+      line.style.setProperty('stroke-dasharray','8 6');
+      line.style.setProperty('stroke-width','2.5px');
+      line.dataset.relationVisual='production';
+      return;
+    }
+    if(isProjectLink(d)){
+      line.style.setProperty('stroke','#2e9e5b');
+      line.style.setProperty('stroke-opacity','.72');
+      line.style.setProperty('stroke-dasharray','none');
+      line.style.setProperty('stroke-width','2.2px');
+      line.dataset.relationVisual='project';
+      return;
+    }
+    delete line.dataset.relationVisual;
+    delete line.dataset.orientationCount;
+  });
+}
 function decorateOrientationView(members){
   const {coord,counts,total}=orientationSummary(members);
   const active=new Set(counts.keys());if(coord)active.add(String(coord.id));
@@ -84,13 +136,13 @@ function decorateOrientationView(members){
   });
   const insight=$('#p135RedeInsight');
   if(mode==='orientation'&&insight){
-    insight.textContent=`${counts.size} pessoa${counts.size===1?'':'s'} com orientação · ${total} registro${total===1?'':'s'}`;
+    insight.textContent=`${counts.size} pessoa${counts.size===1?'':'s'} com orientação · ${total} registro${total===1?'':'s'} · linha mais grossa = mais orientações`;
   }
 }
 function installBuildWrapper(){
   let fn=null;try{fn=window.buildLinks||buildLinks}catch(_e){}
   if(typeof fn!=='function')return false;
-  if(fn.__p154Orientation){buildWrapped=true;return true}
+  if(fn.__p154Orientation)return true;
   const wrapped=function(members){
     const base=fn.apply(this,arguments)||[];
     if(mode==='orientation')return orientationLinks(members);
@@ -98,29 +150,31 @@ function installBuildWrapper(){
     return base;
   };
   wrapped.__p154Orientation=true;wrapped.__p154Original=fn;
-  try{buildLinks=wrapped}catch(_e){}window.buildLinks=wrapped;buildWrapped=true;return true;
+  try{buildLinks=wrapped}catch(_e){}window.buildLinks=wrapped;return true;
 }
 function afterRender(){
   setNamesVisible();
+  decorateLinkStyles();
   decorateOrientationView(activeMembers());
 }
 function installRenderWrapper(){
   let fn=null;try{fn=window.renderGraph||renderGraph}catch(_e){}
   if(typeof fn!=='function')return false;
-  if(fn.__p154Orientation){renderWrapped=true;return true}
+  if(fn.__p154Orientation)return true;
   const wrapped=function(){
     const t=$('#tLabels');if(t)t.checked=true;
     const r=fn.apply(this,arguments);
-    [0,60,180,500,1200].forEach(ms=>setTimeout(afterRender,ms));
+    afterRender();
+    requestAnimationFrame(afterRender);
     return r;
   };
   wrapped.__p154Orientation=true;
   wrapped.__p154Original=fn;
   wrapped.__p135Fixed=true;
-  try{renderGraph=wrapped}catch(_e){}window.renderGraph=wrapped;renderWrapped=true;return true;
+  try{renderGraph=wrapped}catch(_e){}window.renderGraph=wrapped;return true;
 }
 function redraw(){
-  try{const t=$('#tLabels');if(t)t.checked=true;(window.renderGraph||renderGraph)?.()}catch(e){console.warn('P154 redraw',e)}
+  try{const t=$('#tLabels');if(t)t.checked=true;(window.renderGraph||renderGraph)?.()}catch(e){console.warn('P156 redraw',e)}
 }
 function ensureOrientationButton(){
   const modes=$('#p135RedeToolbar .p135-modes');if(!modes)return false;
@@ -139,13 +193,12 @@ function ensureOrientationButton(){
   return true;
 }
 function bindModes(){
-  const modes=$('#p135RedeToolbar .p135-modes');if(!modes||modes.dataset.p154Bound)return;
-  modes.dataset.p154Bound='1';
+  const modes=$('#p135RedeToolbar .p135-modes');if(!modes||modes.dataset.p156Bound)return;
+  modes.dataset.p156Bound='1';
   modes.addEventListener('click',e=>{
     const b=e.target.closest?.('[data-p135-mode]');if(!b)return;
     mode=b.dataset.p135Mode||'all';
-    const own=$('[data-p154-mode="orientation"]',modes);own?.classList.remove('on');
-    setTimeout(()=>{installBuildWrapper();installRenderWrapper();redraw()},30);
+    $('[data-p154-mode="orientation"]',modes)?.classList.remove('on');
   },true);
 }
 function listenOrientations(){
@@ -155,18 +208,24 @@ function listenOrientations(){
     const q=f.query(f.collection(window.db,'rede_activities'),f.where('type','==','orientacao'));
     unsubscribe=f.onSnapshot(q,snap=>{
       orientationDocs=new Map(snap.docs.map(d=>[d.id,{...d.data(),id:d.id}]));
-      [40,160,420].forEach(ms=>setTimeout(redraw,ms));
-    },e=>console.warn('P154 orientação snapshot',e));
-  }catch(e){console.warn('P154 orientação listener',e)}
+      redraw();
+    },e=>console.warn('P156 orientação snapshot',e));
+  }catch(e){console.warn('P156 orientação listener',e)}
+}
+function install(){
+  installBuildWrapper();
+  installRenderWrapper();
+  ensureOrientationButton();
+  bindModes();
+  listenOrientations();
+  setNamesVisible();
+  decorateLinkStyles();
 }
 function boot(){
-  const install=()=>{
-    installBuildWrapper();installRenderWrapper();ensureOrientationButton();bindModes();listenOrientations();setNamesVisible();
-  };
-  install();[120,350,800,1600,2600].forEach(ms=>setTimeout(install,ms));
-  const view=$('#viewRede');if(view)new MutationObserver(()=>requestAnimationFrame(()=>{ensureOrientationButton();bindModes();setNamesVisible()})).observe(view,{childList:true,subtree:true});
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden){install();redraw()}});
-  window.addEventListener('pageshow',()=>{install();redraw()});
+  install();
+  setTimeout(install,220);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)redraw()});
+  window.addEventListener('pageshow',redraw);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
