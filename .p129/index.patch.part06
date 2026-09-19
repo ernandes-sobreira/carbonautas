@@ -1,0 +1,104 @@
++function ago(t){if(!t)return'nunca';const d=Math.floor((Date.now()-t)/86400000);if(d<=0)return'hoje';if(d===1)return'ontem';if(d<30)return`${d} d`;const m=Math.floor(d/30);return m<12?`${m} m`:`${Math.floor(m/12)} a`}
++function first(n){return String(n||'').trim().split(/\s+/)[0]||'Carbonauta'}
++
++/* ---------- 2) presença silenciosa ---------- */
++let presenceDone=false;
++async function markPresence(){
++  const id=me();if(!id||presenceDone)return;
++  const key='carbonautas_p128_seen_'+id,last=Number(localStorage.getItem(key)||0);
++  if(Date.now()-last<30*60*1000){presenceDone=true;return}
++  try{
++    const f=FB();
++    await f.updateDoc(f.doc(window.db,'rede_members',id),{lastSeenAt:f.serverTimestamp(),lastSeenDay:dayIso()});
++    localStorage.setItem(key,String(Date.now()));presenceDone=true;
++  }catch(e){console.warn('P128 presença',e?.code||e)}
++}
++
++/* ---------- 3) painel de acessos (coordenação) ---------- */
++function renderPresence(){
++  const root=document.getElementById('dashAttention');
++  if(!root||!admin()){const old=document.getElementById('p128Presence');if(old)old.remove();return}
++  const members=(st().members||[]).filter(m=>m.status!=='egresso');
++  if(!members.length)return;
++  const rows=members.map(m=>({m,t:ms(m.lastSeenAt)||ms(m.lastSeenDay)})).sort((a,b)=>b.t-a.t);
++  const cls=t=>{if(!t)return'nunca';const d=(Date.now()-t)/86400000;return d<1?'hoje':d<7?'semana':'longe'};
++  const hoje=rows.filter(r=>cls(r.t)==='hoje').length;
++  let box=document.getElementById('p128Presence');
++  if(!box){box=document.createElement('section');box.id='p128Presence';root.parentNode.insertBefore(box,root)}
++  const sig=rows.map(r=>r.m.id+':'+r.t).join('|');
++  if(box.dataset.sig===sig)return;box.dataset.sig=sig;
++  box.innerHTML=`<div class="p128-head">Acessos <small>${hoje} hoje · ${rows.length} pessoas</small></div><div class="p128-grid">${rows.map(r=>`<div class="p128-chip ${cls(r.t)}" title="${esc(r.m.nome||'')}"><i></i><b>${esc(first(r.m.nome))}</b><span>${ago(r.t)}</span></div>`).join('')}</div>`;
++}
++
++/* ---------- 4) linha do tempo por pessoa ---------- */
++const SHOW=12;
++function timelineItems(m){
++  const items=[];
++  (m.prazos||[]).forEach(p=>{const t=ms(p.data);if(!t)return;items.push({t,cls:p.feito?'done':(t<Date.now()?'over':''),txt:`Prazo · ${p.titulo||''}`})});
++  (st().activities||[]).filter(a=>a.ownerId===m.id).forEach(a=>{
++    const t=ms(a.dueDate)||ms(a.updatedAt)||ms(a.createdAt);if(!t)return;
++    const done=a.status==='concluido'||!!a.doneAt;
++    items.push({t,cls:done?'done':(a.dueDate&&t<Date.now()?'over':''),txt:`${a.type==='produto'?'Produto':a.type==='orientacao'?'Orientação':'Tarefa'} · ${a.title||''}`})
++  });
++  (st().publicacoes||[]).filter(p=>p.memberId===m.id&&p.tipo==='arquivo').forEach(p=>{const t=ms(p.ts);if(!t)return;items.push({t,cls:'',txt:`Arquivo · ${p.titulo||p.fileName||''}${p.reviewFlow?' · v'+(p.reviewVersion||1):''}`})});
++  (st().photos||[]).filter(p=>p.autorId===m.id).forEach(p=>{const t=ms(p.dataRealizacao)||ms(p.ts);if(!t)return;items.push({t,cls:'',txt:`Foto · ${p.legenda||p.projeto||''}`})});
++  (st().feed||[]).filter(p=>p.authorId===m.id).forEach(p=>{const t=ms(p.ts);if(!t)return;items.push({t,cls:'',txt:`Destaque · ${p.title||p.text||''}`})});
++  return items.sort((a,b)=>b.t-a.t);
++}
++function renderTimeline(expand){
++  const inner=document.getElementById('detailInner');if(!inner)return;
++  let m=null;try{m=(st().members||[]).find(x=>x.id===selectedId)}catch(_e){}
++  if(!m)return;
++  const items=timelineItems(m);
++  let box=document.getElementById('p128Timeline');
++  if(!box){box=document.createElement('div');box.id='p128Timeline';inner.appendChild(box)}
++  const all=expand||box.dataset.expand==='1';box.dataset.expand=all?'1':'0';
++  const shown=all?items:items.slice(0,SHOW);
++  box.innerHTML=`<h4>Linha do tempo</h4>`+(items.length?`<ol>${shown.map(i=>`<li class="${i.cls}"><time>${fmtShort(i.t)}</time>${esc(i.txt).slice(0,90)}</li>`).join('')}</ol>${items.length>SHOW&&!all?`<button type="button" class="p128-more">Ver tudo (${items.length})</button>`:''}`:`<div class="p128-empty">Nada registrado ainda.</div>`);
++  const more=box.querySelector('.p128-more');if(more)more.onclick=()=>renderTimeline(true);
++}
++
++/* ---------- 5) jogo só quando aberto ---------- */
++function loadGameIfOpen(v){
++  if(v!=='jogo')return;
++  const f=document.getElementById('carbonautaGameFrame');
++  if(f&&!f.getAttribute('src')&&f.dataset.src)f.src=f.dataset.src;
++}
++
++/* ---------- ganchos ---------- */
++let basePainel=null,baseDetail=null,baseSwitch=null;
++function hook(){
++  if(!basePainel&&typeof window.renderPainel==='function'){basePainel=window.renderPainel;const w=function(){const r=basePainel.apply(this,arguments);setTimeout(renderPresence,0);return r};try{renderPainel=w}catch(_e){}window.renderPainel=w}
++  if(!baseDetail&&typeof window.renderDetail==='function'){baseDetail=window.renderDetail;const w=function(){const r=baseDetail.apply(this,arguments);setTimeout(()=>renderTimeline(false),0);return r};try{renderDetail=w}catch(_e){}window.renderDetail=w}
++  if(!baseSwitch&&typeof window.switchView==='function'){baseSwitch=window.switchView;const w=function(v){const r=baseSwitch.apply(this,arguments);loadGameIfOpen(v);return r};try{switchView=w}catch(_e){}window.switchView=w}
++}
++function boot(){
++  ensureCss();hook();
++  setTimeout(hook,900);setTimeout(hook,2500);
++  const tick=setInterval(()=>{hook();if(me()){markPresence();renderPresence();}if(presenceDone&&basePainel&&baseDetail)clearInterval(tick)},1500);
++  document.addEventListener('visibilitychange',()=>{if(!document.hidden){presenceDone=false;markPresence()}});
++  console.info('Carbonautas',BUILD,'presença silenciosa, linha do tempo, sem medalhas, jogo sob demanda');
++}
++if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
++})();
++
++</script>
++<script data-src="p129-menos-na-tela.js">
++/* Carbonautas P129 · menos na tela
++   1) Fofoca geral sem temas.
++   2) Jogo sai do Painel e vira card no Repositório.
++   3) Lab sai do menu e vira card no Repositório.
++   4) Um só badge em Conversas (equipe + privadas).
++   5) Painel sem KPIs numéricos.
++   8) Repositório no celular: botão grande "Enviar arquivo" no topo, Science Dock recolhido, botões secundários atrás de "Mais". */
++(function(){
++'use strict';
++if(window.__CARBONAUTAS_P129)return;
++window.__CARBONAUTAS_P129=true;
++const BUILD='P129';
++const $=(s,r=document)=>r.querySelector(s);
++
++const css=`
++#p46Topics,#p46TopicSelect,#dashGameBtn,#dashKpis,.tab[data-view="lab"],#privateBadge{display:none!important}
++#p129Shortcuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin:0 0 12px}
++#p129Shortcuts button{display:flex;align-items:center;gap:10px;border:1px solid #dfe9e6;background:#fff;border-radius:14px;padding:10px 12px;text-align:left;cursor:pointer;font:inherit;color:#183844}
