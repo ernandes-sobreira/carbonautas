@@ -11831,7 +11831,7 @@ function ensureStyle(){if(q('#p85MobileStyle'))return;const st=document.createEl
 #viewPainel .dash-grid{display:block!important;width:100%!important}.dash-grid>aside{display:flex!important;gap:12px!important;margin-top:12px!important}#viewPainel .dash-card{border-radius:20px!important;padding:14px!important;margin:0!important;box-shadow:none!important;border:1px solid #dbe5e8!important;overflow:hidden!important}.p56-task{grid-template-columns:1fr!important;gap:10px!important;border-radius:17px!important;padding:13px!important;min-width:0!important;width:100%!important;overflow:hidden!important;box-shadow:none!important}.p56-task-main,.p56-task-actions{min-width:0!important;width:100%!important}.p56-what{font-size:16.5px!important;line-height:1.18!important;overflow-wrap:anywhere!important}.p56-detail{font-size:12.5px!important;line-height:1.4!important;overflow-wrap:anywhere!important;white-space:normal!important}.p56-task-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}.p56-task-actions .btn{width:100%!important;min-height:42px!important;height:auto!important;padding:8px 7px!important;justify-content:center!important;border-radius:11px!important;font-size:11.5px!important;white-space:normal!important;text-align:center!important}.p56-task-actions .btn:only-child{grid-column:1/-1!important}.p85-checkin-toggle{display:flex!important;width:100%!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;border:1px solid #d8e5e8!important;background:#f7fbfc!important;color:#274650!important;border-radius:13px!important;padding:10px 11px!important;font-weight:850!important;font-size:11.5px!important;margin:2px 0 3px!important}.p85-checkin-hidden{display:none!important}
 }
 `;document.head.appendChild(st)}
-function relocateToday(){const hero=q('#viewPainel .dash-hero'),card=q('#p78TodayCard');if(hero&&card&&hero.nextElementSibling!==card)hero.insertAdjacentElement('afterend',card)}
+function relocateToday(){return}
 function hideLab(){const x=q('.app-nav-card[data-app-view="lab"]');if(x)x.style.display='none'}
 function organizeCheckins(){if(innerWidth>760)return;const root=q('#dashAttention');if(!root)return;const cards=qa('.p56-task',root).filter(c=>!c.classList.contains('p77-hidden-treated')&&!c.classList.contains('p85-hidden-treated')&&/CHECK-IN/i.test(c.querySelector('.p56-source')?.textContent||''));let ctrl=q('#p85CheckinToggle');if(cards.length<=2){ctrl?.remove();cards.forEach(c=>c.classList.remove('p85-checkin-hidden'));return}if(!ctrl){ctrl=document.createElement('button');ctrl.type='button';ctrl.id='p85CheckinToggle';ctrl.className='p85-checkin-toggle';ctrl.onclick=()=>{checkinsExpanded=!checkinsExpanded;organizeCheckins()};cards[0].insertAdjacentElement('beforebegin',ctrl)}const html=`<span>👀 Check-ins pendentes</span><b>${cards.length} · ${checkinsExpanded?'recolher':'ver todos'}</b>`;if(ctrl.innerHTML!==html)ctrl.innerHTML=html;cards.forEach((c,i)=>c.classList.toggle('p85-checkin-hidden',!checkinsExpanded&&i>=2))}
 function polish(){canonicalize();ensureStyle();relocateToday();hideLab();organizeCheckins()} function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;polish()})}
@@ -12727,11 +12727,11 @@ function ensureCss(){if($('#p117Style'))return;const st=document.createElement('
 function ensurePanel(){
   let host=$('#p117Highlights');if(host)return host;
   host=document.createElement('section');host.id='p117Highlights';
-  const anchor=$('#p78TodayCard')||$('#dashKpis')?.previousElementSibling||$('.dash-hero');
-  if(anchor)anchor.insertAdjacentElement('afterend',host);else $('#viewPainel .dash-wrap')?.prepend(host);
+  const hero=$('#viewPainel .dash-hero');
+  if(hero)hero.insertAdjacentElement('afterend',host);else $('#viewPainel .dash-wrap')?.prepend(host);
   return host;
 }
-function relocatePanel(){const host=$('#p117Highlights'),anchor=$('#p78TodayCard');if(host&&anchor&&anchor.nextElementSibling!==host)anchor.insertAdjacentElement('afterend',host)}
+function relocatePanel(){const host=$('#p117Highlights'),hero=$('#viewPainel .dash-hero');if(host&&hero&&hero.nextElementSibling!==host)hero.insertAdjacentElement('afterend',host)}
 function initials(n=''){return String(n).trim().split(/\s+/).slice(0,2).map(x=>x[0]?.toUpperCase()||'').join('')||'★'}
 function cardHTML(x){
   const c=cat(x.category),m=member(x.memberId),name=m?.nome||x.memberName||'Carbonauta',photo=m?.foto||'';
@@ -15190,6 +15190,67 @@ document.addEventListener('focusin',function(e){
   if(head&&!head.hasAttribute('tabindex'))head.setAttribute('tabindex','0');
 },true);
 window.CARBONAUTAS_ACCESS_COLLAPSE_BUILD='P137';
+})();
+</script>
+
+
+<style id="p144HomeOrderStyle">
+/* P144 · Destaques primeiro; Atenção depois; resumo Hoje no mesmo padrão das pastas */
+#viewPainel #p117Highlights{margin-bottom:12px!important}
+#viewPainel .p142-home-grid{margin-top:0!important}
+#viewPainel .p144-today #p78TodayCard{border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;margin:0!important;padding:0!important;width:100%!important;max-width:none!important}
+#viewPainel .p144-today #p78TodayCard .p78-head{display:none!important}
+#viewPainel .p144-today .p142-body{padding-top:4px!important}
+#viewPainel .p144-today .p78-sec{margin-top:10px!important}
+#viewPainel .p144-today .p78-sec:first-child{margin-top:6px!important}
+#viewPainel .p144-today .p78-row{border:1px solid #dfeae8!important;border-radius:16px!important;background:#fff!important;box-shadow:none!important;margin:7px 0!important}
+#viewPainel .p144-today .p78-next{border-radius:15px!important;background:#f5f9f8!important;border:1px solid #e0ebe9!important}
+#viewPainel .p144-today .p78-actions{margin-top:10px!important}
+#viewPainel .p142-command-card>.p142-accordion:nth-of-type(1) .p142-icon{background:#fff8e9!important;border-color:#f4dfae!important}
+#viewPainel .p142-command-card>.p142-accordion:nth-of-type(2) .p142-icon{background:#eaf7fb!important;border-color:#d2e8f0!important}
+#viewPainel .p142-command-card>.p142-accordion:nth-of-type(3) .p142-icon{background:#eaf8f1!important;border-color:#cfe9dc!important}
+#viewPainel .p142-command-card>.p142-accordion:nth-of-type(4) .p142-icon{background:#f2edfb!important;border-color:#e0d7f2!important}
+#viewPainel .p142-command-card>.p142-accordion:nth-of-type(5) .p142-icon{background:#eef6fb!important;border-color:#d9e8f2!important}
+@media(max-width:700px){
+  #viewPainel #p117Highlights{margin-bottom:10px!important}
+  #viewPainel .p144-today .p78-row{padding:11px 10px!important}
+  #viewPainel .p144-today .p78-main span{font-size:11px!important;line-height:1.35!important}
+}
+</style>
+<script id="p144HomeOrderController">
+(()=>{
+  'use strict';
+  const q=(s,r=document)=>r.querySelector(s);
+  function wrapToday(){
+    const card=q('#p78TodayCard'),command=q('#viewPainel .p142-command-card');
+    if(!card||!command)return false;
+    let wrap=q('#p144TodayDetails');
+    if(!wrap){
+      wrap=document.createElement('details');
+      wrap.id='p144TodayDetails';
+      wrap.className='p142-accordion p144-today';
+      wrap.innerHTML='<summary><span class="p142-icon">🔔</span><span class="p142-label"><b>Hoje no Carbonautas</b><small>Novidades e mudanças desde seu último acesso.</small></span><span class="p142-toggle"><span class="p142-show">Ver</span><span class="p142-hide">Fechar</span></span></summary><div class="p142-body p144-today-body"></div>';
+    }
+    const body=q('.p144-today-body',wrap);
+    if(body&&card.parentElement!==body)body.appendChild(card);
+    const first=q(':scope > .p142-accordion',command);
+    if(first&&first.nextElementSibling!==wrap)first.insertAdjacentElement('afterend',wrap);
+    return true;
+  }
+  function arrange(){
+    const hero=q('#viewPainel .dash-hero'),high=q('#p117Highlights'),home=q('#viewPainel .p142-home-grid');
+    if(hero&&high&&hero.nextElementSibling!==high)hero.insertAdjacentElement('afterend',high);
+    if(high&&home&&high.nextElementSibling!==home)high.insertAdjacentElement('afterend',home);
+    return wrapToday()&&!!high&&!!home;
+  }
+  function boot(){
+    if(arrange())return;
+    const root=q('#viewPainel')||document.body;
+    const ob=new MutationObserver(()=>{if(arrange())ob.disconnect()});
+    ob.observe(root,{childList:true,subtree:true});
+    setTimeout(()=>{arrange();ob.disconnect()},6000);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
 
