@@ -3,39 +3,31 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Carbonautas · Agenda P126</title>
+<title>Carbonautas · Conversas P127</title>
 <style>html,body{height:100%;margin:0;font-family:system-ui;background:#f6faf9;color:#183844}main{height:100%;display:grid;place-items:center}div{text-align:center;max-width:560px;padding:28px}h1{margin:0 0 10px;font-size:26px}p{color:#60757d;line-height:1.5}.ok{color:#087f5b;font-weight:700}</style>
 </head>
 <body>
-<main><div><h1>Corrigindo a Agenda na origem…</h1><p id="msg">Impedindo reconstruções do calendário quando os dados não mudaram.</p></div></main>
+<main><div><h1>Corrigindo as conversas…</h1><p id="msg">Sincronizando Fofoca geral, Panelinha e Privadas com a tela realmente aberta.</p></div></main>
 <script>
 (async()=>{
   const msg=document.getElementById('msg');
   const wait=ms=>new Promise(r=>setTimeout(r,ms));
   try{
-    if('caches' in window){
-      const keys=await caches.keys();
-      await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));
-    }
+    if('caches' in window){const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')).map(k=>caches.delete(k)));}
     if('serviceWorker' in navigator){
-      msg.textContent='Limpando cache e recarregando o motor da Agenda…';
+      msg.textContent='Limpando a regra antiga que deixava Panelinha verde…';
       const regs=await navigator.serviceWorker.getRegistrations();
       for(const r of regs){if(r.scope.includes('/carbonautas/')){try{await r.unregister()}catch(_e){}}}
-      await wait(400);
-      const reg=await navigator.serviceWorker.register('./sw.js?agenda=P126&t='+Date.now(),{updateViaCache:'none'});
+      await wait(350);
+      const reg=await navigator.serviceWorker.register('./sw.js?tabs=P127&t='+Date.now(),{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting)reg.waiting.postMessage('SKIP_WAITING');
-      const worker=reg.active||reg.waiting||reg.installing;
-      if(worker)worker.postMessage('FORCE_REFRESH_ALL');
-      await wait(1500);
+      const worker=reg.active||reg.waiting||reg.installing;if(worker)worker.postMessage('FORCE_REFRESH_ALL');
+      await wait(1300);
     }
-    msg.className='ok';
-    msg.textContent='P126 aplicada: atualizações irrelevantes do Firebase não recriam mais a Agenda.';
-  }catch(e){
-    console.warn(e);
-    msg.textContent='Atualização aplicada. Abrindo o Carbonautas…';
-  }
-  setTimeout(()=>location.replace('./?agenda=P126&t='+Date.now()),800);
+    msg.className='ok';msg.textContent='P127 aplicada: a aba verde agora acompanha a conversa realmente aberta.';
+  }catch(e){console.warn(e);msg.textContent='Correção aplicada. Abrindo o Carbonautas…'}
+  setTimeout(()=>location.replace('./?tabs=P127&t='+Date.now()),700);
 })();
 </script>
 </body>
