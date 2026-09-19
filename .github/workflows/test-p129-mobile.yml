@@ -34,8 +34,10 @@ jobs:
               userAgent:'Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36'
             });
             const page=await context.newPage();
-            const navs=[];
-            page.on('framenavigated',f=>{if(f===page.mainFrame())navs.push(f.url())});
+            const documentRequests=[];
+            let domContentLoaded=0;
+            page.on('request',r=>{if(r.isNavigationRequest()&&r.frame()===page.mainFrame())documentRequests.push(r.url())});
+            page.on('domcontentloaded',()=>domContentLoaded++);
             page.on('console',m=>console.log('browser:',m.type(),m.text()));
             const url='https://ernandes-sobreira.github.io/carbonautas/?p129-mobile-probe='+Date.now();
             await page.goto(url,{waitUntil:'domcontentloaded',timeout:60000});
@@ -47,9 +49,9 @@ jobs:
               navType:performance.getEntriesByType('navigation')[0]?.type||null,
               swControlled:!!navigator.serviceWorker?.controller
             }));
-            console.log('RESULTADO',JSON.stringify({...out,mainNavigations:navs.length,urls:navs}));
+            console.log('RESULTADO',JSON.stringify({...out,documentLoads:documentRequests.length,domContentLoaded,documentRequests}));
             if(out.build!=='P129-MENOS-20260919')throw new Error('build inesperada: '+out.build);
-            if(navs.length!==1)throw new Error('a pagina navegou/recarregou sozinha; navegacoes='+navs.length);
+            if(documentRequests.length!==1||domContentLoaded!==1)throw new Error('houve reload real na primeira abertura; documentos='+documentRequests.length+' domcontentloaded='+domContentLoaded);
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
