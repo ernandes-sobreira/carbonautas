@@ -20,15 +20,29 @@ jobs:
           ref: fix/rede-acompanhamento-mobile
           fetch-depth: 0
 
+      - name: Corrigir validação local do aplicador
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('.github/p135_patch.py')
+          s=p.read_text(encoding='utf-8')
+          old="'ajustes rede': 'id=\"p135RedeSettings\"' in s,"
+          new="'ajustes rede': \"modal.id='p135RedeSettings'\" in s,"
+          if old not in s:
+              raise SystemExit('Validação antiga não encontrada')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+          PY
+
       - name: Aplicar correção auditada
         run: python3 .github/p135_patch.py
 
       - name: Validar diff
         run: |
           git diff --check
-          grep -q "const painted=!!\$('#graph g.node'\)" index.html
-          grep -q 'p135-rede-acompanhamento-fix' index.html
-          grep -q 'p135HealthDetails' index.html
+          grep -Fq "const painted=!!\$('#graph g.node')" index.html
+          grep -Fq 'p135-rede-acompanhamento-fix' index.html
+          grep -Fq 'p135HealthDetails' index.html
+          grep -Fq "modal.id='p135RedeSettings'" index.html
 
       - name: Commit no branch de correção
         run: |
