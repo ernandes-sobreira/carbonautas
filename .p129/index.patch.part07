@@ -1,0 +1,72 @@
++#p129Shortcuts button b{display:block;font-size:13px;font-weight:800}
++#p129Shortcuts button small{display:block;font-size:11px;color:#71868b}
++#p129Shortcuts button span{font-size:20px}
++#p129Send{display:none}
++@media(max-width:760px){
++  #p129Send{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0 0 10px;padding:14px;border:0;border-radius:16px;background:#168f94;color:#fff;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 8px 20px rgba(22,143,148,.25)}
++  #repoMainHead #newOfficeBtn,#repoMainHead #addRepoPackageBtn,#repoMainHead #repoDedupeBtn,#repoMainHead #addPubBtn{display:none!important}
++  #repoMainHead.p129-open #newOfficeBtn,#repoMainHead.p129-open #addRepoPackageBtn,#repoMainHead.p129-open #repoDedupeBtn{display:inline-flex!important;width:100%;justify-content:center}
++  #p129More{width:100%;justify-content:center}
++  #scienceDock{display:none!important}
++  #scienceDock.p129-open{display:block!important}
++  #p129DockToggle{width:100%;justify-content:center;margin:0 0 10px}
++}
++`;
++function ensureCss(){if(document.getElementById('p129Style'))return;const s=document.createElement('style');s.id='p129Style';s.textContent=css;document.head.appendChild(s)}
++
++/* ---------- 4) um badge só ---------- */
++let own=0,mine='';
++function syncBadge(){
++  const a=$('#msgBadge'),b=$('#privateBadge');if(!a||!b)return;
++  const n=own+(parseInt(b.textContent,10)||0);
++  const txt=n?(n>99?'99+':String(n)):'';
++  if(a.textContent===txt&&(txt?a.style.display!=='none':a.style.display==='none'))return;
++  mine=txt;a.textContent=txt;a.style.display=txt?'':'none';
++}
++function watchBadges(){
++  const a=$('#msgBadge'),b=$('#privateBadge');if(!a||!b)return;
++  own=parseInt(a.textContent,10)||0;
++  new MutationObserver(()=>{if(a.textContent!==mine)own=parseInt(a.textContent,10)||0;syncBadge()}).observe(a,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['style']});
++  new MutationObserver(syncBadge).observe(b,{childList:true,characterData:true,subtree:true});
++  syncBadge();
++}
++
++/* ---------- 2, 3, 8) atalhos e entrada do Repositório ---------- */
++function go(v){try{if(typeof switchView==='function')switchView(v);else if(typeof window.switchView==='function')window.switchView(v)}catch(e){console.warn(e)}}
++function injectRepo(){
++  const head=$('#repoMainHead');if(!head||$('#p129Send'))return;
++  const send=document.createElement('button');send.id='p129Send';send.type='button';send.innerHTML='＋ Enviar arquivo';
++  send.onclick=()=>{const b=$('#addPubBtn');if(b)b.click()};
++  head.parentNode.insertBefore(send,head);
++  const more=document.createElement('button');more.id='p129More';more.type='button';more.className='btn';more.textContent='Mais';
++  more.onclick=()=>{const open=head.classList.toggle('p129-open');more.textContent=open?'Fechar':'Mais'};
++  head.appendChild(more);
++  if(window.innerWidth>760)more.style.display='none';
++  const dock=$('#scienceDock');
++  if(dock){
++    const t=document.createElement('button');t.id='p129DockToggle';t.type='button';t.className='btn';t.textContent='✨ Criar documento';
++    t.onclick=()=>{const open=dock.classList.toggle('p129-open');t.textContent=open?'Fechar':'✨ Criar documento'};
++    dock.parentNode.insertBefore(t,dock);
++    if(window.innerWidth>760)t.style.display='none';
++  }
++  const tabs=$('#repoModeTabs');
++  if(tabs&&!$('#p129Shortcuts')){
++    const sc=document.createElement('div');sc.id='p129Shortcuts';
++    sc.innerHTML=`<button type="button" data-go="lab"><span>🧪</span><span><b>Laboratório de Dados</b><small>Análises e planilhas</small></span></button><button type="button" data-go="jogo"><span>🎮</span><span><b>Jogo do Carbonauta</b><small>Ciclo do carbono</small></span></button>`;
++    sc.querySelectorAll('button').forEach(b=>b.onclick=()=>go(b.dataset.go));
++    tabs.parentNode.insertBefore(sc,tabs.nextSibling);
++  }
++}
++
++function boot(){
++  ensureCss();injectRepo();watchBadges();
++  setTimeout(injectRepo,800);setTimeout(injectRepo,2500);
++  window.addEventListener('resize',()=>{const d=window.innerWidth>760?'none':'';['p129More','p129DockToggle'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=d})});
++  console.info('Carbonautas',BUILD,'geral sem temas, jogo e lab no Repositório, um badge, sem KPIs');
++}
++if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
++})();
++
+ </script>
+ <style id="agendaDeckP109" data-src="agenda-deck-p109.css">
+ /* Carbonautas P109 · Agenda em pastas + baralho deslizante. Somente apresentação. */
