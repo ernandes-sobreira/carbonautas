@@ -1,0 +1,114 @@
+diff --git a/README.md b/README.md
+index b2458fe..4bf4886 100644
+--- a/README.md
++++ b/README.md
+@@ -6,7 +6,7 @@ Plataforma da Rede Carbonautas (LIPAN/LEFA/CELBE, UNEMAT). Arquivo unico `index.
+ 
+ | Caminho | Uso |
+ |---|---|
+-| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P126 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
++| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P129 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
+ | `sw.js` | Service worker. So cache e pagina offline. Nao injeta mais nada no HTML |
+ | `game.html`, `recovery.html`, `chrome-reset.html`, `manifest.webmanifest`, icones | Publicar junto na raiz |
+ | `firestore.rules` | Unica fonte das regras. Publicar no Console do Firebase. Contem tambem as regras de outros sistemas (`projects/`) |
+@@ -37,6 +37,27 @@ Para restaurar por Git: `git checkout P126-pre-consolidacao -- .`
+ 
+ ## CHANGELOG
+ 
++### P129 · 2026-09-19 · Menos na tela, abertura mais leve
++- Fofoca geral sem temas: saem a barra de temas e o seletor por mensagem. Mensagens antigas continuam visiveis.
++- Jogo sai do Painel e Lab sai do menu. Os dois viram cards no topo do Repositorio. As telas continuam existindo.
++- Um so badge em Conversas (equipe + privadas somadas).
++- Painel sem os quatro KPIs numericos. Ficam as listas curtas e o bloco Acessos.
++- d3, mammoth, xlsx e pdf.js deixam de carregar na abertura. Cada um baixa na primeira vez que a tela precisa (grafo da Rede, preview de DOCX, planilha, PDF, exportacoes). Cerca de 1,3 MB a menos no primeiro acesso.
++- Corrigido: a primeira visita recarregava a pagina sozinha (o service worker antigo e a camada P85 forcavam reload ao assumir o controle). Agora abre uma vez so.
++- Repositorio no celular: botao grande "Enviar arquivo" no topo, Science Dock recolhido atras de "Criar documento", botoes secundarios atras de "Mais". No computador nada muda.
++- Nao alterado: regras, VPS, dados, Agenda, notificacoes, reacoes dos destaques.
++
++### P128 · 2026-09-19 · Menos coisas na tela
++- Medalhas, pontos e ranking saem da interface (botao, resumo e cards). Os dados continuam no Firestore; nada foi apagado.
++- Check-in com texto sai. Entrar no app registra presenca em `rede_members.lastSeenAt` (uma vez a cada 30 min, so no proprio cadastro).
++- Painel da coordenacao ganha o bloco "Acessos": nome e quando entrou (hoje, ontem, N dias). Alunos nao veem esse bloco.
++- Pessoas: ao abrir um integrante aparece a "Linha do tempo" (prazos, tarefas, arquivos, fotos e destaques da pessoa, mais recente primeiro; 12 itens e botao "Ver tudo").
++- Painel com menos palavras: frases de explicacao reduzidas a uma linha.
++- O jogo so carrega quando a tela do jogo e aberta. Antes o three.js baixava em todo acesso.
++- Novo `vps/P128_lembretes_email.js`: lembrete diario de prazos por e-mail, gratuito (Gmail com senha de app), com resumo para a coordenacao. Instrucoes no cabecalho do arquivo.
++- Novo `vps/P128_ONLYOFFICE_LEVE.txt`: como abrir o editor no modo mobile e com barra compacta.
++- Nao alterado: regras, VPS, dados, conversas, mural, destaques, repositorio.
++
+ ### P127 · 2026-09-19 · Consolidacao
+ - `index.html` passa a conter as 64 camadas (49 scripts e 2 CSS que o `sw.js` injetava, mais 9 scripts e 4 CSS que a camada P91 carregava em cadeia), na mesma ordem de execucao de antes. Primeira visita ja abre a versao completa; nao depende mais do service worker instalar e recarregar a pagina.
+ - `sw.js` reduzido a cache e pagina offline.
+diff --git a/sw.js b/sw.js
+index 24b8266..422e0f0 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,7 +1,7 @@
+-/* Carbonautas · service worker P127
+-   Só faz cache de recursos e página offline.
++/* Carbonautas · service worker P129
++   Só faz cache de recursos e página offline. Não recarrega abas ao ativar; a atualização acontece na próxima abertura.
+    Não injeta mais scripts no HTML: todas as camadas estão dentro do index.html. */
+-const CACHE='carbonautas-p127-20260919';
++const CACHE='carbonautas-p129-20260919';
+ const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#f6faf9;color:#183844"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
+ 
+ self.addEventListener('install',()=>{self.skipWaiting();});
+@@ -10,15 +10,6 @@ self.addEventListener('activate',event=>{event.waitUntil((async()=>{
+   const keys=await caches.keys();
+   await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));
+   await self.clients.claim();
+-  // Recarrega uma vez as abas abertas para sair da versão anterior (que dependia de injeção).
+-  const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
+-  await Promise.all(clients.map(c=>{
+-    try{
+-      const u=new URL(c.url);
+-      if(u.pathname.endsWith('/recovery.html')||u.pathname.endsWith('/chrome-reset.html'))return null;
+-      return c.navigate(u.href).catch(()=>null);
+-    }catch(_e){return null}
+-  }));
+ })());});
+ 
+ self.addEventListener('message',event=>{
+diff --git a/index.html.sha512 b/index.html.sha512
+index 7c4db20..6d23be9 100644
+--- a/index.html.sha512
++++ b/index.html.sha512
+@@ -1 +1 @@
+-c55a8d00e501fe14bc1f3b375bca4b889c031feb943d7dca0a25090ec344b6c8e38a76be631677c0c046c2bb3e63ab541074fa74e750bcf2df42d320933b300f  index.html
++1b7f24c1657b7431991e89bd20a87cdfb44e8553de88ae772ac3d54135122869044519d7310d3ea5fcb335c2ff1312d7fd37eda3c9353ab5befc2ce120215973  index.html
+diff --git a/mnt/data/p129/carbonautas-P129/vps/P128_ONLYOFFICE_LEVE.txt b/vps/P128_ONLYOFFICE_LEVE.txt
+new file mode 100644
+index 0000000..6cbcb6d
+--- /dev/null
++++ b/vps/P128_ONLYOFFICE_LEVE.txt
+@@ -0,0 +1,40 @@
++Carbonautas P128 · ONLYOFFICE mais leve no celular
++
++O editor pesa porque abre no modo "desktop" com barra completa. A configuração é assinada (JWT)
++no VPS, então a mudança precisa ser feita lá, não no index.html.
++
++Onde: nos três pontos do servidor Node que montam `const config={ documentType:..., type:'desktop', ...`
++(rotas do P16, P22 e P24). Em cada um deles:
++
++1) Detectar celular pelo User-Agent, logo antes de montar `customization`:
++
++    const mobile=/Android|iPhone|iPad|Mobile/i.test(String(req.headers['user-agent']||''));
++
++2) Trocar a linha de customization por:
++
++    const customization={
++      autosave:true,forcesave:true,uiTheme:'theme-light',
++      compactToolbar:true,
++      toolbarNoTabs:true,
++      hideRightMenu:true,
++      compactHeader:true,
++      toolbarHideFileName:true,
++      help:false,about:false,feedback:false,
++      layout:{toolbar:{file:false,home:{mailmerge:false},insert:false,layout:false,references:false,collaboration:{comments:true},protect:false,plugins:false,view:false}}
++    };
++
++3) Trocar `type:'desktop'` por:
++
++    type:mobile?'mobile':'desktop',
++
