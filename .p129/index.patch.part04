@@ -1,0 +1,45 @@
+-function renderHeader(){if(!ensureMount())return;const title=$('#p46ChatTitle'),sub=$('#p46ChatSub'),ico=$('#p46ChatIcon');if(mode==='general'){title.textContent='Fofoca geral';sub.textContent='Conversa aberta da equipe · filtre as mensagens por tema';ico.textContent='💬'}else{const g=groupById(activeGroupId);title.textContent=g?.groupName||'Conversas em panelinha';sub.textContent=g?`${(g.memberIds||[]).length} participantes · grupo da equipe`:'Escolha ou crie uma panelinha';ico.textContent='👥'}renderTopics();renderSide();renderMessages();renderReply();enhanceSubNav()}
++function renderHeader(){if(!ensureMount())return;const title=$('#p46ChatTitle'),sub=$('#p46ChatSub'),ico=$('#p46ChatIcon');if(mode==='general'){title.textContent='Fofoca geral';sub.textContent='Conversa aberta da equipe';ico.textContent='💬'}else{const g=groupById(activeGroupId);title.textContent=g?.groupName||'Conversas em panelinha';sub.textContent=g?`${(g.memberIds||[]).length} participantes · grupo da equipe`:'Escolha ou crie uma panelinha';ico.textContent='👥'}renderTopics();renderSide();renderMessages();renderReply();enhanceSubNav()}
+ function setMode(next){mode=next==='groups'?'groups':'general';if(mode==='groups'&&!activeGroupId){activeGroupId=groupMetas()[0]?.groupId||''}renderHeader();if(window.innerWidth<760){const side=$('.p46-side');if(side)side.style.display='none'}}
+ 
+ function enhanceSubNav(){const nav=$('#subNav');if(!nav)return;const gen=nav.querySelector('[data-sub-view="mensagens"]'),priv=nav.querySelector('[data-sub-view="conversas"]');if(!gen||!priv)return;gen.childNodes[0].nodeValue='Fofoca geral';priv.childNodes[0].nodeValue='Privadas';let pan=nav.querySelector('.p46-panel-btn');if(!pan){pan=document.createElement('button');pan.type='button';pan.className='p46-panel-btn';pan.textContent='Conversas em panelinha';pan.onclick=()=>{if(typeof window.switchView==='function'&&document.body.dataset.view!=='mensagens')window.switchView('mensagens');setTimeout(()=>setMode('groups'),20)};nav.insertBefore(pan,priv)}
+@@ -10995,13 +11012,13 @@ function decorateActivity(card,id){
+   card.classList.add(mine?'p68-mine':'p68-watch');
+   let explanation='';
+   if(mine){
+-    explanation=`Esta tarefa está vinculada a você. ${dueText(a)}`;
++    explanation=`${dueText(a)}`;
+   }else if(file){
+-    explanation=`Responsável: ${owner}. Há um arquivo visível no Repositório, mas <b>não existe uma solicitação de correção para você neste acompanhamento</b>. ${dueText(a)}`;
++    explanation=`${owner} · arquivo no Repositório. ${dueText(a)}`;
+   }else if(needsFile(a)){
+-    explanation=`Responsável: ${owner}. <b>Nenhum arquivo correspondente está visível para você no Repositório.</b> Portanto, isto é acompanhamento do prazo, não uma correção esperando sua decisão. ${dueText(a)}`;
++    explanation=`${owner} · sem arquivo ainda. ${dueText(a)}`;
+   }else{
+-    explanation=`Responsável: ${owner}. Isto é um item de acompanhamento dela/dele, não uma demanda direta para você. ${dueText(a)}`;
++    explanation=`${owner}. ${dueText(a)}`;
+   }
+   if(detail)detail.innerHTML=`<div class="p68-decision"><span class="p68-pill ${mine?'mine':'watch'}">${mine?'🔥 AÇÃO SUA':`👀 AÇÃO DE ${esc(first(owner).toUpperCase())}`}</span>${needsFile(a)||file?`<span class="p68-pill ${file?'file':'nofile'}">${file?'📄 Arquivo visível':'⏳ Sem arquivo visível'}</span>`:''}</div><div class="p68-explain">${explanation}</div><div class="p68-origin">${file?`Arquivo encontrado: ${esc(file.fileName||file.titulo||'Arquivo')}. `:''}${esc(creatorText(a))}</div>`;
+   if(actions){
+@@ -11029,9 +11046,9 @@ function processCard(card){
+   if(key.startsWith('checkin:'))return decorateCheckin(card,key);
+   return decorateOther(card,key)
+ }
+-function section(title,sub,count,nodes){const wrap=document.createElement('div');wrap.className='p68-section';wrap.innerHTML=`<div class="p68-section-head"><div>${title}<div class="p68-section-sub">${sub}</div></div><span>${count}</span></div>`;if(nodes.length)nodes.forEach(n=>wrap.appendChild(n));else{const e=document.createElement('div');e.className='p68-empty';e.textContent=title.includes('Precisa')?'Nada esperando uma decisão sua agora.':'Nada para acompanhar agora.';wrap.appendChild(e)}return wrap}
++function section(title,sub,count,nodes){const wrap=document.createElement('div');wrap.className='p68-section';wrap.innerHTML=`<div class="p68-section-head"><div>${title}<div class="p68-section-sub">${sub}</div></div><span>${count}</span></div>`;if(nodes.length)nodes.forEach(n=>wrap.appendChild(n));else{const e=document.createElement('div');e.className='p68-empty';e.textContent=title.includes('Precisa')?'Nada pendente.':'Nada por enquanto.';wrap.appendChild(e)}return wrap}
+ function updateKpis(mineCount,watchCount){
+-  try{const ks=[...document.querySelectorAll('#dashKpis .dash-kpi')];if(ks[0]){ks[0].querySelector('.k-n').textContent=mineCount;ks[0].querySelector('.k-l').textContent='precisam de você'}if(ks[2]){ks[2].querySelector('.k-n').textContent=watchCount;ks[2].querySelector('.k-l').textContent='só acompanhar'}const g=document.getElementById('dashGreeting');if(g)g.textContent='Veja primeiro o que realmente depende de você. O restante fica separado apenas para acompanhamento.'}catch(_e){}
++  try{const ks=[...document.querySelectorAll('#dashKpis .dash-kpi')];if(ks[0]){ks[0].querySelector('.k-n').textContent=mineCount;ks[0].querySelector('.k-l').textContent='precisam de você'}if(ks[2]){ks[2].querySelector('.k-n').textContent=watchCount;ks[2].querySelector('.k-l').textContent='só acompanhar'}const g=document.getElementById('dashGreeting');if(g)g.textContent='Primeiro o que depende de você.'}catch(_e){}
+ }
+ function transform(){
+   const root=document.getElementById('dashAttention');if(!root||busy)return;
+@@ -11041,7 +11058,7 @@ function transform(){
+   try{
+     const done=root.querySelector('.p56-done-box'),mine=[],watch=[];
+     cards.forEach(card=>{const r=processCard(card);(r.mine?mine:watch).push(card)});
+-    root.innerHTML='';root.appendChild(section('🔥 Precisa de você','Só entra aqui o que realmente espera uma decisão ou ação sua.',mine.length,mine));root.appendChild(section('👀 Só acompanhar','Prazos e tarefas dos alunos. Não são demandas suas.',watch.length,watch));if(done)root.appendChild(done);
++    root.innerHTML='';root.appendChild(section('🔥 Precisa de você','Espera uma ação sua.',mine.length,mine));root.appendChild(section('👀 Só acompanhar','Prazos dos alunos.',watch.length,watch));if(done)root.appendChild(done);
+     root.dataset.p68Signature=keys;updateKpis(mine.length,watch.length);
+   }finally{busy=false}
+ }
+@@ -11741,7 +11758,7 @@ function reconcileLocal(){const local=localAsEntries();let next=entries;for(cons
