@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Carbonautas · Dossiê atualizado</title>
+<title>Carbonautas · Marca P134</title>
 <style>html,body{height:100%;margin:0;font-family:system-ui;background:#f6faf9;color:#183844}main{height:100%;display:grid;place-items:center}div{text-align:center;max-width:560px;padding:28px}h1{margin:0 0 10px;font-size:26px}p{color:#60757d;line-height:1.5}.ok{color:#087f5b;font-weight:700}</style>
 </head>
 <body>
-<main><div><h1>Atualizando o Dossiê…</h1><p id="msg">Ativando datas reais, resumo de hoje, semana e mês.</p></div></main>
+<main><div><h1>Atualizando a identidade visual…</h1><p id="msg">Aplicando a nova marca Carbonautas e renovando os arquivos do aplicativo.</p></div></main>
 <script>
 (async()=>{
   const msg=document.getElementById('msg');
@@ -19,14 +19,14 @@
       const regs=await navigator.serviceWorker.getRegistrations();
       for(const r of regs){if(r.scope.includes('/carbonautas/')){try{await r.unregister()}catch(_e){}}}
       await wait(350);
-      const reg=await navigator.serviceWorker.register('./sw.js?dossier=P133&t='+Date.now(),{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?brand=P134&t='+Date.now(),{updateViaCache:'none'});
       await reg.update();
       if(reg.waiting)reg.waiting.postMessage('SKIP_WAITING');
       await wait(1200);
     }
-    msg.className='ok';msg.textContent='Atualizado: Dossiê com datas reais, períodos automáticos e botão largo no painel.';
+    msg.className='ok';msg.textContent='P134 aplicada: nova marca, ícones e PWA atualizados. Dossiê e demais correções preservados.';
   }catch(e){console.warn(e);msg.textContent='Atualização aplicada. Abrindo o Carbonautas…'}
-  setTimeout(()=>location.replace('./?dossier=P133&t='+Date.now()),700);
+  setTimeout(()=>location.replace('./?brand=P134&t='+Date.now()),700);
 })();
 </script>
 </body>
