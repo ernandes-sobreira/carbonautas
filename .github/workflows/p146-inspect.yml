@@ -1,0 +1,38 @@
+name: P146 inspect repository categories
+on:
+  push:
+    branches: [fix/p146-repository-categories]
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect category definitions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          terms=['Nota técnica','Artigo científico','Resumo expandido','Resumo simples','Plano de visibilidade','Jogo','Plataforma','Projeto','Apresentação','Cronograma','Relatório','Livro','Capítulo','Todas as categorias']
+          out=[]
+          for term in terms:
+              out.append(f'### {term} count={s.count(term)}')
+              start=0
+              for n in range(min(s.count(term),8)):
+                  i=s.find(term,start)
+                  if i<0: break
+                  a=max(0,i-500); b=min(len(s),i+1200)
+                  out.append(s[a:b].replace('\n','\\n'))
+                  out.append('---')
+                  start=i+len(term)
+          Path('p146-inspect.txt').write_text('\n'.join(out),encoding='utf-8')
+          PY
+      - name: Commit report
+        run: |
+          git config user.name "ernandes-sobreira"
+          git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
+          git add p146-inspect.txt
+          git commit -m "chore: inspect repository categories" || exit 0
+          git push
