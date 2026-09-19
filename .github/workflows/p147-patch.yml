@@ -13,10 +13,14 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          s=s.replace('          <option value="cronograma">Cronograma</option>\n','',1)
-          s=s.replace('Object.entries(CATEGORIAS).sort(',"Object.entries(CATEGORIAS).filter(([k])=>k!=='cronograma').sort(",1)
+          s,n1=re.subn(r'^[ \t]*<option\s+value="cronograma">Cronograma</option>[ \t]*\r?$', '', s, count=1, flags=re.M)
+          s,n2=re.subn(r'Object\.entries\(CATEGORIAS\)\.sort\(', "Object.entries(CATEGORIAS).filter(([k])=>k!=='cronograma').sort(", s, count=1)
+          print('removed_option',n1,'patched_filter',n2)
+          if n1!=1 or n2!=1:
+              raise SystemExit('P147 target pattern mismatch')
           p.write_text(s,encoding='utf-8')
           PY
       - name: Commit fix
@@ -24,5 +28,5 @@ jobs:
           git config user.name "ernandes-sobreira"
           git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
           git add index.html
-          git commit -m "P147: retirar cronograma das opções do repositório" || exit 0
+          git commit -m "P147: retirar cronograma das opções do repositório"
           git push
