@@ -1,0 +1,18 @@
+name: Validate P151 academic link
+on:
+  push:
+    branches: [fix/p151-academic-link]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax check
+        run: node --check modules/rede-orientacao-p150.js
+      - name: Scope check
+        run: |
+          git diff --check HEAD~1 HEAD
+          grep -q "vinculoCoordenador" modules/rede-orientacao-p150.js
+          grep -q "data-p135-mode=\"orientation\"" p135-rede-acompanhamento.js
