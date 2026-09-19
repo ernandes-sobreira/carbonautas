@@ -1,0 +1,62 @@
+name: Consolidar P127
+
+on:
+  push:
+    branches: [P126-pre-consolidacao-safety]
+
+permissions:
+  contents: write
+
+jobs:
+  consolidate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout da branch de seguranca
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Preparar construtor e voltar para main
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/p127-assets
+          mkdir -p /tmp/p127-assets
+          cp -a .p127/. /tmp/p127-assets/
+          git fetch origin main
+          git checkout --detach origin/main
+          test "$(git rev-parse HEAD)" = "6b30e16803eff1ff0fbef9a83a6e6efa32b88f4f"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Criar ponto de restauracao P126
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! git ls-remote --exit-code --tags origin refs/tags/P126-pre-consolidacao >/dev/null 2>&1; then
+            git tag -a P126-pre-consolidacao -m "Ultima versao com patches injetados pelo sw.js" 6b30e16803eff1ff0fbef9a83a6e6efa32b88f4f
+            git push origin refs/tags/P126-pre-consolidacao
+          fi
+
+      - name: Construir e auditar P127 consolidada
+        shell: bash
+        run: |
+          set -euo pipefail
+          python /tmp/p127-assets/consolidate.py /tmp/p127-assets
+
+      - name: Commit unico e push para main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git status --short
+          if git diff -- firestore.rules | grep -q .; then
+            echo "firestore.rules mudou: abortando" >&2
+            exit 1
+          fi
+          git add -A
+          if git diff --cached --name-only | grep -qx firestore.rules; then
+            echo "firestore.rules entrou no commit: abortando" >&2
+            exit 1
+          fi
+          git commit -m "P127: consolidacao das camadas no index.html, sw.js so cache, raiz limpa"
+          git push origin HEAD:main
