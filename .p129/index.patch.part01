@@ -1,0 +1,116 @@
+diff --git a/index.html b/index.html
+index adbf748..c79549a 100644
+--- a/index.html
++++ b/index.html
+@@ -12,10 +12,6 @@
+ <link rel="preconnect" href="https://fonts.googleapis.com">
+ <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+-<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+-<script src="https://cdn.jsdelivr.net/npm/mammoth@1.10.0/mammoth.browser.min.js"></script>
+-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+ <style>
+   :root{
+     --petrol:#0E5C63; --petrol-d:#0a464c; --agua:#1E88C7; --cerrado:#2E9E5B;
+@@ -1771,7 +1767,7 @@
+   <div class="view on" id="viewPainel">
+     <div class="dash-scroll"><div class="dash-wrap">
+       <div class="dash-hero">
+-        <div><h2>O que precisa da minha atenção?</h2><p id="dashGreeting">Prazos, correções, bolsas, check-ins, produtos e pessoas que precisam de acompanhamento.</p></div>
++        <div><h2>O que precisa da minha atenção?</h2><p id="dashGreeting">O que espera você hoje.</p></div>
+         <div class="spacer"></div>
+         <div class="dash-hero-actions"><button class="btn" id="dashCheckinBtn">✓ Check-in mensal</button><button class="btn" id="dashProductBtn">🎯 Registrar produto</button><button class="btn" id="dashMedalsBtn">🏅 Medalhas</button><button class="btn" id="dashGameBtn">🎮 Jogo</button><button class="btn primary" id="dashDossierBtn">📚 Dossiê</button><button class="btn" id="dashBackupBtn" style="display:none">📦 Backup Excel</button></div>
+       </div>
+@@ -1910,7 +1906,7 @@
+   <div class="view" id="viewJogo">
+     <div class="game-scroll"><div class="game-wrap">
+       <div class="game-head"><div><h2>🎮 Carbonauta</h2><p>Sete mundos do ciclo do carbono. Completar o ciclo vale pontos no ranking, no máximo uma vez por dia.</p></div><div class="spacer"></div><button class="btn" type="button" id="reloadGameBtn">↻ Reiniciar jogo</button></div>
+-      <div class="game-frame-shell"><iframe id="carbonautaGameFrame" src="./game.html?v=P28" title="Jogo Carbonauta" allow="autoplay; fullscreen"></iframe></div>
++      <div class="game-frame-shell"><iframe id="carbonautaGameFrame" data-src="./game.html?v=P128" title="Jogo Carbonauta" allow="autoplay; fullscreen"></iframe></div>
+     </div></div>
+   </div>
+ 
+@@ -3128,6 +3124,22 @@ let repoPackageUploadContext = 'general';
+ let activeRepoFolderAccessId = '';
+ let pendingRepoAddFilesId = '';
+ const FB = () => window.fbFns;
++// P129 · bibliotecas pesadas so quando a tela precisa
++const P129_LIBS={
++  d3:{src:'https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js',ok:()=>!!window.d3},
++  mammoth:{src:'https://cdn.jsdelivr.net/npm/mammoth@1.10.0/mammoth.browser.min.js',ok:()=>!!window.mammoth},
++  xlsx:{src:'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',ok:()=>!!window.XLSX},
++  pdfjs:{src:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',ok:()=>!!window.pdfjsLib}
++};
++const p129LibPromises={};
++function ensureLib(name){
++  const lib=P129_LIBS[name];if(!lib)return Promise.reject(new Error('lib desconhecida: '+name));
++  if(lib.ok())return Promise.resolve();
++  if(p129LibPromises[name])return p129LibPromises[name];
++  p129LibPromises[name]=new Promise((res,rej)=>{const s=document.createElement('script');s.src=lib.src;s.async=true;s.onload=()=>lib.ok()?res():rej(new Error(name+' nao inicializou'));s.onerror=()=>{delete p129LibPromises[name];rej(new Error('Nao consegui baixar '+name+'. Verifique a conexao.'))};document.head.appendChild(s)});
++  return p129LibPromises[name];
++}
++window.ensureLib=ensureLib;
+ 
+ /* ============ HELPERS ============ */
+ const $=s=>document.querySelector(s);
+@@ -3950,7 +3962,7 @@ function renderLinhaFilters(){
+ }
+ function linhaColor(l){
+   let h=0; for(let k=0;k<l.length;k++){h=(h*31+l.charCodeAt(k))>>>0}
+-  return d3.hsl(h%360, .5, .55).toString();
++  return `hsl(${h%360},50%,55%)`;
+ }
+ 
+ /* ============ GESTÃO DE LINHAS DE PESQUISA ============ */
+@@ -4051,9 +4063,11 @@ function renderProgramaFilter(){
+ }
+ 
+ /* ============ RENDER: GRAPH ============ */
+-const svg=d3.select('#graph');
++let svg=null; // P129: criado em initGraph, depois de carregar o d3
+ let gZoom, gLink, gNode, zoomBehavior;
+ function initGraph(){
++  if(!window.d3||gZoom)return;
++  svg=d3.select('#graph');
+   const g=svg.append('g').attr('class','zoomG');
+   gZoom=g; gLink=g.append('g'); gNode=g.append('g');
+   zoomBehavior=d3.zoom().scaleExtent([.35,3]).on('zoom',e=>g.attr('transform',e.transform));
+@@ -4062,6 +4076,7 @@ function initGraph(){
+ function graphSize(){const r=$('#graph').getBoundingClientRect();return [r.width||600,r.height||400]}
+ 
+ function renderGraph(){
++  if(!window.d3||!gZoom){ensureLib('d3').then(()=>{initGraph();renderGraph()}).catch(e=>{console.warn(e);const eg=$('#emptyGraph');if(eg){eg.style.display='grid'}});return}
+   const members=visibleMembers();
+   $('#emptyGraph').style.display = members.length? 'none':'grid';
+   const links=buildLinks(members);
+@@ -4146,6 +4161,7 @@ function hoverNode(d,on){
+   gNode.selectAll('g.node').classed('dim',n=>on&&!neigh.has(n.id));
+ }
+ function fitView(){
++  if(!svg||!zoomBehavior)return;
+   svg.transition().duration(400).call(zoomBehavior.transform,d3.zoomIdentity);
+   if(simulation) simulation.alpha(.5).restart();
+ }
+@@ -4432,6 +4448,7 @@ function externalViewerUrl(url,ext=''){
+   return url;
+ }
+ async function renderPdfJs(viewUrl,name='PDF'){
++  try{await ensureLib('pdfjs')}catch(e){throw new Error(e.message)}
+   const body=$('#filePreviewBody');
+   try{
+     if(!window.pdfjsLib?.getDocument)throw new Error('Leitor PDF não carregou. Verifique sua conexão e tente novamente.');
+@@ -4511,7 +4528,7 @@ async function openFilePreview(url,name='Arquivo',context=null){
+   if(ext==='docx'){
+     try{
+       if(!window.mammoth) throw new Error('Leitor local indisponível.');
+-      const ab=await previewFetch(viewUrl), result=await window.mammoth.convertToHtml({arrayBuffer:ab});
++      await ensureLib('mammoth');const ab=await previewFetch(viewUrl), result=await window.mammoth.convertToHtml({arrayBuffer:ab});
+       body.innerHTML=`<article class="docx-preview">${sanitizePreviewHtml(result.value||'<p>Documento vazio.</p>')}</article>`;
+     }catch(e){
+       console.warn('Leitor local do Word falhou; usando visualizador online.',e);
+@@ -4522,7 +4539,7 @@ async function openFilePreview(url,name='Arquivo',context=null){
+   if(ext==='xlsx'||ext==='xls'){
+     try{
+       if(!window.XLSX) throw new Error('Leitor local indisponível.');
+-      const ab=await previewFetch(viewUrl); previewWorkbook=window.XLSX.read(ab,{type:'array'});
