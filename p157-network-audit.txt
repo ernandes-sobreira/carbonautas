@@ -1,0 +1,566 @@
+
+### forceSimulation
+();renderGraph()}).catch(e=>{console.warn(e);const eg=$('#emptyGraph');if(eg){eg.style.display='grid'}});return}
+  const members=visibleMembers();
+  $('#emptyGraph').style.display = members.length? 'none':'grid';
+  const links=buildLinks(members);
+  const [W,H]=graphSize();
+  const grouping=$('#grouping').value;
+
+  members.forEach(m=>{ if(m.x==null){m.x=W/2+(Math.random()-.5)*200; m.y=H/2+(Math.random()-.5)*200} });
+
+  let groupKey=null, groups=[];
+  if(grouping==='linha'){ groupKey=m=>m.linhas[0]||'—'; groups=[...new Set(members.map(groupKey))]; }
+  if(grouping==='nivel'){ groupKey=m=>m.nivel; groups=Object.keys(NIVEIS).filter(k=>members.some(m=>m.nivel===k)); }
+  const centroid={};
+  groups.forEach((g,i)=>{const a=(i/groups.length)*2*Math.PI; centroid[g]={x:W/2+Math.cos(a)*Math.min(W,H)*0.32, y:H/2+Math.sin(a)*Math.min(W,H)*0.32}});
+
+  if(simulation) simulation.stop();
+  simulation=d3.forceSimulation(members)
+    .force('link',d3.forceLink(links).id(d=>d.id)
+      .distance(d=>d.aux?150:90-d.w*8)
+      .strength(d=>d.aux?0.045:0.12+d.w*0.05))
+    .force('charge',d3.forceManyBody().strength(-260))
+    .force('collide',d3.forceCollide(d=>NIVEIS[d.nivel].r+14))
+    .force('center',grouping==='free'?d3.forceCenter(W/2,H/2):null);
+  if(groupKey){
+    simulation.force('gx',d3.forceX(d=>centroid[groupKey(d)].x).strength(.28))
+              .force('gy',d3.forceY(d=>centroid[groupKey(d)].y).strength(.28));
+  }else{
+    simulation.force('x',d3.forceX(W/2).strength(.03)).force('y',d3.forceY(H/2).strength(.03));
+  }
+
+  gLink.selectAll('line').data(links,d=>d.source.id+'-'+d.target.id).join(
+    e=>e.append('line').attr('class',d=>'link'+(d.aux?' aux':'')).attr('stroke-width',d=>0.8+d.w*0.9),
+    u=>u.attr('class',d=>'link'+(d.aux?' aux':'')).attr('stroke-width',d=>0.8+d.w*0.9),
+    x=>x.remove()
+  );
+
+  const showLabels=$('#tLabels').checked;
+  gNode.selectAll('g.node').data(members,d=>d.id).join(
+    enter=>{
+      const g=enter.append('g').attr('class','node').call(drag(simulation));
+      g.append('circle');
+      g.append('circle').attr('class','ring');
+      g.append('text').attr('text-anchor','middle');
+      g.on('click',(e,d)=>{selectNode(d.id)});
+      g.on('mouseenter',(e,d)=>hoverNode(d,true)).on('mouseleave',(e,d)=>hoverNode(d,false));
+      return g;
+    },
+    update=>update,
+    exit=>exit.remove()
+  );
+  gNode.selectAll('g.node')
+    .attr('class',d=>'node'+(d.status==='egresso'?' egresso':'')+(d.id===selectedId?' sel':''))
+    .each(function(d){
+      const el=d3.select(this);
+      el.select('circle:not(.ring)').attr('r',NIVEIS[d.nivel].r).attr('fill',NIVEIS[d.nivel].color);
+      el.select('.ring').attr('r',NIVEIS[d.nivel].r+5);
+      el.selec
+
+### forceLink
+onst eg=$('#emptyGraph');if(eg){eg.style.display='grid'}});return}
+  const members=visibleMembers();
+  $('#emptyGraph').style.display = members.length? 'none':'grid';
+  const links=buildLinks(members);
+  const [W,H]=graphSize();
+  const grouping=$('#grouping').value;
+
+  members.forEach(m=>{ if(m.x==null){m.x=W/2+(Math.random()-.5)*200; m.y=H/2+(Math.random()-.5)*200} });
+
+  let groupKey=null, groups=[];
+  if(grouping==='linha'){ groupKey=m=>m.linhas[0]||'—'; groups=[...new Set(members.map(groupKey))]; }
+  if(grouping==='nivel'){ groupKey=m=>m.nivel; groups=Object.keys(NIVEIS).filter(k=>members.some(m=>m.nivel===k)); }
+  const centroid={};
+  groups.forEach((g,i)=>{const a=(i/groups.length)*2*Math.PI; centroid[g]={x:W/2+Math.cos(a)*Math.min(W,H)*0.32, y:H/2+Math.sin(a)*Math.min(W,H)*0.32}});
+
+  if(simulation) simulation.stop();
+  simulation=d3.forceSimulation(members)
+    .force('link',d3.forceLink(links).id(d=>d.id)
+      .distance(d=>d.aux?150:90-d.w*8)
+      .strength(d=>d.aux?0.045:0.12+d.w*0.05))
+    .force('charge',d3.forceManyBody().strength(-260))
+    .force('collide',d3.forceCollide(d=>NIVEIS[d.nivel].r+14))
+    .force('center',grouping==='free'?d3.forceCenter(W/2,H/2):null);
+  if(groupKey){
+    simulation.force('gx',d3.forceX(d=>centroid[groupKey(d)].x).strength(.28))
+              .force('gy',d3.forceY(d=>centroid[groupKey(d)].y).strength(.28));
+  }else{
+    simulation.force('x',d3.forceX(W/2).strength(.03)).force('y',d3.forceY(H/2).strength(.03));
+  }
+
+  gLink.selectAll('line').data(links,d=>d.source.id+'-'+d.target.id).join(
+    e=>e.append('line').attr('class',d=>'link'+(d.aux?' aux':'')).attr('stroke-width',d=>0.8+d.w*0.9),
+    u=>u.attr('class',d=>'link'+(d.aux?' aux':'')).attr('stroke-width',d=>0.8+d.w*0.9),
+    x=>x.remove()
+  );
+
+  const showLabels=$('#tLabels').checked;
+  gNode.selectAll('g.node').data(members,d=>d.id).join(
+    enter=>{
+      const g=enter.append('g').attr('class','node').call(drag(simulation));
+      g.append('circle');
+      g.append('circle').attr('class','ring');
+      g.append('text').attr('text-anchor','middle');
+      g.on('click',(e,d)=>{selectNode(d.id)});
+      g.on('mouseenter',(e,d)=>hoverNode(d,true)).on('mouseleave',(e,d)=>hoverNode(d,false));
+      return g;
+    },
+    update=>update,
+    exit=>exit.remove()
+  );
+  gNode.selectAll('g.node')
+    .attr('class',d=>'node'+(d.status==='egresso'?' egresso':'')+(d.id===selectedId?' sel':''))
+    .each(function(d){
+      const el=d3.select(this);
+      el.select('circle:not(.ring)').attr('r',NIVEIS[d.nivel].r).attr('fill',NIVEIS[d.nivel].color);
+      el.select('.ring').attr('r',NIVEIS[d.nivel].r+5);
+      el.select('text')
+        .attr('y',NIVEIS[d.nivel].r+
+
+### stroke-width
+k-2)}
+  select.mini,input.mini{
+    border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:13px;background:var(--white);color:var(--ink);outline:0;width:100%;
+  }
+  select.mini:focus,input.mini:focus{border-color:var(--petrol)}
+  .link-clear{font-size:12px;color:var(--agua);font-weight:600;cursor:pointer}
+  .link-clear:hover{text-decoration:underline}
+
+  /* Graph */
+  .graph-wrap{flex:1;position:relative;min-width:0;background:
+    radial-gradient(1200px 600px at 60% -10%,#f4faf9,transparent),
+    var(--white);overflow:hidden}
+  svg.graph{width:100%;height:100%;display:block;cursor:grab}
+  svg.graph:active{cursor:grabbing}
+  .link{stroke:#c7d6d6;stroke-opacity:.55}
+  .link.hl{stroke:var(--petrol);stroke-opacity:.9}
+  .link.aux{stroke:var(--indigo);stroke-opacity:.4;stroke-dasharray:3 3}
+  .link.aux.hl{stroke:var(--indigo);stroke-opacity:.85}
+  .node circle{stroke:#fff;stroke-width:2.5;cursor:pointer;transition:filter .12s}
+  .node.egresso circle{stroke-dasharray:3 2.5}
+  .node.dim{opacity:.16}
+  .node .ring{fill:none;stroke:var(--ink);stroke-width:2.5;opacity:0}
+  .node.sel .ring{opacity:1}
+  .node text{
+    font-family:'Inter';font-size:11px;font-weight:600;fill:var(--ink);pointer-events:none;
+    paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round;
+  }
+  .node text.plat{fill:var(--agua)}
+  .graph-controls{
+    position:absolute;left:14px;bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+    background:rgba(255,255,255,.86);backdrop-filter:blur(6px);border:1px solid var(--line);
+    border-radius:12px;padding:7px 9px;box-shadow:var(--shadow);
+  }
+  .graph-controls select{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px;background:#fff;outline:0}
+  .toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);font-weight:600;padding:6px 8px;border-radius:8px}
+  .toggle input{accent-color:var(--petrol)}
+  .empty-graph{position:absolute;inset:0;display:none;place-items:center;color:var(--ink-3);font-size:14px;text-align:center;padding:30px}
+
+  /* Detail panel */
+  .detail{
+    width:0;flex:0 0 0;border-left:1px solid var(--line);background:var(--white);overflow:hidden;
+    transition:width .22s ease,flex-basis .22s ease;
+  }
+  .detail.open{width:360px;flex:0 0 360px}
+  .detail-inner{width:360px;height:100%;overflow-y:auto;padding:0 0 40px}
+  .dh{position:relative;padding:22px 22px 18px;border-bottom:1px solid var(--line)}
+  .dh .close{position:absolute;top:14px;right:14px}
+  .avatar{
+    width:66px;height:66px;border-radius:18px;object-fit:cover;background:var(--panel);
+    display:grid;place-items:center;font-family:'Fraunces';font-weight:600;f
+h:100%;
+  }
+  select.mini:focus,input.mini:focus{border-color:var(--petrol)}
+  .link-clear{font-size:12px;color:var(--agua);font-weight:600;cursor:pointer}
+  .link-clear:hover{text-decoration:underline}
+
+  /* Graph */
+  .graph-wrap{flex:1;position:relative;min-width:0;background:
+    radial-gradient(1200px 600px at 60% -10%,#f4faf9,transparent),
+    var(--white);overflow:hidden}
+  svg.graph{width:100%;height:100%;display:block;cursor:grab}
+  svg.graph:active{cursor:grabbing}
+  .link{stroke:#c7d6d6;stroke-opacity:.55}
+  .link.hl{stroke:var(--petrol);stroke-opacity:.9}
+  .link.aux{stroke:var(--indigo);stroke-opacity:.4;stroke-dasharray:3 3}
+  .link.aux.hl{stroke:var(--indigo);stroke-opacity:.85}
+  .node circle{stroke:#fff;stroke-width:2.5;cursor:pointer;transition:filter .12s}
+  .node.egresso circle{stroke-dasharray:3 2.5}
+  .node.dim{opacity:.16}
+  .node .ring{fill:none;stroke:var(--ink);stroke-width:2.5;opacity:0}
+  .node.sel .ring{opacity:1}
+  .node text{
+    font-family:'Inter';font-size:11px;font-weight:600;fill:var(--ink);pointer-events:none;
+    paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round;
+  }
+  .node text.plat{fill:var(--agua)}
+  .graph-controls{
+    position:absolute;left:14px;bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+    background:rgba(255,255,255,.86);backdrop-filter:blur(6px);border:1px solid var(--line);
+    border-radius:12px;padding:7px 9px;box-shadow:var(--shadow);
+  }
+  .graph-controls select{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px;background:#fff;outline:0}
+  .toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);font-weight:600;padding:6px 8px;border-radius:8px}
+  .toggle input{accent-color:var(--petrol)}
+  .empty-graph{position:absolute;inset:0;display:none;place-items:center;color:var(--ink-3);font-size:14px;text-align:center;padding:30px}
+
+  /* Detail panel */
+  .detail{
+    width:0;flex:0 0 0;border-left:1px solid var(--line);background:var(--white);overflow:hidden;
+    transition:width .22s ease,flex-basis .22s ease;
+  }
+  .detail.open{width:360px;flex:0 0 360px}
+  .detail-inner{width:360px;height:100%;overflow-y:auto;padding:0 0 40px}
+  .dh{position:relative;padding:22px 22px 18px;border-bottom:1px solid var(--line)}
+  .dh .close{position:absolute;top:14px;right:14px}
+  .avatar{
+    width:66px;height:66px;border-radius:18px;object-fit:cover;background:var(--panel);
+    display:grid;place-items:center;font-family:'Fraunces';font-weight:600;font-size:26px;color:#fff;
+    box-shadow:var(--shadow);flex:0 0 auto;
+  }
+  .dh-top{display:flex;gap:14px;align-items:center}
+  .dh h2{font-family:'Fraunces';font-weight:
+ine}
+
+  /* Graph */
+  .graph-wrap{flex:1;position:relative;min-width:0;background:
+    radial-gradient(1200px 600px at 60% -10%,#f4faf9,transparent),
+    var(--white);overflow:hidden}
+  svg.graph{width:100%;height:100%;display:block;cursor:grab}
+  svg.graph:active{cursor:grabbing}
+  .link{stroke:#c7d6d6;stroke-opacity:.55}
+  .link.hl{stroke:var(--petrol);stroke-opacity:.9}
+  .link.aux{stroke:var(--indigo);stroke-opacity:.4;stroke-dasharray:3 3}
+  .link.aux.hl{stroke:var(--indigo);stroke-opacity:.85}
+  .node circle{stroke:#fff;stroke-width:2.5;cursor:pointer;transition:filter .12s}
+  .node.egresso circle{stroke-dasharray:3 2.5}
+  .node.dim{opacity:.16}
+  .node .ring{fill:none;stroke:var(--ink);stroke-width:2.5;opacity:0}
+  .node.sel .ring{opacity:1}
+  .node text{
+    font-family:'Inter';font-size:11px;font-weight:600;fill:var(--ink);pointer-events:none;
+    paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round;
+  }
+  .node text.plat{fill:var(--agua)}
+  .graph-controls{
+    position:absolute;left:14px;bottom:14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+    background:rgba(255,255,255,.86);backdrop-filter:blur(6px);border:1px solid var(--line);
+    border-radius:12px;padding:7px 9px;box-shadow:var(--shadow);
+  }
+  .graph-controls select{border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px;background:#fff;outline:0}
+  .toggle{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);font-weight:600;padding:6px 8px;border-radius:8px}
+  .toggle input{accent-color:var(--petrol)}
+  .empty-graph{position:absolute;inset:0;display:none;place-items:center;color:var(--ink-3);font-size:14px;text-align:center;padding:30px}
+
+  /* Detail panel */
+  .detail{
+    width:0;flex:0 0 0;border-left:1px solid var(--line);background:var(--white);overflow:hidden;
+    transition:width .22s ease,flex-basis .22s ease;
+  }
+  .detail.open{width:360px;flex:0 0 360px}
+  .detail-inner{width:360px;height:100%;overflow-y:auto;padding:0 0 40px}
+  .dh{position:relative;padding:22px 22px 18px;border-bottom:1px solid var(--line)}
+  .dh .close{position:absolute;top:14px;right:14px}
+  .avatar{
+    width:66px;height:66px;border-radius:18px;object-fit:cover;background:var(--panel);
+    display:grid;place-items:center;font-family:'Fraunces';font-weight:600;font-size:26px;color:#fff;
+    box-shadow:var(--shadow);flex:0 0 auto;
+  }
+  .dh-top{display:flex;gap:14px;align-items:center}
+  .dh h2{font-family:'Fraunces';font-weight:600;font-size:20px;margin:0 0 4px;line-height:1.1;letter-spacing:-.01em}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;colo
+="Código do projeto"></div>
+      <div class="hint" id="unlinkedEmail" style="margin-bottom:10px"></div>
+      <div class="auth-msg" id="claimMsg"></div>
+      <button class="btn primary" id="claimProfileBtn" style="width:100%;justify-content:center;margin-bottom:8px">Concluir meu cadastro</button>
+      <button class="btn ghost" id="unlinkedLogoutBtn" style="width:100%;justify-content:center">Sair</button>
+    </div>
+  </div>
+</div>
+
+<div class="loading" id="loading">
+  <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P28" alt="Carbonautas · carbono em ligação"></div>
+  <p id="loadingMsg">Conectando à rede…</p>
+</div>
+
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="btn ghost menu-btn" id="menuBtn" title="Abrir menu do aplicativo" aria-label="Abrir menu do aplicativo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+    </button>
+    <div class="brand">
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P28" alt="Carbonautas · carbono em ligação"></div>
+      <div>
+        <h1>Carbonautas</h1>
+        <div class="sub">LIPAN · LEFA · CELBE</div>
+      </div>
+    </div>
+
+    <nav class="tabs" id="tabs">
+      <button class="tab on" data-view="painel" data-group="painel" title="O que precisa da minha atenção">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h4l3-9 4 16 3-7h4"/></svg>
+        <span class="tl">Painel</span><span class="badge" id="attentionBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="pubs" data-group="pubs" title="Repositório">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="tl">Repositório</span>
+      </button>
+      <button class="tab" data-view="rede" data-group="pessoas" title="Pessoas e acompanhamento">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M15.5 20a5 5 0 0 1 5.5-5"/></svg>
+        <span class="tl">Pessoas</span>
+      </button>
+      <button class="tab" data-view="crono" data-group="agenda" title="Agenda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2
+o à rede…</p>
+</div>
+
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="btn ghost menu-btn" id="menuBtn" title="Abrir menu do aplicativo" aria-label="Abrir menu do aplicativo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+    </button>
+    <div class="brand">
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P28" alt="Carbonautas · carbono em ligação"></div>
+      <div>
+        <h1>Carbonautas</h1>
+        <div class="sub">LIPAN · LEFA · CELBE</div>
+      </div>
+    </div>
+
+    <nav class="tabs" id="tabs">
+      <button class="tab on" data-view="painel" data-group="painel" title="O que precisa da minha atenção">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h4l3-9 4 16 3-7h4"/></svg>
+        <span class="tl">Painel</span><span class="badge" id="attentionBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="pubs" data-group="pubs" title="Repositório">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="tl">Repositório</span>
+      </button>
+      <button class="tab" data-view="rede" data-group="pessoas" title="Pessoas e acompanhamento">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M15.5 20a5 5 0 0 1 5.5-5"/></svg>
+        <span class="tl">Pessoas</span>
+      </button>
+      <button class="tab" data-view="crono" data-group="agenda" title="Agenda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="tl">Agenda</span><span class="badge" id="cronoBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="mensagens" data-group="conversas" title="Conversas da equipe e privadas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a3 3 0 0 1-3 3H8l-5 3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3z"/></svg>
+        <span class="tl">Conversas</span><span class="badge" id="msgBadge" style="display:none"></span><span class="badge" id="privateBadge" style="display:none"></span>
+      <
+x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+    </button>
+    <div class="brand">
+      <div class="mark logo-mark"><img class="logo-img" src="./icon-512.png?v=P28" alt="Carbonautas · carbono em ligação"></div>
+      <div>
+        <h1>Carbonautas</h1>
+        <div class="sub">LIPAN · LEFA · CELBE</div>
+      </div>
+    </div>
+
+    <nav class="tabs" id="tabs">
+      <button class="tab on" data-view="painel" data-group="painel" title="O que precisa da minha atenção">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h4l3-9 4 16 3-7h4"/></svg>
+        <span class="tl">Painel</span><span class="badge" id="attentionBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="pubs" data-group="pubs" title="Repositório">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="tl">Repositório</span>
+      </button>
+      <button class="tab" data-view="rede" data-group="pessoas" title="Pessoas e acompanhamento">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M15.5 20a5 5 0 0 1 5.5-5"/></svg>
+        <span class="tl">Pessoas</span>
+      </button>
+      <button class="tab" data-view="crono" data-group="agenda" title="Agenda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="tl">Agenda</span><span class="badge" id="cronoBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="mensagens" data-group="conversas" title="Conversas da equipe e privadas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a3 3 0 0 1-3 3H8l-5 3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3z"/></svg>
+        <span class="tl">Conversas</span><span class="badge" id="msgBadge" style="display:none"></span><span class="badge" id="privateBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="mural" data-group="mural" title="Mural e fotos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span class="tl">Mural</span><
+</div>
+
+    <nav class="tabs" id="tabs">
+      <button class="tab on" data-view="painel" data-group="painel" title="O que precisa da minha atenção">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 13h4l3-9 4 16 3-7h4"/></svg>
+        <span class="tl">Painel</span><span class="badge" id="attentionBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="pubs" data-group="pubs" title="Repositório">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="tl">Repositório</span>
+      </button>
+      <button class="tab" data-view="rede" data-group="pessoas" title="Pessoas e acompanhamento">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M15.5 20a5 5 0 0 1 5.5-5"/></svg>
+        <span class="tl">Pessoas</span>
+      </button>
+      <button class="tab" data-view="crono" data-group="agenda" title="Agenda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="tl">Agenda</span><span class="badge" id="cronoBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="mensagens" data-group="conversas" title="Conversas da equipe e privadas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a3 3 0 0 1-3 3H8l-5 3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3z"/></svg>
+        <span class="tl">Conversas</span><span class="badge" id="msgBadge" style="display:none"></span><span class="badge" id="privateBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="mural" data-group="mural" title="Mural e fotos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span class="tl">Mural</span><span class="badge" id="muralBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="lab" data-group="lab" title="Laboratório de Dados">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6"/><path d="M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3"/></svg>
+        
+play:none"></span>
+      </button>
+      <button class="tab" data-view="pubs" data-group="pubs" title="Repositório">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <span class="tl">Repositório</span>
+      </button>
+      <button class="tab" data-view="rede" data-group="pessoas" title="Pessoas e acompanhamento">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M15.5 20a5 5 0 0 1 5.5-5"/></svg>
+        <span class="tl">Pessoas</span>
+      </button>
+      <button class="tab" data-view="crono" data-group="agenda" title="Agenda">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span class="tl">Agenda</span><span class="badge" id="cronoBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="mensagens" data-group="conversas" title="Conversas da equipe e privadas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a3 3 0 0 1-3 3H8l-5 3V6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3z"/></svg>
+        <span class="tl">Conversas</span><span class="badge" id="msgBadge" style="display:none"></span><span class="badge" id="privateBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="mural" data-group="mural" title="Mural e fotos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span class="tl">Mural</span><span class="badge" id="muralBadge" style="display:none"></span>
+      </button>
+      <button class="tab" data-view="lab" data-group="lab" title="Laboratório de Dados">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6"/><path d="M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3"/></svg>
+        <span class="tl">Lab</span>
+      </button>
+    </nav>
+
+    <div class="spacer"></div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+      <input id="search" placeholder="Buscar pessoa, tema ou linha">
+    </div>
+    <bu
+
+### function buildLinks
+abel:a.hubMotivo||'Vínculo com o grupo inteiro'});
+    if(b.hub) reasons.push({type:'hub',label:b.hubMotivo||'Vínculo com o grupo inteiro'});
+    (a.vinculos||[]).filter(v=>v.id===b.id).forEach(v=>reasons.push({type:'vinculo',label:v.motivo||'Vínculo declarado'}));
+    (b.vinculos||[]).filter(v=>v.id===a.id).forEach(v=>reasons.push({type:'vinculo',label:v.motivo||'Vínculo declarado'}));
+  }
+  return reasons;
+}
+function p135NetworkReasonMatches(r,mode){
+  if(!mode||mode==='all')return true;
+  const txt=String(r?.label||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  if(mode==='orientacao')return /orienta|orientad|coorient|supervis/.test(txt);
+  if(mode==='projetos')return r?.type==='linha'||/projeto|pesquisa|campo|grupo|rede/.test(txt);
+  if(mode==='producao')return /artigo|publica|produc|coautor|manuscrit|relat|dado|dataset|capitul|livro/.test(txt);
+  return true;
+}
+function buildLinks(members){
+  const includeAux = $('#tHubLinks') ? $('#tHubLinks').checked : true;
+  const links=[];
+  for(let i=0;i<members.length;i++){
+    for(let j=i+1;j<members.length;j++){
+      const allReasons=pairReasons(members[i],members[j],includeAux);
+      const reasons=allReasons.filter(r=>p135NetworkReasonMatches(r,window.__p135NetworkMode||'all'));
+      if(reasons.length){
+        const hasLinha=reasons.some(r=>r.type==='linha');
+        const w=reasons.reduce((s,r)=>s+(r.type==='linha'?1:0.45),0);
+        links.push({source:members[i].id,target:members[j].id,reasons,w,aux:!hasLinha});
+      }
+    }
+  }
+  return links;
+}
+
+/* ============ RENDER: STATS ============ */
+function renderStats(){
+  const el=$('#stats'); el.innerHTML='';
+  const total=state.members.length;
+  const card=(n,l,color,filterFn,active)=>{
+    const d=document.createElement('div'); d.className='stat'+(active?' on':'');
+    d.innerHTML=`<div class="n">${n}</div><div class="l">${l}</div>${color?`<span class="dot" style="background:${color}"></span>`:''}`;
+    if(filterFn) d.onclick=filterFn;
+    return d;
+  };
+  el.appendChild(card(total,'Membros','',()=>{clearFilters()}, false));
+  const bolsistas=state.members.filter(m=>m.bolsista).length; if(bolsistas) el.appendChild(card(bolsistas,'Bolsistas','#7437E8',null,false));
+  for(const [k,v] of Object.entries(NIVEIS)){
+    const n=state.members.filter(m=>m.nivel===k).length; if(!n) continue;
+    const soloOn = hiddenNiveis.size>0 && !hiddenNiveis.has(k);
+    el.appendChild(card(n, v.short, v.color, ()=>{ toggleSoloNivel(k) }, soloOn));
+  }
+  const prazos=[]; state.members.forEach(m=>(m.prazos||[]).forEach(p=>{if(!p.feito){const di=dateInfo(p.data); if(di&&(di.over||di.soon)) prazos.push({m,p,di})}}));
+  if(prazos.length){
+    const a=do
+
+### function renderGraph
+t();
+  toast('Linha adicionada.');
+}
+function renderProgramaFilter(){
+  const sel=$('#fPrograma'); const cur=sel.value;
+  const progs=[...new Set(state.members.map(m=>m.programa).filter(Boolean))].sort();
+  sel.innerHTML='<option value="">Todos os programas</option>'+progs.map(p=>`<option>${esc(p)}</option>`).join('');
+  sel.value=cur;
+}
+
+/* ============ RENDER: GRAPH ============ */
+let svg=null; // P129: criado em initGraph, depois de carregar o d3
+let gZoom, gLink, gNode, zoomBehavior;
+function initGraph(){
+  if(!window.d3||gZoom)return;
+  svg=d3.select('#graph');
+  const g=svg.append('g').attr('class','zoomG');
+  gZoom=g; gLink=g.append('g'); gNode=g.append('g');
+  zoomBehavior=d3.zoom().scaleExtent([.35,3]).on('zoom',e=>g.attr('transform',e.transform));
+  svg.call(zoomBehavior);
+}
+function graphSize(){const r=$('#graph').getBoundingClientRect();return [r.width||600,r.height||400]}
+
+function renderGraph(){
+  if(!window.d3||!gZoom){ensureLib('d3').then(()=>{initGraph();renderGraph()}).catch(e=>{console.warn(e);const eg=$('#emptyGraph');if(eg){eg.style.display='grid'}});return}
+  const members=visibleMembers();
+  $('#emptyGraph').style.display = members.length? 'none':'grid';
+  const links=buildLinks(members);
+  const [W,H]=graphSize();
+  const grouping=$('#grouping').value;
+
+  members.forEach(m=>{ if(m.x==null){m.x=W/2+(Math.random()-.5)*200; m.y=H/2+(Math.random()-.5)*200} });
+
+  let groupKey=null, groups=[];
+  if(grouping==='linha'){ groupKey=m=>m.linhas[0]||'—'; groups=[...new Set(members.map(groupKey))]; }
+  if(grouping==='nivel'){ groupKey=m=>m.nivel; groups=Object.keys(NIVEIS).filter(k=>members.some(m=>m.nivel===k)); }
+  const centroid={};
+  groups.forEach((g,i)=>{const a=(i/groups.length)*2*Math.PI; centroid[g]={x:W/2+Math.cos(a)*Math.min(W,H)*0.32, y:H/2+Math.sin(a)*Math.min(W,H)*0.32}});
+
+  if(simulation) simulation.stop();
+  simulation=d3.forceSimulation(members)
+    .force('link',d3.forceLink(links).id(d=>d.id)
+      .distance(d=>d.aux?150:90-d.w*8)
+      .strength(d=>d.aux?0.045:0.12+d.w*0.05))
+    .force('charge',d3.forceManyBody().strength(-260))
+    .force('collide',d3.forceCollide(d=>NIVEIS[d.nivel].r+14))
+    .force('center',grouping==='free'?d3.forceCenter(W/2,H/2):null);
+  if(groupKey){
+    simulation.force('gx',d3.forceX(d=>centroid[groupKey(d)].x).strength(.28))
+              .force('gy',d3.forceY(d=>centroid[groupKey(d)].y).strength(.28));
+  }else{
+    simulation.force('x',d3.forceX(W/2).strength(.03)).force('y',d3.forceY(H/2).strength(.03));
+  }
+
+  gLink.selectAll('line').data(links,d=>d.source.id+'-'+d.target.id).join(
+    e=>e.append('line').attr('class',d=>'link'+(d.aux?' aux':'')).attr('stroke-width',d=>0.8+d.w*0.9),
+    u
