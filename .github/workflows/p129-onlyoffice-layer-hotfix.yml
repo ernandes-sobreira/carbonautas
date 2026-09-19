@@ -1,0 +1,48 @@
+name: P129 hotfix ONLYOFFICE layer
+
+on:
+  push:
+    branches: [P129-onlyoffice-layer-hotfix]
+    paths: ['.github/workflows/p129-onlyoffice-layer-hotfix.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Aplicar hotfix consolidado
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text()
+          marker='p129-onlyoffice-layer-hotfix'
+          if marker not in s:
+              css='''\n<style id="p129-onlyoffice-layer-hotfix">\n/* P129 hotfix · ONLYOFFICE sempre acima de cards e navegacao do app */\n#onlyOfficeOverlay{z-index:2147483640!important;}\n#onlyOfficeOverlay.open{display:flex!important;}\n@media(max-width:900px){\n  #onlyOfficeOverlay.open{padding:0!important;overflow:hidden!important;}\n  #onlyOfficeOverlay .oo-modal{position:fixed!important;inset:0!important;width:100vw!important;max-width:100vw!important;height:100dvh!important;max-height:100dvh!important;margin:0!important;border-radius:0!important;background:#fff!important;z-index:2147483641!important;}\n}\n</style>\n'''
+              if '</head>' not in s:
+                  raise SystemExit('ERRO: </head> nao encontrado')
+              s=s.replace('</head>',css+'</head>',1)
+              p.write_text(s)
+              print('Hotfix inserido')
+          else:
+              print('Hotfix ja presente')
+          PY
+          sha512sum index.html > index.html.sha512
+          grep -q 'p129-onlyoffice-layer-hotfix' index.html
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html index.html.sha512
+          if git diff --cached --quiet; then
+            echo 'Nada para publicar'
+            exit 0
+          fi
+          git commit -m 'P129 hotfix: ONLYOFFICE acima dos cards e da barra mobile'
+          git push origin HEAD:main
