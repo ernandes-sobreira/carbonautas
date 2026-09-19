@@ -1,3 +1,4 @@
+# retry: 2
 name: Publicar P129
 
 on:
