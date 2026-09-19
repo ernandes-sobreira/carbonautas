@@ -14929,5 +14929,165 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 </script>
 
+
+<!-- P136 · Desktop amplo + Agenda funcional e estável -->
+<style id="p136DesktopAgendaStyle">
+@media (min-width:921px){
+  #viewPainel .dash-wrap{
+    max-width:1480px!important;width:calc(100% - 64px)!important;
+    padding:28px 0 80px!important;
+  }
+  #viewPainel .dash-hero{
+    min-height:154px!important;display:grid!important;
+    grid-template-columns:minmax(320px,1fr) minmax(600px,1.35fr)!important;
+    align-items:center!important;gap:34px!important;padding:28px 32px!important;
+  }
+  #viewPainel .dash-hero>.spacer{display:none!important}
+  #viewPainel .dash-hero-actions{
+    width:100%!important;display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:9px!important;justify-content:stretch!important;
+  }
+  #viewPainel .dash-hero-actions .btn{
+    width:100%!important;min-height:44px!important;justify-content:center!important;
+    white-space:normal!important;text-align:center!important;
+  }
+  #viewPainel .dash-grid{
+    grid-template-columns:minmax(0,1.65fr) minmax(360px,.75fr)!important;gap:18px!important;
+  }
+  #viewPainel #p78TodayCard,#viewPainel #p117Highlights{width:100%!important;max-width:none!important}
+
+  #viewCrono .crono-wrap{
+    max-width:1480px!important;width:calc(100% - 64px)!important;
+    padding:28px 0 80px!important;overflow-x:visible!important;
+  }
+  #viewCrono .ag-head{
+    display:flex!important;align-items:center!important;justify-content:flex-start!important;
+    flex-wrap:wrap!important;gap:10px!important;margin-bottom:22px!important;
+  }
+  #viewCrono .ag-head>.spacer{display:block!important;flex:1 1 auto!important}
+  #viewCrono .ag-nav{width:auto!important;flex:0 0 auto!important;justify-content:flex-start!important}
+  #viewCrono .ag-title{min-width:250px!important;max-width:none!important;text-align:left!important}
+  #viewCrono .ag-modes{flex:0 0 auto!important}
+
+  /* No PC, Dia vira uma visão de trabalho: faixa de dias + compromissos em grade. */
+  #viewCrono[data-p114-mode="day"] .ag-month{
+    margin:0!important;padding:14px 0 24px!important;gap:12px!important;
+    scroll-padding-inline:0!important;scroll-behavior:auto!important;
+  }
+  #viewCrono[data-p114-mode="day"] .ag-day{
+    flex:0 0 132px!important;width:132px!important;min-width:132px!important;
+    min-height:142px!important;transform:none!important;animation:none!important;transition:none!important;
+  }
+  #viewCrono[data-p114-mode="day"] .ag-day.sel{
+    transform:none!important;box-shadow:0 12px 28px rgba(25,66,69,.10)!important;
+  }
+  #viewCrono[data-p114-mode="day"] .p110-subtitle{display:none!important}
+  #viewCrono[data-p114-mode="day"] .p110-event-track{
+    display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:16px!important;margin:0!important;padding:12px 0 24px!important;
+    overflow:visible!important;scroll-snap-type:none!important;scroll-padding:0!important;
+  }
+  #viewCrono[data-p114-mode="day"] .p110-event-card{
+    width:100%!important;min-width:0!important;max-width:none!important;flex:initial!important;
+    min-height:150px!important;margin:0!important;transform:none!important;
+    animation:none!important;transition:none!important;scroll-snap-align:none!important;
+  }
+  #viewCrono[data-p114-mode="day"] .p110-event-nav{display:none!important}
+
+  /* Evita o pisca-pisca dos patches antigos no desktop. */
+  #viewCrono .ag-month,#viewCrono .ag-day,#viewCrono .p110-event-card,#viewCrono .ag-item{
+    animation:none!important;scroll-behavior:auto!important;
+  }
+  #viewCrono .ag-day,#viewCrono .p110-event-card{transition:none!important}
+}
+@media (min-width:921px) and (max-width:1180px){
+  #viewPainel .dash-wrap,#viewCrono .crono-wrap{width:calc(100% - 36px)!important}
+  #viewPainel .dash-hero{grid-template-columns:1fr!important}
+  #viewCrono[data-p114-mode="day"] .p110-event-track{grid-template-columns:1fr!important}
+}
+</style>
+<script id="p136DesktopAgendaController">
+/* Carbonautas P136 · controlador final SOMENTE para desktop.
+   Resolve a disputa P110/P114/P126 sem criar intervalos ou observers. */
+(function(){
+'use strict';
+if(window.__CARBONAUTAS_P136_DESKTOP)return;
+window.__CARBONAUTAS_P136_DESKTOP=true;
+const BUILD='P136';
+const isDesktop=()=>window.matchMedia('(min-width:921px)').matches;
+const view=()=>document.getElementById('viewCrono');
+function forceRender(){
+  try{
+    if(typeof window.forceAgendaRenderP126==='function')return window.forceAgendaRenderP126();
+    if(typeof renderCrono==='function')return renderCrono(true);
+    if(typeof window.renderCrono==='function')return window.renderCrono(true);
+  }catch(e){console.warn('P136 render agenda',e)}
+}
+function currentMode(){
+  const v=view(),visual=v?.dataset?.p114Mode||'';
+  if(['day','month','year','list'].includes(visual))return visual;
+  let base='';try{base=String(agMode||'')}catch(_e){}
+  if(base==='ano')return'year';if(base==='lista')return'list';return'day';
+}
+function paintMode(mode){
+  const v=view();if(!v)return;
+  v.dataset.p114Mode=mode;
+  const buttons=[...document.querySelectorAll('#viewCrono #agModes button,#viewCrono #p114DayMode')];
+  buttons.forEach(b=>{b.classList.remove('p114-mode-active');b.classList.remove('on')});
+  let target=null;
+  if(mode==='day')target=document.getElementById('p114DayMode');
+  else{
+    const wanted=mode==='month'?'Mês':mode==='year'?'Ano':'Lista';
+    target=buttons.find(b=>(b.textContent||'').trim()===wanted)||null;
+  }
+  target?.classList.add('p114-mode-active','on');
+}
+function setDesktopMode(mode){
+  if(!isDesktop())return;
+  try{
+    if(mode==='year')agMode='ano';
+    else if(mode==='list')agMode='lista';
+    else agMode='mes';
+    if(mode==='day'&&!agSelected){
+      try{agSelected=typeof agTodayIso==='function'?agTodayIso():new Date().toISOString().slice(0,10)}catch(_e){}
+    }
+  }catch(e){console.warn('P136 modo agenda',e)}
+  forceRender();
+  requestAnimationFrame(()=>paintMode(mode));
+  setTimeout(()=>paintMode(mode),70);
+}
+function buttonMode(b){
+  if(!b)return'';if(b.id==='p114DayMode')return'day';
+  const t=(b.textContent||'').trim();
+  return t==='Mês'?'month':t==='Ano'?'year':t==='Lista'?'list':'';
+}
+function openAgenda(){
+  try{
+    if(typeof window.switchView==='function')window.switchView('crono');
+    else if(typeof switchView==='function')switchView('crono');
+  }catch(e){console.warn('P136 abrir agenda',e)}
+  try{window.closeAppMenu?.()}catch(_e){}
+  setTimeout(()=>{forceRender();paintMode(currentMode())},0);
+}
+document.addEventListener('click',function(e){
+  if(!isDesktop())return;
+  const modeBtn=e.target.closest?.('#viewCrono #p114DayMode,#viewCrono #agModes button');
+  if(modeBtn){
+    const mode=buttonMode(modeBtn);if(!mode)return;
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    setDesktopMode(mode);return;
+  }
+  const agendaNav=e.target.closest?.('.tab[data-view="crono"],.app-nav-card[data-app-view="crono"]');
+  if(agendaNav){
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openAgenda();
+  }
+},true);
+setTimeout(()=>{if(isDesktop()&&document.body.dataset.view==='crono'){forceRender();paintMode(currentMode())}},260);
+window.CARBONAUTAS_DESKTOP_AGENDA_BUILD=BUILD;
+console.info('Carbonautas P136 · desktop amplo + Agenda estável ativo');
+})();
+</script>
+
 </body>
 </html>
