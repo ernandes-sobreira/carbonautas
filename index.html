@@ -2777,19 +2777,18 @@
       <div class="fg" id="pubAutorRow"><label>Autor(a)</label><select id="pubAutor"></select></div>
       <div class="fg"><label>Categoria</label>
         <select id="pubCategoriaSel">
-          <option value="nota_tecnica">Nota técnica</option>
-          <option value="artigo">Artigo científico</option>
-          <option value="resumo_expandido">Resumo expandido</option>
-          <option value="resumo_simples">Resumo simples</option>
-          <option value="visibilidade">Plano de visibilidade</option>
-          <option value="jogo">Jogo</option>
-          <option value="plataforma">Plataforma</option>
-          <option value="projeto">Projeto</option>
           <option value="apresentacao">Apresentação</option>
+          <option value="artigo">Artigo científico</option>
           <option value="cronograma">Cronograma</option>
-          <option value="relatorio">Relatório</option>
           <option value="dados">Dados / planilha</option>
+          <option value="jogos_plataformas">Jogos e plataformas</option>
+          <option value="livros_capitulos">Livros e capítulos</option>
+          <option value="nota_tecnica">Nota técnica</option>
           <option value="outro">Outro</option>
+          <option value="visibilidade">Plano de visibilidade</option>
+          <option value="projetos_relatorios">Projetos e relatórios</option>
+          <option value="resumos">Resumos</option>
+          <option value="video">Vídeo</option>
         </select>
       </div>
       <div class="fg" id="pubOutroRow" style="display:none"><label>Especifique</label><input id="pubOutroTxt" placeholder="Qual tipo de produto?"></div>
@@ -3099,20 +3098,26 @@ const NIVEIS = {
 };
 const DEFAULT_LINHAS = ['Carbono e GEE','Cinzas e fogo','Qualidade do ar e PM2.5','Microclima e meteorologia','Saúde e clima','Mudanças climáticas e assentamentos','Recursos hídricos e qualidade da água','Qualidade ambiental e sensoriamento','Biodiversidade e peixes','Turfeiras','Hidrovia','Extensão e visibilidade','Educação e aulas de campo','IA e créditos de carbono'];
 const CATEGORIAS = {
-  nota_tecnica:     {label:'Nota técnica',            color:'#0E5C63'},
-  artigo:           {label:'Artigo científico',        color:'#1E88C7'},
-  resumo_expandido: {label:'Resumo expandido',         color:'#2E9E5B'},
-  resumo_simples:   {label:'Resumo simples',           color:'#6C5CE0'},
-  visibilidade:     {label:'Plano de visibilidade',    color:'#E0912E'},
-  jogo:             {label:'Jogo',                     color:'#D6497A'},
-  plataforma:       {label:'Plataforma',                color:'#16262c'},
-  projeto:          {label:'Projeto',                   color:'#0E5C63'},
-  apresentacao:     {label:'Apresentação',              color:'#6C5CE0'},
-  cronograma:       {label:'Cronograma',                color:'#E0912E'},
-  relatorio:        {label:'Relatório',                 color:'#2E9E5B'},
-  dados:            {label:'Dados / planilha',          color:'#1E88C7'},
-  outro:            {label:'Outro',                    color:'#7c8b90'},
+  apresentacao:       {label:'Apresentação',            color:'#6C5CE0'},
+  artigo:             {label:'Artigo científico',       color:'#1E88C7'},
+  cronograma:         {label:'Cronograma',              color:'#E0912E'},
+  dados:              {label:'Dados / planilha',        color:'#1E88C7'},
+  jogos_plataformas:  {label:'Jogos e plataformas',     color:'#D6497A'},
+  livros_capitulos:   {label:'Livros e capítulos',      color:'#8A6A45'},
+  nota_tecnica:       {label:'Nota técnica',            color:'#0E5C63'},
+  outro:              {label:'Outro',                   color:'#7c8b90'},
+  visibilidade:       {label:'Plano de visibilidade',   color:'#E0912E'},
+  projetos_relatorios:{label:'Projetos e relatórios',   color:'#2E9E5B'},
+  resumos:            {label:'Resumos',                 color:'#4F8D63'},
+  video:              {label:'Vídeo',                   color:'#C75A5A'},
 };
+const REPO_CATEGORY_ALIASES = {
+  resumo_expandido:'resumos', resumo_simples:'resumos', resumo:'resumos',
+  jogo:'jogos_plataformas', plataforma:'jogos_plataformas',
+  projeto:'projetos_relatorios', relatorio:'projetos_relatorios',
+  livro:'livros_capitulos', capitulo:'livros_capitulos'
+};
+function repoCategoryKey(key=''){ return REPO_CATEGORY_ALIASES[key]||key||'outro'; }
 const LAB_CONTEXT_LABELS={project:'Projeto / capítulo',article:'Artigo científico',product:'Produto',independent:'Pesquisa independente',exploratory:'Exploratória'};
 function scientificContextHTML(p){
   if(!p)return '';
@@ -3259,7 +3264,7 @@ function scholarshipHTML(m,compact=false){
 }
 function memberRepositoryItems(memberId){
   const out=[];
-  compactPublicationsForDisplay(state.publicacoes.filter(p=>p.memberId===memberId)).forEach(p=>out.push({source:'publicacao',id:p.id,title:p.titulo||p.fileName||'Documento',kind:(CATEGORIAS[p.categoria]?.label||p.categoriaOutro||p.categoria||'Publicação'),url:p.url||'',fileName:p.fileName||'',isFile:p.tipo==='arquivo',ts:p.ts,reviewFlow:!!p.reviewFlow,reviewVersion:p.reviewVersion||0,reviewStatus:p.reviewStatus||'',reviewReviewerId:p.reviewReviewerId||'',reviewReturnToId:p.reviewReturnToId||'',reviewNextRecipientId:p.reviewNextRecipientId||'',reviewNote:p.reviewNote||'',onlineEditVersion:p.onlineEditVersion||1,raw:p}));
+  compactPublicationsForDisplay(state.publicacoes.filter(p=>p.memberId===memberId)).forEach(p=>out.push({source:'publicacao',id:p.id,title:p.titulo||p.fileName||'Documento',kind:(CATEGORIAS[repoCategoryKey(p.categoria)]?.label||p.categoriaOutro||p.categoria||'Publicação'),url:p.url||'',fileName:p.fileName||'',isFile:p.tipo==='arquivo',ts:p.ts,reviewFlow:!!p.reviewFlow,reviewVersion:p.reviewVersion||0,reviewStatus:p.reviewStatus||'',reviewReviewerId:p.reviewReviewerId||'',reviewReturnToId:p.reviewReturnToId||'',reviewNextRecipientId:p.reviewNextRecipientId||'',reviewNote:p.reviewNote||'',onlineEditVersion:p.onlineEditVersion||1,raw:p}));
   state.repositoryPackages.filter(p=>p.ownerMemberId===memberId).forEach(p=>out.push({source:'package',id:p.id,title:p.title||'Conjunto de arquivos',kind:'Dossiê · '+repoPurposeLabel(p),url:'',fileName:'',isFile:false,ts:p.ts,package:p}));
   state.activities.filter(a=>a.ownerId===memberId && (a.fileUrl||a.externalUrl)).forEach(a=>out.push({source:'atividade',id:a.id,title:a.title||'Registro de acompanhamento',kind:ACTIVITY_TYPES[a.type]||a.type||'Acompanhamento',url:a.fileUrl||a.externalUrl||'',fileName:a.fileName||'',isFile:!!a.fileUrl,ts:a.updatedAt||a.createdAt}));
   const m=memberById(memberId); (m?.resultados||[]).forEach((r,i)=>{if(r.url)out.push({source:'resultado',id:'r'+i,title:r.titulo||'Resultado / produto',kind:'Resultado / produto',url:r.url,fileName:'',isFile:false,ts:null})});
@@ -5339,7 +5344,7 @@ async function savePhoto(){
 function refreshPubFilters(){
   const cc=$('#pubCategoria'), curC=cc.value;
   cc.innerHTML='<option value="">Todas as categorias</option>'+
-    Object.entries(CATEGORIAS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+    Object.entries(CATEGORIAS).sort((a,b)=>a[1].label.localeCompare(b[1].label,'pt-BR')).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
   cc.value=curC;
   const cp=$('#pubPessoa'), curP=cp.value;
   const ordered=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome));
@@ -5431,7 +5436,7 @@ function renderPubs(){
   const cat=$('#pubCategoria').value, pessoa=$('#pubPessoa').value, mine=$('#pubMine').checked;
   const packageCount=renderRepoPackages(cat,pessoa,mine,'general');
   let list=state.publicacoes;
-  if(cat) list=list.filter(p=>p.categoria===cat);
+  if(cat) list=list.filter(p=>repoCategoryKey(p.categoria)===cat);
   if(pessoa) list=list.filter(p=>p.memberId===pessoa);
   if(mine){
     if(!myId){ toast('Identifique-se primeiro para ver só as suas.'); $('#pubMine').checked=false; }
@@ -5440,8 +5445,9 @@ function renderPubs(){
   list=compactPublicationsForDisplay(list);updateRepoDedupeButton();
   if(!list.length){ wrap.innerHTML=packageCount?'':'<div class="crono-empty">Nenhuma publicação encontrada com esses filtros.</div>'; return; }
   wrap.innerHTML=list.map(p=>{
-    const cfg=CATEGORIAS[p.categoria]||CATEGORIAS.outro;
-    const catLabel = p.categoria==='outro' && p.categoriaOutro ? p.categoriaOutro : cfg.label;
+    const normalizedCategory=repoCategoryKey(p.categoria);
+    const cfg=CATEGORIAS[normalizedCategory]||CATEGORIAS.outro;
+    const catLabel = normalizedCategory==='outro' && p.categoriaOutro ? p.categoriaOutro : cfg.label;
     const m=memberById(p.memberId);
     const canDel = isAdmin || (p.reviewFlow ? p.ownerUid===(window.auth.currentUser?.uid||'') : canEditMember(p.memberId));
     const dt = p.ts?.toMillis?new Date(p.ts.toMillis()):null;
@@ -6111,8 +6117,8 @@ async function openPubModal(presetMemberId=null,reviewContext=null){
 
     pubReviewContext=reviewContext||null;
     if(reviewContext)$('#pubAutorRow').style.display='none';
-    $('#pubCategoriaSel').value=reviewContext?.categoria||'artigo';
-    $('#pubOutroRow').style.display=reviewContext?.categoria==='outro'?'block':'none';
+    $('#pubCategoriaSel').value=repoCategoryKey(reviewContext?.categoria||'artigo');
+    $('#pubOutroRow').style.display=repoCategoryKey(reviewContext?.categoria)==='outro'?'block':'none';
     $('#pubOutroTxt').value=reviewContext?.categoriaOutro||'';
     $('#pubTitulo').value=reviewContext?.reviewBaseTitle||reviewContext?.titulo||'';
     $('#pubUrl').value='';
