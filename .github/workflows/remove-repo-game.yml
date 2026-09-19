@@ -1,0 +1,36 @@
+name: Remove repository game shortcut
+on:
+  push:
+    branches: [P130-remove-game-worker]
+permissions:
+  contents: write
+jobs:
+  remove-game:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Remove game shortcut only
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          pat=re.compile(r'<button type="button" data-go="jogo"><span>🎮</span><span><b>Jogo do Carbonauta</b><small>Ciclo do carbono</small></span></button>')
+          s2,n=pat.subn('',s)
+          if n != 1:
+              raise SystemExit(f'ABORTADO: esperado 1 atalho do jogo, encontrados {n}')
+          p.write_text(s2,encoding='utf-8')
+          print('Atalho do jogo removido:',n)
+          PY
+      - name: Commit to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "P130: retirar jogo do repositório"
+          git push origin main
