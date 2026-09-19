@@ -1,10 +1,8 @@
 name: P147 inspect cronograma repository wiring
 on:
-  push:
-    branches: [fix/p147-remove-cronograma-repo]
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
 jobs:
   inspect:
     runs-on: ubuntu-latest
@@ -15,23 +13,6 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           s=Path('index.html').read_text(encoding='utf-8')
-          out=[]
           for needle in ['function refreshPubFilters()', 'const CATEGORIAS = {', 'value="cronograma"', "label:'Cronograma'", 'repoCategory']:
-              out.append(f'### {needle}\n')
-              pos=0; n=0
-              while True:
-                  i=s.find(needle,pos)
-                  if i<0: break
-                  n+=1
-                  out.append(s[max(0,i-700):min(len(s),i+1800)]+'\n---\n')
-                  pos=i+len(needle)
-              out.append(f'count={n}\n')
-          Path('p147-inspect.txt').write_text('\n'.join(out),encoding='utf-8')
+              print(needle, s.count(needle))
           PY
-      - name: Commit report
-        run: |
-          git config user.name "ernandes-sobreira"
-          git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
-          git add p147-inspect.txt
-          git commit -m "chore: inspect P147 cronograma wiring" || exit 0
-          git push
