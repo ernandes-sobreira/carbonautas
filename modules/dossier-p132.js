@@ -1,7 +1,5 @@
-/* Carbonautas P135 · carregador seguro
-   O módulo P133 original foi preservado em dossier-p133-original.js.
-   Este arquivo já é carregado pelo index.html no fim da página e apenas
-   encadeia o dossiê original + a correção auditada Rede/Acompanhamento. */
+/* Carbonautas P150 · carregador seguro
+   Mantém o núcleo da Rede intacto e encadeia módulos isolados depois dele. */
 (function(){
 'use strict';
 if(window.__CARBONAUTAS_P135_LOADER)return;
@@ -22,6 +20,7 @@ function load(src,id){
   try{
     await load('./modules/dossier-p133-original.js?v=P133-20260919','carbonautas-dossier-p133-original');
     await load('./p135-rede-acompanhamento.js?v=P135-20260919','carbonautas-p135-rede-acompanhamento');
-  }catch(e){console.error('Carbonautas P135 loader',e)}
+    await load('./modules/rede-orientacao-p150.js?v=P150-20260919','carbonautas-rede-orientacao-p150');
+  }catch(e){console.error('Carbonautas loader',e)}
 })();
 })();
