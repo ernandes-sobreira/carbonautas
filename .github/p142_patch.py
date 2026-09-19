@@ -5,16 +5,7 @@ p = Path('index.html')
 s = p.read_text(encoding='utf-8')
 scripts_before = re.findall(r'<script\b[^>]*>.*?</script>', s, flags=re.S|re.I)
 
-pat = re.compile(
-    r'      <div class="dash-grid">\n'
-    r'        <section class="dash-card"><div class="dash-card-head"><div><h3>⚡ Atenção agora</h3>.*?'
-    r'id="dashProductsAllBtn".*?'</n    r'</aside>\n      </div>',
-    flags=re.S
-)
-
-# fix string concatenation typo safely by defining final pattern directly
 pat = re.compile(r'''      <div class="dash-grid">\n        <section class="dash-card"><div class="dash-card-head"><div><h3>⚡ Atenção agora</h3>.*?id="dashProductsAllBtn".*?</aside>\n      </div>''', re.S)
-
 matches = list(pat.finditer(s))
 if len(matches) != 1:
     raise SystemExit(f'expected exactly one dashboard block, found {len(matches)}')
@@ -40,7 +31,6 @@ new = '''      <div class="dash-grid p142-home-grid">
           </details>
         </section>
       </div>'''
-
 s = s[:matches[0].start()] + new + s[matches[0].end():]
 
 css = '''
