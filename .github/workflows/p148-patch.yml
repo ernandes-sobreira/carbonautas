@@ -1,0 +1,46 @@
+name: P148 remove Rede technical settings
+on:
+  push:
+    branches: [fix/p148-remove-ajustes-rede]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Remove Ajustes da Rede and keep only real filters
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old=s
+          button='<button type="button" class="p135-rede-settings-btn" id="p135RedeSettingsBtn">⚙ Ajustes</button>'
+          if s.count(button)!=1:
+              raise SystemExit(f'expected one Ajustes button, found {s.count(button)}')
+          s=s.replace(button,'',1)
+          line1="  const modal=document.createElement('div');modal.id='p135RedeSettings';modal.hidden=true;modal.innerHTML=`<section class=\"p135-settings-sheet\"><div class=\"p135-settings-head\"><b>Ajustes da Rede</b><button type=\"button\" class=\"p135-settings-close\" aria-label=\"Fechar\">×</button></div><div id=\"p135SettingsBody\"></div></section>`;document.body.appendChild(modal);const body=$('#p135SettingsBody',modal),side=$('.side',main),controls=$('.graph-controls',wrap);if(side)body.appendChild(side);if(controls)body.appendChild(controls);"
+          line2="  $('#p135RedeSettingsBtn',bar).onclick=()=>{modal.hidden=false};$('.p135-settings-close',modal).onclick=()=>{modal.hidden=true;requestAnimationFrame(redraw)};modal.addEventListener('click',e=>{if(e.target===modal){modal.hidden=true;requestAnimationFrame(redraw)}});"
+          if s.count(line1)!=1 or s.count(line2)!=1:
+              raise SystemExit(f'settings modal pattern mismatch: {s.count(line1)}, {s.count(line2)}')
+          replacement="  const controls=$('.graph-controls',wrap);if(controls)controls.style.display='none';"
+          s=s.replace(line1,replacement,1).replace(line2,'',1)
+          if s==old: raise SystemExit('no changes')
+          if 'id=\"p135RedeSettingsBtn\"' in s or '<b>Ajustes da Rede</b>' in s:
+              raise SystemExit('user-visible Ajustes still present')
+          if 'id=\"redeFiltersBtn\"' not in s or 'Filtros da Rede' not in s:
+              raise SystemExit('real Rede filters were accidentally removed')
+          if "controls.style.display='none'" not in s:
+              raise SystemExit('technical graph controls not hidden')
+          p.write_text(s,encoding='utf-8')
+          print('P148 OK: Ajustes removed; Filtros da Rede preserved')
+          PY
+          git diff --check
+      - name: Commit fix
+        run: |
+          git config user.name "ernandes-sobreira"
+          git config user.email "156730719+ernandes-sobreira@users.noreply.github.com"
+          git add index.html
+          git commit -m "P148: retirar Ajustes técnicos da Rede" || exit 0
+          git push
