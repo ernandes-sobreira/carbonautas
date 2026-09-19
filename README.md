@@ -6,7 +6,7 @@ Plataforma da Rede Carbonautas (LIPAN/LEFA/CELBE, UNEMAT). Arquivo unico `index.
 
 | Caminho | Uso |
 |---|---|
-| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P126 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
+| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P129 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
 | `sw.js` | Service worker. So cache e pagina offline. Nao injeta mais nada no HTML |
 | `game.html`, `recovery.html`, `chrome-reset.html`, `manifest.webmanifest`, icones | Publicar junto na raiz |
 | `firestore.rules` | Unica fonte das regras. Publicar no Console do Firebase. Contem tambem as regras de outros sistemas (`projects/`) |
@@ -36,6 +36,27 @@ Para restaurar por Git: `git checkout P126-pre-consolidacao -- .`
 4. Testar em janela anonima.
 
 ## CHANGELOG
+
+### P129 · 2026-09-19 · Menos na tela, abertura mais leve
+- Fofoca geral sem temas: saem a barra de temas e o seletor por mensagem. Mensagens antigas continuam visiveis.
+- Jogo sai do Painel e Lab sai do menu. Os dois viram cards no topo do Repositorio. As telas continuam existindo.
+- Um so badge em Conversas (equipe + privadas somadas).
+- Painel sem os quatro KPIs numericos. Ficam as listas curtas e o bloco Acessos.
+- d3, mammoth, xlsx e pdf.js deixam de carregar na abertura. Cada um baixa na primeira vez que a tela precisa (grafo da Rede, preview de DOCX, planilha, PDF, exportacoes). Cerca de 1,3 MB a menos no primeiro acesso.
+- Corrigido: a primeira visita recarregava a pagina sozinha (o service worker antigo e a camada P85 forcavam reload ao assumir o controle). Agora abre uma vez so.
+- Repositorio no celular: botao grande "Enviar arquivo" no topo, Science Dock recolhido atras de "Criar documento", botoes secundarios atras de "Mais". No computador nada muda.
+- Nao alterado: regras, VPS, dados, Agenda, notificacoes, reacoes dos destaques.
+
+### P128 · 2026-09-19 · Menos coisas na tela
+- Medalhas, pontos e ranking saem da interface (botao, resumo e cards). Os dados continuam no Firestore; nada foi apagado.
+- Check-in com texto sai. Entrar no app registra presenca em `rede_members.lastSeenAt` (uma vez a cada 30 min, so no proprio cadastro).
+- Painel da coordenacao ganha o bloco "Acessos": nome e quando entrou (hoje, ontem, N dias). Alunos nao veem esse bloco.
+- Pessoas: ao abrir um integrante aparece a "Linha do tempo" (prazos, tarefas, arquivos, fotos e destaques da pessoa, mais recente primeiro; 12 itens e botao "Ver tudo").
+- Painel com menos palavras: frases de explicacao reduzidas a uma linha.
+- O jogo so carrega quando a tela do jogo e aberta. Antes o three.js baixava em todo acesso.
+- Novo `vps/P128_lembretes_email.js`: lembrete diario de prazos por e-mail, gratuito (Gmail com senha de app), com resumo para a coordenacao. Instrucoes no cabecalho do arquivo.
+- Novo `vps/P128_ONLYOFFICE_LEVE.txt`: como abrir o editor no modo mobile e com barra compacta.
+- Nao alterado: regras, VPS, dados, conversas, mural, destaques, repositorio.
 
 ### P127 · 2026-09-19 · Consolidacao
 - `index.html` passa a conter as 64 camadas (49 scripts e 2 CSS que o `sw.js` injetava, mais 9 scripts e 4 CSS que a camada P91 carregava em cadeia), na mesma ordem de execucao de antes. Primeira visita ja abre a versao completa; nao depende mais do service worker instalar e recarregar a pagina.

@@ -1,7 +1,7 @@
-/* Carbonautas · service worker P127
-   Só faz cache de recursos e página offline.
+/* Carbonautas · service worker P129
+   Só faz cache de recursos e página offline. Não recarrega abas ao ativar; a atualização acontece na próxima abertura.
    Não injeta mais scripts no HTML: todas as camadas estão dentro do index.html. */
-const CACHE='carbonautas-p127-20260919';
+const CACHE='carbonautas-p129-20260919';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#f6faf9;color:#183844"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
 
 self.addEventListener('install',()=>{self.skipWaiting();});
@@ -10,15 +10,6 @@ self.addEventListener('activate',event=>{event.waitUntil((async()=>{
   const keys=await caches.keys();
   await Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)));
   await self.clients.claim();
-  // Recarrega uma vez as abas abertas para sair da versão anterior (que dependia de injeção).
-  const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});
-  await Promise.all(clients.map(c=>{
-    try{
-      const u=new URL(c.url);
-      if(u.pathname.endsWith('/recovery.html')||u.pathname.endsWith('/chrome-reset.html'))return null;
-      return c.navigate(u.href).catch(()=>null);
-    }catch(_e){return null}
-  }));
 })());});
 
 self.addEventListener('message',event=>{

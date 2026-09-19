@@ -1,0 +1,40 @@
+Carbonautas P128 · ONLYOFFICE mais leve no celular
+
+O editor pesa porque abre no modo "desktop" com barra completa. A configuração é assinada (JWT)
+no VPS, então a mudança precisa ser feita lá, não no index.html.
+
+Onde: nos três pontos do servidor Node que montam `const config={ documentType:..., type:'desktop', ...`
+(rotas do P16, P22 e P24). Em cada um deles:
+
+1) Detectar celular pelo User-Agent, logo antes de montar `customization`:
+
+    const mobile=/Android|iPhone|iPad|Mobile/i.test(String(req.headers['user-agent']||''));
+
+2) Trocar a linha de customization por:
+
+    const customization={
+      autosave:true,forcesave:true,uiTheme:'theme-light',
+      compactToolbar:true,
+      toolbarNoTabs:true,
+      hideRightMenu:true,
+      compactHeader:true,
+      toolbarHideFileName:true,
+      help:false,about:false,feedback:false,
+      layout:{toolbar:{file:false,home:{mailmerge:false},insert:false,layout:false,references:false,collaboration:{comments:true},protect:false,plugins:false,view:false}}
+    };
+
+3) Trocar `type:'desktop'` por:
+
+    type:mobile?'mobile':'desktop',
+
+4) Reiniciar o serviço (pm2 restart <nome> ou systemctl restart <nome>).
+
+Resultado: no celular abre o editor mobile do ONLYOFFICE (texto, comentário e revisão, sem abas);
+no computador abre com barra compacta, só a aba Início e Comentários. O salvamento continua igual.
+
+Sobre o custo: o ONLYOFFICE Document Server Community é gratuito. O que você paga é o VPS.
+Nada gratuito substitui edição de DOCX com controle de alterações dentro do app. As alternativas
+mais simples (converter para HTML e editar texto) perdem formatação, comentários e revisões ao
+salvar de volta, o que atrapalha justamente a correção de artigo. Sugestão: manter o VPS e deixar
+o editor leve como acima. Se o custo do VPS for o problema, o servidor de documentos pode rodar
+em um plano menor (2 GB de RAM bastam para poucos usuários simultâneos).

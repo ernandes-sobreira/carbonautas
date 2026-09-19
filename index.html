@@ -12,10 +12,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mammoth@1.10.0/mammoth.browser.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
   :root{
     --petrol:#0E5C63; --petrol-d:#0a464c; --agua:#1E88C7; --cerrado:#2E9E5B;
@@ -1771,7 +1767,7 @@
   <div class="view on" id="viewPainel">
     <div class="dash-scroll"><div class="dash-wrap">
       <div class="dash-hero">
-        <div><h2>O que precisa da minha atenção?</h2><p id="dashGreeting">Prazos, correções, bolsas, check-ins, produtos e pessoas que precisam de acompanhamento.</p></div>
+        <div><h2>O que precisa da minha atenção?</h2><p id="dashGreeting">O que espera você hoje.</p></div>
         <div class="spacer"></div>
         <div class="dash-hero-actions"><button class="btn" id="dashCheckinBtn">✓ Check-in mensal</button><button class="btn" id="dashProductBtn">🎯 Registrar produto</button><button class="btn" id="dashMedalsBtn">🏅 Medalhas</button><button class="btn" id="dashGameBtn">🎮 Jogo</button><button class="btn primary" id="dashDossierBtn">📚 Dossiê</button><button class="btn" id="dashBackupBtn" style="display:none">📦 Backup Excel</button></div>
       </div>
@@ -1910,7 +1906,7 @@
   <div class="view" id="viewJogo">
     <div class="game-scroll"><div class="game-wrap">
       <div class="game-head"><div><h2>🎮 Carbonauta</h2><p>Sete mundos do ciclo do carbono. Completar o ciclo vale pontos no ranking, no máximo uma vez por dia.</p></div><div class="spacer"></div><button class="btn" type="button" id="reloadGameBtn">↻ Reiniciar jogo</button></div>
-      <div class="game-frame-shell"><iframe id="carbonautaGameFrame" src="./game.html?v=P28" title="Jogo Carbonauta" allow="autoplay; fullscreen"></iframe></div>
+      <div class="game-frame-shell"><iframe id="carbonautaGameFrame" data-src="./game.html?v=P128" title="Jogo Carbonauta" allow="autoplay; fullscreen"></iframe></div>
     </div></div>
   </div>
 
@@ -3128,6 +3124,22 @@ let repoPackageUploadContext = 'general';
 let activeRepoFolderAccessId = '';
 let pendingRepoAddFilesId = '';
 const FB = () => window.fbFns;
+// P129 · bibliotecas pesadas so quando a tela precisa
+const P129_LIBS={
+  d3:{src:'https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js',ok:()=>!!window.d3},
+  mammoth:{src:'https://cdn.jsdelivr.net/npm/mammoth@1.10.0/mammoth.browser.min.js',ok:()=>!!window.mammoth},
+  xlsx:{src:'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js',ok:()=>!!window.XLSX},
+  pdfjs:{src:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',ok:()=>!!window.pdfjsLib}
+};
+const p129LibPromises={};
+function ensureLib(name){
+  const lib=P129_LIBS[name];if(!lib)return Promise.reject(new Error('lib desconhecida: '+name));
+  if(lib.ok())return Promise.resolve();
+  if(p129LibPromises[name])return p129LibPromises[name];
+  p129LibPromises[name]=new Promise((res,rej)=>{const s=document.createElement('script');s.src=lib.src;s.async=true;s.onload=()=>lib.ok()?res():rej(new Error(name+' nao inicializou'));s.onerror=()=>{delete p129LibPromises[name];rej(new Error('Nao consegui baixar '+name+'. Verifique a conexao.'))};document.head.appendChild(s)});
+  return p129LibPromises[name];
+}
+window.ensureLib=ensureLib;
 
 /* ============ HELPERS ============ */
 const $=s=>document.querySelector(s);
@@ -3950,7 +3962,7 @@ function renderLinhaFilters(){
 }
 function linhaColor(l){
   let h=0; for(let k=0;k<l.length;k++){h=(h*31+l.charCodeAt(k))>>>0}
-  return d3.hsl(h%360, .5, .55).toString();
+  return `hsl(${h%360},50%,55%)`;
 }
 
 /* ============ GESTÃO DE LINHAS DE PESQUISA ============ */
@@ -4051,9 +4063,11 @@ function renderProgramaFilter(){
 }
 
 /* ============ RENDER: GRAPH ============ */
-const svg=d3.select('#graph');
+let svg=null; // P129: criado em initGraph, depois de carregar o d3
 let gZoom, gLink, gNode, zoomBehavior;
 function initGraph(){
+  if(!window.d3||gZoom)return;
+  svg=d3.select('#graph');
   const g=svg.append('g').attr('class','zoomG');
   gZoom=g; gLink=g.append('g'); gNode=g.append('g');
   zoomBehavior=d3.zoom().scaleExtent([.35,3]).on('zoom',e=>g.attr('transform',e.transform));
@@ -4062,6 +4076,7 @@ function initGraph(){
 function graphSize(){const r=$('#graph').getBoundingClientRect();return [r.width||600,r.height||400]}
 
 function renderGraph(){
+  if(!window.d3||!gZoom){ensureLib('d3').then(()=>{initGraph();renderGraph()}).catch(e=>{console.warn(e);const eg=$('#emptyGraph');if(eg){eg.style.display='grid'}});return}
   const members=visibleMembers();
   $('#emptyGraph').style.display = members.length? 'none':'grid';
   const links=buildLinks(members);
@@ -4146,6 +4161,7 @@ function hoverNode(d,on){
   gNode.selectAll('g.node').classed('dim',n=>on&&!neigh.has(n.id));
 }
 function fitView(){
+  if(!svg||!zoomBehavior)return;
   svg.transition().duration(400).call(zoomBehavior.transform,d3.zoomIdentity);
   if(simulation) simulation.alpha(.5).restart();
 }
@@ -4432,6 +4448,7 @@ function externalViewerUrl(url,ext=''){
   return url;
 }
 async function renderPdfJs(viewUrl,name='PDF'){
+  try{await ensureLib('pdfjs')}catch(e){throw new Error(e.message)}
   const body=$('#filePreviewBody');
   try{
     if(!window.pdfjsLib?.getDocument)throw new Error('Leitor PDF não carregou. Verifique sua conexão e tente novamente.');
@@ -4511,7 +4528,7 @@ async function openFilePreview(url,name='Arquivo',context=null){
   if(ext==='docx'){
     try{
       if(!window.mammoth) throw new Error('Leitor local indisponível.');
-      const ab=await previewFetch(viewUrl), result=await window.mammoth.convertToHtml({arrayBuffer:ab});
+      await ensureLib('mammoth');const ab=await previewFetch(viewUrl), result=await window.mammoth.convertToHtml({arrayBuffer:ab});
       body.innerHTML=`<article class="docx-preview">${sanitizePreviewHtml(result.value||'<p>Documento vazio.</p>')}</article>`;
     }catch(e){
       console.warn('Leitor local do Word falhou; usando visualizador online.',e);
@@ -4522,7 +4539,7 @@ async function openFilePreview(url,name='Arquivo',context=null){
   if(ext==='xlsx'||ext==='xls'){
     try{
       if(!window.XLSX) throw new Error('Leitor local indisponível.');
-      const ab=await previewFetch(viewUrl); previewWorkbook=window.XLSX.read(ab,{type:'array'});
+      await ensureLib('xlsx');const ab=await previewFetch(viewUrl); previewWorkbook=window.XLSX.read(ab,{type:'array'});
       const names=previewWorkbook.SheetNames||[]; if(!names.length) throw new Error('A planilha não contém abas legíveis.');
       body.innerHTML=`<div class="excel-preview"><div class="excel-tabs" id="excelTabs">${names.map((n,i)=>`<button type="button" onclick="showWorkbookSheet(${i})">${esc(n)}</button>`).join('')}</div><div class="excel-sheet" id="excelSheet"></div></div>`;
       showWorkbookSheet(0);
@@ -6257,7 +6274,7 @@ function focusMemberTrack(id){switchView('track');setTimeout(()=>{if($('#trackOw
 function renderPainel(){
   if(!$('#dashKpis'))return;const scope=isAdmin?state.members.filter(m=>m.status!=='egresso'):state.members.filter(m=>m.id===myId);const att=attentionItems();const critical=att.filter(x=>x.sev==='critical').length;
   const overdue=scope.reduce((n,m)=>n+state.activities.filter(a=>a.ownerId===m.id&&_isOverdue(a)).length,0);const corr=scope.reduce((n,m)=>n+state.activities.filter(a=>a.ownerId===m.id&&a.type==='correcao'&&!_activityDone(a)).length,0);const unread=state.notifications.filter(n=>!n.read).length;const products=scope.reduce((n,m)=>n+state.activities.filter(a=>a.ownerId===m.id&&a.type==='produto').length,0);
-  $('#dashGreeting').textContent=isAdmin?'Prazos, correções, bolsas, check-ins, produtos e Carbonautas que precisam de acompanhamento.':'Seu projeto, seus prazos, check-in, produtos e próximos passos em um só lugar.';
+  $('#dashGreeting').textContent=isAdmin?'O que espera você hoje.':'Seus prazos e próximos passos.';
   $('#dashKpis').innerHTML=`<div class="dash-kpi ${critical?'bad':'good'}"><div class="k-n">${critical}</div><div class="k-l">situações críticas</div></div><div class="dash-kpi ${overdue?'bad':'good'}"><div class="k-n">${overdue}</div><div class="k-l">itens atrasados</div></div><div class="dash-kpi ${corr?'warn':'good'}"><div class="k-n">${corr}</div><div class="k-l">correções abertas</div></div><div class="dash-kpi ${unread?'warn':'good'}"><div class="k-n">${unread}</div><div class="k-l">notificações não lidas</div></div><div class="dash-kpi"><div class="k-n">${products}</div><div class="k-l">produtos registrados</div></div>`;
   $('#dashAttention').innerHTML=att.length?att.map(x=>`<div class="attention-item ${x.sev==='critical'?'critical':''}" onclick="focusMemberTrack('${x.memberId}')"><span class="attention-dot"></span><div><div class="attention-who">${esc(x.who)}</div><div class="attention-why">${esc(x.why)}</div></div><div class="attention-date">${x.date?fmtDate(x.date):''}</div></div>`).join(''):'<div class="dash-empty">✅ Nada crítico agora. Os projetos estão em dia.</div>';
   $('#dashHealth').innerHTML=scope.length?scope.map(m=>{const h=memberHealth(m);return `<div class="health-row" onclick="focusMemberTrack('${m.id}')" style="cursor:pointer"><span class="health-dot ${h.level}"></span><div class="health-person"><b>${esc(m.nome)}</b><span>${esc(h.reasons.slice(0,2).join(' · '))}</span></div><span class="health-score">${h.level==='green'?'Em dia':h.level==='yellow'?'Atenção':'Intervir'}</span></div>`}).join(''):'<div class="dash-empty">Sem pessoas neste recorte.</div>';
@@ -6278,11 +6295,11 @@ function refreshDossierPerson(){const sel=$('#dossierPerson'),cur=sel.value;cons
 function renderDossier(){const m=memberById($('#dossierPerson')?.value);if(!m)return;$('#dossierContent').innerHTML=dossierHTML(m)}
 function openDossier(memberId=''){refreshDossierPerson();if(memberId&&[...$('#dossierPerson').options].some(o=>o.value===memberId))$('#dossierPerson').value=memberId;renderDossier();openOverlay('dossierOverlay')}
 function dossierWorkbook(memberId){const m=memberById(memberId),{acts,repo,cron,checkins,products}=dossierRowsFor(m);const wb=XLSX.utils.book_new();const profile=[{Nome:m.nome,Nivel:NIVEIS[m.nivel]?.label||m.nivel,Programa:m.programa||'',Status:m.status||'',Bolsista:m.bolsista?'Sim':'Não','Pergunta científica':m.perguntaCientifica||'','Objetivo central':m.objetivoProjeto||'','Grupo atendido':m.grupoAtendido||'','Ideia de visibilidade':m.ideiaVisibilidade||'',Outros:m.projetoOutros||''}];XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(profile),'Perfil');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(acts.map(a=>({Tipo:ACTIVITY_TYPES[a.type]||a.type,Titulo:a.title||'',Status:ACTIVITY_STATUS[a.status]||a.status,Inicio:a.startDate||'',Prazo:a.dueDate||'',Descricao:a.description||''}))), 'Acompanhamento');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(products.map(a=>({Produto:a.title||'',Tipo:PRODUCT_TYPES[a.productType]||a.productType,Status:ACTIVITY_STATUS[a.status]||a.status,Prazo:a.dueDate||'',Observacoes:a.description||''}))), 'Produtos');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(checkins.map(a=>({Mes:a.checkinMonth||'',Fez:a.checkinDid||'',Entregou:a.checkinDelivered||'',Dificuldade:a.checkinDifficulty||'',Proximo:a.checkinNext||''}))), 'Checkins');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(repo.map(r=>({Titulo:r.title||'',Tipo:r.kind||'',Arquivo:r.fileName||'',URL:r.url||'',Correcao:r.reviewFlow?'Sim':'Não',Versao:r.reviewVersion||'',Status:r.reviewStatus||''}))), 'Repositorio');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(cron.map(c=>({Titulo:c.titulo||'',Data:c.data||'',Concluido:c.feito?'Sim':'Não'}))), 'Prazos');return wb}
-function exportDossierExcel(){const id=$('#dossierPerson').value,m=memberById(id);if(!m||!window.XLSX)return;XLSX.writeFile(dossierWorkbook(id),`Dossie_${slugify(m.nome)}.xlsx`)}
+function exportDossierExcel(){const id=$('#dossierPerson').value,m=memberById(id);if(!m)return;if(!window.XLSX){ensureLib('xlsx').then(exportDossierExcel).catch(e=>toast(e.message));return}XLSX.writeFile(dossierWorkbook(id),`Dossie_${slugify(m.nome)}.xlsx`)}
 function exportDossierCsv(){const id=$('#dossierPerson').value,m=memberById(id);if(!m)return;const {acts}=dossierRowsFor(m),rows=[['Nome','Tipo','Título','Status','Início','Prazo','Descrição'],...acts.map(a=>[m.nome,ACTIVITY_TYPES[a.type]||a.type,a.title||'',ACTIVITY_STATUS[a.status]||a.status,a.startDate||'',a.dueDate||'',a.description||''])];const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n');const b=new Blob([csv],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.csv`;a.click();URL.revokeObjectURL(u)}
 function exportDossierWord(){const m=memberById($('#dossierPerson').value);if(!m)return;const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Dossiê · ${esc(m.nome)}</title><style>body{font-family:Arial,sans-serif;margin:32px;color:#152b38}h1,h2,h3{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:11pt}td,th{border:1px solid #ddd;padding:7px;text-align:left}.dossier-question{padding:14px;background:#f2efff;border:1px solid #d7cdfa}</style></head><body><h1>Dossiê do Carbonauta</h1>${dossierHTML(m)}</body></html>`;const blob=new Blob(['\ufeff',html],{type:'application/msword'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.doc`;a.click();URL.revokeObjectURL(u)}
 function printDossier(){const m=memberById($('#dossierPerson').value);if(!m)return;const w=window.open('','_blank');w.document.write(`<html><head><title>Dossiê · ${esc(m.nome)}</title><style>body{font-family:Arial,sans-serif;margin:30px;color:#152b38}h1,h2,h3{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:12px}td,th{border-bottom:1px solid #ddd;padding:7px;text-align:left}.dossier-question{padding:14px;background:#f2efff;border:1px solid #d7cdfa;border-radius:10px}</style></head><body>${dossierHTML(m)}</body></html>`);w.document.close();setTimeout(()=>w.print(),350)}
-function exportGeneralBackup(){if(!isAdmin||!window.XLSX){toast('Backup geral disponível somente para o coordenador.');return}const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.members.map(m=>({id:m.id,nome:m.nome,nivel:m.nivel,programa:m.programa||'',status:m.status||'',bolsista:m.bolsista?'Sim':'Não',pergunta:m.perguntaCientifica||'',objetivo:m.objetivoProjeto||'',publico:m.grupoAtendido||'',visibilidade:m.ideiaVisibilidade||''}))), 'Pessoas');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.activities.map(a=>({id:a.id,ownerId:a.ownerId,ownerName:a.ownerName||'',tipo:a.type,status:a.status,titulo:a.title||'',descricao:a.description||'',inicio:a.startDate||'',prazo:a.dueDate||'',mes:a.checkinMonth||'',produto:a.productType||''}))), 'Acompanhamento');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.publicacoes.map(x=>({id:x.id,ownerUid:x.ownerUid||'',titulo:x.titulo||x.title||'',categoria:x.categoria||'',url:x.fileUrl||x.url||x.externalUrl||''}))), 'Repositorio');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(buildCronoItems().map(x=>({tipo:x.kind,titulo:x.titulo,data:x.data,owner:x.ownerName,concluido:x.feito?'Sim':'Não'}))), 'Cronograma');XLSX.writeFile(wb,`Carbonautas_backup_${new Date().toISOString().slice(0,10)}.xlsx`);toast('Backup Excel gerado.')}
+function exportGeneralBackup(){if(isAdmin&&!window.XLSX){ensureLib('xlsx').then(exportGeneralBackup).catch(e=>toast(e.message));return}if(!isAdmin||!window.XLSX){toast('Backup geral disponível somente para o coordenador.');return}const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.members.map(m=>({id:m.id,nome:m.nome,nivel:m.nivel,programa:m.programa||'',status:m.status||'',bolsista:m.bolsista?'Sim':'Não',pergunta:m.perguntaCientifica||'',objetivo:m.objetivoProjeto||'',publico:m.grupoAtendido||'',visibilidade:m.ideiaVisibilidade||''}))), 'Pessoas');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.activities.map(a=>({id:a.id,ownerId:a.ownerId,ownerName:a.ownerName||'',tipo:a.type,status:a.status,titulo:a.title||'',descricao:a.description||'',inicio:a.startDate||'',prazo:a.dueDate||'',mes:a.checkinMonth||'',produto:a.productType||''}))), 'Acompanhamento');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.publicacoes.map(x=>({id:x.id,ownerUid:x.ownerUid||'',titulo:x.titulo||x.title||'',categoria:x.categoria||'',url:x.fileUrl||x.url||x.externalUrl||''}))), 'Repositorio');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(buildCronoItems().map(x=>({tipo:x.kind,titulo:x.titulo,data:x.data,owner:x.ownerName,concluido:x.feito?'Sim':'Não'}))), 'Cronograma');XLSX.writeFile(wb,`Carbonautas_backup_${new Date().toISOString().slice(0,10)}.xlsx`);toast('Backup Excel gerado.')}
 
 /* ============ FEED SOCIAL ============ */
 let postFileData='',postFileName='';
@@ -7050,11 +7067,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P127-CONSOLIDADO-20260919';
+window.CARBONAUTAS_BUILD='P129-MENOS-20260919';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P127-20260919',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P129-20260919',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -7079,7 +7096,7 @@ waitFirebase().then(startAuth);
 })();
 </script>
 
-<!-- ===== Carbonautas P127: camadas P44 a P126 consolidadas neste arquivo (antes injetadas pelo sw.js) ===== -->
+<!-- ===== Carbonautas P128: camadas P44 a P129 consolidadas neste arquivo (antes injetadas pelo sw.js) ===== -->
 <style data-src="agenda-soft-p108.css">
 /* Carbonautas P108 · Agenda leve, clara e sem alterar a lógica */
 #viewCrono .crono-scroll{
@@ -8993,7 +9010,7 @@ function jumpTo(id){if(!id)return;const el=document.querySelector(`[data-msg-id=
 async function sendMessage(){const input=$('#p46Input'),text=norm(input?.value);if(!text||!myMemberId)return;if(text.length>5000)return toast('A mensagem pode ter no máximo 5.000 caracteres.');if(mode==='groups'&&!groupById(activeGroupId))return toast('Escolha uma panelinha.');const m=member(myMemberId),payload={tipo:mode==='groups'?'chat_group_message':'quick',text,author:m?.nome||me?.nome||'Carbonauta',authorId:myMemberId,authorUid:window.auth?.currentUser?.uid||'',authorFoto:m?.foto||'',authorColor:'#0d8192',ts:f().serverTimestamp(),replyTo:replyTarget?{...replyTarget}:null};if(mode==='groups')payload.groupId=activeGroupId;else payload.topic=composerTopic||'Geral';try{await f().addDoc(f().collection(window.db,'rede_chat'),payload);input.value='';input.style.height='auto';replyTarget=null;renderReply()}catch(e){console.error(e);toast('Não consegui enviar a mensagem.')}
 }
 
-function renderHeader(){if(!ensureMount())return;const title=$('#p46ChatTitle'),sub=$('#p46ChatSub'),ico=$('#p46ChatIcon');if(mode==='general'){title.textContent='Fofoca geral';sub.textContent='Conversa aberta da equipe · filtre as mensagens por tema';ico.textContent='💬'}else{const g=groupById(activeGroupId);title.textContent=g?.groupName||'Conversas em panelinha';sub.textContent=g?`${(g.memberIds||[]).length} participantes · grupo da equipe`:'Escolha ou crie uma panelinha';ico.textContent='👥'}renderTopics();renderSide();renderMessages();renderReply();enhanceSubNav()}
+function renderHeader(){if(!ensureMount())return;const title=$('#p46ChatTitle'),sub=$('#p46ChatSub'),ico=$('#p46ChatIcon');if(mode==='general'){title.textContent='Fofoca geral';sub.textContent='Conversa aberta da equipe';ico.textContent='💬'}else{const g=groupById(activeGroupId);title.textContent=g?.groupName||'Conversas em panelinha';sub.textContent=g?`${(g.memberIds||[]).length} participantes · grupo da equipe`:'Escolha ou crie uma panelinha';ico.textContent='👥'}renderTopics();renderSide();renderMessages();renderReply();enhanceSubNav()}
 function setMode(next){mode=next==='groups'?'groups':'general';if(mode==='groups'&&!activeGroupId){activeGroupId=groupMetas()[0]?.groupId||''}renderHeader();if(window.innerWidth<760){const side=$('.p46-side');if(side)side.style.display='none'}}
 
 function enhanceSubNav(){const nav=$('#subNav');if(!nav)return;const gen=nav.querySelector('[data-sub-view="mensagens"]'),priv=nav.querySelector('[data-sub-view="conversas"]');if(!gen||!priv)return;gen.childNodes[0].nodeValue='Fofoca geral';priv.childNodes[0].nodeValue='Privadas';let pan=nav.querySelector('.p46-panel-btn');if(!pan){pan=document.createElement('button');pan.type='button';pan.className='p46-panel-btn';pan.textContent='Conversas em panelinha';pan.onclick=()=>{if(typeof window.switchView==='function'&&document.body.dataset.view!=='mensagens')window.switchView('mensagens');setTimeout(()=>setMode('groups'),20)};nav.insertBefore(pan,priv)}
@@ -10995,13 +11012,13 @@ function decorateActivity(card,id){
   card.classList.add(mine?'p68-mine':'p68-watch');
   let explanation='';
   if(mine){
-    explanation=`Esta tarefa está vinculada a você. ${dueText(a)}`;
+    explanation=`${dueText(a)}`;
   }else if(file){
-    explanation=`Responsável: ${owner}. Há um arquivo visível no Repositório, mas <b>não existe uma solicitação de correção para você neste acompanhamento</b>. ${dueText(a)}`;
+    explanation=`${owner} · arquivo no Repositório. ${dueText(a)}`;
   }else if(needsFile(a)){
-    explanation=`Responsável: ${owner}. <b>Nenhum arquivo correspondente está visível para você no Repositório.</b> Portanto, isto é acompanhamento do prazo, não uma correção esperando sua decisão. ${dueText(a)}`;
+    explanation=`${owner} · sem arquivo ainda. ${dueText(a)}`;
   }else{
-    explanation=`Responsável: ${owner}. Isto é um item de acompanhamento dela/dele, não uma demanda direta para você. ${dueText(a)}`;
+    explanation=`${owner}. ${dueText(a)}`;
   }
   if(detail)detail.innerHTML=`<div class="p68-decision"><span class="p68-pill ${mine?'mine':'watch'}">${mine?'🔥 AÇÃO SUA':`👀 AÇÃO DE ${esc(first(owner).toUpperCase())}`}</span>${needsFile(a)||file?`<span class="p68-pill ${file?'file':'nofile'}">${file?'📄 Arquivo visível':'⏳ Sem arquivo visível'}</span>`:''}</div><div class="p68-explain">${explanation}</div><div class="p68-origin">${file?`Arquivo encontrado: ${esc(file.fileName||file.titulo||'Arquivo')}. `:''}${esc(creatorText(a))}</div>`;
   if(actions){
@@ -11029,9 +11046,9 @@ function processCard(card){
   if(key.startsWith('checkin:'))return decorateCheckin(card,key);
   return decorateOther(card,key)
 }
-function section(title,sub,count,nodes){const wrap=document.createElement('div');wrap.className='p68-section';wrap.innerHTML=`<div class="p68-section-head"><div>${title}<div class="p68-section-sub">${sub}</div></div><span>${count}</span></div>`;if(nodes.length)nodes.forEach(n=>wrap.appendChild(n));else{const e=document.createElement('div');e.className='p68-empty';e.textContent=title.includes('Precisa')?'Nada esperando uma decisão sua agora.':'Nada para acompanhar agora.';wrap.appendChild(e)}return wrap}
+function section(title,sub,count,nodes){const wrap=document.createElement('div');wrap.className='p68-section';wrap.innerHTML=`<div class="p68-section-head"><div>${title}<div class="p68-section-sub">${sub}</div></div><span>${count}</span></div>`;if(nodes.length)nodes.forEach(n=>wrap.appendChild(n));else{const e=document.createElement('div');e.className='p68-empty';e.textContent=title.includes('Precisa')?'Nada pendente.':'Nada por enquanto.';wrap.appendChild(e)}return wrap}
 function updateKpis(mineCount,watchCount){
-  try{const ks=[...document.querySelectorAll('#dashKpis .dash-kpi')];if(ks[0]){ks[0].querySelector('.k-n').textContent=mineCount;ks[0].querySelector('.k-l').textContent='precisam de você'}if(ks[2]){ks[2].querySelector('.k-n').textContent=watchCount;ks[2].querySelector('.k-l').textContent='só acompanhar'}const g=document.getElementById('dashGreeting');if(g)g.textContent='Veja primeiro o que realmente depende de você. O restante fica separado apenas para acompanhamento.'}catch(_e){}
+  try{const ks=[...document.querySelectorAll('#dashKpis .dash-kpi')];if(ks[0]){ks[0].querySelector('.k-n').textContent=mineCount;ks[0].querySelector('.k-l').textContent='precisam de você'}if(ks[2]){ks[2].querySelector('.k-n').textContent=watchCount;ks[2].querySelector('.k-l').textContent='só acompanhar'}const g=document.getElementById('dashGreeting');if(g)g.textContent='Primeiro o que depende de você.'}catch(_e){}
 }
 function transform(){
   const root=document.getElementById('dashAttention');if(!root||busy)return;
@@ -11041,7 +11058,7 @@ function transform(){
   try{
     const done=root.querySelector('.p56-done-box'),mine=[],watch=[];
     cards.forEach(card=>{const r=processCard(card);(r.mine?mine:watch).push(card)});
-    root.innerHTML='';root.appendChild(section('🔥 Precisa de você','Só entra aqui o que realmente espera uma decisão ou ação sua.',mine.length,mine));root.appendChild(section('👀 Só acompanhar','Prazos e tarefas dos alunos. Não são demandas suas.',watch.length,watch));if(done)root.appendChild(done);
+    root.innerHTML='';root.appendChild(section('🔥 Precisa de você','Espera uma ação sua.',mine.length,mine));root.appendChild(section('👀 Só acompanhar','Prazos dos alunos.',watch.length,watch));if(done)root.appendChild(done);
     root.dataset.p68Signature=keys;updateKpis(mine.length,watch.length);
   }finally{busy=false}
 }
@@ -11741,7 +11758,7 @@ function reconcileLocal(){const local=localAsEntries();let next=entries;for(cons
 async function startSync(){if(started||!window.db||!F()||!window.auth?.currentUser)return;started=true;try{const p=await getProfile();if(!p?.memberId){started=false;return}memberRef=F().doc(window.db,'rede_members',p.memberId);const snap=await F().getDoc(memberRef);if(!snap.exists()){started=false;return}const remote=snap.data()?.[CLOUD_FIELD]?.entries||{};entries=mergeEntries(remote,localAsEntries());applyEntriesToLocal(entries);await writeCloud();unsub?.();unsub=F().onSnapshot(memberRef,s=>{if(!s.exists())return;const r=s.data()?.[CLOUD_FIELD]?.entries||{};const merged=mergeEntries(r,entries);entries=merged;applyEntriesToLocal(entries);if(!same(trimEntries(r),entries))setTimeout(writeCloud,100)},e=>console.warn('P85 painel cloud read',e));wrapActions()}catch(e){started=false;console.warn('P85 iniciar sync',e)}}
 function waitSync(){if(window.db&&F()&&window.auth?.currentUser)startSync();else setTimeout(waitSync,450)}
 async function checkUpdate(){if(!('serviceWorker' in navigator))return;try{const reg=await navigator.serviceWorker.getRegistration('./');if(!reg)return;await reg.update();if(reg.waiting)reg.waiting.postMessage('SKIP_WAITING')}catch(e){console.warn('P85 update check',e)}}
-if('serviceWorker' in navigator){let reloading=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)return;reloading=true;const u=new URL(location.href);u.searchParams.set('build',BUILD);u.searchParams.set('apprefresh',Date.now().toString());location.replace(u.href)});window.addEventListener('focus',()=>{checkUpdate();startSync();polish()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkUpdate();startSync();polish()}});setTimeout(checkUpdate,1000)}
+if('serviceWorker' in navigator){let reloading=false;const hadController=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading||!hadController)return;reloading=true;const u=new URL(location.href);u.searchParams.set('build',BUILD);u.searchParams.set('apprefresh',Date.now().toString());location.replace(u.href)});window.addEventListener('focus',()=>{checkUpdate();startSync();polish()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkUpdate();startSync();polish()}});setTimeout(checkUpdate,1000)}
 const target=q('#viewPainel')||document.body;new MutationObserver(m=>{if(m.some(x=>x.addedNodes?.length||x.removedNodes?.length))schedule()}).observe(target,{childList:true,subtree:true});
 canonicalize();ensureStyle();polish();waitSync();setInterval(()=>{wrapActions();reconcileLocal()},2600);
 window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P85 PC/app unificados e estáveis');
@@ -13943,6 +13960,229 @@ function labelTools(){
 }
 function refreshTop(){markTopPlus()}
 function boot(){css();refreshTop();labelTools();new MutationObserver(()=>{refreshTop();labelTools()}).observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['data-view']});window.addEventListener('resize',refreshTop,{passive:true});console.info('Carbonautas',VERSION,'adicionar aluno só em Rede/Acompanhamento + composer mobile')}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+
+</script>
+<script data-src="p128-simplify.js">
+/* Carbonautas P128 · menos coisas na tela
+   1) Medalhas e pontos saem da interface (os dados continuam no Firestore).
+   2) Check-in com texto sai. Entrar no app já registra presença (rede_members.lastSeenAt).
+   3) Coordenação vê no Painel quem entrou e quando. Só a coordenação.
+   4) Linha do tempo por pessoa dentro de Pessoas (prazos, tarefas, arquivos, fotos, destaques).
+   5) O jogo só carrega quando a tela do jogo é aberta. */
+(function(){
+'use strict';
+if(window.__CARBONAUTAS_P128)return;
+window.__CARBONAUTAS_P128=true;
+const BUILD='P128';
+
+/* ---------- CSS ---------- */
+const css=`
+#dashMedalsBtn,.p56-medal-summary,.p57-usage-head,.p57-usage-body,.p57-usage-grid,.p57-periods,.p57-use-card,.p57-use-chip,.p57-use-break,
+.p59-checkin-bar,.p59-checkin-card{display:none!important}
+#p128Presence{margin:0 0 14px}
+#p128Presence .p128-head{display:flex;align-items:baseline;gap:8px;margin-bottom:8px;font-weight:800;color:#162e39}
+#p128Presence .p128-head small{font-weight:600;color:#71868b}
+#p128Presence .p128-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+#p128Presence .p128-chip{display:flex;align-items:center;gap:7px;padding:6px 9px;border:1px solid #dfe9e6;border-radius:12px;background:#fff;font-size:12px;min-width:0}
+#p128Presence .p128-chip i{width:8px;height:8px;border-radius:50%;flex:0 0 auto;background:#c9d4d1}
+#p128Presence .p128-chip.hoje i{background:#20b96a}
+#p128Presence .p128-chip.semana i{background:#e0b02e}
+#p128Presence .p128-chip.longe i{background:#e5646f}
+#p128Presence .p128-chip b{font-weight:700;color:#183844;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#p128Presence .p128-chip span{color:#71868b;margin-left:auto;white-space:nowrap}
+#p128Timeline{margin-top:14px;padding-top:12px;border-top:1px solid #e3ecea}
+#p128Timeline h4{margin:0 0 8px;font-size:13px;font-weight:800;color:#162e39}
+#p128Timeline ol{list-style:none;margin:0;padding:0 0 0 14px;border-left:2px solid #dfe9e6}
+#p128Timeline li{position:relative;padding:0 0 9px 12px;font-size:12px;line-height:1.35;color:#2d4a52}
+#p128Timeline li:before{content:'';position:absolute;left:-19px;top:5px;width:8px;height:8px;border-radius:50%;background:#168f94}
+#p128Timeline li.over:before{background:#e5646f}
+#p128Timeline li.done:before{background:#20b96a}
+#p128Timeline li time{display:block;font-size:11px;color:#71868b}
+#p128Timeline .p128-more{margin-top:4px;border:1px solid #dfe9e6;background:#fff;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:700;color:#176e6a;cursor:pointer}
+#p128Timeline .p128-empty{font-size:12px;color:#71868b}
+`;
+function ensureCss(){if(document.getElementById('p128Style'))return;const s=document.createElement('style');s.id='p128Style';s.textContent=css;document.head.appendChild(s)}
+
+/* ---------- utilidades seguras ---------- */
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function me(){try{return typeof myId!=='undefined'?myId:''}catch(_e){return''}}
+function admin(){try{return !!isAdmin}catch(_e){return false}}
+function st(){try{return state||{}}catch(_e){return{}}}
+function ms(v){if(!v)return 0;try{if(typeof v.toMillis==='function')return v.toMillis();if(v.seconds)return v.seconds*1000;if(typeof v==='string'){if(/^\d{4}-\d{2}-\d{2}$/.test(v))return new Date(v+'T12:00:00').getTime();const t=Date.parse(v);return isNaN(t)?0:t}if(typeof v==='number')return v;if(v instanceof Date)return v.getTime()}catch(_e){}return 0}
+function dayIso(d){const x=d||new Date();return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')}
+function fmtShort(t){if(!t)return'';return new Date(t).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}
+function ago(t){if(!t)return'nunca';const d=Math.floor((Date.now()-t)/86400000);if(d<=0)return'hoje';if(d===1)return'ontem';if(d<30)return`${d} d`;const m=Math.floor(d/30);return m<12?`${m} m`:`${Math.floor(m/12)} a`}
+function first(n){return String(n||'').trim().split(/\s+/)[0]||'Carbonauta'}
+
+/* ---------- 2) presença silenciosa ---------- */
+let presenceDone=false;
+async function markPresence(){
+  const id=me();if(!id||presenceDone)return;
+  const key='carbonautas_p128_seen_'+id,last=Number(localStorage.getItem(key)||0);
+  if(Date.now()-last<30*60*1000){presenceDone=true;return}
+  try{
+    const f=FB();
+    await f.updateDoc(f.doc(window.db,'rede_members',id),{lastSeenAt:f.serverTimestamp(),lastSeenDay:dayIso()});
+    localStorage.setItem(key,String(Date.now()));presenceDone=true;
+  }catch(e){console.warn('P128 presença',e?.code||e)}
+}
+
+/* ---------- 3) painel de acessos (coordenação) ---------- */
+function renderPresence(){
+  const root=document.getElementById('dashAttention');
+  if(!root||!admin()){const old=document.getElementById('p128Presence');if(old)old.remove();return}
+  const members=(st().members||[]).filter(m=>m.status!=='egresso');
+  if(!members.length)return;
+  const rows=members.map(m=>({m,t:ms(m.lastSeenAt)||ms(m.lastSeenDay)})).sort((a,b)=>b.t-a.t);
+  const cls=t=>{if(!t)return'nunca';const d=(Date.now()-t)/86400000;return d<1?'hoje':d<7?'semana':'longe'};
+  const hoje=rows.filter(r=>cls(r.t)==='hoje').length;
+  let box=document.getElementById('p128Presence');
+  if(!box){box=document.createElement('section');box.id='p128Presence';root.parentNode.insertBefore(box,root)}
+  const sig=rows.map(r=>r.m.id+':'+r.t).join('|');
+  if(box.dataset.sig===sig)return;box.dataset.sig=sig;
+  box.innerHTML=`<div class="p128-head">Acessos <small>${hoje} hoje · ${rows.length} pessoas</small></div><div class="p128-grid">${rows.map(r=>`<div class="p128-chip ${cls(r.t)}" title="${esc(r.m.nome||'')}"><i></i><b>${esc(first(r.m.nome))}</b><span>${ago(r.t)}</span></div>`).join('')}</div>`;
+}
+
+/* ---------- 4) linha do tempo por pessoa ---------- */
+const SHOW=12;
+function timelineItems(m){
+  const items=[];
+  (m.prazos||[]).forEach(p=>{const t=ms(p.data);if(!t)return;items.push({t,cls:p.feito?'done':(t<Date.now()?'over':''),txt:`Prazo · ${p.titulo||''}`})});
+  (st().activities||[]).filter(a=>a.ownerId===m.id).forEach(a=>{
+    const t=ms(a.dueDate)||ms(a.updatedAt)||ms(a.createdAt);if(!t)return;
+    const done=a.status==='concluido'||!!a.doneAt;
+    items.push({t,cls:done?'done':(a.dueDate&&t<Date.now()?'over':''),txt:`${a.type==='produto'?'Produto':a.type==='orientacao'?'Orientação':'Tarefa'} · ${a.title||''}`})
+  });
+  (st().publicacoes||[]).filter(p=>p.memberId===m.id&&p.tipo==='arquivo').forEach(p=>{const t=ms(p.ts);if(!t)return;items.push({t,cls:'',txt:`Arquivo · ${p.titulo||p.fileName||''}${p.reviewFlow?' · v'+(p.reviewVersion||1):''}`})});
+  (st().photos||[]).filter(p=>p.autorId===m.id).forEach(p=>{const t=ms(p.dataRealizacao)||ms(p.ts);if(!t)return;items.push({t,cls:'',txt:`Foto · ${p.legenda||p.projeto||''}`})});
+  (st().feed||[]).filter(p=>p.authorId===m.id).forEach(p=>{const t=ms(p.ts);if(!t)return;items.push({t,cls:'',txt:`Destaque · ${p.title||p.text||''}`})});
+  return items.sort((a,b)=>b.t-a.t);
+}
+function renderTimeline(expand){
+  const inner=document.getElementById('detailInner');if(!inner)return;
+  let m=null;try{m=(st().members||[]).find(x=>x.id===selectedId)}catch(_e){}
+  if(!m)return;
+  const items=timelineItems(m);
+  let box=document.getElementById('p128Timeline');
+  if(!box){box=document.createElement('div');box.id='p128Timeline';inner.appendChild(box)}
+  const all=expand||box.dataset.expand==='1';box.dataset.expand=all?'1':'0';
+  const shown=all?items:items.slice(0,SHOW);
+  box.innerHTML=`<h4>Linha do tempo</h4>`+(items.length?`<ol>${shown.map(i=>`<li class="${i.cls}"><time>${fmtShort(i.t)}</time>${esc(i.txt).slice(0,90)}</li>`).join('')}</ol>${items.length>SHOW&&!all?`<button type="button" class="p128-more">Ver tudo (${items.length})</button>`:''}`:`<div class="p128-empty">Nada registrado ainda.</div>`);
+  const more=box.querySelector('.p128-more');if(more)more.onclick=()=>renderTimeline(true);
+}
+
+/* ---------- 5) jogo só quando aberto ---------- */
+function loadGameIfOpen(v){
+  if(v!=='jogo')return;
+  const f=document.getElementById('carbonautaGameFrame');
+  if(f&&!f.getAttribute('src')&&f.dataset.src)f.src=f.dataset.src;
+}
+
+/* ---------- ganchos ---------- */
+let basePainel=null,baseDetail=null,baseSwitch=null;
+function hook(){
+  if(!basePainel&&typeof window.renderPainel==='function'){basePainel=window.renderPainel;const w=function(){const r=basePainel.apply(this,arguments);setTimeout(renderPresence,0);return r};try{renderPainel=w}catch(_e){}window.renderPainel=w}
+  if(!baseDetail&&typeof window.renderDetail==='function'){baseDetail=window.renderDetail;const w=function(){const r=baseDetail.apply(this,arguments);setTimeout(()=>renderTimeline(false),0);return r};try{renderDetail=w}catch(_e){}window.renderDetail=w}
+  if(!baseSwitch&&typeof window.switchView==='function'){baseSwitch=window.switchView;const w=function(v){const r=baseSwitch.apply(this,arguments);loadGameIfOpen(v);return r};try{switchView=w}catch(_e){}window.switchView=w}
+}
+function boot(){
+  ensureCss();hook();
+  setTimeout(hook,900);setTimeout(hook,2500);
+  const tick=setInterval(()=>{hook();if(me()){markPresence();renderPresence();}if(presenceDone&&basePainel&&baseDetail)clearInterval(tick)},1500);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){presenceDone=false;markPresence()}});
+  console.info('Carbonautas',BUILD,'presença silenciosa, linha do tempo, sem medalhas, jogo sob demanda');
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+
+</script>
+<script data-src="p129-menos-na-tela.js">
+/* Carbonautas P129 · menos na tela
+   1) Fofoca geral sem temas.
+   2) Jogo sai do Painel e vira card no Repositório.
+   3) Lab sai do menu e vira card no Repositório.
+   4) Um só badge em Conversas (equipe + privadas).
+   5) Painel sem KPIs numéricos.
+   8) Repositório no celular: botão grande "Enviar arquivo" no topo, Science Dock recolhido, botões secundários atrás de "Mais". */
+(function(){
+'use strict';
+if(window.__CARBONAUTAS_P129)return;
+window.__CARBONAUTAS_P129=true;
+const BUILD='P129';
+const $=(s,r=document)=>r.querySelector(s);
+
+const css=`
+#p46Topics,#p46TopicSelect,#dashGameBtn,#dashKpis,.tab[data-view="lab"],#privateBadge{display:none!important}
+#p129Shortcuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin:0 0 12px}
+#p129Shortcuts button{display:flex;align-items:center;gap:10px;border:1px solid #dfe9e6;background:#fff;border-radius:14px;padding:10px 12px;text-align:left;cursor:pointer;font:inherit;color:#183844}
+#p129Shortcuts button b{display:block;font-size:13px;font-weight:800}
+#p129Shortcuts button small{display:block;font-size:11px;color:#71868b}
+#p129Shortcuts button span{font-size:20px}
+#p129Send{display:none}
+@media(max-width:760px){
+  #p129Send{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:0 0 10px;padding:14px;border:0;border-radius:16px;background:#168f94;color:#fff;font-weight:900;font-size:15px;cursor:pointer;box-shadow:0 8px 20px rgba(22,143,148,.25)}
+  #repoMainHead #newOfficeBtn,#repoMainHead #addRepoPackageBtn,#repoMainHead #repoDedupeBtn,#repoMainHead #addPubBtn{display:none!important}
+  #repoMainHead.p129-open #newOfficeBtn,#repoMainHead.p129-open #addRepoPackageBtn,#repoMainHead.p129-open #repoDedupeBtn{display:inline-flex!important;width:100%;justify-content:center}
+  #p129More{width:100%;justify-content:center}
+  #scienceDock{display:none!important}
+  #scienceDock.p129-open{display:block!important}
+  #p129DockToggle{width:100%;justify-content:center;margin:0 0 10px}
+}
+`;
+function ensureCss(){if(document.getElementById('p129Style'))return;const s=document.createElement('style');s.id='p129Style';s.textContent=css;document.head.appendChild(s)}
+
+/* ---------- 4) um badge só ---------- */
+let own=0,mine='';
+function syncBadge(){
+  const a=$('#msgBadge'),b=$('#privateBadge');if(!a||!b)return;
+  const n=own+(parseInt(b.textContent,10)||0);
+  const txt=n?(n>99?'99+':String(n)):'';
+  if(a.textContent===txt&&(txt?a.style.display!=='none':a.style.display==='none'))return;
+  mine=txt;a.textContent=txt;a.style.display=txt?'':'none';
+}
+function watchBadges(){
+  const a=$('#msgBadge'),b=$('#privateBadge');if(!a||!b)return;
+  own=parseInt(a.textContent,10)||0;
+  new MutationObserver(()=>{if(a.textContent!==mine)own=parseInt(a.textContent,10)||0;syncBadge()}).observe(a,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['style']});
+  new MutationObserver(syncBadge).observe(b,{childList:true,characterData:true,subtree:true});
+  syncBadge();
+}
+
+/* ---------- 2, 3, 8) atalhos e entrada do Repositório ---------- */
+function go(v){try{if(typeof switchView==='function')switchView(v);else if(typeof window.switchView==='function')window.switchView(v)}catch(e){console.warn(e)}}
+function injectRepo(){
+  const head=$('#repoMainHead');if(!head||$('#p129Send'))return;
+  const send=document.createElement('button');send.id='p129Send';send.type='button';send.innerHTML='＋ Enviar arquivo';
+  send.onclick=()=>{const b=$('#addPubBtn');if(b)b.click()};
+  head.parentNode.insertBefore(send,head);
+  const more=document.createElement('button');more.id='p129More';more.type='button';more.className='btn';more.textContent='Mais';
+  more.onclick=()=>{const open=head.classList.toggle('p129-open');more.textContent=open?'Fechar':'Mais'};
+  head.appendChild(more);
+  if(window.innerWidth>760)more.style.display='none';
+  const dock=$('#scienceDock');
+  if(dock){
+    const t=document.createElement('button');t.id='p129DockToggle';t.type='button';t.className='btn';t.textContent='✨ Criar documento';
+    t.onclick=()=>{const open=dock.classList.toggle('p129-open');t.textContent=open?'Fechar':'✨ Criar documento'};
+    dock.parentNode.insertBefore(t,dock);
+    if(window.innerWidth>760)t.style.display='none';
+  }
+  const tabs=$('#repoModeTabs');
+  if(tabs&&!$('#p129Shortcuts')){
+    const sc=document.createElement('div');sc.id='p129Shortcuts';
+    sc.innerHTML=`<button type="button" data-go="lab"><span>🧪</span><span><b>Laboratório de Dados</b><small>Análises e planilhas</small></span></button><button type="button" data-go="jogo"><span>🎮</span><span><b>Jogo do Carbonauta</b><small>Ciclo do carbono</small></span></button>`;
+    sc.querySelectorAll('button').forEach(b=>b.onclick=()=>go(b.dataset.go));
+    tabs.parentNode.insertBefore(sc,tabs.nextSibling);
+  }
+}
+
+function boot(){
+  ensureCss();injectRepo();watchBadges();
+  setTimeout(injectRepo,800);setTimeout(injectRepo,2500);
+  window.addEventListener('resize',()=>{const d=window.innerWidth>760?'none':'';['p129More','p129DockToggle'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display=d})});
+  console.info('Carbonautas',BUILD,'geral sem temas, jogo e lab no Repositório, um badge, sem KPIs');
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 
