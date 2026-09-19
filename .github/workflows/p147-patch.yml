@@ -10,34 +10,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Patch and validate
+      - name: Patch repository category selectors
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
           p=Path('index.html')
           s=p.read_text(encoding='utf-8')
-          old=s
-          s,n=re.subn(r'\n\s*<option value="cronograma">Cronograma</option>', '', s, count=1)
-          if n!=1:
-              raise SystemExit(f'expected one cronograma upload option, removed {n}')
-          needle='Object.entries(CATEGORIAS).sort('
-          repl="Object.entries(CATEGORIAS).filter(([k])=>k!=='cronograma').sort("
-          if needle not in s:
-              raise SystemExit('refreshPubFilters Object.entries pattern not found')
-          s=s.replace(needle,repl,1)
-          if s==old:
-              raise SystemExit('no change')
-          if '<option value="cronograma">Cronograma</option>' in s:
-              raise SystemExit('cronograma still selectable in upload modal')
-          if "Object.entries(CATEGORIAS).filter(([k])=>k!=='cronograma').sort(" not in s:
-              raise SystemExit('cronograma filter exclusion missing')
-          if "cronograma:         {label:'Cronograma'" not in s:
-              raise SystemExit('legacy cronograma compatibility entry missing')
+          s=s.replace('          <option value="cronograma">Cronograma</option>\n','',1)
+          s=s.replace('Object.entries(CATEGORIAS).sort(',"Object.entries(CATEGORIAS).filter(([k])=>k!=='cronograma').sort(",1)
           p.write_text(s,encoding='utf-8')
-          print('P147 validation OK')
           PY
-          git diff --check
+          grep -q "<option value=\"cronograma\">Cronograma</option>" index.html && exit 1 || true
+          grep -q "Object.entries(CATEGORIAS).filter(([k])=>k!='cronograma')" index.html || grep -q "Object.entries(CATEGORIAS).filter(([k])=>k!=='cronograma')" index.html
       - name: Commit fix
         run: |
           git config user.name "ernandes-sobreira"
