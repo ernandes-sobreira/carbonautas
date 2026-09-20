@@ -7321,11 +7321,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P198-20260920';
+window.CARBONAUTAS_BUILD='P199-20260920';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P198-20260920',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P199-20260920',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -12902,11 +12902,11 @@ function ensureCss(){if($('#p117Style'))return;const st=document.createElement('
 function ensurePanel(){
   let host=$('#p117Highlights');if(host)return host;
   host=document.createElement('section');host.id='p117Highlights';
-  const mural=$('#viewMural .mural-board'),filter=$('#muralFilterbar');
-  if(mural){if(filter)mural.insertBefore(host,filter);else mural.appendChild(host)}else $('#viewMural')?.appendChild(host);
+  const msgs=$('#viewMural #muralMsgs'),mural=$('#viewMural .mural-board');
+  if(msgs)msgs.appendChild(host);else if(mural)mural.appendChild(host);else $('#viewMural')?.appendChild(host);
   return host;
 }
-function relocatePanel(){const host=$('#p117Highlights'),mural=$('#viewMural .mural-board'),filter=$('#muralFilterbar');if(!host||!mural)return;if(filter){if(host.parentElement!==mural||host.nextElementSibling!==filter)mural.insertBefore(host,filter)}else if(host.parentElement!==mural)mural.appendChild(host)}
+function relocatePanel(){const host=$('#p117Highlights'),msgs=$('#viewMural #muralMsgs');if(!host||!msgs)return;if(host.parentElement!==msgs||host!==msgs.lastElementChild)msgs.appendChild(host)}
 function initials(n=''){return String(n).trim().split(/\s+/).slice(0,2).map(x=>x[0]?.toUpperCase()||'').join('')||'★'}
 function cardHTML(x){
   const c=cat(x.category),m=member(x.memberId),name=m?.nome||x.memberName||'Carbonauta',photo=m?.foto||'';
@@ -15594,6 +15594,11 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',boo
 })();
 </script>
 
+
+
+<style id="p199HighlightsBottomStyle">
+#viewMural #muralMsgs > #p117Highlights{flex:0 0 auto!important;width:100%!important;margin:6px 0 18px!important}
+</style>
 
 <style id="p198DesktopBackStyle">
 #p195Deck .p198-back{display:none!important}
