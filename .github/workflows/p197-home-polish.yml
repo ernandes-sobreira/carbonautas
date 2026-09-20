@@ -1,0 +1,103 @@
+name: P197 home polish
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: "${{ !contains(github.event.head_commit.message, '[p197-applied]') }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Aplicar P197 e validar
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64,hashlib,re,subprocess,sys
+
+          idx=Path('index.html')
+          s=idx.read_text(encoding='utf-8')
+
+          required=[
+            'p196SwipeCardsStyle',
+            "window.CARBONAUTAS_BUILD='P196-20260920';",
+            "navigator.serviceWorker.register('./sw.js?v=P196-20260920',{updateViaCache:'none'})",
+            "if(Math.abs(dx)<7)return;if(Math.abs(dx)<=Math.abs(dy)*1.05)return;horizontal=true",
+            "const threshold=Math.min(118,card.offsetWidth*.22),fast=Math.abs(vx)>.55;",
+            '<span class="p195-count"></span><button class="p195-btn ghost" data-g>Dispensar</button><button class="p195-btn" data-n>Passar →</button><button class="p195-btn primary" data-o>Abrir</button>'
+          ]
+          for a in required:
+            assert a in s, f'anchor missing: {a[:120]}'
+          assert 'p197HomePolishStyle' not in s
+
+          s=s.replace(
+            "if(Math.abs(dx)<7)return;if(Math.abs(dx)<=Math.abs(dy)*1.05)return;horizontal=true",
+            "if(Math.abs(dx)<4)return;if(Math.abs(dx)<=Math.abs(dy)*.85)return;horizontal=true;if(e.cancelable)e.preventDefault()",
+            1
+          )
+          s=s.replace(
+            "const threshold=Math.min(118,card.offsetWidth*.22),fast=Math.abs(vx)>.55;",
+            "const threshold=Math.min(58,Math.max(32,card.offsetWidth*.11)),fast=Math.abs(vx)>.22;",
+            1
+          )
+
+          old='<span class="p195-count"></span><button class="p195-btn ghost" data-g>Dispensar</button><button class="p195-btn" data-n>Passar →</button><button class="p195-btn primary" data-o>Abrir</button>'
+          new='<span class="p195-count"></span><span class="p197-swipehint">deslize</span><button class="p195-btn ghost" data-g>Dispensar</button><button class="p195-btn" data-n>→</button><button class="p195-btn primary" data-o>Abrir</button>'
+          s=s.replace(old,new,1)
+
+          old="q('[data-n]',card).style.display=a.length>1?'':'none';q('[data-o]',card).onclick=()=>open(it);"
+          new="q('[data-n]',card).style.display=a.length>1?'':'none';q('[data-n]',card).setAttribute('aria-label','Próximo card');q('[data-n]',card).title='Próximo';q('[data-o]',card).onclick=()=>open(it);"
+          assert old in s
+          s=s.replace(old,new,1)
+
+          css=base64.b64decode('CjxzdHlsZSBpZD0icDE5N0hvbWVQb2xpc2hTdHlsZSI+CiN2aWV3UGFpbmVsICNkYXNoQXR0ZW50aW9uLAojdmlld1BhaW5lbCAjcDc4VG9kYXlDYXJke2Rpc3BsYXk6bm9uZSFpbXBvcnRhbnR9CgojcDE5NURlY2t7bWF4LXdpZHRoOjYyMHB4IWltcG9ydGFudH0KI3AxOTVEZWNrIC5wMTk1LWhlYWR7CiAgbWFyZ2luOjAgNnB4IDE0cHghaW1wb3J0YW50OwogIGNvbG9yOiM3YzkwOTchaW1wb3J0YW50OwogIGZvbnQtc2l6ZToxMHB4IWltcG9ydGFudDsKICBsZXR0ZXItc3BhY2luZzouMTZlbSFpbXBvcnRhbnQKfQojcDE5NURlY2sgLnAxOTUtY2FyZHsKICBtaW4taGVpZ2h0OjI0OHB4IWltcG9ydGFudDsKICBwYWRkaW5nOjI2cHggMjRweCAyMHB4IWltcG9ydGFudDsKICBib3JkZXI6MXB4IHNvbGlkIHJnYmEoMjgsOTEsOTgsLjEwKSFpbXBvcnRhbnQ7CiAgYm9yZGVyLXJhZGl1czoyNnB4IWltcG9ydGFudDsKICBiYWNrZ3JvdW5kOgogICAgcmFkaWFsLWdyYWRpZW50KGNpcmNsZSBhdCA4OCUgOCUscmdiYSgzNywxNzYsMTUzLC4xMCksdHJhbnNwYXJlbnQgMzIlKSwKICAgIGxpbmVhci1ncmFkaWVudCgxNjBkZWcsI2ZmZmZmZiAwJSwjZmJmZWZkIDcyJSwjZjVmYmY5IDEwMCUpIWltcG9ydGFudDsKICBib3gtc2hhZG93OjAgMjJweCA1OHB4IHJnYmEoMjAsNTksNjksLjExKSFpbXBvcnRhbnQ7Cn0KI3AxOTVEZWNrIC5wMTk1LWt7ZGlzcGxheTpub25lIWltcG9ydGFudH0KI3AxOTVEZWNrIC5wMTk1LXRpdGxlewogIG1hcmdpbjoycHggMCAxMnB4IWltcG9ydGFudDsKICBtYXgtd2lkdGg6OTIlIWltcG9ydGFudDsKICBjb2xvcjojMTQzOTQ1IWltcG9ydGFudDsKICBmb250LXNpemU6Y2xhbXAoMjJweCw1Ljh2dywzMHB4KSFpbXBvcnRhbnQ7CiAgZm9udC13ZWlnaHQ6ODUwIWltcG9ydGFudDsKICBsaW5lLWhlaWdodDoxLjA2IWltcG9ydGFudDsKICBsZXR0ZXItc3BhY2luZzotLjAzNWVtIWltcG9ydGFudAp9CiNwMTk1RGVjayAucDE5NS1tZXRhewogIGRpc3BsYXk6aW5saW5lLWZsZXghaW1wb3J0YW50OwogIHdpZHRoOmF1dG8haW1wb3J0YW50OwogIG1heC13aWR0aDoxMDAlIWltcG9ydGFudDsKICBtYXJnaW46MCAwIDEzcHghaW1wb3J0YW50OwogIHBhZGRpbmc6NnB4IDEwcHghaW1wb3J0YW50OwogIGJvcmRlci1yYWRpdXM6OTk5cHghaW1wb3J0YW50OwogIGJhY2tncm91bmQ6I2VkZjhmNSFpbXBvcnRhbnQ7CiAgY29sb3I6IzIzNzQ2ZiFpbXBvcnRhbnQ7CiAgZm9udC1zaXplOjEwcHghaW1wb3J0YW50OwogIGZvbnQtd2VpZ2h0Ojg1MCFpbXBvcnRhbnQ7CiAgbGluZS1oZWlnaHQ6MS4yIWltcG9ydGFudDsKICB3aGl0ZS1zcGFjZTpub3JtYWwhaW1wb3J0YW50Cn0KI3AxOTVEZWNrIC5wMTk1LWRldGFpbHsKICBkaXNwbGF5Oi13ZWJraXQtYm94IWltcG9ydGFudDsKICBvdmVyZmxvdzpoaWRkZW4haW1wb3J0YW50OwogIC13ZWJraXQtbGluZS1jbGFtcDo0IWltcG9ydGFudDsKICAtd2Via2l0LWJveC1vcmllbnQ6dmVydGljYWwhaW1wb3J0YW50OwogIG1heC13aWR0aDo5NSUhaW1wb3J0YW50OwogIGNvbG9yOiM2MDc1N2MhaW1wb3J0YW50OwogIGZvbnQtc2l6ZToxM3B4IWltcG9ydGFudDsKICBsaW5lLWhlaWdodDoxLjQ4IWltcG9ydGFudAp9CiNwMTk1RGVjayAucDE5NS1mb290ewogIG1hcmdpbi10b3A6MjJweCFpbXBvcnRhbnQ7CiAgcGFkZGluZy10b3A6MTVweCFpbXBvcnRhbnQ7CiAgYm9yZGVyLXRvcDoxcHggc29saWQgcmdiYSgyMyw4Niw5MiwuMDgpIWltcG9ydGFudDsKICBnYXA6OHB4IWltcG9ydGFudDsKICBmbGV4LXdyYXA6bm93cmFwIWltcG9ydGFudAp9CiNwMTk1RGVjayAucDE5NS1jb3VudHsKICBvcmRlcjoxIWltcG9ydGFudDsKICBtYXJnaW46MCFpbXBvcnRhbnQ7CiAgcGFkZGluZzo3cHggOXB4IWltcG9ydGFudDsKICBib3JkZXItcmFkaXVzOjk5OXB4IWltcG9ydGFudDsKICBiYWNrZ3JvdW5kOiNmMmY2ZjUhaW1wb3J0YW50OwogIGNvbG9yOiM3NDg3OGQhaW1wb3J0YW50OwogIGZvbnQtc2l6ZToxMHB4IWltcG9ydGFudDsKICBmb250LXdlaWdodDo4NTAhaW1wb3J0YW50OwogIHdoaXRlLXNwYWNlOm5vd3JhcCFpbXBvcnRhbnQKfQojcDE5NURlY2sgLnAxOTctc3dpcGVoaW50ewogIG9yZGVyOjIhaW1wb3J0YW50OwogIG1hcmdpbi1yaWdodDphdXRvIWltcG9ydGFudDsKICBjb2xvcjojOTFhMGE1IWltcG9ydGFudDsKICBmb250LXNpemU6MTBweCFpbXBvcnRhbnQ7CiAgZm9udC13ZWlnaHQ6NzUwIWltcG9ydGFudDsKICB3aGl0ZS1zcGFjZTpub3dyYXAhaW1wb3J0YW50Cn0KI3AxOTVEZWNrIC5wMTk3LXN3aXBlaGludDo6YmVmb3Jle2NvbnRlbnQ6IuKGlCAiO2NvbG9yOiM0MmE5OWQhaW1wb3J0YW50O2ZvbnQtd2VpZ2h0Ojk1MCFpbXBvcnRhbnR9CiNwMTk1RGVjayAucDE5NS1idG57CiAgYXBwZWFyYW5jZTpub25lIWltcG9ydGFudDsKICAtd2Via2l0LWFwcGVhcmFuY2U6bm9uZSFpbXBvcnRhbnQ7CiAgbWluLWhlaWdodDozOHB4IWltcG9ydGFudDsKICBib3JkZXI6MXB4IHNvbGlkIHJnYmEoMjUsNzksODYsLjEwKSFpbXBvcnRhbnQ7CiAgYm9yZGVyLXJhZGl1czo5OTlweCFpbXBvcnRhbnQ7CiAgYmFja2dyb3VuZDojZjRmOGY3IWltcG9ydGFudDsKICBib3gtc2hhZG93Om5vbmUhaW1wb3J0YW50OwogIGNvbG9yOiM0NzYzNmIhaW1wb3J0YW50OwogIHBhZGRpbmc6OXB4IDEzcHghaW1wb3J0YW50OwogIGZvbnQtZmFtaWx5OmluaGVyaXQhaW1wb3J0YW50OwogIGZvbnQtc2l6ZToxMXB4IWltcG9ydGFudDsKICBmb250LXdlaWdodDo4NTAhaW1wb3J0YW50OwogIGxpbmUtaGVpZ2h0OjEhaW1wb3J0YW50Cn0KI3AxOTVEZWNrIC5wMTk1LWJ0bi5naG9zdHsKICBvcmRlcjozIWltcG9ydGFudDsKICBib3JkZXItY29sb3I6dHJhbnNwYXJlbnQhaW1wb3J0YW50OwogIGJhY2tncm91bmQ6dHJhbnNwYXJlbnQhaW1wb3J0YW50OwogIGNvbG9yOiM4MTkxOTchaW1wb3J0YW50OwogIHBhZGRpbmctaW5saW5lOjhweCFpbXBvcnRhbnQKfQojcDE5NURlY2sgLnAxOTUtYnRuW2RhdGEtbl17CiAgb3JkZXI6NCFpbXBvcnRhbnQ7CiAgd2lkdGg6NDBweCFpbXBvcnRhbnQ7CiAgbWluLXdpZHRoOjQwcHghaW1wb3J0YW50OwogIHBhZGRpbmc6MCFpbXBvcnRhbnQ7CiAgYm9yZGVyLWNvbG9yOiNkN2U3ZTQhaW1wb3J0YW50OwogIGJhY2tncm91bmQ6I2ZmZiFpbXBvcnRhbnQ7CiAgY29sb3I6IzFjNmY3NCFpbXBvcnRhbnQ7CiAgZm9udC1zaXplOjIwcHghaW1wb3J0YW50Cn0KI3AxOTVEZWNrIC5wMTk1LWJ0bi5wcmltYXJ5ewogIG9yZGVyOjUhaW1wb3J0YW50OwogIGJvcmRlci1jb2xvcjojMTI2Zjc4IWltcG9ydGFudDsKICBiYWNrZ3JvdW5kOiMxMjZmNzghaW1wb3J0YW50OwogIGNvbG9yOiNmZmYhaW1wb3J0YW50OwogIHBhZGRpbmctaW5saW5lOjE3cHghaW1wb3J0YW50OwogIGJveC1zaGFkb3c6MCA4cHggMjBweCByZ2JhKDE4LDExMSwxMjAsLjE2KSFpbXBvcnRhbnQKfQojcDE5NURlY2sgLnAxOTUtYnRuOmFjdGl2ZXt0cmFuc2Zvcm06c2NhbGUoLjk3KSFpbXBvcnRhbnR9CiNwMTk1RGVjayAucDE5NS1jYXJkLnAxOTYtZHJhZ2dpbmd7CiAgYm94LXNoYWRvdzowIDMwcHggNzJweCByZ2JhKDIwLDU5LDY5LC4xOCkhaW1wb3J0YW50Cn0KQG1lZGlhKG1heC13aWR0aDo3MDBweCl7CiAgI3ZpZXdQYWluZWwgLmRhc2gtd3JhcHtwYWRkaW5nLXRvcDoxMHB4IWltcG9ydGFudH0KICAjcDE5NURlY2sgLnAxOTUtY2FyZHsKICAgIG1pbi1oZWlnaHQ6MjM2cHghaW1wb3J0YW50OwogICAgcGFkZGluZzoyMnB4IDIwcHggMThweCFpbXBvcnRhbnQ7CiAgICBib3JkZXItcmFkaXVzOjI0cHghaW1wb3J0YW50CiAgfQogICNwMTk1RGVjayAucDE5NS10aXRsZXtmb250LXNpemU6MjRweCFpbXBvcnRhbnR9CiAgI3AxOTVEZWNrIC5wMTk1LWRldGFpbHtmb250LXNpemU6MTIuNXB4IWltcG9ydGFudDstd2Via2l0LWxpbmUtY2xhbXA6NCFpbXBvcnRhbnR9CiAgI3AxOTVEZWNrIC5wMTk1LWZvb3R7Z2FwOjVweCFpbXBvcnRhbnR9CiAgI3AxOTVEZWNrIC5wMTk3LXN3aXBlaGludHtmb250LXNpemU6OXB4IWltcG9ydGFudH0KICAjcDE5NURlY2sgLnAxOTUtYnRuLmdob3N0e2ZvbnQtc2l6ZToxMHB4IWltcG9ydGFudH0KICAjcDE5NURlY2sgLnAxOTUtYnRuLnByaW1hcnl7cGFkZGluZy1pbmxpbmU6MTVweCFpbXBvcnRhbnR9Cn0KPC9zdHlsZT4K').decode()
+          head,tail=s.rsplit('</body>',1)
+          s=head+css+'\n</body>'+tail
+
+          s=s.replace("window.CARBONAUTAS_BUILD='P196-20260920';","window.CARBONAUTAS_BUILD='P197-20260920';",1)
+          s=s.replace("navigator.serviceWorker.register('./sw.js?v=P196-20260920',{updateViaCache:'none'})","navigator.serviceWorker.register('./sw.js?v=P197-20260920',{updateViaCache:'none'})",1)
+          idx.write_text(s,encoding='utf-8')
+
+          sw=Path('sw.js')
+          w=sw.read_text(encoding='utf-8')
+          assert 'service worker P196' in w and 'carbonautas-p196-20260920' in w
+          w=w.replace('service worker P196','service worker P197',1).replace('carbonautas-p196-20260920','carbonautas-p197-20260920',1)
+          sw.write_text(w,encoding='utf-8')
+
+          rm=Path('README.md')
+          r=rm.read_text(encoding='utf-8')
+          assert 'Todas as camadas P44 a P196 estao dentro dele' in r
+          assert '### P196 · 2026-09-20 · Swipe físico nos passa-cards' in r
+          r=r.replace('Todas as camadas P44 a P196 estao dentro dele','Todas as camadas P44 a P197 estao dentro dele',1)
+          note='''### P197 · 2026-09-20 · Capa mais limpa e swipe leve\n- Swipe passa com gesto curto (aprox. 35–58 px) ou movimento rápido, sem exigir força.\n- Fontes antigas do painel ficam invisíveis na capa, mas continuam alimentando os cards.\n- Remove o AGORA duplicado, melhora hierarquia de título, metadado e descrição.\n- Botões recebem visual próprio de app e o próximo vira seta circular.\n- Incluída dica discreta ↔ deslize.\n- Não alterado: dados, Firebase, regras, VPS ou permissões.\n\n'''
+          r=r.replace('### P196 · 2026-09-20 · Swipe físico nos passa-cards',note+'### P196 · 2026-09-20 · Swipe físico nos passa-cards',1)
+          rm.write_text(r,encoding='utf-8')
+
+          Path('index.html.sha512').write_text(hashlib.sha512(idx.read_bytes()).hexdigest()+'  index.html\n',encoding='utf-8')
+
+          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.I|re.S)
+          for i,b in enumerate(blocks):
+            p=Path(f'/tmp/p197-{i}.mjs')
+            p.write_text(b,encoding='utf-8')
+            z=subprocess.run(['node','--check',str(p)],capture_output=True,text=True)
+            if z.returncode:
+              print('JS block',i,'failed')
+              print(z.stderr)
+              sys.exit(1)
+          print('validated',len(blocks),'script blocks; P197 anchors applied')
+          PY
+          sha512sum -c index.html.sha512
+          git diff --check
+      - name: Commit validado
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/p197-home-polish.yml
+          git add index.html sw.js README.md index.html.sha512
+          git commit -m "P197: capa limpa e swipe leve [p197-applied]"
+          git push
