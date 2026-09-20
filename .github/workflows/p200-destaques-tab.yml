@@ -27,21 +27,8 @@ jobs:
           map_old="mural:'viewMural',fotos:'viewFotos',pubs:'viewPubs'"
           map_new="mural:'viewMural',fotos:'viewFotos',destaques:'viewDestaques',pubs:'viewPubs'"
 
-          ensure_old="""function ensurePanel(){
-            let host=$('#p117Highlights');if(host)return host;
-            host=document.createElement('section');host.id='p117Highlights';
-            const msgs=$('#viewMural #muralMsgs'),mural=$('#viewMural .mural-board');
-            if(msgs)msgs.appendChild(host);else if(mural)mural.appendChild(host);else $('#viewMural')?.appendChild(host);
-            return host;
-          }"""
-          ensure_new="""function ensurePanel(){
-            let host=$('#p117Highlights');
-            const dest=$('#viewDestaques .p200-highlights-wrap');
-            if(host){if(dest&&host.parentElement!==dest)dest.appendChild(host);return host}
-            host=document.createElement('section');host.id='p117Highlights';
-            if(dest)dest.appendChild(host);else $('#viewDestaques')?.appendChild(host);
-            return host;
-          }"""
+          ensure_old="function ensurePanel(){\n  let host=$('#p117Highlights');if(host)return host;\n  host=document.createElement('section');host.id='p117Highlights';\n  const msgs=$('#viewMural #muralMsgs'),mural=$('#viewMural .mural-board');\n  if(msgs)msgs.appendChild(host);else if(mural)mural.appendChild(host);else $('#viewMural')?.appendChild(host);\n  return host;\n}"
+          ensure_new="function ensurePanel(){\n  let host=$('#p117Highlights');\n  const dest=$('#viewDestaques .p200-highlights-wrap');\n  if(host){if(dest&&host.parentElement!==dest)dest.appendChild(host);return host}\n  host=document.createElement('section');host.id='p117Highlights';\n  if(dest)dest.appendChild(host);else $('#viewDestaques')?.appendChild(host);\n  return host;\n}"
 
           reloc_old="function relocatePanel(){const host=$('#p117Highlights'),msgs=$('#viewMural #muralMsgs');if(!host||!msgs)return;if(host.parentElement!==msgs||host!==msgs.lastElementChild)msgs.appendChild(host)}"
           reloc_new="function relocatePanel(){const host=$('#p117Highlights'),dest=$('#viewDestaques .p200-highlights-wrap');if(!host||!dest)return;if(host.parentElement!==dest)dest.appendChild(host)}"
@@ -53,8 +40,7 @@ jobs:
           swreg_old="navigator.serviceWorker.register('./sw.js?v=P199-20260920',{updateViaCache:'none'})"
           lab_anchor='  <!-- ============ VIEW: LABORATÓRIO DE DADOS ============ -->'
 
-          required=[group_old,map_old,ensure_old,reloc_old,notif_old,version_old,swreg_old,lab_anchor]
-          for a in required:
+          for a in [group_old,map_old,ensure_old,reloc_old,notif_old,version_old,swreg_old,lab_anchor]:
             assert a in s, 'anchor missing: '+a[:160]
           assert 'id="viewDestaques"' not in s
 
@@ -64,33 +50,36 @@ jobs:
           s=s.replace(reloc_old,reloc_new,1)
           s=s.replace(notif_old,notif_new,1)
 
-          view='''  <!-- ============ VIEW: DESTAQUES ============ -->
-          <div class="view" id="viewDestaques">
-            <div class="p200-highlights-scroll">
-              <div class="p200-highlights-wrap"></div>
-            </div>
-          </div>
-
-'''
+          view='\n'.join([
+            '  <!-- ============ VIEW: DESTAQUES ============ -->',
+            '  <div class="view" id="viewDestaques">',
+            '    <div class="p200-highlights-scroll">',
+            '      <div class="p200-highlights-wrap"></div>',
+            '    </div>',
+            '  </div>',
+            ''
+          ])+'\n'
           s=s.replace(lab_anchor,view+lab_anchor,1)
 
-          css='''
-<style id="p200DestaquesTabStyle">
-#viewDestaques{overflow:hidden;background:linear-gradient(180deg,#f7fbfa 0%,#f4f8f7 100%)!important}
-#viewDestaques .p200-highlights-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-#viewDestaques .p200-highlights-wrap{width:100%;max-width:980px;margin:0 auto;padding:18px 18px 120px}
-#viewDestaques #p117Highlights{margin:0!important;width:100%!important;box-sizing:border-box}
-#viewMural .mural-filterbar-pro{flex:0 0 auto!important;min-height:50px!important;align-items:center!important}
-@media(max-width:700px){
-  #viewDestaques .p200-highlights-wrap{padding:12px 14px 118px}
-  #viewDestaques .p117-deck{grid-auto-columns:minmax(255px,88%)!important}
-  #viewDestaques .p117-head{gap:8px}
-}
-</style>
-'''
+          css='\n'.join([
+            '',
+            '<style id="p200DestaquesTabStyle">',
+            '#viewDestaques{overflow:hidden;background:linear-gradient(180deg,#f7fbfa 0%,#f4f8f7 100%)!important}',
+            '#viewDestaques .p200-highlights-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}',
+            '#viewDestaques .p200-highlights-wrap{width:100%;max-width:980px;margin:0 auto;padding:18px 18px 120px}',
+            '#viewDestaques #p117Highlights{margin:0!important;width:100%!important;box-sizing:border-box}',
+            '#viewMural .mural-filterbar-pro{flex:0 0 auto!important;min-height:50px!important;align-items:center!important}',
+            '@media(max-width:700px){',
+            '  #viewDestaques .p200-highlights-wrap{padding:12px 14px 118px}',
+            '  #viewDestaques .p117-deck{grid-auto-columns:minmax(255px,88%)!important}',
+            '  #viewDestaques .p117-head{gap:8px}',
+            '}',
+            '</style>',
+            ''
+          ])+'\n'
           anchor='<style id="p199HighlightsBottomStyle">'
           assert anchor in s
-          s=s.replace(anchor,css+'\n'+anchor,1)
+          s=s.replace(anchor,css+anchor,1)
 
           s=s.replace(version_old,"window.CARBONAUTAS_BUILD='P200-20260920';",1)
           s=s.replace(swreg_old,"navigator.serviceWorker.register('./sw.js?v=P200-20260920',{updateViaCache:'none'})",1)
@@ -105,7 +94,7 @@ jobs:
           assert 'Todas as camadas P44 a P199 estao dentro dele' in r
           assert '### P199 · 2026-09-20 · Destaques no fim do Mural' in r
           r=r.replace('Todas as camadas P44 a P199 estao dentro dele','Todas as camadas P44 a P200 estao dentro dele',1)
-          note='''### P200 · 2026-09-20 · Destaques viram aba própria\n- Ó nóis! passa a ter três abas: Mural, Fotos e Destaques.\n- Destaques do mês saem completamente do feed e ganham tela própria rolável.\n- Notificações de Destaques abrem diretamente nessa nova aba.\n- Corrigido o encolhimento da barra de filtros do Mural no celular.\n- Não alterado: dados, Firebase, regras, VPS ou permissões.\n\n'''
+          note='### P200 · 2026-09-20 · Destaques viram aba própria\n- Ó nóis! passa a ter três abas: Mural, Fotos e Destaques.\n- Destaques do mês saem completamente do feed e ganham tela própria rolável.\n- Notificações de Destaques abrem diretamente nessa nova aba.\n- Corrigido o encolhimento da barra de filtros do Mural no celular.\n- Não alterado: dados, Firebase, regras, VPS ou permissões.\n\n'
           r=r.replace('### P199 · 2026-09-20 · Destaques no fim do Mural',note+'### P199 · 2026-09-20 · Destaques no fim do Mural',1)
           rm.write_text(r,encoding='utf-8')
 
