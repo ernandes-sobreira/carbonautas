@@ -1,10 +1,9 @@
-/* Carbonautas P184 · carregador sob demanda protegido pelo login
-   - nenhum módulo pesado roda por trás da tela de login
-   - check-in só carrega depois que o usuário entra
-   - Rede/Acompanhamento/Agenda/Mural continuam sob demanda
-   - mantém anexos da Agenda, cards do Mural e Olha rapidão
-   - evita interferência de observers/timers no Firebase Auth
-   - não altera regras do Firebase nem VPS
+/* Carbonautas P185 · carregador sob demanda pós-login
+   - reconhece o app aberto pelo shell visível ou Firebase Auth, sem confundir DOM antigo de login
+   - restaura Olha rapidão/Ver mural mesmo se o botão de login continuar no DOM
+   - não intercepta o Menu nem outros cliques da interface
+   - mantém Rede, Agenda, Mural e Acompanhamento sob demanda
+   - não altera Firebase, regras ou VPS
 */
 (function(){
 'use strict';
@@ -12,12 +11,15 @@ if(window.__CARBONAUTAS_P135_LOADER)return;
 window.__CARBONAUTAS_P135_LOADER=true;
 
 const $=(s,r=document)=>r.querySelector(s);
-let redePromise=null,dossierPromise=null,projectsPromise=null,agendaPromise=null,agendaFocusPromise=null,agendaDetailPromise=null,homePolishPromise=null,muralVisualPromise=null,muralPolishPromise=null,muralSavePromise=null,muralUnifiedPromise=null,muralCardsPromise=null,highlightsPromise=null,checkinPromise=null,peopleScheduled=false;
+let redePromise=null,dossierPromise=null,projectsPromise=null,agendaPromise=null,agendaFocusPromise=null,agendaDetailPromise=null,homePolishPromise=null,muralVisualPromise=null,muralPolishPromise=null,muralSavePromise=null,muralUnifiedPromise=null,muralCardsPromise=null,highlightsPromise=null,checkinPromise=null,peopleScheduled=false,postAuthStarted=false;
 
 function load(src,id){return new Promise((resolve,reject)=>{if(document.getElementById(id)){resolve();return}const s=document.createElement('script');s.id=id;s.src=src;s.async=false;s.onload=resolve;s.onerror=()=>reject(new Error('Falha ao carregar '+src));document.body.appendChild(s)})}
 function idle(fn,timeout=1200){if('requestIdleCallback'in window)requestIdleCallback(fn,{timeout});else setTimeout(fn,320)}
-function visible(el){if(!el)return false;try{const cs=getComputedStyle(el),r=el.getBoundingClientRect();return cs.display!=='none'&&cs.visibility!=='hidden'&&r.width>0&&r.height>0}catch(_e){return false}}
-function atLogin(){return visible(document.getElementById('loginBtn'))}
+function visible(el){if(!el)return false;try{const cs=getComputedStyle(el),r=el.getBoundingClientRect();return cs.display!=='none'&&cs.visibility!=='hidden'&&cs.opacity!=='0'&&r.width>0&&r.height>0}catch(_e){return false}}
+function authUser(){try{return !!window.auth?.currentUser}catch(_e){return false}}
+function appShellVisible(){return visible($('#mainHeader'))||visible($('#viewPainel'))||visible($('.app-header'))||visible($('header.topbar'))}
+function appReady(){return authUser()||appShellVisible()}
+function atLogin(){return !appReady()&&visible($('#loginBtn'))}
 function currentView(){return document.body?.dataset?.view||''}
 
 function ensureCheckin(){if(checkinPromise)return checkinPromise;checkinPromise=load('./modules/checkin-mobile-p171.js?v=P171-20260920','carbonautas-checkin-mobile-p171').catch(e=>{checkinPromise=null;console.error('Carbonautas check-in móvel',e)});return checkinPromise}
@@ -36,7 +38,7 @@ function ensureHomePolish(){
  if(homePolishPromise)return homePolishPromise;
  homePolishPromise=(async()=>{try{
   await load('./modules/agenda-mural-home-p176.js?v=P176-20260920','carbonautas-agenda-mural-home-p176');
-  await load('./modules/home-olha-rapidao-p181.js?v=P181B-20260920','carbonautas-home-olha-rapidao-p181');
+  await load('./modules/home-olha-rapidao-p181.js?v=P181C-20260920','carbonautas-home-olha-rapidao-p181');
  }catch(e){homePolishPromise=null;console.error('Carbonautas capa/Mural',e)}})();
  return homePolishPromise
 }
@@ -66,8 +68,7 @@ function ensurePeople(){
   await load('./modules/rede-pessoas-p164.js?v=P165-20260919','carbonautas-rede-pessoas-p164');
   await load('./modules/rede-acompanhamento-gestao-p166.js?v=P167-20260920','carbonautas-rede-acompanhamento-gestao-p166');
   await load('./modules/bolsas-historico-p168.js?v=P168-20260920','carbonautas-bolsas-historico-p168');
-  await ensureProjects();
-  wireMacroShortcut();setTimeout(wireMacroShortcut,160);
+  await ensureProjects();wireMacroShortcut();setTimeout(wireMacroShortcut,160)
  }catch(e){console.error('Carbonautas gestão pessoas',e)}},700)
 }
 function ensureRede(){
@@ -79,43 +80,55 @@ function ensureRede(){
   await load('./modules/rede-legenda-p158.js?v=P158-20260919','carbonautas-rede-legenda-p158');
   await load('./modules/rede-controles-p161.js?v=P165-20260919','carbonautas-rede-controles-p161');
   await load('./modules/rede-estabilidade-p163.js?v=P165-20260919','carbonautas-rede-estabilidade-p163');
-  ensurePeople();
+  ensurePeople()
  }catch(e){redePromise=null;console.error('Carbonautas Rede',e)}})();
  return redePromise
 }
 
 function route(){
- // Regra de segurança: se a tela de login está visível, não injeta nenhum módulo do app.
- if(atLogin())return;
+ if(!appReady())return;
  ensureCheckin();
  const v=currentView();
+ const home=v==='painel'||(!v&&appShellVisible());
  if(v==='rede'||v==='track')ensureRede();
  if(v==='pubs')ensureProjects();
  if(v==='crono'||v==='agenda'){ensureAgenda();ensureAgendaFocus();ensureAgendaDetail()}
- if(v==='painel'){
-  (async()=>{await ensureAgendaFocus();await ensureHomePolish();window.refreshHomeAgendaMural?.()})();
-  ensureHighlights();
+ if(home){
+  // A aparência da capa não depende do módulo de anexos terminar de carregar.
+  ensureAgendaFocus();
+  ensureHomePolish().then(()=>{window.refreshHomeAgendaMural?.()});
+  ensureHighlights()
  }
  if(v==='mural'||v==='feed'){ensureHomePolish();ensureMuralVisual();ensureMuralPolish();ensureMuralSave();ensureMuralUnified();ensureMuralCards()}
 }
-function afterLoginChecks(){[250,700,1400,2600].forEach(ms=>setTimeout(route,ms))}
+function startPostAuth(){
+ if(!appReady())return false;
+ if(!postAuthStarted){postAuthStarted=true;ensureCheckin()}
+ route();return true
+}
 function boot(){
- // Não há preload pesado no login. Isso deixa Firebase Auth livre para inicializar e responder ao toque.
- route();
- const mo=new MutationObserver(ms=>{if(ms.some(m=>m.attributeName==='data-view')){route();if(currentView()==='track')setTimeout(wireMacroShortcut,900)}});mo.observe(document.body,{attributes:true,attributeFilter:['data-view']});
+ // Só observa mudanças; não bloqueia nem captura o funcionamento normal do Menu/login.
+ const mo=new MutationObserver(ms=>{
+  if(appReady())startPostAuth();
+  if(ms.some(m=>m.attributeName==='data-view')){route();if(currentView()==='track')setTimeout(wireMacroShortcut,900)}
+ });
+ mo.observe(document.body,{attributes:true,attributeFilter:['data-view','class','style']});
+
  document.addEventListener('click',e=>{
-  if(e.target.closest?.('#loginBtn')){afterLoginChecks();return}
-  if(atLogin())return;
+  if(!appReady())return;
   const t=e.target.closest?.('#dashDossierBtn,#trackDossierBtn,[data-open-dossier]');if(t)ensureDossier();
   const p=e.target.closest?.('#managePeopleBtn');if(p){ensureRede();ensurePeople()}
   const ag=e.target.closest?.('#newEventBtn,[data-open-event],#saveEventBtn,#agNewBtn,[data-p174-new],[data-p174-new-ag],#viewCrono .ag-item');if(ag){ensureAgenda();ensureAgendaFocus();ensureAgendaDetail()}
   const mural=e.target.closest?.('#newPostBtn,#muralPostBtn,#muralNewBtn,#mobileMuralFab,#mobileMuralNew,[data-mural-kind],#savePostBtn');if(mural){ensureHomePolish();ensureMuralVisual();ensureMuralPolish();ensureMuralSave();ensureMuralUnified();ensureMuralCards()}
   const h=e.target.closest?.('[data-p117-add],[data-p117-edit],#p117Highlights');if(h)ensureHighlights()
- },true);
- window.addEventListener('firebase-ready',afterLoginChecks,{passive:true});
- window.addEventListener('pageshow',()=>setTimeout(route,120),{passive:true});
- // Sessão lembrada pelo Firebase pode restaurar sem clique no botão.
- [350,1200,3000,6000].forEach(ms=>setTimeout(route,ms));
+ },false);
+
+ window.addEventListener('firebase-ready',()=>setTimeout(startPostAuth,40),{passive:true});
+ window.addEventListener('pageshow',()=>setTimeout(startPostAuth,80),{passive:true});
+
+ // Firebase pode restaurar a sessão sem clique. A sonda termina assim que o app aparece.
+ let n=0;const probe=setInterval(()=>{n++;if(startPostAuth()||n>80)clearInterval(probe)},150);
+ startPostAuth()
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
