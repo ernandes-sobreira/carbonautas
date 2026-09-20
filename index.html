@@ -7321,11 +7321,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P192-20260920';
+window.CARBONAUTAS_BUILD='P193-20260920';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P192-20260920',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P193-20260920',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -9280,7 +9280,7 @@ async function loadIdentityAndSubscribe(){if(!window.auth?.currentUser||!window.
 
 function installOverrides(){if(typeof window.renderMensagens==='function')window.renderMensagens=()=>{renderHeader()};const oldSub=window.renderSubNav;if(typeof oldSub==='function'&&!oldSub.__p46){const wrapped=function(v){oldSub(v);setTimeout(enhanceSubNav,0)};wrapped.__p46=true;window.renderSubNav=wrapped}}
 
-async function boot(){injectCss();if(!ensureMount())return;installOverrides();enhanceSubNav();let tries=0;while(tries++<80){if(await loadIdentityAndSubscribe())break;await new Promise(r=>setTimeout(r,250))}renderHeader();setInterval(enhanceSubNav,900);console.info('Carbonautas chat',VERSION,'carregado')}
+async function boot(){injectCss();if(!ensureMount())return;installOverrides();enhanceSubNav();let tries=0;while(tries++<80){if(await loadIdentityAndSubscribe())break;await new Promise(r=>setTimeout(r,250))}renderHeader();console.info('Carbonautas chat',VERSION,'carregado')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 
