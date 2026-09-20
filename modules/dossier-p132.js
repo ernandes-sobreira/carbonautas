@@ -1,4 +1,4 @@
-/* Carbonautas P161 · carregador seguro
+/* Carbonautas P162 · carregador seguro
    Mantém o núcleo da Rede, acompanhamento acadêmico, acabamento visual,
    legenda e os controles unificados de filtros + ajustes. */
 (function(){
@@ -24,7 +24,7 @@ function load(src,id){
     await load('./modules/rede-orientacao-p150.js?v=P151-20260919','carbonautas-rede-orientacao-p150');
     await load('./modules/rede-ui-p155.js?v=P157-20260919','carbonautas-rede-ui-p155');
     await load('./modules/rede-legenda-p158.js?v=P158-20260919','carbonautas-rede-legenda-p158');
-    await load('./modules/rede-controles-p161.js?v=P161-20260919','carbonautas-rede-controles-p161');
+    await load('./modules/rede-controles-p161.js?v=P162-20260919','carbonautas-rede-controles-p161');
   }catch(e){console.error('Carbonautas loader',e)}
 })();
 })();
