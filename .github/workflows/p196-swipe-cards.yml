@@ -1,0 +1,115 @@
+name: P196 swipe fisico nos cards
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: ${{ !contains(github.event.head_commit.message, '[p196-applied]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Aplicar P196 e validar
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,re,subprocess,sys
+
+          idx=Path('index.html')
+          s=idx.read_text(encoding='utf-8')
+          required=[
+            'p195MinimalHomeController',
+            "window.CARBONAUTAS_BUILD='P195-20260920';",
+            "navigator.serviceWorker.register('./sw.js?v=P195-20260920',{updateViaCache:'none'})",
+            "<button class=\"p195-btn\" data-n>Passar →</button>",
+            "q('[data-n]',card).onclick=()=>{pos=(pos+1)%a.length;render()}"
+          ]
+          for a in required:
+            assert a in s, f'anchor missing: {a[:100]}'
+          assert 'p196SwipeCardsStyle' not in s
+
+          css_anchor="#p195Deck .p195-k{font-size:10px;font-weight:950;letter-spacing:.12em;color:#148087}"
+          css=r'''<style id="p196SwipeCardsStyle">
+#p195Deck .p195-card{position:relative;touch-action:pan-y;cursor:grab;will-change:transform,opacity;transform-origin:50% 86%;transition:transform .34s cubic-bezier(.2,.82,.2,1),opacity .24s ease,box-shadow .24s ease;overflow:hidden}
+#p195Deck .p195-card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(135deg,rgba(14,111,120,.12),transparent 42%,rgba(36,161,143,.08));opacity:0;transition:opacity .16s ease}
+#p195Deck .p195-card.p196-dragging{cursor:grabbing;transition:none;box-shadow:0 34px 92px rgba(17,55,64,.22)}
+#p195Deck .p195-card.p196-dragging::before{opacity:var(--p196-glow,.12)}
+#p195Deck .p195-card.p196-return{transition:transform .46s cubic-bezier(.18,1.52,.35,1),opacity .24s ease,box-shadow .28s ease}
+#p195Deck .p195-card.p196-fly{pointer-events:none;transition:transform .28s cubic-bezier(.34,.72,.24,1),opacity .22s ease,box-shadow .22s ease}
+#p195Deck .p195-card.p196-enter{animation:p196Enter .28s cubic-bezier(.18,.9,.25,1) both}
+@keyframes p196Enter{from{opacity:.58;transform:translate3d(var(--p196-enter-x,0),10px,0) scale(.975)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+@media(max-width:700px){#p195Deck .p195-card{cursor:default}}
+@media(prefers-reduced-motion:reduce){#p195Deck .p195-card,#p195Deck .p195-card.p196-return,#p195Deck .p195-card.p196-fly{transition-duration:.01ms!important}#p195Deck .p195-card.p196-enter{animation:none!important}}
+</style>
+'''
+          assert css_anchor in s
+          s=s.replace(css_anchor,css+'\n'+css_anchor,1)
+
+          render_anchor="function render(){const d=ensure();"
+          swipe=r'''function resetSwipe(card){if(!card)return;card.classList.remove('p196-dragging','p196-return','p196-fly','p196-left','p196-right');card.style.transform='';card.style.opacity='';card.style.removeProperty('--p196-glow')}
+function swipeEnter(card,dir=0){resetSwipe(card);card.classList.remove('p196-enter');card.style.setProperty('--p196-enter-x',(dir?(-dir*28):0)+'px');void card.offsetWidth;card.classList.add('p196-enter')}
+function bindSwipe(card,a,it){
+  if(!card||!a?.length)return;
+  let active=false,pid=null,sx=0,sy=0,px=0,pt=0,dx=0,dy=0,vx=0,horizontal=false;
+  const finish=(dir)=>{if(!dir||a.length<2){card.classList.remove('p196-dragging');card.classList.add('p196-return');card.style.transform='';card.style.opacity='';card.style.removeProperty('--p196-glow');setTimeout(()=>card.classList.remove('p196-return'),470);return}card.classList.remove('p196-dragging','p196-return');card.classList.add('p196-fly');const distance=Math.max(window.innerWidth,card.offsetWidth)*1.12;const lift=Math.min(54,Math.abs(dx)*.12);card.style.transform=`translate3d(${dir*distance}px,${lift}px,0) rotate(${dir*11}deg) scale(.985)`;card.style.opacity='0';try{navigator.vibrate?.(8)}catch(_e){};setTimeout(()=>{pos=(pos+(dir<0?1:-1)+a.length)%a.length;render();const next=q('.p195-card',q('#p195Deck'));if(next)swipeEnter(next,dir)},230)};
+  card.onpointerdown=e=>{if(e.pointerType==='mouse'&&e.button!==0)return;if(e.target.closest('button,a,details,summary,input,textarea,select'))return;active=true;horizontal=false;pid=e.pointerId;sx=px=e.clientX;sy=e.clientY;pt=performance.now();dx=dy=vx=0;card.setPointerCapture?.(pid);card.classList.remove('p196-enter','p196-return','p196-fly');card.classList.add('p196-dragging')};
+  card.onpointermove=e=>{if(!active||e.pointerId!==pid)return;dx=e.clientX-sx;dy=e.clientY-sy;if(!horizontal){if(Math.abs(dx)<7)return;if(Math.abs(dx)<=Math.abs(dy)*1.05)return;horizontal=true}const now=performance.now(),dt=Math.max(1,now-pt);vx=(e.clientX-px)/dt;px=e.clientX;pt=now;const rot=Math.max(-8,Math.min(8,dx/27)),scale=1-Math.min(.018,Math.abs(dx)/5200),fade=1-Math.min(.14,Math.abs(dx)/900),glow=Math.min(.32,.08+Math.abs(dx)/520);card.style.setProperty('--p196-glow',String(glow));card.style.transform=`translate3d(${dx}px,${dy*.13}px,0) rotate(${rot}deg) scale(${scale})`;card.style.opacity=String(fade)};
+  const end=e=>{if(!active||e.pointerId!==pid)return;active=false;try{card.releasePointerCapture?.(pid)}catch(_e){};if(!horizontal){resetSwipe(card);return}const threshold=Math.min(118,card.offsetWidth*.22),fast=Math.abs(vx)>.55;if(Math.abs(dx)>=threshold||fast)finish(dx<0?-1:1);else finish(0)};
+  card.onpointerup=end;card.onpointercancel=end;
+}
+'''
+          assert render_anchor in s
+          s=s.replace(render_anchor,swipe+'\n'+render_anchor,1)
+
+          old="if(!a.length){card.innerHTML='<div class=\"p195-empty\"><b>✓ Tudo certo.</b><span>Nada pedindo sua atenção agora.</span></div>';return}"
+          new="if(!a.length){resetSwipe(card);card.innerHTML='<div class=\"p195-empty\"><b>✓ Tudo certo.</b><span>Nada pedindo sua atenção agora.</span></div>';return}"
+          assert old in s
+          s=s.replace(old,new,1)
+
+          old="q('[data-g]',card).onclick=()=>{const g=gone();g.add(it.key);save(g);render()}}"
+          new="q('[data-g]',card).onclick=()=>{const g=gone();g.add(it.key);save(g);render()};bindSwipe(card,a,it)}"
+          assert old in s
+          s=s.replace(old,new,1)
+
+          s=s.replace("window.CARBONAUTAS_BUILD='P195-20260920';","window.CARBONAUTAS_BUILD='P196-20260920';",1)
+          s=s.replace("navigator.serviceWorker.register('./sw.js?v=P195-20260920',{updateViaCache:'none'})","navigator.serviceWorker.register('./sw.js?v=P196-20260920',{updateViaCache:'none'})",1)
+          idx.write_text(s,encoding='utf-8')
+
+          sw=Path('sw.js');w=sw.read_text(encoding='utf-8')
+          assert 'service worker P195' in w and 'carbonautas-p195-20260920' in w
+          w=w.replace('service worker P195','service worker P196',1).replace('carbonautas-p195-20260920','carbonautas-p196-20260920',1)
+          sw.write_text(w,encoding='utf-8')
+
+          rm=Path('README.md');r=rm.read_text(encoding='utf-8')
+          assert 'Todas as camadas P44 a P195 estao dentro dele' in r
+          assert '### P195 · 2026-09-20 · Capa mínima em passa-card' in r
+          r=r.replace('Todas as camadas P44 a P195 estao dentro dele','Todas as camadas P44 a P196 estao dentro dele',1)
+          note='''### P196 · 2026-09-20 · Swipe físico nos passa-cards\n- Cards acompanham o dedo ou mouse durante o arraste horizontal.\n- Swipe para a esquerda avança; swipe para a direita volta ao card anterior.\n- Soltar antes do limite devolve o card com efeito de mola.\n- Swipe concluído lança o card para fora da tela e traz o seguinte com animação.\n- Botões Passar, Abrir e Dispensar continuam disponíveis como alternativa.\n- Não alterado: dados, regras, Firebase, VPS ou permissões.\n\n'''
+          r=r.replace('### P195 · 2026-09-20 · Capa mínima em passa-card',note+'### P195 · 2026-09-20 · Capa mínima em passa-card',1)
+          rm.write_text(r,encoding='utf-8')
+
+          Path('index.html.sha512').write_text(hashlib.sha512(idx.read_bytes()).hexdigest()+'  index.html\n',encoding='utf-8')
+
+          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.I|re.S)
+          for i,b in enumerate(blocks):
+            p=Path(f'/tmp/p196-{i}.mjs');p.write_text(b,encoding='utf-8')
+            z=subprocess.run(['node','--check',str(p)],capture_output=True,text=True)
+            if z.returncode:
+              print('JS block',i,'failed');print(z.stderr);sys.exit(1)
+          print('validated',len(blocks),'script blocks; swipe anchors applied')
+          PY
+          sha512sum -c index.html.sha512
+          git diff --check
+      - name: Commit validado
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/p196-swipe-cards.yml
+          git add index.html sw.js README.md index.html.sha512
+          git commit -m "P196: swipe fisico nos cards [p196-applied]"
+          git push
