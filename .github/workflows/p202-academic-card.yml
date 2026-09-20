@@ -1,0 +1,108 @@
+name: P202 academic card
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: "${{ !contains(github.event.head_commit.message, '[p202-applied]') }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Aplicar P202 e validar
+        shell: bash
+        run: |
+          cat > /tmp/p202.py <<'PY'
+          from pathlib import Path
+          import re,hashlib,subprocess,sys,gzip,base64
+          D=lambda x:gzip.decompress(base64.b64decode(x)).decode()
+          idx=Path('index.html');s=idx.read_text(encoding='utf-8')
+          assert 'data-carbonautas-p202-academic' not in s
+          assert "window.CARBONAUTAS_BUILD='P201-20260920';" in s
+          assert "navigator.serviceWorker.register('./sw.js?v=P201-20260920',{updateViaCache:'none'})" in s
+
+          acad=D(Path('.p202-acad.b64').read_text().strip())
+          anchor='function timelineCard(m,can){'
+          assert s.count(anchor)==1, s.count(anchor)
+          s=s.replace(anchor,acad+'\n'+anchor,1)
+
+          old="function buildDeckCards(m){const can=memberCanEdit(m.id);return [overviewCard(m,can),projectCard(m,can),timelineCard(m,can),historyCard(m,can),pendingCard(m,can)]}"
+          new="function buildDeckCards(m){const can=memberCanEdit(m.id);return [overviewCard(m,can),academicCard(m,can),projectCard(m,can),timelineCard(m,can),historyCard(m,can),pendingCard(m,can)]}"
+          assert s.count(old)==1, s.count(old)
+          s=s.replace(old,new,1)
+
+          old="    else if(action==='project')call('openProjectProfile',mid);\n    else if(action==='checkin')call('openCheckin',mid);"
+          new="    else if(action==='academic-edit')call('openAcademicCardEditor',mid);\n    else if(action==='academic-download')call('downloadAcademicCard',mid);\n    else if(action==='academic-share')call('shareAcademicCard',mid);\n    else if(action==='project')call('openProjectProfile',mid);\n    else if(action==='checkin')call('openCheckin',mid);"
+          assert s.count(old)==1, s.count(old)
+          s=s.replace(old,new,1)
+
+          assert s.count('<b id="p97CardCount">1 de 5</b>')==1
+          s=s.replace('<b id="p97CardCount">1 de 5</b>','<b id="p97CardCount">1 de 6</b>',1)
+
+          ref='\n\nfunction renderAfterTrack(){renderFolders();refreshOpenDeck()}'
+          assert s.count(ref)==1, s.count(ref)
+          s=s.replace(ref,'\nwindow.p202RefreshAcademicDeck=refreshOpenDeck;'+ref,1)
+
+          layer=D(Path('.p202-layer.b64').read_text().strip())
+          pos=s.rfind('</body>')
+          assert pos>0
+          s=s[:pos]+layer+'\n'+s[pos:]
+
+          s=s.replace("window.CARBONAUTAS_BUILD='P201-20260920';","window.CARBONAUTAS_BUILD='P202-20260920';",1)
+          s=s.replace("navigator.serviceWorker.register('./sw.js?v=P201-20260920',{updateViaCache:'none'})","navigator.serviceWorker.register('./sw.js?v=P202-20260920',{updateViaCache:'none'})",1)
+          idx.write_text(s,encoding='utf-8')
+
+          rp=Path('firestore.rules');r=rp.read_text(encoding='utf-8')
+          needle="            'telefone',\n            'tema',"
+          repl="            'telefone',\n            'minibio',\n            'lattesUrl',\n            'orcidUrl',\n            'tema',"
+          assert r.count(needle)==1, r.count(needle)
+          r=r.replace(needle,repl,1)
+          rp.write_text(r,encoding='utf-8')
+
+          sw=Path('sw.js');w=sw.read_text(encoding='utf-8')
+          assert 'service worker P201' in w and 'carbonautas-p201-20260920' in w
+          sw.write_text(w.replace('service worker P201','service worker P202',1).replace('carbonautas-p201-20260920','carbonautas-p202-20260920',1),encoding='utf-8')
+
+          rm=Path('README.md');t=rm.read_text(encoding='utf-8')
+          assert 'Todas as camadas P44 a P201 estao dentro dele' in t
+          assert '### P201 · 2026-09-20 · Voltar das conversas privadas' in t
+          t=t.replace('Todas as camadas P44 a P201 estao dentro dele','Todas as camadas P44 a P202 estao dentro dele',1)
+          note="""### P202 · 2026-09-20 · Cartão acadêmico compartilhável
+          - Perfis de Pessoas ganham uma carta acadêmica própria no baralho de acompanhamento.
+          - A própria pessoa e a coordenação podem preencher minibio, Currículo Lattes e ORCID.
+          - O cartão pode ser baixado em PNG e compartilhado pelo recurso nativo do celular; no desktop há fallback com download/cópia.
+          - Os links de Lattes e ORCID ficam clicáveis dentro da plataforma.
+          - `firestore.rules` passa a permitir que a própria pessoa atualize somente esses três novos campos, além dos campos pessoais já autorizados.
+          - Não alterado: permissões administrativas, conversas privadas, VPS ou dados de acompanhamento.
+
+          """
+          t=t.replace('### P201 · 2026-09-20 · Voltar das conversas privadas',note+'### P201 · 2026-09-20 · Voltar das conversas privadas',1)
+          rm.write_text(t,encoding='utf-8')
+
+          digest=hashlib.sha512(idx.read_bytes()).hexdigest()
+          Path('index.html.sha512').write_text(digest+'  index.html\n',encoding='utf-8')
+
+          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.I|re.S)
+          for i,b in enumerate(blocks):
+              p=Path(f'/tmp/p202-{i}.mjs');p.write_text(b,encoding='utf-8')
+              z=subprocess.run(['node','--check',str(p)],capture_output=True,text=True)
+              if z.returncode:
+                  print('JS block',i,'failed');print(z.stderr);sys.exit(1)
+          assert Path('index.html.sha512').read_text().split()[0]==hashlib.sha512(idx.read_bytes()).hexdigest()
+          assert all(k in r for k in ["'minibio'","'lattesUrl'","'orcidUrl'"])
+          print('P202 validated',len(blocks),'script blocks')
+          PY
+          python3 /tmp/p202.py
+          git diff --check
+      - name: Commit validado
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/p202-academic-card.yml .p202-layer.b64 .p202-acad.b64
+          git add index.html firestore.rules sw.js README.md index.html.sha512
+          git commit -m "P202: cartão acadêmico compartilhável [p202-applied]"
+          git push
