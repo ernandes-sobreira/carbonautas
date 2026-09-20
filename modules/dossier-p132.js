@@ -38,7 +38,7 @@ function ensureHomePolish(){
  if(homePolishPromise)return homePolishPromise;
  homePolishPromise=(async()=>{try{
   await load('./modules/agenda-mural-home-p176.js?v=P176-20260920','carbonautas-agenda-mural-home-p176');
-  await load('./modules/home-olha-rapidao-p181.js?v=P181C-20260920','carbonautas-home-olha-rapidao-p181');
+  await load('./modules/home-olha-rapidao-p181.js?v=P181D-20260920','carbonautas-home-olha-rapidao-p181');
  }catch(e){homePolishPromise=null;console.error('Carbonautas capa/Mural',e)}})();
  return homePolishPromise
 }
