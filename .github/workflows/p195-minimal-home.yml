@@ -1,0 +1,210 @@
+name: P195 capa minima passa-card
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: ${{ !contains(github.event.head_commit.message, '[p195-applied]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Aplicar P195 e validar
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, hashlib, re, subprocess, sys
+
+          idx=Path('index.html')
+          s=idx.read_text(encoding='utf-8')
+
+          required=[
+            'p194HomeFloatingCardsStyle',
+            "window.CARBONAUTAS_BUILD='P194-20260920';",
+            "navigator.serviceWorker.register('./sw.js?v=P194-20260920',{updateViaCache:'none'})",
+            "function relocatePanel(){const host=$('#p117Highlights'),home=$('#viewPainel .p142-home-grid');if(host&&home&&home.previousElementSibling!==host)home.insertAdjacentElement('beforebegin',host)}",
+            "const home=$('#viewPainel .p142-home-grid');\n  if(home)home.insertAdjacentElement('beforebegin',host);else $('#viewPainel .dash-wrap')?.prepend(host);"
+          ]
+          for a in required:
+            assert a in s, f'anchor missing: {a[:90]}'
+          assert 'p195MinimalHomeStyle' not in s
+          assert '</body>' in s
+
+          old_ensure="const home=$('#viewPainel .p142-home-grid');\n  if(home)home.insertAdjacentElement('beforebegin',host);else $('#viewPainel .dash-wrap')?.prepend(host);"
+          new_ensure="const mural=$('#viewMural .mural-board'),filter=$('#muralFilterbar');\n  if(mural){if(filter)mural.insertBefore(host,filter);else mural.appendChild(host)}else $('#viewMural')?.appendChild(host);"
+          s=s.replace(old_ensure,new_ensure)
+
+          old_reloc="function relocatePanel(){const host=$('#p117Highlights'),home=$('#viewPainel .p142-home-grid');if(host&&home&&home.previousElementSibling!==host)home.insertAdjacentElement('beforebegin',host)}"
+          new_reloc="function relocatePanel(){const host=$('#p117Highlights'),mural=$('#viewMural .mural-board'),filter=$('#muralFilterbar');if(!host||!mural)return;if(filter){if(host.parentElement!==mural||host.nextElementSibling!==filter)mural.insertBefore(host,filter)}else if(host.parentElement!==mural)mural.appendChild(host)}"
+          s=s.replace(old_reloc,new_reloc)
+
+          old_notif="try{if(typeof window.switchView==='function')window.switchView('painel');else if(typeof switchView==='function')switchView('painel')}catch(_e){}"
+          new_notif="try{if(typeof window.switchView==='function')window.switchView('mural');else if(typeof switchView==='function')switchView('mural')}catch(_e){}"
+          assert old_notif in s, 'highlight notification target anchor missing'
+          s=s.replace(old_notif,new_notif)
+
+          layer=base64.b64decode('CjxzdHlsZSBpZD0icDE5NU1pbmltYWxIb21lU3R5bGUiPgovKiBQMTk1IMK3IGNhcGEgbcOtbmltYTogdW0gY2FyZCBwb3IgdmV6OyBvIHJlc3RvIGZpY2EgbmFzIHRlbGFzIHByw7NwcmlhcyAqLwojdmlld1BhaW5lbCAuZGFzaC1oZXJvLAojdmlld1BhaW5lbCAjZGFzaEtwaXMsCiN2aWV3UGFpbmVsICNwMTk0V2VsY29tZSwKI3ZpZXdQYWluZWwgI3AxOTRTaG9ydGN1dHMsCiN2aWV3UGFpbmVsICNwMTk0Rm9vdGVyTGlua3N7ZGlzcGxheTpub25lIWltcG9ydGFudH0KI3ZpZXdQYWluZWwgLnAxNDItaG9tZS1ncmlke2Rpc3BsYXk6YmxvY2shaW1wb3J0YW50O21hcmdpbjowIWltcG9ydGFudDt3aWR0aDoxMDAlIWltcG9ydGFudH0KI3ZpZXdQYWluZWwgLnAxNDItaG9tZS1ncmlkPip7ZGlzcGxheTpub25lIWltcG9ydGFudH0KI3ZpZXdQYWluZWwgI3AxOTVGb2N1c0RlY2t7ZGlzcGxheTpibG9ja2FpbXBvcnRhbnR9CiN2aWV3UGFpbmVsIC5kYXNoLXdyYXB7bWF4LXdpZHRoOjg2MHB4IWltcG9ydGFudDttYXJnaW46MCBhdXRvIWltcG9ydGFudDtwYWRkaW5nLXRvcDpjbGFtcCgxOHB4LDV2aCw1NHB4KSFpbXBvcnRhbnR9CiN2aWV3UGFpbmVsICNwMTkyQWJvdXRGb290ZXJ7ZGlzcGxheTpmbGV4IWltcG9ydGFudDtwYWRkaW5nOjIycHggOHB4IDI4cHghaW1wb3J0YW50fQojdmlld1BhaW5lbCAjcDE5MkFib3V0Rm9vdGVyIGJ1dHRvbntmb250LXNpemU6MTFweCFpbXBvcnRhbnQ7Y29sb3I6IzhhOTk5ZSFpbXBvcnRhbnR9CgojcDE5NUZvY3VzRGVja3twb3NpdGlvbjpyZWxhdGl2ZTttYXJnaW46MCBhdXRvO21heC13aWR0aDo2ODBweDtwYWRkaW5nOjAgNHB4fQojcDE5NUZvY3VzRGVjayAucDE5NS10b3B7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDttYXJnaW46MCAycHggMTJweH0KI3AxOTVGb2N1c0RlY2sgLnAxOTUtYnJhbmR7Zm9udC1zaXplOjEwcHg7Zm9udC13ZWlnaHQ6OTUwO2xldHRlci1zcGFjaW5nOi4xNGVtO2NvbG9yOiM3MzhhOTE7dGV4dC10cmFuc2Zvcm06dXBwZXJjYXNlfQojcDE5NUZvY3VzRGVjayAucDE5NS1tZW51e3Bvc2l0aW9uOnJlbGF0aXZlfQojcDE5NUZvY3VzRGVjayAucDE5NS1tb3Jle3dpZHRoOjM4cHg7aGVpZ2h0OjM4cHg7Ym9yZGVyOjFweCBzb2xpZCAjZGNlN2U2O2JhY2tncm91bmQ6I2ZmZjtib3JkZXItcmFkaXVzOjk5OXB4O2NvbG9yOiM2MDc2N2U7Zm9udC1zaXplOjIxcHg7bGluZS1oZWlnaHQ6MTtkaXNwbGF5OmdyaWQ7cGxhY2UtaXRlbXM6Y2VudGVyO2JveC1zaGFkb3c6MCA4cHggMjJweCByZ2JhKDE5LDY3LDc1LC4wNSl9CiNwMTk1Rm9jdXNEZWNrIC5wMTk1LXNoZWV0e3Bvc2l0aW9uOmFic29sdXRlO3JpZ2h0OjA7dG9wOjQ0cHg7ei1pbmRleDo0MDt3aWR0aDptaW4oMjYwcHgsODJ2dyk7ZGlzcGxheTpub25lO2JhY2tncm91bmQ6I2ZmZjhib3JkZXI6MXB4IHNvbGlkICNkOWU2ZTQ7Ym9yZGVyLXJhZGl1czoxOHB4O3BhZGRpbmc6N3B4O2JveC1zaGFkb3c6MCAyMnB4IDYwcHggcmdiYSgxNyw1Myw2MiwuMTgpfQojcDE5NUZvY3VzRGVjayAucDE5NS1zaGVldC5vcGVue2Rpc3BsYXk6YmxvY2t9CiNwMTk1Rm9jdXNEZWNrIC5wMTk1LXNoZWV0IGJ1dHRvbnt3aWR0aDoxMDAlO2JvcmRlcjowO2JhY2tncm91bmQ6dHJhbnNwYXJlbnQ7Ym9yZGVyLXJhZGl1czoxMnB4O3BhZGRpbmc6MTFweCAxMnB4O3RleHQtYWxpZ246bGVmdDtmb250LXNpemU6MTJweDtmb250LXdlaWdodDo4MDA7Y29sb3I6IzI3NDY1MH0KI3AxOTVGb2N1c0RlY2sgLnAxOTUtc2hlZXQgYnV0dG9uOmhvdmVye2JhY2tncm91bmQ6I2YwZjdmNX0KI3AxOTVGb2N1c0RlY2sgLnAxOTUtY2FyZHttaW4taGVpZ2h0OjI3MHB4O2JvcmRlcjoxcHggc29saWQgI2RiZThlNjtib3JkZXItcmFkaXVzOjMwcHg7YmFja2dyb3VuZDpsaW5lYXItZ3JhZGllbnQoMTQ1ZGVnLCNmZmYgMCUsI2ZiZmVmZCAxMDAlKTtwYWRkaW5nOmNsYW1wKDIycHgsNXZ3LDM0cHgpO2JveC1zaGFkb3c6MCAyNnB4IDgwcHggcmdiYSgxNiw1Nyw2NiwuMTMpO2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47YW5pbWF0aW9uOnAxOTVJbiAuMjJzIGVhc2UgYm90aH0KQGtleWZyYW1lcyBwMTk1SW57ZnJvbXthcGFjaXR5Oi4yO3RyYW5zZm9ybTp0cmFuc2xhdGVZKDEwcHgpIHNjYWxlKC45ODUpfXRve29wYWNpdHk6MTt0cmFuc2Zvcm06bm9uZX19CiNwMTk1Rm9jdXNEZWNrIC5wMTk1LWtpY2tlcntkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo4cHg7Zm9udC1zaXplOjEwcHg7Zm9udC13ZWlnaHQ6OTUwO2xldHRlci1zcGFjaW5nOi4xMmVtO3RleHQtdHJhbnNmb3JtOnVwcGVyY2FzZTtjb2xvcjojMTQ4MDg3fQojcDE5NUZvY3VzRGVjayAucDE5NS1raWNrZXIgaXt3aWR0aDo4cHg7aGVpZ2h0OjhweDtib3JkZXItcmFkaXVzOjUwJTtiYWNrZ3JvdW5kOiMyMGExOGY7Ym94LXNoYWRvdzowIDAgMCA1cHggcmdiYSgzMiwxNjEsMTQzLC4xMCl9CiNwMTk1Rm9jdXNEZWNrIC5wMTk1LXRpdGxle2ZvbnQtZmFtaWx5OidTcGFjZSBHcm90ZXNrJywnSW50ZXInLHNhbnMtc2VyaWY7Zm9udC1zaXplOmNsYW1wKDI0cHgsNHZ3LDM0cHgpO2xpbmUtaGVpZ2h0OjEuMDY7bGV0dGVyLXNwYWNpbmc6LS4wNDVlbTtjb2xvcjojMTUzYTQ5O21hcmdpbjoxNXB4IDAgOHB4O292ZXJmbG93LXdyYXA6YW55d2hlcmV9CiNwMTk1Rm9jdXNEZWNrIC5wMTk1LW1ldGF7Zm9udC1zaXplOjExcHg7Zm9udC13ZWlnaHQ6ODAwO2NvbG9yOiM3MTg1OGQ7bWFyZ2luLWJvdHRvbTo5cHh9CiNwMTk1Rm9jdXNEZWNrIC5wMTk1LWRldGFpbHtmb250LXNpemU6MTNweDtsaW5lLWhlaWdodDoxLjU7Y29sb3I6IzVlNzM3YjttYXgtd2lkdGg6NTgwcHh9CiNwMTk1Rm9jdXNEZWNrIC5wMTk1LWZvb3R7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6OHB4O21hcmdpbi10b3A6MjRweH0KI3AxOTVGb2N1c0RlY2sgLnAxOTUtY291bnR7bWFyZ2luLXJpZ2h0OmF1dG87Zm9udC1zaXplOjEwcHg7Zm9udC13ZWlnaHQ6OTAwO2NvbG9yOiM4YTlhOWZ9CiNwMTk1Rm9jdXNEZWNrIC5wMTk1LWJ0bntib3JkZXI6MXB4IHNvbGlkICNkNmU0ZTE7YmFja2dyb3VuZDojZmZmO2NvbG9yOiMzMTUyNWQ7Ym9yZGVyLXJhZGl1czo5OTlweDtwYWRkaW5nOjEwcHggMTRweDtmb250LXNpemU6MTFweDtmb250LXdlaWdodDo5MDB9CiNwMTk1Rm9jdXNEZWNrIC5wMTk1LWJ0bi5wcmltYXJ5e2JhY2tncm91bmQ6IzBlNmY3ODtib3JkZXItY29sb3I6IzBlNmY3ODtjb2xvcjojZmZmfQojcDE5NUZvY3VzRGVjayAucDE5NS1idG4uZ2hvc3R7Ym9yZGVyLWNvbG9yOnRyYW5zcGFyZW50O2JhY2tncm91bmQ6dHJhbnNwYXJlbnQ7Y29sb3I6IzgwOTA5Nz; padding-left:8px;padding-right:8px}
+#p195FocusDeck .p195-empty{text-align:center;min-height:230px;display:grid;place-items:center}
+#p195FocusDeck .p195-empty .p195-empty-icon{font-size:34px;margin-bottom:8px}
+#p195FocusDeck .p195-empty b{display:block;font-size:23px;color:#173b49;letter-spacing:-.03em}
+#p195FocusDeck .p195-empty span{display:block;font-size:12px;color:#7a8d94;margin-top:5px}
+
+#viewMural #p117Highlights{width:100%!important;max-width:none!important;margin:0 0 14px!important}
+#viewMural #p117Highlights .p117-sub{max-width:680px}
+@media(max-width:700px){
+  #viewPainel .dash-scroll{background:#f6f9f8!important}
+  #viewPainel .dash-wrap{padding:18px 12px 92px!important}
+  #p195FocusDeck{padding:0}
+  #p195FocusDeck .p195-card{min-height:300px;border-radius:26px;padding:24px 20px}
+  #p195FocusDeck .p195-foot{display:grid;grid-template-columns:auto 1fr auto;gap:6px}
+  #p195FocusDeck .p195-count{grid-column:1/-1;margin:0 0 3px;text-align:center}
+  #p195FocusDeck .p195-btn{padding:11px 12px}
+}
+</style>
+<script id="p195MinimalHomeController">
+(()=>{
+  'use strict';
+  const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>Array.from(r.querySelectorAll(s));
+  const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toLowerCase();
+  const txt=(s,r)=>String(q(s,r)?.textContent||'').replace(/\s+/g,' ').trim();
+  let pos=0,items=[],scheduled=false,observed=new WeakSet();
+  const dismissed=()=>{
+    try{return new Set(JSON.parse(sessionStorage.getItem('p195Dismissed')||'[]'))}catch(_e){return new Set()}
+  };
+  const saveDismissed=set=>{try{sessionStorage.setItem('p195Dismissed',JSON.stringify([...set].slice(-100)))}catch(_e){}};
+  function keyOf(parts){return norm(parts.filter(Boolean).join('|')).slice(0,700)}
+  function collect(){
+    const out=[],seen=new Set(),gone=dismissed();
+    qa('#dashAttention .p56-task').forEach(el=>{
+      const title=txt('.p56-what',el)||txt('.p56-who',el)||'Item para resolver';
+      const who=txt('.p56-who',el),detail=txt('.p56-detail',el),date=txt('.p56-date',el),source=txt('.p56-source',el);
+      const key=keyOf(['acao',who,title,detail,date]);
+      if(!key||seen.has(key)||gone.has(key))return;seen.add(key);
+      out.push({key,title,meta:[source,who,date].filter(Boolean).join(' · '),detail,el,kind:'Agora'});
+    });
+    qa('#p78TodayCard .p78-row').forEach(el=>{
+      const title=txt('.p78-main b',el)||'Novidade';
+      const detail=txt('.p78-main span',el),tag=txt('.p78-tag',el);
+      const key=keyOf(['novidade',title,detail]);
+      if(!key||seen.has(key)||gone.has(key))return;seen.add(key);
+      out.push({key,title,meta:['Novidade',tag].filter(Boolean).join(' · '),detail,el,kind:'Agora'});
+    });
+    items=out;
+    if(pos>=items.length)pos=0;
+  }
+  function ensureDeck(){
+    const home=q('#viewPainel .p142-home-grid');if(!home)return null;
+    let deck=q('#p195FocusDeck');
+    if(!deck){
+      deck=document.createElement('section');deck.id='p195FocusDeck';deck.setAttribute('aria-live','polite');
+      deck.innerHTML='<div class="p195-top"><span class="p195-brand">AGORA</span><div class="p195-menu"><button type="button" class="p195-more" aria-label="Mais ações">⋯</button><div class="p195-sheet"><button type="button" data-p195-action="task">＋ Nova pendência</button><button type="button" data-p195-action="checkin">✓ Check-in</button><button type="button" data-p195-action="product">🎯 Registrar produto</button><button type="button" data-p195-action="dossier">📚 Dossiê</button><button type="button" data-p195-action="backup">📦 Backup</button></div></div></div><div class="p195-card"></div>';
+      home.prepend(deck);
+      q('.p195-more',deck).onclick=e=>{e.stopPropagation();q('.p195-sheet',deck).classList.toggle('open')};
+      q('.p195-sheet',deck).onclick=e=>{
+        const b=e.target.closest('[data-p195-action]');if(!b)return;
+        const map={task:'#dashNewTaskBtn',checkin:'#dashCheckinBtn',product:'#dashProductBtn',dossier:'#dashDossierBtn',backup:'#dashBackupBtn'};
+        const target=q(map[b.dataset.p195Action]);q('.p195-sheet',deck).classList.remove('open');
+        if(target&&getComputedStyle(target).display!=='none')target.click();else if(target)target.click();
+      };
+      document.addEventListener('click',e=>{if(!e.target.closest('#p195FocusDeck .p195-menu'))q('.p195-sheet',deck)?.classList.remove('open')});
+    }
+    const backup=q('[data-p195-action="backup"]',deck),src=q('#dashBackupBtn');
+    if(backup)backup.style.display=src&&getComputedStyle(src).display!=='none'?'block':'none';
+    return deck;
+  }
+  function openItem(it){
+    if(!it?.el)return;
+    if(it.el.matches('.p78-row')){it.el.click();return}
+    const buttons=qa('.p56-task-actions button',it.el);
+    const open=buttons.find(b=>!/concluir|já tratei|ja tratei/i.test(b.textContent||''))||buttons[0];
+    open?.click();
+  }
+  function render(){
+    scheduled=false;const deck=ensureDeck();if(!deck)return;
+    collect();const card=q('.p195-card',deck);if(!card)return;
+    if(!items.length){
+      card.innerHTML='<div class="p195-empty"><div><div class="p195-empty-icon">✓</div><b>Tudo certo por aqui.</b><span>Nada pedindo sua atenção agora.</span></div></div>';
+      return;
+    }
+    const it=items[pos]||items[0],more=items.length>1;
+    card.innerHTML=`<div><div class="p195-kicker"><i></i>${it.kind}</div><div class="p195-title"></div><div class="p195-meta"></div><div class="p195-detail"></div></div><div class="p195-foot"><span class="p195-count">${pos+1} de ${items.length}</span><button type="button" class="p195-btn ghost" data-p195-dismiss>Dispensar</button><button type="button" class="p195-btn" data-p195-next ${more?'':'hidden'}>Passar →</button><button type="button" class="p195-btn primary" data-p195-open>Abrir</button></div>`;
+    q('.p195-title',card).textContent=it.title;
+    q('.p195-meta',card).textContent=it.meta;
+    q('.p195-detail',card).textContent=it.detail||'Toque em Abrir para ver o contexto.';
+    q('[data-p195-open]',card).onclick=()=>openItem(it);
+    const next=q('[data-p195-next]',card);if(next)next.onclick=()=>{pos=(pos+1)%items.length;render()};
+    q('[data-p195-dismiss]',card).onclick=()=>{
+      const set=dismissed();set.add(it.key);saveDismissed(set);collect();if(pos>=items.length)pos=0;render();
+    };
+  }
+  function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(render)}
+  function observeSources(){
+    ['#dashAttention','#p78TodayCard'].forEach(sel=>{const el=q(sel);if(el&&!observed.has(el)){observed.add(el);new MutationObserver(schedule).observe(el,{childList:true,subtree:true,characterData:true})}});
+  }
+  function boot(){
+    ensureDeck();observeSources();schedule();
+    let tries=0;const timer=setInterval(()=>{tries++;observeSources();schedule();if((q('#dashAttention')&&q('#p78TodayCard'))||tries>=16)clearInterval(timer)},350);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
+').decode('utf-8')
+          head,tail=s.rsplit('</body>',1)
+          s=head+layer+'\n</body>'+tail
+
+          s=s.replace("window.CARBONAUTAS_BUILD='P194-20260920';","window.CARBONAUTAS_BUILD='P195-20260920';")
+          s=s.replace("navigator.serviceWorker.register('./sw.js?v=P194-20260920',{updateViaCache:'none'})","navigator.serviceWorker.register('./sw.js?v=P195-20260920',{updateViaCache:'none'})")
+          assert 'p195MinimalHomeStyle' in s
+          assert "window.CARBONAUTAS_BUILD='P195-20260920';" in s
+          idx.write_text(s,encoding='utf-8')
+
+          sw=Path('sw.js'); t=sw.read_text(encoding='utf-8')
+          assert 'service worker P194' in t and "const CACHE='carbonautas-p194-20260920';" in t
+          t=t.replace('service worker P194','service worker P195').replace("const CACHE='carbonautas-p194-20260920';","const CACHE='carbonautas-p195-20260920';")
+          sw.write_text(t,encoding='utf-8')
+
+          readme=Path('README.md'); r=readme.read_text(encoding='utf-8')
+          assert 'Todas as camadas P44 a P194 estao dentro dele' in r
+          marker='### P194 · 2026-09-20 · Home em cards flutuantes'
+          assert marker in r
+          r=r.replace('Todas as camadas P44 a P194 estao dentro dele','Todas as camadas P44 a P195 estao dentro dele')
+          sec='''### P195 · 2026-09-20 · Capa mínima em passa-card
+- A capa passa a mostrar um único card flutuante por vez, alimentado pelas pendências e novidades já existentes.
+- “Passar” avança para o próximo card; “Dispensar” tira somente da capa durante a sessão, sem concluir nem apagar o item real.
+- Atalhos duplicados de Mural, Agenda, Repositório e Pessoas saem da capa.
+- “Precisa de você” e “Só acompanhar” deixam de aparecer como blocos duplicados e viram uma única fila visual.
+- O hero “O que precisa da minha atenção?” e os KPIs deixam de aparecer na capa.
+- Destaques do mês saem da capa e passam para “Ó nóis!” (Mural), antes dos filtros.
+- Ações menos frequentes ficam atrás do botão “⋯”.
+- Não alterado: dados, regras do Firebase, VPS, permissões ou conteúdo das pendências.
+
+'''
+          r=r.replace(marker,sec+marker)
+          readme.write_text(r,encoding='utf-8')
+
+          Path('index.html.sha512').write_text(hashlib.sha512(idx.read_bytes()).hexdigest()+'  index.html\n',encoding='utf-8')
+
+          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.I|re.S)
+          for i,b in enumerate(blocks):
+            p=Path(f'/tmp/p195-{i}.mjs'); p.write_text(b,encoding='utf-8')
+            z=subprocess.run(['node','--check',str(p)],capture_output=True,text=True)
+            if z.returncode:
+              print(f'JS block {i} failed\n{z.stderr}')
+              sys.exit(1)
+          print(f'Validated {len(blocks)} inline script blocks')
+          PY
+          sha512sum -c index.html.sha512
+          git diff --check
+      - name: Commit validado
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/p195-minimal-home.yml
+          git add index.html sw.js README.md index.html.sha512
+          git commit -m "P195: capa minima em passa-card [p195-applied]"
+          git push
