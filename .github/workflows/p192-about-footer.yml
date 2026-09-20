@@ -1,0 +1,88 @@
+name: P192 sobre no fim do painel
+on:
+  push:
+    branches: [about-footer-p192]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: ${{ !contains(github.event.head_commit.message, '[p192-applied]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Aplicar ajuste minimo e validar
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib, re, subprocess, sys
+
+          idx=Path('index.html')
+          s=idx.read_text(encoding='utf-8')
+
+          old_about="function openAbout(){ensureAbout();qs('#p78AboutOverlay')?.classList.add('open')}"
+          new_about=old_about+"\nwindow.openCarbonautasAbout=openAbout;"
+          assert s.count(old_about)==1, f'openAbout count={s.count(old_about)}'
+          s=s.replace(old_about,new_about)
+
+          old_css='.tab[data-view="lab"],.app-nav-card[data-app-view="lab"]{display:none!important}#p78TodayCard{scroll-margin-top:16px}.p85-checkin-toggle{display:none}'
+          new_css=old_css+'#p192AboutFooter{display:flex;justify-content:center;align-items:center;padding:22px 8px 28px}#p192AboutFooter button{border:0;background:transparent;color:#6f858d;border-radius:999px;padding:10px 14px;font-size:12px;font-weight:800;cursor:pointer}#p192AboutFooter button:hover{background:#eef7f5;color:#0d7479}'
+          assert s.count(old_css)==1, f'css anchor count={s.count(old_css)}'
+          s=s.replace(old_css,new_css)
+
+          old_hide="function hideLab(){const x=q('.app-nav-card[data-app-view=\"lab\"]');if(x)x.style.display='none'}"
+          new_hide=old_hide+"\nfunction ensureAboutFooter(){const host=q('#viewPainel .dash-wrap');if(!host)return;let foot=q('#p192AboutFooter');if(!foot){foot=document.createElement('div');foot.id='p192AboutFooter';foot.innerHTML='<button type=\"button\" aria-label=\"Sobre o Carbonautas\">ⓘ Sobre o Carbonautas</button>';const b=foot.querySelector('button');if(b)b.onclick=()=>{if(typeof window.openCarbonautasAbout==='function')window.openCarbonautasAbout();else q('#p78AboutBtn')?.click()}}if(foot.parentElement!==host||host.lastElementChild!==foot)host.appendChild(foot);const old=q('#p78AboutBtn');if(old)old.style.display='none'}"
+          assert s.count(old_hide)==1, f'hideLab anchor count={s.count(old_hide)}'
+          s=s.replace(old_hide,new_hide)
+
+          old_polish='function polish(){canonicalize();ensureStyle();relocateToday();hideLab();organizeCheckins()}'
+          new_polish='function polish(){canonicalize();ensureStyle();relocateToday();hideLab();organizeCheckins();ensureAboutFooter()}'
+          assert s.count(old_polish)==1, f'polish count={s.count(old_polish)}'
+          s=s.replace(old_polish,new_polish)
+
+          assert s.count("window.CARBONAUTAS_BUILD='P191-20260920';")==1
+          assert s.count("navigator.serviceWorker.register('./sw.js?v=P191-20260920',{updateViaCache:'none'})")==1
+          s=s.replace("window.CARBONAUTAS_BUILD='P191-20260920';","window.CARBONAUTAS_BUILD='P192-20260920';")
+          s=s.replace("navigator.serviceWorker.register('./sw.js?v=P191-20260920',{updateViaCache:'none'})","navigator.serviceWorker.register('./sw.js?v=P192-20260920',{updateViaCache:'none'})")
+          idx.write_text(s,encoding='utf-8')
+
+          sw=Path('sw.js'); t=sw.read_text(encoding='utf-8')
+          assert t.count('service worker P191')==1
+          assert t.count("const CACHE='carbonautas-p191-20260920';")==1
+          t=t.replace('service worker P191','service worker P192').replace("const CACHE='carbonautas-p191-20260920';","const CACHE='carbonautas-p192-20260920';")
+          sw.write_text(t,encoding='utf-8')
+
+          readme=Path('README.md'); r=readme.read_text(encoding='utf-8')
+          assert r.count('Todas as camadas P44 a P191 estao dentro dele')==1
+          marker='### P191 · 2026-09-20 · Versionamento alinhado'
+          assert r.count(marker)==1
+          r=r.replace('Todas as camadas P44 a P191 estao dentro dele','Todas as camadas P44 a P192 estao dentro dele')
+          sec='''### P192 · 2026-09-20 · Sobre mais encontrável sem aumentar o menu\n- Mantido o menu principal enxuto.\n- “Sobre o Carbonautas” passa a aparecer como atalho discreto no fim da tela “Coisa pra resolver”.\n- O botão antigo escondido dentro do resumo do Painel deixa de ser exibido para evitar duplicidade.\n- Não alterado: dados, regras, Firebase e VPS.\n\n'''
+          r=r.replace(marker,sec+marker)
+          readme.write_text(r,encoding='utf-8')
+
+          Path('index.html.sha512').write_text(hashlib.sha512(idx.read_bytes()).hexdigest()+'  index.html\n',encoding='utf-8')
+
+          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.I|re.S)
+          for i,b in enumerate(blocks):
+              p=Path(f'/tmp/p192-{i}.mjs'); p.write_text(b,encoding='utf-8')
+              z=subprocess.run(['node','--check',str(p)],capture_output=True,text=True)
+              if z.returncode:
+                  print(f'JS block {i} failed\n{z.stderr}')
+                  sys.exit(1)
+          print(f'Validated {len(blocks)} inline script blocks')
+          PY
+          sha512sum -c index.html.sha512
+          git diff --check
+          git diff -- index.html sw.js README.md index.html.sha512
+      - name: Commit validado
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/p192-about-footer.yml
+          git add index.html sw.js README.md index.html.sha512
+          git commit -m "P192: coloca Sobre no fim do painel [p192-applied]"
+          git push
