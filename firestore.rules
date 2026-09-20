@@ -11,7 +11,7 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function hasProfile() {
+    function profileExists() {
       return signedIn()
         && exists(
           /databases/$(database)/documents/rede_users/$(request.auth.uid)
@@ -25,23 +25,61 @@ service cloud.firestore {
     }
 
     function myMemberId() {
-      return userProfile().data.memberId;
+      return userProfile().data.get('memberId', '');
     }
 
-    // O e-mail especial continua sendo reconhecido mesmo se o perfil
-    // rede_users precisar ser reparado. Isso reduz o risco de lockout
-    // administrativo sem dar privilégios a outras contas.
+    // Única fonte de autoridade administrativa: rede_users.role.
     function isCoordinator() {
-      return signedIn() && (
-        request.auth.token.email == 'ernandes.sobreira@gmail.com'
-        || (
-          hasProfile() && (
-            userProfile().data.role == 'coordinator'
-            || userProfile().data.memberId ==
-              'seed-ernandes-sobreira-oliveira-junior'
+      return profileExists()
+        && userProfile().data.get('role', 'student') == 'coordinator';
+    }
+
+    // Perfil ativo: coordenador por papel, ou integrante vinculado a um
+    // rede_members existente que não tenha sido desligado como egresso.
+    function hasProfile() {
+      return profileExists()
+        && (
+          isCoordinator()
+          || (
+            myMemberId() != ''
+            && exists(
+              /databases/$(database)/documents/rede_members/$(myMemberId())
+            )
+            && get(
+              /databases/$(database)/documents/rede_members/$(myMemberId())
+            ).data.get('status', 'ativo') != 'egresso'
           )
+        );
+    }
+
+    function canClaimProfile() {
+      return signedIn() && !profileExists();
+    }
+
+    function bootstrapTarget() {
+      return signedIn()
+        && exists(
+          /databases/$(database)/documents/rede_settings/bootstrap
         )
-      );
+        && get(
+          /databases/$(database)/documents/rede_settings/bootstrap
+        ).data.get('enabled', false) == true
+        && get(
+          /databases/$(database)/documents/rede_settings/bootstrap
+        ).data.get('coordinatorUid', '') == request.auth.uid;
+    }
+
+    function bootstrapConsumedByMe() {
+      return bootstrapTarget()
+        && getAfter(
+          /databases/$(database)/documents/rede_settings/bootstrap
+        ).data.get('enabled', true) == false
+        && getAfter(
+          /databases/$(database)/documents/rede_settings/bootstrap
+        ).data.get('coordinatorUid', '') == request.auth.uid
+        && getAfter(
+          /databases/$(database)/documents/rede_settings/bootstrap
+        ).data.get('consumedByUid', '') == request.auth.uid;
     }
 
     function isMine(memberId) {
@@ -119,27 +157,54 @@ service cloud.firestore {
           || isCoordinator()
         );
 
-      allow create: if isCoordinator() || (
-        signedIn()
-        && request.auth.uid == uid
-        && request.resource.data.role == 'student'
-        && request.resource.data.email ==
-           request.auth.token.email
+      allow create: if isCoordinator()
+        || (
+          signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.role == 'coordinator'
+          && request.resource.data.email == request.auth.token.email
+          && request.resource.data.keys().hasOnly([
+            'nome',
+            'email',
+            'role',
+            'createdAt'
+          ])
+          && bootstrapConsumedByMe()
+        )
+        || (
+          signedIn()
+          && request.auth.uid == uid
+          && request.resource.data.role == 'student'
+          && request.resource.data.email ==
+             request.auth.token.email
 
-        && request.resource.data.keys().hasOnly([
-          'memberId',
-          'nome',
-          'email',
-          'role',
-          'createdAt'
-        ])
+          && request.resource.data.keys().hasOnly([
+            'memberId',
+            'nome',
+            'email',
+            'role',
+            'createdAt'
+          ])
 
-        && getAfter(
-          /databases/$(database)/documents/rede_member_claims/$(request.resource.data.memberId)
-        ).data.uid == request.auth.uid
-      );
+          && getAfter(
+            /databases/$(database)/documents/rede_member_claims/$(request.resource.data.memberId)
+          ).data.uid == request.auth.uid
+        );
 
-      allow update, delete: if isCoordinator();
+      allow update: if isCoordinator()
+        || (
+          signedIn()
+          && request.auth.uid == uid
+          && resource.data.get('role', 'student') != 'coordinator'
+          && request.resource.data.role == 'coordinator'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'role',
+            'updatedAt'
+          ])
+          && bootstrapConsumedByMe()
+        );
+
+      allow delete: if isCoordinator();
     }
 
 
@@ -155,14 +220,49 @@ service cloud.firestore {
           && resource.data.uid == request.auth.uid
         );
 
-      allow create: if signedIn()
-
-        && request.resource.data.uid == request.auth.uid
+      allow create: if (
+        isCoordinator()
 
         && request.resource.data.memberId == memberId
+        && request.resource.data.uid is string
+        && request.resource.data.uid.size() > 0
+        && request.resource.data.email is string
 
-        && request.resource.data.email ==
-           request.auth.token.email
+        && request.resource.data.keys().hasOnly([
+          'uid',
+          'memberId',
+          'email',
+          'createdAt'
+        ])
+
+        && exists(
+          /databases/$(database)/documents/rede_members/$(memberId)
+        )
+        && get(
+          /databases/$(database)/documents/rede_members/$(memberId)
+        ).data.nivel != 'coord'
+        && get(
+          /databases/$(database)/documents/rede_members/$(memberId)
+        ).data.get('status', 'ativo') != 'egresso'
+        && !exists(
+          /databases/$(database)/documents/rede_member_claims/$(memberId)
+        )
+
+        && getAfter(
+          /databases/$(database)/documents/rede_users/$(request.resource.data.uid)
+        ).data.memberId == memberId
+        && getAfter(
+          /databases/$(database)/documents/rede_users/$(request.resource.data.uid)
+        ).data.role == 'student'
+        && getAfter(
+          /databases/$(database)/documents/rede_users/$(request.resource.data.uid)
+        ).data.email == request.resource.data.email
+      ) || (
+        signedIn()
+
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.memberId == memberId
+        && request.resource.data.email == request.auth.token.email
 
         && request.resource.data.keys().hasOnly([
           'uid',
@@ -172,29 +272,26 @@ service cloud.firestore {
           'createdAt'
         ])
 
-        && registrationOpen(
-          request.resource.data.registrationCode
-        )
-
+        && registrationOpen(request.resource.data.registrationCode)
         && exists(
           /databases/$(database)/documents/rede_members/$(memberId)
         )
-
         && get(
           /databases/$(database)/documents/rede_members/$(memberId)
         ).data.nivel != 'coord'
-
+        && get(
+          /databases/$(database)/documents/rede_members/$(memberId)
+        ).data.get('status', 'ativo') != 'egresso'
         && !exists(
           /databases/$(database)/documents/rede_member_claims/$(memberId)
         )
-
         && getAfter(
           /databases/$(database)/documents/rede_users/$(request.auth.uid)
         ).data.memberId == memberId
-
         && getAfter(
           /databases/$(database)/documents/rede_users/$(request.auth.uid)
-        ).data.role == 'student';
+        ).data.role == 'student'
+      );
 
       allow update: if false;
 
@@ -208,12 +305,54 @@ service cloud.firestore {
 
     match /rede_members/{memberId} {
 
-      allow read: if signedIn();
+      function selfMemberUpdateAllowed() {
+        return isMine(memberId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'nome',
+            'telefone',
+            'tema',
+            'plataforma',
+            'driveLink',
+            'notas',
+            'linhas',
+            'resultados',
+            'prazos',
+            'foto',
+            'hub',
+            'hubMotivo',
+            'vinculos',
+            'perguntaCientifica',
+            'objetivoProjeto',
+            'grupoAtendido',
+            'ideiaVisibilidade',
+            'projetoOutros',
+            'projectProfileUpdatedAt',
+            'panelStateV1',
+            'panelStateUpdatedAt',
+            'lastSeenAt',
+            'lastSeenDay',
+            'accessCount',
+            'accessLastDay',
+            'accessTrackingVersion',
+            'accessByDay',
+            'accessDaysCount',
+            'accessFirstTrackedAt'
+          ]);
+      }
+
+      allow get: if hasProfile()
+        || (
+          profileExists()
+          && myMemberId() == memberId
+        );
+
+      allow list: if hasProfile()
+        || canClaimProfile();
 
       allow create, delete: if isCoordinator();
 
       allow update: if isCoordinator()
-        || isMine(memberId);
+        || selfMemberUpdateAllowed();
     }
 
     // ============================================================
@@ -222,7 +361,7 @@ service cloud.firestore {
 
     match /rede_schedule/{documentId} {
 
-      allow read: if signedIn();
+      allow read: if hasProfile();
 
       allow create, update, delete: if isCoordinator();
     }
@@ -236,7 +375,7 @@ service cloud.firestore {
 
     match /rede_activities/{documentId} {
 
-      allow read: if signedIn();
+      allow read: if hasProfile();
 
       allow create: if isCoordinator() || (
         hasProfile()
@@ -260,9 +399,9 @@ service cloud.firestore {
 
     match /rede_publicacoes/{documentId} {
 
-      allow read: if signedIn();
+      allow read: if hasProfile();
 
-      allow create: if signedIn()
+      allow create: if hasProfile()
         && (
           request.resource.data.ownerUid == request.auth.uid
           || isCoordinator()
@@ -328,7 +467,7 @@ service cloud.firestore {
         && request.resource.data.get('collaboratorMemberIds', []) == resource.data.get('collaboratorMemberIds', []);
       }
 
-      allow update: if signedIn()
+      allow update: if hasProfile()
         && (
           resource.data.ownerUid == request.auth.uid
           || isCoordinator()
@@ -338,7 +477,7 @@ service cloud.firestore {
 
       // P64: quem criou/enviou pode excluir; coordenação continua podendo
       // excluir itens do Repositório Geral. Não amplia acesso a chats privados.
-      allow delete: if signedIn()
+      allow delete: if hasProfile()
         && (
           resource.data.ownerUid == request.auth.uid
           || resource.data.get('createdByUid', '') == request.auth.uid
@@ -389,9 +528,12 @@ service cloud.firestore {
 
         allow update: if false;
 
-        allow delete: if hasProfile()
-          && generalFileConversationAllowed()
-          && resource.data.authorUid == request.auth.uid;
+        allow delete: if (
+            hasProfile()
+            && generalFileConversationAllowed()
+            && resource.data.authorUid == request.auth.uid
+          )
+          || isCoordinator();
       }
 
       // P20 — conversa privada vinculada a um fluxo de correção.
@@ -435,8 +577,11 @@ service cloud.firestore {
 
         allow update: if false;
 
-        allow delete: if isReviewParticipant()
-          && resource.data.authorUid == request.auth.uid;
+        allow delete: if (
+            isReviewParticipant()
+            && resource.data.authorUid == request.auth.uid
+          )
+          || isCoordinator();
       }
     }
 
@@ -533,12 +678,13 @@ service cloud.firestore {
           && resource.data.get('personalRepo', false) != true;
       }
 
-      // P25: sem o teste "is list" na consulta. A listagem do app usa
-      // where('allowedMemberIds','array-contains',meuId); o motor de regras
-      // consegue provar o "in" a partir desse filtro, mas nao o "is list",
-      // e a consulta inteira era negada.
+      // Pastas "Toda a Rede" são avaliadas dinamicamente; ACL explícita
+      // continua valendo para pastas privadas e selecionadas.
       allow read: if hasProfile()
-        && myMemberId() in resource.data.allowedMemberIds;
+        && (
+          resource.data.get('accessMode', '') == 'group'
+          || myMemberId() in resource.data.allowedMemberIds
+        );
 
       allow create: if hasProfile()
         && request.resource.data.createdByUid == request.auth.uid
@@ -587,8 +733,13 @@ service cloud.firestore {
         }
 
         allow read: if hasProfile()
-          && parentPackage().data.allowedMemberIds is list
-          && myMemberId() in parentPackage().data.allowedMemberIds;
+          && (
+            parentPackage().data.get('accessMode', '') == 'group'
+            || (
+              parentPackage().data.allowedMemberIds is list
+              && myMemberId() in parentPackage().data.allowedMemberIds
+            )
+          );
 
         allow create: if parentManager()
           && request.resource.data.createdByUid == request.auth.uid;
@@ -603,12 +754,22 @@ service cloud.firestore {
         match /messages/{messageId} {
 
           allow read: if hasProfile()
-            && parentPackage().data.allowedMemberIds is list
-            && myMemberId() in parentPackage().data.allowedMemberIds;
+            && (
+              parentPackage().data.get('accessMode', '') == 'group'
+              || (
+                parentPackage().data.allowedMemberIds is list
+                && myMemberId() in parentPackage().data.allowedMemberIds
+              )
+            );
 
           allow create: if hasProfile()
-            && parentPackage().data.allowedMemberIds is list
-            && myMemberId() in parentPackage().data.allowedMemberIds
+            && (
+              parentPackage().data.get('accessMode', '') == 'group'
+              || (
+                parentPackage().data.allowedMemberIds is list
+                && myMemberId() in parentPackage().data.allowedMemberIds
+              )
+            )
             && request.resource.data.keys().hasOnly([
               'authorUid',
               'authorMemberId',
@@ -627,10 +788,21 @@ service cloud.firestore {
 
           allow update: if false;
 
-          allow delete: if hasProfile()
-            && parentPackage().data.allowedMemberIds is list
-            && myMemberId() in parentPackage().data.allowedMemberIds
-            && resource.data.authorUid == request.auth.uid;
+          allow delete: if (
+              hasProfile()
+              && (
+                parentPackage().data.get('accessMode', '') == 'group'
+                || (
+                  parentPackage().data.allowedMemberIds is list
+                  && myMemberId() in parentPackage().data.allowedMemberIds
+                )
+              )
+              && resource.data.authorUid == request.auth.uid
+            )
+            || (
+              isCoordinator()
+              && parentPackage().data.get('personalRepo', false) != true
+            );
         }
       }
     }
@@ -642,7 +814,7 @@ service cloud.firestore {
 
     match /rede_photos/{documentId} {
 
-      allow read: if signedIn();
+      allow read: if hasProfile();
 
       allow create: if hasProfile()
         && request.resource.data.autorId == myMemberId();
@@ -664,7 +836,7 @@ service cloud.firestore {
 
     match /rede_feed/{documentId} {
 
-      allow read: if signedIn();
+      allow read: if hasProfile();
 
       allow create: if hasProfile()
         && request.resource.data.authorUid == request.auth.uid;
@@ -683,7 +855,7 @@ service cloud.firestore {
 
     match /rede_feed_comments/{documentId} {
 
-      allow read: if signedIn();
+      allow read: if hasProfile();
 
       allow create: if hasProfile()
         && request.resource.data.authorUid == request.auth.uid;
@@ -702,7 +874,7 @@ service cloud.firestore {
 
     match /rede_feed_reactions/{documentId} {
 
-      allow read: if signedIn();
+      allow read: if hasProfile();
 
       allow create, update: if hasProfile()
         && request.resource.data.actorUid == request.auth.uid;
@@ -721,7 +893,7 @@ service cloud.firestore {
 
     match /rede_chat/{documentId} {
 
-      allow read: if signedIn();
+      allow read: if hasProfile();
 
       allow create: if hasProfile()
         && request.resource.data.authorId == myMemberId();
@@ -737,13 +909,35 @@ service cloud.firestore {
 
     match /rede_settings/{documentId} {
 
-      allow read: if signedIn()
-        && (
-          documentId != 'registration'
-          || isCoordinator()
+      allow read: if (
+          documentId == 'bootstrap'
+          && signedIn()
+        )
+        || (
+          hasProfile()
+          && (
+            documentId != 'registration'
+            || isCoordinator()
+          )
         );
 
-      allow write: if isCoordinator();
+      allow write: if isCoordinator()
+        || (
+          documentId == 'bootstrap'
+          && bootstrapTarget()
+          && request.resource.data.get('coordinatorUid', '') ==
+             resource.data.get('coordinatorUid', '')
+          && request.resource.data.get('enabled', true) == false
+          && request.resource.data.get('consumedByUid', '') == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'enabled',
+            'consumedByUid',
+            'consumedAt'
+          ])
+          && getAfter(
+            /databases/$(database)/documents/rede_users/$(request.auth.uid)
+          ).data.get('role', '') == 'coordinator'
+        );
     }
 
 
@@ -826,6 +1020,171 @@ service cloud.firestore {
 
       allow delete: if hasProfile()
         && resource.data.recipientId == myMemberId();
+    }
+
+
+    // ============================================================
+    // CARBONAUTAS — CONVERSAS EM GRUPO PRIVADAS
+    // Sem exceção para coordenador: somente participantes do grupo.
+    // ============================================================
+
+    match /rede_group_threads/{groupId} {
+
+      function groupMember() {
+        return hasProfile()
+          && resource.data.memberIds is list
+          && myMemberId() in resource.data.memberIds;
+      }
+
+      function groupCreator() {
+        return groupMember()
+          && resource.data.createdByUid == request.auth.uid
+          && resource.data.createdByMemberId == myMemberId();
+      }
+
+      function validGroupSummaryUpdate() {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'updatedAt',
+            'lastMessage',
+            'lastSenderId'
+          ])
+          && request.resource.data.updatedAt == request.time
+          && request.resource.data.lastMessage is string
+          && request.resource.data.lastMessage.size() <= 160
+          && request.resource.data.lastSenderId == myMemberId();
+      }
+
+      function validGroupMembersUpdate() {
+        return groupCreator()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'memberIds',
+            'updatedAt'
+          ])
+          && request.resource.data.memberIds is list
+          && request.resource.data.memberIds.size() >= 2
+          && request.resource.data.memberIds.size() <= 60
+          && resource.data.createdByMemberId in request.resource.data.memberIds
+          && request.resource.data.updatedAt == request.time;
+      }
+
+      allow get, list: if groupMember();
+
+      allow create: if hasProfile()
+        && request.resource.data.keys().hasOnly([
+          'groupName',
+          'memberIds',
+          'createdByUid',
+          'createdByMemberId',
+          'createdByName',
+          'active',
+          'createdAt',
+          'updatedAt'
+        ])
+        && request.resource.data.groupName is string
+        && request.resource.data.groupName.size() >= 1
+        && request.resource.data.groupName.size() <= 80
+        && request.resource.data.memberIds is list
+        && request.resource.data.memberIds.size() >= 2
+        && request.resource.data.memberIds.size() <= 60
+        && myMemberId() in request.resource.data.memberIds
+        && request.resource.data.createdByUid == request.auth.uid
+        && request.resource.data.createdByMemberId == myMemberId()
+        && request.resource.data.createdByName is string
+        && request.resource.data.createdByName.size() >= 1
+        && request.resource.data.createdByName.size() <= 200
+        && request.resource.data.active == true
+        && request.resource.data.createdAt == request.time
+        && request.resource.data.updatedAt == request.time;
+
+      allow update: if groupMember()
+        && (
+          validGroupSummaryUpdate()
+          || validGroupMembersUpdate()
+        );
+
+      allow delete: if groupCreator();
+
+      match /messages/{messageId} {
+
+        function groupThread() {
+          return get(
+            /databases/$(database)/documents/rede_group_threads/$(groupId)
+          );
+        }
+
+        function groupMessageMember() {
+          let group = groupThread();
+          return hasProfile()
+            && group.data.memberIds is list
+            && myMemberId() in group.data.memberIds;
+        }
+
+        function groupMessageCreator() {
+          let group = groupThread();
+          return groupMessageMember()
+            && group.data.createdByUid == request.auth.uid
+            && group.data.createdByMemberId == myMemberId();
+        }
+
+        function validGroupReplyTo() {
+          return request.resource.data.replyTo == null
+            || (
+              request.resource.data.replyTo is map
+              && request.resource.data.replyTo.keys().hasOnly([
+                'messageId',
+                'authorName',
+                'textExcerpt'
+              ])
+              && request.resource.data.replyTo.messageId is string
+              && request.resource.data.replyTo.messageId.size() <= 200
+              && request.resource.data.replyTo.authorName is string
+              && request.resource.data.replyTo.authorName.size() <= 200
+              && request.resource.data.replyTo.textExcerpt is string
+              && request.resource.data.replyTo.textExcerpt.size() <= 130
+            );
+        }
+
+        allow read: if groupMessageMember();
+
+        allow create: if groupMessageMember()
+          && request.resource.data.keys().hasOnly([
+            'authorUid',
+            'authorMemberId',
+            'authorName',
+            'text',
+            'topic',
+            'replyTo',
+            'createdAt'
+          ])
+          && request.resource.data.authorUid == request.auth.uid
+          && request.resource.data.authorMemberId == myMemberId()
+          && request.resource.data.authorName is string
+          && request.resource.data.authorName.size() >= 1
+          && request.resource.data.authorName.size() <= 200
+          && request.resource.data.text is string
+          && request.resource.data.text.size() >= 1
+          && request.resource.data.text.size() <= 5000
+          && request.resource.data.topic is string
+          && request.resource.data.topic in [
+            'Geral',
+            'Campo',
+            'Laboratório',
+            'Dados',
+            'Artigos',
+            'Eventos',
+            'Prazos'
+          ]
+          && validGroupReplyTo()
+          && request.resource.data.createdAt == request.time;
+
+        allow update: if false;
+
+        allow delete: if groupMessageMember()
+          && (
+            resource.data.authorUid == request.auth.uid
+            || groupMessageCreator()
+          );
+      }
     }
 
 
@@ -1191,7 +1550,7 @@ service cloud.firestore {
         ).data.get('nivel', '') != 'coord';
       }
 
-      allow read: if signedIn();
+      allow read: if hasProfile();
 
       allow create: if hasProfile()
         && request.resource.data.keys().hasOnly([
