@@ -1,6 +1,6 @@
-/* Carbonautas P163 · carregador seguro
+/* Carbonautas P164 · carregador seguro
    Mantém o núcleo da Rede, acompanhamento acadêmico, acabamento visual,
-   legenda, controles unificados e estabilização do grafo. */
+   legenda, controles unificados, estabilização do grafo e gestão de pessoas. */
 (function(){
 'use strict';
 if(window.__CARBONAUTAS_P135_LOADER)return;
@@ -26,6 +26,7 @@ function load(src,id){
     await load('./modules/rede-legenda-p158.js?v=P158-20260919','carbonautas-rede-legenda-p158');
     await load('./modules/rede-controles-p161.js?v=P162-20260919','carbonautas-rede-controles-p161');
     await load('./modules/rede-estabilidade-p163.js?v=P163-20260919','carbonautas-rede-estabilidade-p163');
+    await load('./modules/rede-pessoas-p164.js?v=P164-20260919','carbonautas-rede-pessoas-p164');
   }catch(e){console.error('Carbonautas loader',e)}
 })();
 })();
