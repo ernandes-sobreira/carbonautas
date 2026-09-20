@@ -1,16 +1,9 @@
-/* Carbonautas P183 · carregador sob demanda
-   - Rede e Acompanhamento só carregam quando usados
-   - projetos macro também carregam diretamente no Repositório
-   - agenda carrega reuniões, foco, anexos e detalhe visual só quando usada
-   - capa usa foco compacto da agenda e ações datadas do Mural
-   - capa recebe “Olha rapidão” e atalhos iguais para Agenda e Mural
-   - Mural é único para toda a Rede, sem mensagens direcionadas
-   - Mural usa cards uniformes e leitura ampliada por swipe
-   - publicação do Mural salva texto antes do anexo para não perder a mensagem
-   - destaques carregam compactação/ajuste visual só no Painel
-   - centraliza pessoas no Acompanhamento e projetos macro no Repositório
-   - mantém histórico de bolsas e projetos dos alunos
-   - carrega imediatamente a proteção do check-in diário no celular
+/* Carbonautas P184 · carregador sob demanda protegido pelo login
+   - nenhum módulo pesado roda por trás da tela de login
+   - check-in só carrega depois que o usuário entra
+   - Rede/Acompanhamento/Agenda/Mural continuam sob demanda
+   - mantém anexos da Agenda, cards do Mural e Olha rapidão
+   - evita interferência de observers/timers no Firebase Auth
    - não altera regras do Firebase nem VPS
 */
 (function(){
@@ -19,9 +12,15 @@ if(window.__CARBONAUTAS_P135_LOADER)return;
 window.__CARBONAUTAS_P135_LOADER=true;
 
 const $=(s,r=document)=>r.querySelector(s);
-let redePromise=null,dossierPromise=null,projectsPromise=null,agendaPromise=null,agendaFocusPromise=null,agendaDetailPromise=null,homePolishPromise=null,muralVisualPromise=null,muralPolishPromise=null,muralSavePromise=null,muralUnifiedPromise=null,muralCardsPromise=null,highlightsPromise=null,peopleScheduled=false;
+let redePromise=null,dossierPromise=null,projectsPromise=null,agendaPromise=null,agendaFocusPromise=null,agendaDetailPromise=null,homePolishPromise=null,muralVisualPromise=null,muralPolishPromise=null,muralSavePromise=null,muralUnifiedPromise=null,muralCardsPromise=null,highlightsPromise=null,checkinPromise=null,peopleScheduled=false;
+
 function load(src,id){return new Promise((resolve,reject)=>{if(document.getElementById(id)){resolve();return}const s=document.createElement('script');s.id=id;s.src=src;s.async=false;s.onload=resolve;s.onerror=()=>reject(new Error('Falha ao carregar '+src));document.body.appendChild(s)})}
 function idle(fn,timeout=1200){if('requestIdleCallback'in window)requestIdleCallback(fn,{timeout});else setTimeout(fn,320)}
+function visible(el){if(!el)return false;try{const cs=getComputedStyle(el),r=el.getBoundingClientRect();return cs.display!=='none'&&cs.visibility!=='hidden'&&r.width>0&&r.height>0}catch(_e){return false}}
+function atLogin(){return visible(document.getElementById('loginBtn'))}
+function currentView(){return document.body?.dataset?.view||''}
+
+function ensureCheckin(){if(checkinPromise)return checkinPromise;checkinPromise=load('./modules/checkin-mobile-p171.js?v=P171-20260920','carbonautas-checkin-mobile-p171').catch(e=>{checkinPromise=null;console.error('Carbonautas check-in móvel',e)});return checkinPromise}
 function ensureDossier(){if(dossierPromise)return dossierPromise;dossierPromise=load('./modules/dossier-p133-original.js?v=P133-20260919','carbonautas-dossier-p133-original').catch(e=>{dossierPromise=null;console.error('Carbonautas dossiê',e)});return dossierPromise}
 function ensureAgenda(){if(agendaPromise)return agendaPromise;agendaPromise=load('./modules/agenda-reunioes-p172.js?v=P172-20260920','carbonautas-agenda-reunioes-p172').catch(e=>{agendaPromise=null;console.error('Carbonautas agenda',e)});return agendaPromise}
 function ensureAgendaFocus(){
@@ -84,8 +83,11 @@ function ensureRede(){
  }catch(e){redePromise=null;console.error('Carbonautas Rede',e)}})();
  return redePromise
 }
-function currentView(){return document.body?.dataset?.view||''}
+
 function route(){
+ // Regra de segurança: se a tela de login está visível, não injeta nenhum módulo do app.
+ if(atLogin())return;
+ ensureCheckin();
  const v=currentView();
  if(v==='rede'||v==='track')ensureRede();
  if(v==='pubs')ensureProjects();
@@ -96,23 +98,24 @@ function route(){
  }
  if(v==='mural'||v==='feed'){ensureHomePolish();ensureMuralVisual();ensureMuralPolish();ensureMuralSave();ensureMuralUnified();ensureMuralCards()}
 }
+function afterLoginChecks(){[250,700,1400,2600].forEach(ms=>setTimeout(route,ms))}
 function boot(){
- load('./modules/checkin-mobile-p171.js?v=P171-20260920','carbonautas-checkin-mobile-p171').catch(e=>console.error('Carbonautas check-in móvel',e));
+ // Não há preload pesado no login. Isso deixa Firebase Auth livre para inicializar e responder ao toque.
  route();
  const mo=new MutationObserver(ms=>{if(ms.some(m=>m.attributeName==='data-view')){route();if(currentView()==='track')setTimeout(wireMacroShortcut,900)}});mo.observe(document.body,{attributes:true,attributeFilter:['data-view']});
  document.addEventListener('click',e=>{
+  if(e.target.closest?.('#loginBtn')){afterLoginChecks();return}
+  if(atLogin())return;
   const t=e.target.closest?.('#dashDossierBtn,#trackDossierBtn,[data-open-dossier]');if(t)ensureDossier();
   const p=e.target.closest?.('#managePeopleBtn');if(p){ensureRede();ensurePeople()}
   const ag=e.target.closest?.('#newEventBtn,[data-open-event],#saveEventBtn,#agNewBtn,[data-p174-new],[data-p174-new-ag],#viewCrono .ag-item');if(ag){ensureAgenda();ensureAgendaFocus();ensureAgendaDetail()}
   const mural=e.target.closest?.('#newPostBtn,#muralPostBtn,#muralNewBtn,#mobileMuralFab,#mobileMuralNew,[data-mural-kind],#savePostBtn');if(mural){ensureHomePolish();ensureMuralVisual();ensureMuralPolish();ensureMuralSave();ensureMuralUnified();ensureMuralCards()}
   const h=e.target.closest?.('[data-p117-add],[data-p117-edit],#p117Highlights');if(h)ensureHighlights()
  },true);
- idle(()=>ensureMuralPolish(),250);
- idle(()=>ensureMuralVisual(),650);
- idle(()=>ensureMuralSave(),850);
- idle(()=>ensureMuralUnified(),950);
- idle(()=>ensureMuralCards(),1150);
- idle(()=>ensureDossier(),1800)
+ window.addEventListener('firebase-ready',afterLoginChecks,{passive:true});
+ window.addEventListener('pageshow',()=>setTimeout(route,120),{passive:true});
+ // Sessão lembrada pelo Firebase pode restaurar sem clique no botão.
+ [350,1200,3000,6000].forEach(ms=>setTimeout(route,ms));
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
