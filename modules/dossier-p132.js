@@ -1,9 +1,9 @@
-/* Carbonautas P179 · carregador sob demanda
+/* Carbonautas P180 · carregador sob demanda
    - Rede e Acompanhamento só carregam quando usados
    - projetos macro também carregam diretamente no Repositório
    - agenda carrega reuniões, foco e detalhe visual só quando usada
    - capa usa foco compacto da agenda e ações datadas do Mural
-   - Mural recebe publicação móvel confiável, preview, cards visuais e não vistos
+   - Mural é único para toda a Rede, sem mensagens direcionadas
    - publicação do Mural salva texto antes do anexo para não perder a mensagem
    - destaques carregam compactação/ajuste visual só no Painel
    - centraliza pessoas no Acompanhamento e projetos macro no Repositório
@@ -17,7 +17,7 @@ if(window.__CARBONAUTAS_P135_LOADER)return;
 window.__CARBONAUTAS_P135_LOADER=true;
 
 const $=(s,r=document)=>r.querySelector(s);
-let redePromise=null,dossierPromise=null,projectsPromise=null,agendaPromise=null,agendaFocusPromise=null,agendaDetailPromise=null,homePolishPromise=null,muralVisualPromise=null,muralPolishPromise=null,muralSavePromise=null,highlightsPromise=null,peopleScheduled=false;
+let redePromise=null,dossierPromise=null,projectsPromise=null,agendaPromise=null,agendaFocusPromise=null,agendaDetailPromise=null,homePolishPromise=null,muralVisualPromise=null,muralPolishPromise=null,muralSavePromise=null,muralUnifiedPromise=null,highlightsPromise=null,peopleScheduled=false;
 function load(src,id){return new Promise((resolve,reject)=>{if(document.getElementById(id)){resolve();return}const s=document.createElement('script');s.id=id;s.src=src;s.async=false;s.onload=resolve;s.onerror=()=>reject(new Error('Falha ao carregar '+src));document.body.appendChild(s)})}
 function idle(fn,timeout=1200){if('requestIdleCallback'in window)requestIdleCallback(fn,{timeout});else setTimeout(fn,320)}
 function ensureDossier(){if(dossierPromise)return dossierPromise;dossierPromise=load('./modules/dossier-p133-original.js?v=P133-20260919','carbonautas-dossier-p133-original').catch(e=>{dossierPromise=null;console.error('Carbonautas dossiê',e)});return dossierPromise}
@@ -27,7 +27,8 @@ function ensureAgendaDetail(){if(agendaDetailPromise)return agendaDetailPromise;
 function ensureHomePolish(){if(homePolishPromise)return homePolishPromise;homePolishPromise=load('./modules/agenda-mural-home-p176.js?v=P176-20260920','carbonautas-agenda-mural-home-p176').catch(e=>{homePolishPromise=null;console.error('Carbonautas capa/Mural',e)});return homePolishPromise}
 function ensureMuralVisual(){if(muralVisualPromise)return muralVisualPromise;muralVisualPromise=load('./modules/mural-visual-p177.js?v=P177-20260920','carbonautas-mural-visual-p177').catch(e=>{muralVisualPromise=null;console.error('Carbonautas Mural visual',e)});return muralVisualPromise}
 function ensureMuralPolish(){if(muralPolishPromise)return muralPolishPromise;muralPolishPromise=load('./modules/mural-visual-p178.js?v=P178-20260920','carbonautas-mural-visual-p178').catch(e=>{muralPolishPromise=null;console.error('Carbonautas Mural não vistos',e)});return muralPolishPromise}
-function ensureMuralSave(){if(muralSavePromise)return muralSavePromise;muralSavePromise=load('./modules/mural-publicacao-p179.js?v=P179-20260920','carbonautas-mural-publicacao-p179').catch(e=>{muralSavePromise=null;console.error('Carbonautas publicação Mural',e)});return muralSavePromise}
+function ensureMuralSave(){if(muralSavePromise)return muralSavePromise;muralSavePromise=load('./modules/mural-publicacao-p179.js?v=P180-20260920','carbonautas-mural-publicacao-p179').catch(e=>{muralSavePromise=null;console.error('Carbonautas publicação Mural',e)});return muralSavePromise}
+function ensureMuralUnified(){if(muralUnifiedPromise)return muralUnifiedPromise;muralUnifiedPromise=load('./modules/mural-unificado-p180.js?v=P180-20260920','carbonautas-mural-unificado-p180').catch(e=>{muralUnifiedPromise=null;console.error('Carbonautas Mural unificado',e)});return muralUnifiedPromise}
 function ensureHighlights(){if(highlightsPromise)return highlightsPromise;highlightsPromise=load('./modules/destaques-ui-p173.js?v=P173-20260920','carbonautas-destaques-ui-p173').catch(e=>{highlightsPromise=null;console.error('Carbonautas destaques',e)});return highlightsPromise}
 function ensureProjects(){
  if(projectsPromise)return projectsPromise;
@@ -76,7 +77,7 @@ function route(){
   (async()=>{await ensureAgendaFocus();await ensureHomePolish();window.refreshHomeAgendaMural?.()})();
   ensureHighlights();
  }
- if(v==='mural'||v==='feed'){ensureHomePolish();ensureMuralVisual();ensureMuralPolish();ensureMuralSave()}
+ if(v==='mural'||v==='feed'){ensureHomePolish();ensureMuralVisual();ensureMuralPolish();ensureMuralSave();ensureMuralUnified()}
 }
 function boot(){
  load('./modules/checkin-mobile-p171.js?v=P171-20260920','carbonautas-checkin-mobile-p171').catch(e=>console.error('Carbonautas check-in móvel',e));
@@ -86,12 +87,13 @@ function boot(){
   const t=e.target.closest?.('#dashDossierBtn,#trackDossierBtn,[data-open-dossier]');if(t)ensureDossier();
   const p=e.target.closest?.('#managePeopleBtn');if(p){ensureRede();ensurePeople()}
   const ag=e.target.closest?.('#newEventBtn,[data-open-event],#saveEventBtn,#agNewBtn,[data-p174-new],[data-p174-new-ag],#viewCrono .ag-item');if(ag){ensureAgenda();ensureAgendaFocus();ensureAgendaDetail()}
-  const mural=e.target.closest?.('#newPostBtn,#muralPostBtn,#muralNewBtn,#mobileMuralFab,#mobileMuralNew,[data-mural-kind],#savePostBtn');if(mural){ensureHomePolish();ensureMuralVisual();ensureMuralPolish();ensureMuralSave()}
+  const mural=e.target.closest?.('#newPostBtn,#muralPostBtn,#muralNewBtn,#mobileMuralFab,#mobileMuralNew,[data-mural-kind],#savePostBtn');if(mural){ensureHomePolish();ensureMuralVisual();ensureMuralPolish();ensureMuralSave();ensureMuralUnified()}
   const h=e.target.closest?.('[data-p117-add],[data-p117-edit],#p117Highlights');if(h)ensureHighlights()
  },true);
  idle(()=>ensureMuralPolish(),250);
  idle(()=>ensureMuralVisual(),650);
  idle(()=>ensureMuralSave(),850);
+ idle(()=>ensureMuralUnified(),950);
  idle(()=>ensureDossier(),1800)
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
