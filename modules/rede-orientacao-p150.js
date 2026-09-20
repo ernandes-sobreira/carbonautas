@@ -1,6 +1,7 @@
-/* Carbonautas P153 · acompanhamento acadêmico
+/* Carbonautas P165 · acompanhamento acadêmico leve
    Todos os membros da Rede são orientados ou coorientados da coordenação.
-   O modo Orientações representa registros reais de acompanhamento, não inferência textual. */
+   O modo Orientações representa registros reais de acompanhamento.
+   Esta versão evita observers/clicks globais contínuos. */
 (function(){
 'use strict';
 if(window.__CARBONAUTAS_P151_ACADEMICO)return;
@@ -16,99 +17,37 @@ function member(id){try{return typeof memberById==='function'?memberById(id):(S(
 function toastSafe(msg){try{if(typeof toast==='function')toast(msg)}catch(_e){}}
 function roleOf(m){return String(m?.vinculoCoordenador||'').toLowerCase()}
 function orientationActivities(id){return (S().activities||[]).filter(a=>(a.ownerId===id||a.memberId===id)&&String(a.type||'').toLowerCase().includes('orient'))}
+function redeActive(){return document.body?.dataset?.view==='rede'||$('#viewRede')?.classList.contains('on')}
 
 function simplifyNetwork(){
-  const bar=$('#p135RedeToolbar');
-  if(!bar)return;
-  const orient=$('[data-p135-mode="orientation"]',bar);
-  if(orient){orient.textContent='Orientações';orient.title='Orientações registradas no acompanhamento acadêmico';}
-  const sub=$('.p135-rede-title small',bar);if(sub)sub.textContent='Projetos, produção e intensidade do acompanhamento acadêmico';
+  if(!redeActive())return;const bar=$('#p135RedeToolbar');if(!bar)return;const orient=$('[data-p135-mode="orientation"]',bar);if(orient){orient.textContent='Orientações';orient.title='Orientações registradas no acompanhamento acadêmico'}const sub=$('.p135-rede-title small',bar);if(sub)sub.textContent='Projetos, produção e intensidade do acompanhamento acadêmico'
 }
-
 async function setAcademicRole(studentId,role){
-  if(!admin())return toastSafe('Só a coordenação pode definir este vínculo.');
-  const m=member(studentId);if(!m||studentId===my())return;
-  try{
-    if(typeof fbSetMember!=='function')throw new Error('Função de gravação indisponível');
-    await fbSetMember(studentId,{vinculoCoordenador:role});
-    m.vinculoCoordenador=role;
-    toastSafe(role==='coorientado'?'Marcado como coorientado.':'Marcado como orientado.');
-    decorateDetail();
-  }catch(e){console.error('P153 vínculo acadêmico',e);toastSafe('Não foi possível salvar o vínculo acadêmico.');}
+  if(!admin())return toastSafe('Só a coordenação pode definir este vínculo.');const m=member(studentId);if(!m||studentId===my())return;
+  try{if(typeof fbSetMember!=='function')throw new Error('Função de gravação indisponível');await fbSetMember(studentId,{vinculoCoordenador:role});m.vinculoCoordenador=role;toastSafe(role==='coorientado'?'Marcado como coorientado.':'Marcado como orientado.');decorateDetail()}catch(e){console.error('P165 vínculo acadêmico',e);toastSafe('Não foi possível salvar o vínculo acadêmico.')}
 }
-
 function buildSection(studentId){
-  const box=document.createElement('div');box.className='dsec p151-academic-card';box.dataset.memberId=studentId;
-  box.innerHTML=`
-    <div class="lab">Acompanhamento acadêmico</div>
-    <div class="p151-top"><div><strong>Vínculo com a coordenação</strong><small class="p151-count"></small></div></div>
-    <div class="p151-role" role="group" aria-label="Vínculo acadêmico">
-      <button type="button" data-role="orientado">Orientado</button>
-      <button type="button" data-role="coorientado">Coorientado</button>
-    </div>
-    <button type="button" class="btn primary p151-log">+ Registrar orientação</button>`;
-  box.querySelectorAll('[data-role]').forEach(b=>b.addEventListener('click',()=>setAcademicRole(studentId,b.dataset.role)));
-  $('.p151-log',box).addEventListener('click',()=>openOrientationModal(studentId));
-  return box;
+  const box=document.createElement('div');box.className='dsec p151-academic-card';box.dataset.memberId=studentId;box.innerHTML=`<div class="lab">Acompanhamento acadêmico</div><div class="p151-top"><div><strong>Vínculo com a coordenação</strong><small class="p151-count"></small></div></div><div class="p151-role" role="group" aria-label="Vínculo acadêmico"><button type="button" data-role="orientado">Orientado</button><button type="button" data-role="coorientado">Coorientado</button></div><button type="button" class="btn primary p151-log">+ Registrar orientação</button>`;box.querySelectorAll('[data-role]').forEach(b=>b.addEventListener('click',()=>setAcademicRole(studentId,b.dataset.role)));$('.p151-log',box).addEventListener('click',()=>openOrientationModal(studentId));return box
 }
-function refreshSection(box,id){
-  const m=member(id),role=roleOf(m),n=orientationActivities(id).length;
-  box.querySelectorAll('[data-role]').forEach(b=>{b.classList.toggle('on',b.dataset.role===role);b.disabled=!admin()});
-  const c=$('.p151-count',box);if(c)c.textContent=n?`${n} orientação${n===1?'':'ões'} registrada${n===1?'':'s'} no dossiê`:'Nenhuma orientação registrada ainda';
-  const log=$('.p151-log',box);if(log)log.style.display=admin()?'':'none';
-}
+function refreshSection(box,id){const m=member(id),role=roleOf(m),n=orientationActivities(id).length;box.querySelectorAll('[data-role]').forEach(b=>{b.classList.toggle('on',b.dataset.role===role);b.disabled=!admin()});const c=$('.p151-count',box);if(c)c.textContent=n?`${n} orientação${n===1?'':'ões'} registrada${n===1?'':'s'} no dossiê`:'Nenhuma orientação registrada ainda';const log=$('.p151-log',box);if(log)log.style.display=admin()?'':'none'}
 function decorateDetail(){
-  simplifyNetwork();
-  const inner=$('#detailInner'),id=selected();if(!inner||!id)return;
-  let old=$('.p151-academic-card',inner);
-  if(id===my()){old?.remove();return;}
-  if(old&&old.dataset.memberId!==id){old.remove();old=null;}
-  if(!old){
-    old=buildSection(id);
-    const sections=Array.from(inner.querySelectorAll('.dsec'));
-    const repo=sections.find(s=>(($('.lab',s)?.textContent)||'').trim().toLowerCase()==='repositório individual');
-    if(repo)repo.insertAdjacentElement('beforebegin',old);else inner.appendChild(old);
-  }
-  refreshSection(old,id);
+  if(!redeActive())return;simplifyNetwork();const inner=$('#detailInner'),id=selected();if(!inner||!id)return;let old=$('.p151-academic-card',inner);if(id===my()){old?.remove();return}if(old&&old.dataset.memberId!==id){old.remove();old=null}if(!old){old=buildSection(id);const sections=Array.from(inner.querySelectorAll('.dsec')),repo=sections.find(s=>(($('.lab',s)?.textContent)||'').trim().toLowerCase()==='repositório individual');if(repo)repo.insertAdjacentElement('beforebegin',old);else inner.appendChild(old)}refreshSection(old,id)
 }
-
 function ensureModal(){
-  if($('#p151OrientationOverlay'))return;
-  const ov=document.createElement('div');ov.id='p151OrientationOverlay';ov.hidden=true;
-  ov.innerHTML=`<section class="p151-sheet" role="dialog" aria-modal="true" aria-labelledby="p151Title">
-    <div class="p151-head"><div><span>ORIENTAÇÃO</span><h3 id="p151Title">Registrar orientação</h3><p id="p151Person"></p></div><button type="button" class="p151-close" aria-label="Fechar">×</button></div>
-    <label>Data<input id="p151Date" type="date"></label>
-    <label>O que foi orientado?<textarea id="p151Note" rows="5" maxlength="1000" placeholder="Ex.: Revisamos os resultados e combinamos corrigir a discussão até sexta-feira."></textarea></label>
-    <button type="button" id="p151Save" class="p151-save">Salvar no dossiê</button>
-  </section>`;
-  document.body.appendChild(ov);$('.p151-close',ov).onclick=closeModal;ov.onclick=e=>{if(e.target===ov)closeModal()};$('#p151Save',ov).onclick=saveOrientation;
+  if($('#p151OrientationOverlay'))return;const ov=document.createElement('div');ov.id='p151OrientationOverlay';ov.hidden=true;ov.innerHTML=`<section class="p151-sheet" role="dialog" aria-modal="true" aria-labelledby="p151Title"><div class="p151-head"><div><span>ORIENTAÇÃO</span><h3 id="p151Title">Registrar orientação</h3><p id="p151Person"></p></div><button type="button" class="p151-close" aria-label="Fechar">×</button></div><label>Data<input id="p151Date" type="date"></label><label>O que foi orientado?<textarea id="p151Note" rows="5" maxlength="1000" placeholder="Ex.: Revisamos os resultados e combinamos corrigir a discussão até sexta-feira."></textarea></label><button type="button" id="p151Save" class="p151-save">Salvar no dossiê</button></section>`;document.body.appendChild(ov);$('.p151-close',ov).onclick=closeModal;ov.onclick=e=>{if(e.target===ov)closeModal()};$('#p151Save',ov).onclick=saveOrientation
 }
 let modalId='';
-function openOrientationModal(id){
-  if(!admin())return toastSafe('Só a coordenação pode registrar orientação.');
-  ensureModal();modalId=id;$('#p151Person').textContent=member(id)?.nome||'';$('#p151Date').value=today();$('#p151Note').value='';$('#p151OrientationOverlay').hidden=false;setTimeout(()=>$('#p151Note')?.focus(),50);
-}
+function openOrientationModal(id){if(!admin())return toastSafe('Só a coordenação pode registrar orientação.');ensureModal();modalId=id;$('#p151Person').textContent=member(id)?.nome||'';$('#p151Date').value=today();$('#p151Note').value='';$('#p151OrientationOverlay'].hidden=false;setTimeout(()=>$('#p151Note')?.focus(),40)}
 function closeModal(){const ov=$('#p151OrientationOverlay');if(ov)ov.hidden=true;modalId=''}
 async function saveOrientation(){
-  const id=modalId,m=member(id),date=$('#p151Date')?.value||today(),note=($('#p151Note')?.value||'').trim();if(!id||!m)return;if(!note)return toastSafe('Escreva rapidamente o que foi orientado.');
-  const btn=$('#p151Save');if(btn){btn.disabled=true;btn.textContent='Salvando…'}
-  const nextCount=orientationActivities(id).length+1;
-  try{
-    const f=typeof FB==='function'?FB():null;if(!f)throw new Error('Firebase indisponível');
-    const ownerUid=(S().users||[]).find(u=>u.memberId===id)?.uid||'',coord=member(my());
-    await f.addDoc(f.collection(window.db,'rede_activities'),{ownerId:id,ownerUid,ownerName:m.nome||'',type:'orientacao',status:'concluido',title:`Orientação · ${m.nome||'Carbonauta'}`,description:note,startDate:date,dueDate:date,progress:100,orientadorId:my(),orientadorName:coord?.nome||'',vinculoCoordenador:roleOf(m)||'',updatedAt:f.serverTimestamp(),createdAt:f.serverTimestamp()});
-    window.dispatchEvent(new CustomEvent('carbonautas:orientation-saved',{detail:{memberId:id,count:nextCount}}));
-    toastSafe('Orientação registrada no dossiê.');closeModal();
-    [250,900,2200].forEach(ms=>setTimeout(()=>{decorateDetail();try{(window.renderGraph||renderGraph)?.()}catch(_e){}},ms));
-  }catch(e){console.error('P153 registro de orientação',e);toastSafe('Não foi possível registrar a orientação.');}
-  finally{if(btn){btn.disabled=false;btn.textContent='Salvar no dossiê'}}
+  const id=modalId,m=member(id),date=$('#p151Date')?.value||today(),note=($('#p151Note')?.value||'').trim();if(!id||!m)return;if(!note)return toastSafe('Escreva rapidamente o que foi orientado.');const btn=$('#p151Save');if(btn){btn.disabled=true;btn.textContent='Salvando…'}const nextCount=orientationActivities(id).length+1;
+  try{const f=typeof FB==='function'?FB():null;if(!f)throw new Error('Firebase indisponível');const ownerUid=(S().users||[]).find(u=>u.memberId===id)?.uid||'',coord=member(my());await f.addDoc(f.collection(window.db,'rede_activities'),{ownerId:id,ownerUid,ownerName:m.nome||'',type:'orientacao',status:'concluido',title:`Orientação · ${m.nome||'Carbonauta'}`,description:note,startDate:date,dueDate:date,progress:100,orientadorId:my(),orientadorName:coord?.nome||'',vinculoCoordenador:roleOf(m)||'',updatedAt:f.serverTimestamp(),createdAt:f.serverTimestamp()});window.dispatchEvent(new CustomEvent('carbonautas:orientation-saved',{detail:{memberId:id,count:nextCount}}));toastSafe('Orientação registrada no dossiê.');closeModal();setTimeout(()=>{decorateDetail();try{if(redeActive())(window.renderGraph||renderGraph)?.()}catch(_e){}},120)}catch(e){console.error('P165 registro de orientação',e);toastSafe('Não foi possível registrar a orientação.')}finally{if(btn){btn.disabled=false;btn.textContent='Salvar no dossiê'}}
 }
-
-function css(){if($('#p151AcademicStyle'))return;const s=document.createElement('style');s.id='p151AcademicStyle';s.textContent=`
-.p151-academic-card{background:linear-gradient(135deg,#f4fbfa,#f8fbff)}.p151-top{display:flex;gap:10px;align-items:center;margin:7px 0 9px}.p151-top strong{display:block;font-size:14px;color:#173b48}.p151-top small{display:block;margin-top:3px;font-size:11px;color:#71858c}.p151-role{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 9px}.p151-role button{min-height:40px;border:1px solid #d4e3e1;border-radius:12px;background:#fff;color:#526b73;font-weight:800}.p151-role button.on{background:#168f94;color:#fff;border-color:#168f94}.p151-role button:disabled{opacity:.65}.p151-log{width:100%}
-#p151OrientationOverlay[hidden]{display:none!important}#p151OrientationOverlay{position:fixed;inset:0;z-index:2147483600;background:rgba(10,29,38,.46);backdrop-filter:blur(5px);display:grid;place-items:end center}.p151-sheet{width:min(560px,100%);background:#fbfefd;border:1px solid #d5e6e3;border-radius:26px 26px 0 0;padding:17px 17px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -18px 50px rgba(8,35,44,.2)}.p151-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px}.p151-head>div{flex:1}.p151-head span{font-size:10px;letter-spacing:.12em;font-weight:900;color:#168f94}.p151-head h3{margin:3px 0 2px;font:850 22px/1.1 system-ui;color:#173946}.p151-head p{margin:0;color:#6f858c;font-size:13px}.p151-close{border:0;background:#edf5f3;border-radius:13px;width:42px;height:42px;font-size:24px;color:#183b48}.p151-sheet label{display:block;font-size:11px;font-weight:850;color:#617780;text-transform:uppercase;letter-spacing:.04em;margin-top:11px}.p151-sheet input,.p151-sheet textarea{display:block;width:100%;margin-top:6px;border:1px solid #d6e4e2;border-radius:14px;background:#fff;color:#183b48;padding:11px 12px;font:500 14px/1.4 system-ui;box-sizing:border-box;outline:0}.p151-sheet textarea{resize:vertical;min-height:120px}.p151-save{width:100%;min-height:48px;margin-top:14px;border:0;border-radius:14px;background:#168f94;color:#fff;font-weight:850;font-size:15px}.p151-save:disabled{opacity:.65}
-@media(max-width:620px){.p151-sheet{padding:15px 15px calc(18px + env(safe-area-inset-bottom))}.p151-head h3{font-size:20px}}
-`;document.head.appendChild(s)}
-function boot(){css();ensureModal();simplifyNetwork();const inner=$('#detailInner');if(inner)new MutationObserver(()=>requestAnimationFrame(decorateDetail)).observe(inner,{childList:true,subtree:false});const rede=$('#viewRede');if(rede)new MutationObserver(()=>requestAnimationFrame(simplifyNetwork)).observe(rede,{childList:true,subtree:true});document.addEventListener('click',()=>setTimeout(decorateDetail,35),true);setTimeout(()=>{simplifyNetwork();decorateDetail()},220)}
+function css(){if($('#p151AcademicStyle'))return;const s=document.createElement('style');s.id='p151AcademicStyle';s.textContent=`.p151-academic-card{background:linear-gradient(135deg,#f4fbfa,#f8fbff)}.p151-top{display:flex;gap:10px;align-items:center;margin:7px 0 9px}.p151-top strong{display:block;font-size:14px;color:#173b48}.p151-top small{display:block;margin-top:3px;font-size:11px;color:#71858c}.p151-role{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 9px}.p151-role button{min-height:40px;border:1px solid #d4e3e1;border-radius:12px;background:#fff;color:#526b73;font-weight:800}.p151-role button.on{background:#168f94;color:#fff;border-color:#168f94}.p151-role button:disabled{opacity:.65}.p151-log{width:100%}#p151OrientationOverlay[hidden]{display:none!important}#p151OrientationOverlay{position:fixed;inset:0;z-index:2147483600;background:rgba(10,29,38,.46);backdrop-filter:blur(5px);display:grid;place-items:end center}.p151-sheet{width:min(560px,100%);background:#fbfefd;border:1px solid #d5e6e3;border-radius:26px 26px 0 0;padding:17px 17px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -18px 50px rgba(8,35,44,.2)}.p151-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px}.p151-head>div{flex:1}.p151-head span{font-size:10px;letter-spacing:.12em;font-weight:900;color:#168f94}.p151-head h3{margin:3px 0 2px;font:850 22px/1.1 system-ui;color:#173946}.p151-head p{margin:0;color:#6f858c;font-size:13px}.p151-close{border:0;background:#edf5f3;border-radius:13px;width:42px;height:42px;font-size:24px;color:#183b48}.p151-sheet label{display:block;font-size:11px;font-weight:850;color:#617780;text-transform:uppercase;letter-spacing:.04em;margin-top:11px}.p151-sheet input,.p151-sheet textarea{display:block;width:100%;margin-top:6px;border:1px solid #d6e4e2;border-radius:14px;background:#fff;color:#183b48;padding:11px 12px;font:500 14px/1.4 system-ui;box-sizing:border-box;outline:0}.p151-sheet textarea{resize:vertical;min-height:120px}.p151-save{width:100%;min-height:48px;margin-top:14px;border:0;border-radius:14px;background:#168f94;color:#fff;font-weight:850;font-size:15px}.p151-save:disabled{opacity:.65}@media(max-width:620px){.p151-sheet{padding:15px 15px calc(18px + env(safe-area-inset-bottom))}.p151-head h3{font-size:20px}}`;document.head.appendChild(s)}
+function boot(){
+ css();ensureModal();simplifyNetwork();const inner=$('#detailInner');if(inner)new MutationObserver(()=>{if(redeActive())requestAnimationFrame(decorateDetail)}).observe(inner,{childList:true,subtree:false});
+ const viewObserver=new MutationObserver(ms=>{if(ms.some(m=>m.attributeName==='data-view')&&redeActive()){requestAnimationFrame(()=>{simplifyNetwork();decorateDetail()})}});viewObserver.observe(document.body,{attributes:true,attributeFilter:['data-view']});
+ setTimeout(()=>{if(redeActive()){simplifyNetwork();decorateDetail()}},180)
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
