@@ -7321,11 +7321,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P129-MENOS-20260919';
+window.CARBONAUTAS_BUILD='P191-20260920';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P129-20260919',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P191-20260920',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });

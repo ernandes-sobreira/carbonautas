@@ -6,7 +6,7 @@ Plataforma da Rede Carbonautas (LIPAN/LEFA/CELBE, UNEMAT). Arquivo unico `index.
 
 | Caminho | Uso |
 |---|---|
-| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P129 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
+| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P191 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
 | `sw.js` | Service worker. So cache e pagina offline. Nao injeta mais nada no HTML |
 | `game.html`, `recovery.html`, `chrome-reset.html`, `manifest.webmanifest`, icones | Publicar junto na raiz |
 | `firestore.rules` | Unica fonte das regras. Publicar no Console do Firebase. Contem tambem as regras de outros sistemas (`projects/`) |
@@ -36,6 +36,12 @@ Para restaurar por Git: `git checkout P126-pre-consolidacao -- .`
 4. Testar em janela anonima.
 
 ## CHANGELOG
+
+### P191 · 2026-09-20 · Versionamento alinhado
+- Build do app, registro do service worker e cache do `sw.js` passam a usar `P191-20260920`.
+- README atualizado para refletir a versao corrente apos as correcoes de seguranca, Storage e mobile.
+- `index.html.sha512` regenerado a partir do `index.html` publicado.
+- Nao alterado: regras, dados, layout e VPS.
 
 ### P129 · 2026-09-19 · Menos na tela, abertura mais leve
 - Fofoca geral sem temas: saem a barra de temas e o seletor por mensagem. Mensagens antigas continuam visiveis.
