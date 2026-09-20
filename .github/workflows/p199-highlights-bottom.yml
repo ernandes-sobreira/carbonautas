@@ -18,70 +18,32 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import hashlib,re,subprocess,sys
-
           idx=Path('index.html')
           s=idx.read_text(encoding='utf-8')
-
-          old_ensure="""function ensurePanel(){
-  let host=$('#p117Highlights');if(host)return host;
-  host=document.createElement('section');host.id='p117Highlights';
-  const mural=$('#viewMural .mural-board'),filter=$('#muralFilterbar');
-  if(mural){if(filter)mural.insertBefore(host,filter);else mural.appendChild(host)}else $('#viewMural')?.appendChild(host);
-  return host;
-}"""
-          new_ensure="""function ensurePanel(){
-  let host=$('#p117Highlights');if(host)return host;
-  host=document.createElement('section');host.id='p117Highlights';
-  const msgs=$('#viewMural #muralMsgs'),mural=$('#viewMural .mural-board');
-  if(msgs)msgs.appendChild(host);else if(mural)mural.appendChild(host);else $('#viewMural')?.appendChild(host);
-  return host;
-}"""
+          old_ensure="function ensurePanel(){\n  let host=$('#p117Highlights');if(host)return host;\n  host=document.createElement('section');host.id='p117Highlights';\n  const mural=$('#viewMural .mural-board'),filter=$('#muralFilterbar');\n  if(mural){if(filter)mural.insertBefore(host,filter);else mural.appendChild(host)}else $('#viewMural')?.appendChild(host);\n  return host;\n}"
+          new_ensure="function ensurePanel(){\n  let host=$('#p117Highlights');if(host)return host;\n  host=document.createElement('section');host.id='p117Highlights';\n  const msgs=$('#viewMural #muralMsgs'),mural=$('#viewMural .mural-board');\n  if(msgs)msgs.appendChild(host);else if(mural)mural.appendChild(host);else $('#viewMural')?.appendChild(host);\n  return host;\n}"
           old_reloc="function relocatePanel(){const host=$('#p117Highlights'),mural=$('#viewMural .mural-board'),filter=$('#muralFilterbar');if(!host||!mural)return;if(filter){if(host.parentElement!==mural||host.nextElementSibling!==filter)mural.insertBefore(host,filter)}else if(host.parentElement!==mural)mural.appendChild(host)}"
           new_reloc="function relocatePanel(){const host=$('#p117Highlights'),msgs=$('#viewMural #muralMsgs');if(!host||!msgs)return;if(host.parentElement!==msgs||host!==msgs.lastElementChild)msgs.appendChild(host)}"
-
-          required=[
-            old_ensure,
-            old_reloc,
-            "window.CARBONAUTAS_BUILD='P198-20260920';",
-            "navigator.serviceWorker.register('./sw.js?v=P198-20260920',{updateViaCache:'none'})",
-            '<style id="p198DesktopBackStyle">'
-          ]
-          for a in required:
-            assert a in s, f'anchor missing: {a[:140]}'
+          required=[old_ensure,old_reloc,"window.CARBONAUTAS_BUILD='P198-20260920';","navigator.serviceWorker.register('./sw.js?v=P198-20260920',{updateViaCache:'none'})",'<style id="p198DesktopBackStyle">']
+          for a in required: assert a in s, f'anchor missing: {a[:140]}'
           assert 'p199HighlightsBottomStyle' not in s
-
-          s=s.replace(old_ensure,new_ensure,1)
-          s=s.replace(old_reloc,new_reloc,1)
-
-          css='''\n<style id="p199HighlightsBottomStyle">\n#viewMural #muralMsgs > #p117Highlights{\n  flex:0 0 auto!important;\n  width:100%!important;\n  margin:6px 0 18px!important;\n}\n</style>\n'''
-          anchor='<style id="p198DesktopBackStyle">'
-          s=s.replace(anchor,css+'\n'+anchor,1)
-
+          s=s.replace(old_ensure,new_ensure,1).replace(old_reloc,new_reloc,1)
+          css='\n<style id="p199HighlightsBottomStyle">\n#viewMural #muralMsgs > #p117Highlights{flex:0 0 auto!important;width:100%!important;margin:6px 0 18px!important}\n</style>\n'
+          s=s.replace('<style id="p198DesktopBackStyle">',css+'\n<style id="p198DesktopBackStyle">',1)
           s=s.replace("window.CARBONAUTAS_BUILD='P198-20260920';","window.CARBONAUTAS_BUILD='P199-20260920';",1)
           s=s.replace("navigator.serviceWorker.register('./sw.js?v=P198-20260920',{updateViaCache:'none'})","navigator.serviceWorker.register('./sw.js?v=P199-20260920',{updateViaCache:'none'})",1)
           idx.write_text(s,encoding='utf-8')
-
-          sw=Path('sw.js');w=sw.read_text(encoding='utf-8')
-          assert 'service worker P198' in w and 'carbonautas-p198-20260920' in w
-          w=w.replace('service worker P198','service worker P199',1).replace('carbonautas-p198-20260920','carbonautas-p199-20260920',1)
-          sw.write_text(w,encoding='utf-8')
-
-          rm=Path('README.md');r=rm.read_text(encoding='utf-8')
-          assert 'Todas as camadas P44 a P198 estao dentro dele' in r
-          assert '### P198 · 2026-09-20 · Voltar no desktop' in r
+          sw=Path('sw.js');w=sw.read_text(encoding='utf-8');assert 'service worker P198' in w and 'carbonautas-p198-20260920' in w
+          sw.write_text(w.replace('service worker P198','service worker P199',1).replace('carbonautas-p198-20260920','carbonautas-p199-20260920',1),encoding='utf-8')
+          rm=Path('README.md');r=rm.read_text(encoding='utf-8');assert 'Todas as camadas P44 a P198 estao dentro dele' in r and '### P198 · 2026-09-20 · Voltar no desktop' in r
           r=r.replace('Todas as camadas P44 a P198 estao dentro dele','Todas as camadas P44 a P199 estao dentro dele',1)
-          note='''### P199 · 2026-09-20 · Destaques no fim do Mural\n- Destaques do mês deixam o topo do Mural.\n- O bloco passa a ser o último item da área de publicações, depois da última mensagem.\n- Destaques rolam junto com as publicações e não ficam sobrepostos aos filtros ou ao feed.\n- Não alterado: dados, Firebase, regras, VPS ou permissões.\n\n'''
-          r=r.replace('### P198 · 2026-09-20 · Voltar no desktop',note+'### P198 · 2026-09-20 · Voltar no desktop',1)
-          rm.write_text(r,encoding='utf-8')
-
+          note='### P199 · 2026-09-20 · Destaques no fim do Mural\n- Destaques do mês deixam o topo do Mural.\n- O bloco passa a ser o último item da área de publicações, depois da última mensagem.\n- Destaques rolam junto com as publicações e não ficam sobrepostos aos filtros ou ao feed.\n- Não alterado: dados, Firebase, regras, VPS ou permissões.\n\n'
+          r=r.replace('### P198 · 2026-09-20 · Voltar no desktop',note+'### P198 · 2026-09-20 · Voltar no desktop',1);rm.write_text(r,encoding='utf-8')
           Path('index.html.sha512').write_text(hashlib.sha512(idx.read_bytes()).hexdigest()+'  index.html\n',encoding='utf-8')
-
           blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.I|re.S)
           for i,b in enumerate(blocks):
-            p=Path(f'/tmp/p199-{i}.mjs');p.write_text(b,encoding='utf-8')
-            z=subprocess.run(['node','--check',str(p)],capture_output=True,text=True)
-            if z.returncode:
-              print('JS block',i,'failed');print(z.stderr);sys.exit(1)
+            p=Path(f'/tmp/p199-{i}.mjs');p.write_text(b,encoding='utf-8');z=subprocess.run(['node','--check',str(p)],capture_output=True,text=True)
+            if z.returncode: print('JS block',i,'failed');print(z.stderr);sys.exit(1)
           print('validated',len(blocks),'script blocks')
           PY
           sha512sum -c index.html.sha512
