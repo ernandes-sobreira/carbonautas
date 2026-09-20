@@ -1,8 +1,9 @@
-/* Carbonautas P181C · capa “Olha rapidão” + resgate seguro do Menu
+/* Carbonautas P181D · capa “Olha rapidão” + resgate seguro do Menu
    - troca o kicker “Sua agenda” por “Olha rapidão”
    - remove “+ Atividade” da capa; atividade fica na Agenda
    - mantém apenas Ver agenda + Ver mural, do mesmo tamanho
    - adiciona fallback do botão MENU sem bloquear o handler original
+   - atualiza o card “Ó nóis!” para representar Mural, agenda, fotos e vida da rede
 */
 (function(){
 'use strict';
@@ -10,7 +11,7 @@ if(window.__CARBONAUTAS_P181_HOME_RAPIDAO)return;
 window.__CARBONAUTAS_P181_HOME_RAPIDAO=true;
 
 const $=(s,r=document)=>r.querySelector(s);
-let observer=null,menuBound=false;
+let observer=null,menuObserver=null,menuBound=false;
 
 function openMural(){
  try{
@@ -48,6 +49,29 @@ function watch(){
  patch();return true
 }
 
+function patchMuralMenuCard(){
+ const card=$('.app-nav-card[data-app-view="mural"]');
+ if(!card)return false;
+ const title=card.querySelector('h3,.app-nav-title,strong');
+ if(title&&title.textContent.trim()!=='Ó nóis!')title.textContent='Ó nóis!';
+ const desc=card.querySelector('p,.app-nav-desc,.app-nav-subtitle');
+ if(desc&&desc.textContent.trim()!=='Mural, agenda, fotos e vida da rede')desc.textContent='Mural, agenda, fotos e vida da rede';
+ let icon=card.querySelector('.app-nav-icon,.app-nav-emoji,.app-nav-card-icon,.nav-icon,.app-nav-card-emoji,[data-nav-icon]');
+ if(!icon){
+  icon=[...card.querySelectorAll('*')].find(el=>/^(📸|📷|📹)$/.test(String(el.textContent||'').trim()))||null;
+ }
+ if(icon&&icon.textContent.trim()!=='🫂')icon.textContent='🫂';
+ card.setAttribute('aria-label','Ó nóis! — Mural, agenda, fotos e vida da rede');
+ return true
+}
+function watchMuralMenuCard(){
+ const menu=$('#appMenuBackdrop');if(!menu)return false;
+ if(menuObserver)menuObserver.disconnect();
+ menuObserver=new MutationObserver(()=>patchMuralMenuCard());
+ menuObserver.observe(menu,{childList:true,subtree:true});
+ patchMuralMenuCard();return true
+}
+
 function looksLikeMenuButton(el){
  if(!el)return false;
  const txt=String(el.textContent||'').replace(/\s+/g,' ').trim().toUpperCase();
@@ -61,6 +85,7 @@ function forceOpenMenu(){
  menu.classList.add('open');
  menu.setAttribute('aria-hidden','false');
  document.body.classList.add('p129-menu-open');
+ patchMuralMenuCard();
  return true
 }
 function closeMenuFallback(){
@@ -73,7 +98,7 @@ function bindMenuFallback(){
  document.addEventListener('click',e=>{
   const trigger=e.target?.closest?.('button,a,[role="button"]');
   if(trigger&&looksLikeMenuButton(trigger)){
-   setTimeout(()=>{const menu=$('#appMenuBackdrop');if(menu&&!menu.classList.contains('open'))forceOpenMenu()},70);
+   setTimeout(()=>{patchMuralMenuCard();const menu=$('#appMenuBackdrop');if(menu&&!menu.classList.contains('open'))forceOpenMenu()},70);
    return
   }
   const menu=$('#appMenuBackdrop');
@@ -83,8 +108,14 @@ function bindMenuFallback(){
 }
 function boot(){
  css();bindMenuFallback();
- if(watch())return;
- let tries=0;const t=setInterval(()=>{tries++;if(watch()||tries>30)clearInterval(t)},120)
+ watch();watchMuralMenuCard();patchMuralMenuCard();
+ let tries=0;const t=setInterval(()=>{
+  tries++;
+  const homeReady=watch();
+  const menuReady=watchMuralMenuCard();
+  patchMuralMenuCard();
+  if((homeReady&&menuReady)||tries>30)clearInterval(t)
+ },120)
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
