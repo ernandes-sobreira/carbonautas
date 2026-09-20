@@ -1,0 +1,84 @@
+name: P198 desktop back
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: "${{ !contains(github.event.head_commit.message, '[p198-applied]') }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Aplicar P198 e validar
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,re,subprocess,sys
+
+          idx=Path('index.html')
+          s=idx.read_text(encoding='utf-8')
+          required=[
+            "window.CARBONAUTAS_BUILD='P197-20260920';",
+            "navigator.serviceWorker.register('./sw.js?v=P197-20260920',{updateViaCache:'none'})",
+            '<span class="p195-count"></span><span class="p197-swipehint">deslize</span><button class="p195-btn ghost" data-g>Dispensar</button><button class="p195-btn" data-n>→</button><button class="p195-btn primary" data-o>Abrir</button>',
+            "q('[data-n]',card).style.display=a.length>1?'':'none';q('[data-n]',card).setAttribute('aria-label','Próximo card');q('[data-n]',card).title='Próximo';q('[data-o]',card).onclick=()=>open(it);"
+          ]
+          for a in required:
+            assert a in s, f'anchor missing: {a[:120]}'
+          assert 'p198-back' not in s
+
+          old='<span class="p195-count"></span><span class="p197-swipehint">deslize</span><button class="p195-btn ghost" data-g>Dispensar</button><button class="p195-btn" data-n>→</button><button class="p195-btn primary" data-o>Abrir</button>'
+          new='<span class="p195-count"></span><span class="p197-swipehint">deslize</span><button class="p195-btn ghost" data-g>Dispensar</button><button class="p195-btn p198-back" data-p hidden>←</button><button class="p195-btn" data-n>→</button><button class="p195-btn primary" data-o>Abrir</button>'
+          s=s.replace(old,new,1)
+
+          old="q('[data-n]',card).style.display=a.length>1?'':'none';q('[data-n]',card).setAttribute('aria-label','Próximo card');q('[data-n]',card).title='Próximo';q('[data-o]',card).onclick=()=>open(it);"
+          new="const prev=q('[data-p]',card);prev.hidden=a.length<=1;prev.setAttribute('aria-label','Card anterior');prev.title='Voltar';prev.onclick=()=>{pos=(pos-1+a.length)%a.length;render()};q('[data-n]',card).style.display=a.length>1?'':'none';q('[data-n]',card).setAttribute('aria-label','Próximo card');q('[data-n]',card).title='Próximo';q('[data-o]',card).onclick=()=>open(it);"
+          s=s.replace(old,new,1)
+
+          css='''\n<style id="p198DesktopBackStyle">\n#p195Deck .p198-back{display:none!important}\n@media(min-width:701px){\n  #p195Deck .p198-back:not([hidden]){display:inline-flex!important;align-items:center;justify-content:center}\n}\n</style>\n'''
+          anchor='<style id="p197HomePolishStyle">'
+          assert anchor in s
+          s=s.replace(anchor,css+'\n'+anchor,1)
+
+          s=s.replace("window.CARBONAUTAS_BUILD='P197-20260920';","window.CARBONAUTAS_BUILD='P198-20260920';",1)
+          s=s.replace("navigator.serviceWorker.register('./sw.js?v=P197-20260920',{updateViaCache:'none'})","navigator.serviceWorker.register('./sw.js?v=P198-20260920',{updateViaCache:'none'})",1)
+          idx.write_text(s,encoding='utf-8')
+
+          sw=Path('sw.js');w=sw.read_text(encoding='utf-8')
+          assert 'service worker P197' in w and 'carbonautas-p197-20260920' in w
+          w=w.replace('service worker P197','service worker P198',1).replace('carbonautas-p197-20260920','carbonautas-p198-20260920',1)
+          sw.write_text(w,encoding='utf-8')
+
+          rm=Path('README.md');r=rm.read_text(encoding='utf-8')
+          assert 'Todas as camadas P44 a P197 estao dentro dele' in r
+          assert '### P197 · 2026-09-20 · Capa mais limpa e swipe leve' in r
+          r=r.replace('Todas as camadas P44 a P197 estao dentro dele','Todas as camadas P44 a P198 estao dentro dele',1)
+          note='''### P198 · 2026-09-20 · Voltar no desktop\n- Passa-cards ganham botão circular de voltar no PC.\n- Voltar retorna ao card anterior sem dispensar nem alterar dados.\n- No celular o botão fica oculto; o swipe para a direita continua sendo o retorno.\n- Não alterado: dados, Firebase, regras, VPS ou permissões.\n\n'''
+          r=r.replace('### P197 · 2026-09-20 · Capa mais limpa e swipe leve',note+'### P197 · 2026-09-20 · Capa mais limpa e swipe leve',1)
+          rm.write_text(r,encoding='utf-8')
+
+          Path('index.html.sha512').write_text(hashlib.sha512(idx.read_bytes()).hexdigest()+'  index.html\n',encoding='utf-8')
+
+          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.I|re.S)
+          for i,b in enumerate(blocks):
+            p=Path(f'/tmp/p198-{i}.mjs');p.write_text(b,encoding='utf-8')
+            z=subprocess.run(['node','--check',str(p)],capture_output=True,text=True)
+            if z.returncode:
+              print('JS block',i,'failed');print(z.stderr);sys.exit(1)
+          print('validated',len(blocks),'script blocks')
+          PY
+          sha512sum -c index.html.sha512
+          git diff --check
+      - name: Commit validado
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/p198-desktop-back.yml
+          git add index.html sw.js README.md index.html.sha512
+          git commit -m "P198: botao voltar no desktop [p198-applied]"
+          git push
