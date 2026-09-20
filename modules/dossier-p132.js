@@ -1,10 +1,11 @@
-/* Carbonautas P168 · carregador sob demanda
+/* Carbonautas P169 · carregador sob demanda
    - não bloqueia a interface inicial com todos os módulos da Rede
    - carrega Rede/Acompanhamento quando a tela é usada
    - centraliza a gestão de pessoas no Acompanhamento
    - inclui histórico de múltiplos períodos de bolsa por pessoa
+   - inclui projetos macro + projetos dos alunos sem duplicar estrutura
    - mantém gestão avançada fora do caminho crítico
-   - não altera Firebase nem VPS
+   - não altera regras do Firebase nem VPS
 */
 (function(){
 'use strict';
@@ -22,6 +23,7 @@ function ensurePeople(){
   await load('./modules/rede-pessoas-p164.js?v=P165-20260919','carbonautas-rede-pessoas-p164');
   await load('./modules/rede-acompanhamento-gestao-p166.js?v=P167-20260920','carbonautas-rede-acompanhamento-gestao-p166');
   await load('./modules/bolsas-historico-p168.js?v=P168-20260920','carbonautas-bolsas-historico-p168');
+  await load('./modules/projetos-hierarquia-p169.js?v=P169-20260920','carbonautas-projetos-hierarquia-p169');
  }catch(e){console.error('Carbonautas gestão pessoas',e)}},700)
 }
 function ensureRede(){
