@@ -1,7 +1,8 @@
-/* Carbonautas P167 · carregador sob demanda
+/* Carbonautas P168 · carregador sob demanda
    - não bloqueia a interface inicial com todos os módulos da Rede
    - carrega Rede/Acompanhamento quando a tela é usada
    - centraliza a gestão de pessoas no Acompanhamento
+   - inclui histórico de múltiplos períodos de bolsa por pessoa
    - mantém gestão avançada fora do caminho crítico
    - não altera Firebase nem VPS
 */
@@ -20,6 +21,7 @@ function ensurePeople(){
  idle(async()=>{try{
   await load('./modules/rede-pessoas-p164.js?v=P165-20260919','carbonautas-rede-pessoas-p164');
   await load('./modules/rede-acompanhamento-gestao-p166.js?v=P167-20260920','carbonautas-rede-acompanhamento-gestao-p166');
+  await load('./modules/bolsas-historico-p168.js?v=P168-20260920','carbonautas-bolsas-historico-p168');
  }catch(e){console.error('Carbonautas gestão pessoas',e)}},700)
 }
 function ensureRede(){
