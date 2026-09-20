@@ -1,8 +1,9 @@
-/* Carbonautas P176 · carregador sob demanda
+/* Carbonautas P177 · carregador sob demanda
    - Rede e Acompanhamento só carregam quando usados
    - projetos macro também carregam diretamente no Repositório
    - agenda carrega reuniões, foco e detalhe visual só quando usada
    - capa usa foco compacto da agenda e ações datadas do Mural
+   - Mural recebe publicação móvel confiável, preview e cards visuais
    - destaques carregam compactação/ajuste visual só no Painel
    - centraliza pessoas no Acompanhamento e projetos macro no Repositório
    - mantém histórico de bolsas e projetos dos alunos
@@ -15,7 +16,7 @@ if(window.__CARBONAUTAS_P135_LOADER)return;
 window.__CARBONAUTAS_P135_LOADER=true;
 
 const $=(s,r=document)=>r.querySelector(s);
-let redePromise=null,dossierPromise=null,projectsPromise=null,agendaPromise=null,agendaFocusPromise=null,agendaDetailPromise=null,homePolishPromise=null,highlightsPromise=null,peopleScheduled=false;
+let redePromise=null,dossierPromise=null,projectsPromise=null,agendaPromise=null,agendaFocusPromise=null,agendaDetailPromise=null,homePolishPromise=null,muralVisualPromise=null,highlightsPromise=null,peopleScheduled=false;
 function load(src,id){return new Promise((resolve,reject)=>{if(document.getElementById(id)){resolve();return}const s=document.createElement('script');s.id=id;s.src=src;s.async=false;s.onload=resolve;s.onerror=()=>reject(new Error('Falha ao carregar '+src));document.body.appendChild(s)})}
 function idle(fn,timeout=1200){if('requestIdleCallback'in window)requestIdleCallback(fn,{timeout});else setTimeout(fn,320)}
 function ensureDossier(){if(dossierPromise)return dossierPromise;dossierPromise=load('./modules/dossier-p133-original.js?v=P133-20260919','carbonautas-dossier-p133-original').catch(e=>{dossierPromise=null;console.error('Carbonautas dossiê',e)});return dossierPromise}
@@ -23,6 +24,7 @@ function ensureAgenda(){if(agendaPromise)return agendaPromise;agendaPromise=load
 function ensureAgendaFocus(){if(agendaFocusPromise)return agendaFocusPromise;agendaFocusPromise=load('./modules/agenda-foco-p174.js?v=P174-20260920','carbonautas-agenda-foco-p174').catch(e=>{agendaFocusPromise=null;console.error('Carbonautas foco agenda',e)});return agendaFocusPromise}
 function ensureAgendaDetail(){if(agendaDetailPromise)return agendaDetailPromise;agendaDetailPromise=load('./modules/agenda-detalhe-p175.js?v=P175-20260920','carbonautas-agenda-detalhe-p175').catch(e=>{agendaDetailPromise=null;console.error('Carbonautas detalhe agenda',e)});return agendaDetailPromise}
 function ensureHomePolish(){if(homePolishPromise)return homePolishPromise;homePolishPromise=load('./modules/agenda-mural-home-p176.js?v=P176-20260920','carbonautas-agenda-mural-home-p176').catch(e=>{homePolishPromise=null;console.error('Carbonautas capa/Mural',e)});return homePolishPromise}
+function ensureMuralVisual(){if(muralVisualPromise)return muralVisualPromise;muralVisualPromise=load('./modules/mural-visual-p177.js?v=P177-20260920','carbonautas-mural-visual-p177').catch(e=>{muralVisualPromise=null;console.error('Carbonautas Mural visual',e)});return muralVisualPromise}
 function ensureHighlights(){if(highlightsPromise)return highlightsPromise;highlightsPromise=load('./modules/destaques-ui-p173.js?v=P173-20260920','carbonautas-destaques-ui-p173').catch(e=>{highlightsPromise=null;console.error('Carbonautas destaques',e)});return highlightsPromise}
 function ensureProjects(){
  if(projectsPromise)return projectsPromise;
@@ -71,7 +73,7 @@ function route(){
   (async()=>{await ensureAgendaFocus();await ensureHomePolish();window.refreshHomeAgendaMural?.()})();
   ensureHighlights();
  }
- if(v==='mural'||v==='feed')ensureHomePolish();
+ if(v==='mural'||v==='feed'){ensureHomePolish();ensureMuralVisual()}
 }
 function boot(){
  load('./modules/checkin-mobile-p171.js?v=P171-20260920','carbonautas-checkin-mobile-p171').catch(e=>console.error('Carbonautas check-in móvel',e));
@@ -81,9 +83,10 @@ function boot(){
   const t=e.target.closest?.('#dashDossierBtn,#trackDossierBtn,[data-open-dossier]');if(t)ensureDossier();
   const p=e.target.closest?.('#managePeopleBtn');if(p){ensureRede();ensurePeople()}
   const ag=e.target.closest?.('#newEventBtn,[data-open-event],#saveEventBtn,#agNewBtn,[data-p174-new],[data-p174-new-ag],#viewCrono .ag-item');if(ag){ensureAgenda();ensureAgendaFocus();ensureAgendaDetail()}
-  const mural=e.target.closest?.('#newPostBtn,#muralPostBtn,[data-mural-kind],#savePostBtn');if(mural)ensureHomePolish();
+  const mural=e.target.closest?.('#newPostBtn,#muralPostBtn,#muralNewBtn,#mobileMuralFab,#mobileMuralNew,[data-mural-kind],#savePostBtn');if(mural){ensureHomePolish();ensureMuralVisual()}
   const h=e.target.closest?.('[data-p117-add],[data-p117-edit],#p117Highlights');if(h)ensureHighlights()
  },true);
+ idle(()=>ensureMuralVisual(),650);
  idle(()=>ensureDossier(),1800)
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
