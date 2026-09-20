@@ -1,8 +1,9 @@
-/* Carbonautas P180 · Mural único para toda a Rede
+/* Carbonautas P182 · Mural único para toda a Rede + cards uniformes
    - remove a seção “Mensagens direcionadas”
    - todas as publicações ficam na mesma faixa horizontal
    - remove chips de destinatário, pois o Mural é público para a Rede
    - corrige corte/colapso vertical dos cards no celular
+   - carrega a experiência P182 de cards iguais e leitura ampliada por swipe
    - não altera Firebase nem VPS
 */
 (function(){
@@ -84,9 +85,13 @@ function unify(){
  primary.style.height='auto';primary.style.maxHeight='none';primary.style.overflow='visible';
  rail.style.height='auto';rail.style.maxHeight='none';
 }
-function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;unify();observe()})}
+function loadCards(){
+ if(document.getElementById('carbonautas-mural-cards-p182'))return;
+ const s=document.createElement('script');s.id='carbonautas-mural-cards-p182';s.src='./modules/mural-cards-p182.js?v=P182-20260920';s.async=false;s.onerror=()=>console.error('Carbonautas cards do Mural P182 não carregaram');document.body.appendChild(s)
+}
+function schedule(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;unify();observe();loadCards()})}
 function observe(){const box=$('#muralMsgs');if(!box||box.dataset.p180Observed==='1')return;box.dataset.p180Observed='1';observer=new MutationObserver(()=>schedule());observer.observe(box,{childList:true,subtree:true})}
 function bind(){if(document.documentElement.dataset.p180MuralBound==='1')return;document.documentElement.dataset.p180MuralBound='1';new MutationObserver(ms=>{if(ms.some(m=>m.attributeName==='data-view'))schedule()}).observe(document.body,{attributes:true,attributeFilter:['data-view']});window.addEventListener('resize',schedule,{passive:true})}
-function boot(){css();bind();observe();schedule();setTimeout(schedule,120);setTimeout(schedule,450);setTimeout(schedule,1100)}
+function boot(){css();bind();observe();loadCards();schedule();setTimeout(schedule,120);setTimeout(schedule,450);setTimeout(schedule,1100)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
