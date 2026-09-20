@@ -6,7 +6,7 @@ Plataforma da Rede Carbonautas (LIPAN/LEFA/CELBE, UNEMAT). Arquivo unico `index.
 
 | Caminho | Uso |
 |---|---|
-| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P191 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
+| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P192 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
 | `sw.js` | Service worker. So cache e pagina offline. Nao injeta mais nada no HTML |
 | `game.html`, `recovery.html`, `chrome-reset.html`, `manifest.webmanifest`, icones | Publicar junto na raiz |
 | `firestore.rules` | Unica fonte das regras. Publicar no Console do Firebase. Contem tambem as regras de outros sistemas (`projects/`) |
@@ -36,6 +36,12 @@ Para restaurar por Git: `git checkout P126-pre-consolidacao -- .`
 4. Testar em janela anonima.
 
 ## CHANGELOG
+
+### P192 · 2026-09-20 · Sobre mais encontrável sem aumentar o menu
+- Mantido o menu principal enxuto.
+- “Sobre o Carbonautas” passa a aparecer como atalho discreto no fim da tela “Coisa pra resolver”.
+- O botão antigo escondido dentro do resumo do Painel deixa de ser exibido para evitar duplicidade.
+- Não alterado: dados, regras, Firebase e VPS.
 
 ### P191 · 2026-09-20 · Versionamento alinhado
 - Build do app, registro do service worker e cache do `sw.js` passam a usar `P191-20260920`.
