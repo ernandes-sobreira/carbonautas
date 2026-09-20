@@ -17,7 +17,7 @@ function idle(fn){if('requestIdleCallback'in window)requestIdleCallback(fn,{time
   try{
     await load('./modules/dossier-p133-original.js?v=P133-20260919','carbonautas-dossier-p133-original');
     await load('./p135-rede-acompanhamento.js?v=P165-20260919','carbonautas-p135-rede-acompanhamento');
-    await load('./modules/rede-orientacao-p150.js?v=P151-20260919','carbonautas-rede-orientacao-p150');
+    await load('./modules/rede-orientacao-p150.js?v=P165-20260919','carbonautas-rede-orientacao-p150');
     await load('./modules/rede-ui-p155.js?v=P157-20260919','carbonautas-rede-ui-p155');
     await load('./modules/rede-legenda-p158.js?v=P158-20260919','carbonautas-rede-legenda-p158');
     await load('./modules/rede-controles-p161.js?v=P165-20260919','carbonautas-rede-controles-p161');
