@@ -1,8 +1,9 @@
 /* Carbonautas P181 · capa “Olha rapidão”
    - troca o kicker “Sua agenda” por “Olha rapidão”
-   - adiciona botão “Ver mural” junto de Agenda e Atividade
-   - no celular, “Ver mural” ocupa a segunda linha dos atalhos
-   - mantém o bloco compacto e não altera Firebase/VPS
+   - deixa na capa apenas os atalhos Ver agenda e Ver mural
+   - remove “+ Atividade” da capa para evitar confusão com Agenda/Mural
+   - mantém os dois botões com mesmo tamanho e alinhamento
+   - não altera Firebase/VPS
 */
 (function(){
 'use strict';
@@ -21,21 +22,24 @@ function openMural(){
 function css(){
  if($('#p181Style'))return;
  const st=document.createElement('style');st.id='p181Style';st.textContent=`
+ #p174AgendaFocus .p174-head-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important;align-items:stretch!important}
+ #p174AgendaFocus .p174-head-actions>button{margin:0!important;width:100%!important;min-width:0!important;min-height:36px!important;padding:0 10px!important;white-space:nowrap!important;justify-content:center!important}
  #p174AgendaFocus .p181-mural-btn{background:#fff!important;color:#31545c!important;border-color:#d4e2df!important}
  #p174AgendaFocus .p181-mural-btn:active{transform:scale(.985)}
  @media(max-width:650px){
-  #p174AgendaFocus .p174-head-actions{display:grid!important;grid-template-columns:auto auto!important;gap:5px!important;min-width:0!important}
-  #p174AgendaFocus .p174-head-actions>button{margin:0!important;white-space:nowrap!important}
-  #p174AgendaFocus .p181-mural-btn{grid-column:1/-1!important;width:100%!important;min-height:31px!important}
+  #p174AgendaFocus .p174-head-actions{width:100%!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin-top:9px!important}
+  #p174AgendaFocus .p174-head-actions>button{min-height:34px!important;font-size:9.5px!important}
  }
  `;document.head.appendChild(st)
 }
 function patch(){
  const box=$('#p174AgendaFocus');if(!box)return false;
  const kicker=$('.p174-kicker',box);if(kicker&&kicker.textContent!=='OLHA RAPIDÃO')kicker.textContent='OLHA RAPIDÃO';
- const actions=$('.p174-head-actions',box);if(actions&&!actions.querySelector('.p181-mural-btn')){
-  const b=document.createElement('button');b.type='button';b.className='p181-mural-btn';b.textContent='Ver mural';b.setAttribute('aria-label','Ver mural');b.onclick=openMural;actions.appendChild(b)
- }
+ const actions=$('.p174-head-actions',box);if(!actions)return true;
+ const add=actions.querySelector('[data-p174-new]');if(add)add.remove();
+ let b=actions.querySelector('.p181-mural-btn');
+ if(!b){b=document.createElement('button');b.type='button';b.className='p181-mural-btn';b.textContent='Ver mural';b.setAttribute('aria-label','Ver mural');b.onclick=openMural;actions.appendChild(b)}
+ const agenda=actions.querySelector('[data-p174-open]');if(agenda)agenda.textContent='Ver agenda';
  return true
 }
 function watch(){
