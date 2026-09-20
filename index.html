@@ -7321,11 +7321,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P193-20260920';
+window.CARBONAUTAS_BUILD='P194-20260920';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P193-20260920',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P194-20260920',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -15466,6 +15466,58 @@ window.CARBONAUTAS_ACCESS_COLLAPSE_BUILD='P137';
   #photoOverlay #savePhotoBtn{flex:1 1 auto!important;min-height:48px!important;justify-content:center!important}
 }
 </style>
+
+<style id="p194HomeFloatingCardsStyle">
+#viewPainel .dash-wrap{max-width:1180px!important}
+#viewPainel #p194Welcome{margin:0 0 14px;padding:18px 20px;border:1px solid #d9e8e5;border-radius:24px;background:linear-gradient(135deg,#fff,#f3fbf8);box-shadow:0 14px 38px rgba(18,66,73,.07);display:flex;align-items:center;justify-content:space-between;gap:18px}
+#viewPainel #p194Welcome .k{font-size:10px;font-weight:900;letter-spacing:.14em;color:#16858a}
+#viewPainel #p194Welcome h2{font-family:'Space Grotesk','Inter',sans-serif;margin:3px 0 4px;color:#173b4b;font-size:25px;letter-spacing:-.035em}
+#viewPainel #p194Welcome p{margin:0;color:#72868e;font-size:12.5px;line-height:1.4}
+#viewPainel #p194Welcome .a{display:flex;gap:8px;flex:0 0 auto}
+#viewPainel #p194Welcome .btn{min-height:42px;border-radius:13px}
+#viewPainel .p142-command-card{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;gap:14px!important;align-items:start!important}
+#viewPainel .p142-command-intro{grid-column:1/-1!important;padding:2px!important}
+#viewPainel .p142-command-card>.p142-accordion{margin:0!important;background:#fff!important;box-shadow:0 12px 34px rgba(19,67,75,.07)!important}
+#viewPainel .p142-command-card>.p194-action{grid-column:span 5}
+#viewPainel .p142-command-card>.p194-watch{grid-column:span 4}
+#viewPainel .p142-command-card>.p194-short{grid-column:span 3}
+#viewPainel .p142-command-card>.p142-accordion[open]{grid-column:1/-1!important}
+#viewPainel .p142-command-card>.p142-accordion>summary{min-height:94px!important;align-items:flex-start!important;padding:15px!important}
+#viewPainel .p142-command-card>.p142-accordion>summary .p142-label b{font-size:17px!important}
+#viewPainel .p142-command-card>.p142-accordion>summary .p142-label small{white-space:normal!important;overflow:visible!important;text-overflow:clip!important}
+#viewPainel #p194MorePanel{grid-column:1/-1!important;background:#f8fbfa!important;box-shadow:none!important}
+#viewPainel #p194MorePanel>summary{min-height:64px!important;align-items:center!important}
+#viewPainel #p194MoreBody{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding-top:12px}
+#viewPainel #p194MoreBody>.p142-accordion{margin:0!important;border-radius:16px!important;background:#fff!important;box-shadow:none!important}
+#viewPainel #p194Shortcuts{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+#viewPainel .p194-nav{border:1px solid #dce9e7;background:#fff;border-radius:18px;padding:14px;display:flex;gap:11px;align-items:center;cursor:pointer;text-align:left;box-shadow:0 9px 26px rgba(19,67,75,.045)}
+#viewPainel .p194-nav:hover{transform:translateY(-2px);border-color:#c7dfda}
+#viewPainel .p194-nav i{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#eef7f5;font-style:normal;font-size:18px;flex:0 0 38px}
+#viewPainel .p194-nav b{display:block;color:#173b4b;font-size:13px}
+#viewPainel .p194-nav small{display:block;color:#83949b;font-size:10.5px;margin-top:2px}
+#viewPainel #p194FooterLinks{display:flex;justify-content:center;gap:8px;padding:18px 8px 28px}
+#viewPainel #p194FooterLinks button{border:0;background:transparent;color:#6f858d;border-radius:999px;padding:9px 13px;font-size:11.5px;font-weight:800;cursor:pointer}
+#viewPainel #p194FooterLinks button:hover{background:#eef7f5;color:#0d7479}
+#viewPainel #p192AboutFooter{display:none!important}
+@media(max-width:920px){#viewPainel .p142-command-card>.p194-action,#viewPainel .p142-command-card>.p194-watch{grid-column:span 6}#viewPainel .p142-command-card>.p194-short{grid-column:1/-1}#viewPainel #p194Shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){#viewPainel #p194Welcome{display:block;padding:15px;border-radius:20px}#viewPainel #p194Welcome h2{font-size:22px}#viewPainel #p194Welcome .a{display:grid;grid-template-columns:1fr 1fr;margin-top:12px}#viewPainel .p142-command-card{display:block!important}#viewPainel .p142-command-card>.p142-accordion{margin:9px 0!important}#viewPainel .p142-command-card>.p142-accordion>summary{min-height:76px!important;align-items:center!important;padding:11px!important}#viewPainel #p194MoreBody{grid-template-columns:1fr}#viewPainel #p194Shortcuts{grid-template-columns:1fr 1fr;gap:8px}#viewPainel .p194-nav{padding:11px 10px}#viewPainel .p194-nav small{display:none}}
+</style>
+<script id="p194HomeFloatingCardsController">
+(()=>{
+'use strict';
+const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const norm=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+function click(sel){const x=q(sel);if(x){x.click();return true}return false}
+function nav(words){const x=qa('.tab[data-view],.app-nav-card[data-app-view]').find(e=>words.some(w=>norm(e.textContent).includes(norm(w))));if(x){x.click();return true}return false}
+function relabel(x,title,sub,icon){if(!x)return;const b=q('.p142-label b',x),s=q('.p142-label small',x),i=q('.p142-icon',x);if(b)b.textContent=title;if(s)s.textContent=sub;if(i)i.textContent=icon}
+function welcome(home){let x=q('#p194Welcome');if(!x){x=document.createElement('section');x.id='p194Welcome';x.innerHTML='<div><div class="k">CARBONAUTAS</div><h2>Bora ver o que importa?</h2><p>Ação rápida primeiro. Os detalhes aparecem quando você abrir.</p></div><div class="a"><button class="btn" data-a="checkin">✓ Check-in</button><button class="btn primary" data-a="produto">🎯 Registrar produto</button></div>';x.onclick=e=>{const b=e.target.closest('[data-a]');if(!b)return;click(b.dataset.a==='checkin'?'#dashCheckinBtn':'#dashProductBtn')}}const high=q('#p117Highlights'),parent=home.parentElement,anchor=high&&high.parentElement===parent?high:home;if(parent&&(x.parentElement!==parent||x.nextElementSibling!==anchor))parent.insertBefore(x,anchor)}
+function shortcuts(cmd){let x=q('#p194Shortcuts');if(!x){x=document.createElement('section');x.id='p194Shortcuts';x.innerHTML='<button class="p194-nav" data-go="mural"><i>💬</i><span><b>Mural</b><small>Recados, pedidos e alertas.</small></span></button><button class="p194-nav" data-go="agenda"><i>🗓️</i><span><b>Agenda</b><small>Compromissos e reuniões.</small></span></button><button class="p194-nav" data-go="repo"><i>📁</i><span><b>Repositório</b><small>Arquivos e pastas da Rede.</small></span></button><button class="p194-nav" data-go="pessoas"><i>🧭</i><span><b>Pessoas</b><small>Rede e acompanhamento.</small></span></button>';x.onclick=e=>{const b=e.target.closest('[data-go]');if(!b)return;const k=b.dataset.go;if(k==='mural')nav(['mural']);else if(k==='agenda')nav(['agenda']);else if(k==='repo')nav(['repositorio','repositório']);else nav(['pessoas','rede','acompanhamento'])}}if(x.parentElement!==cmd)cmd.appendChild(x)}
+function footer(){const wrap=q('#viewPainel .dash-wrap');if(!wrap)return;let x=q('#p194FooterLinks');if(!x){x=document.createElement('div');x.id='p194FooterLinks';x.innerHTML='<button data-f="about">ⓘ Sobre o Carbonautas</button><button data-f="lab">🧪 Lab</button>';x.onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;if(b.dataset.f==='about'){if(typeof window.openCarbonautasAbout==='function')window.openCarbonautasAbout();else click('#p78AboutBtn')}else nav(['lab','laboratorio','laboratório'])}}if(x.parentElement!==wrap||wrap.lastElementChild!==x)wrap.appendChild(x)}
+function arrange(){const home=q('#viewPainel .p142-home-grid'),cmd=q('#viewPainel .p142-command-card');if(!home||!cmd)return false;welcome(home);const direct=qa(':scope > details.p142-accordion',cmd),quick=q('#p145QuickActions'),today=q('#p144TodayDetails');const attention=direct.find(x=>x!==quick&&x!==today&&/atencao agora|precisa de voce/.test(norm(x.textContent)))||direct.find(x=>x!==quick&&x!==today);if(attention){attention.classList.add('p194-action');relabel(attention,'Precisa de você','Prazos, correções e pendências que pedem ação.','⚡')}if(today){today.classList.add('p194-watch');relabel(today,'Só acompanhar','Novidades e mudanças que vale observar.','👀')}if(quick){quick.classList.add('p194-short');relabel(quick,'Atalhos','Check-in, produto, dossiê e backup.','⚙️')}const intro=q('.p142-command-intro',cmd);if(intro&&attention)intro.insertAdjacentElement('afterend',attention);if(attention&&today)attention.insertAdjacentElement('afterend',today);if(today&&quick)today.insertAdjacentElement('afterend',quick);let more=q('#p194MorePanel');if(!more){more=document.createElement('details');more.id='p194MorePanel';more.className='p142-accordion';more.innerHTML='<summary><span class="p142-icon">＋</span><span class="p142-label"><b>Mais do painel</b><small>Saúde dos projetos, produtos e fechamento mensal.</small></span><span class="p142-toggle"><span class="p142-show">Ver</span><span class="p142-hide">Fechar</span></span></summary><div class="p142-body" id="p194MoreBody"></div>'}const body=q('#p194MoreBody',more);qa(':scope > details.p142-accordion',cmd).filter(x=>x!==attention&&x!==today&&x!==quick&&x!==more).forEach(x=>body.appendChild(x));if(more.parentElement!==cmd)cmd.appendChild(more);shortcuts(cmd);footer();return true}
+function boot(){if(arrange())return;const root=q('#viewPainel')||document.body,ob=new MutationObserver(()=>{if(arrange())ob.disconnect()});ob.observe(root,{childList:true,subtree:true});setTimeout(()=>{arrange();ob.disconnect()},7000)}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
+})();
+</script>
 
 </body>
 </html>

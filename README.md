@@ -6,7 +6,7 @@ Plataforma da Rede Carbonautas (LIPAN/LEFA/CELBE, UNEMAT). Arquivo unico `index.
 
 | Caminho | Uso |
 |---|---|
-| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P193 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
+| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P194 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
 | `sw.js` | Service worker. So cache e pagina offline. Nao injeta mais nada no HTML |
 | `game.html`, `recovery.html`, `chrome-reset.html`, `manifest.webmanifest`, icones | Publicar junto na raiz |
 | `firestore.rules` | Unica fonte das regras. Publicar no Console do Firebase. Contem tambem as regras de outros sistemas (`projects/`) |
@@ -36,6 +36,13 @@ Para restaurar por Git: `git checkout P126-pre-consolidacao -- .`
 4. Testar em janela anonima.
 
 ## CHANGELOG
+
+### P194 · 2026-09-20 · Home em cards flutuantes
+- Nova hierarquia visual no Painel: “Precisa de você”, “Só acompanhar” e “Atalhos” em destaque.
+- Mural, Agenda, Repositório e Pessoas viram atalhos compactos.
+- Saúde dos projetos, produtos e check-in ficam recolhidos em “Mais do painel”.
+- “Sobre o Carbonautas” e “Lab” ficam discretos no rodapé.
+- Não alterado: dados, regras do Firebase, VPS ou permissões.
 
 ### P193 · 2026-09-20 · Menos polling redundante
 - Removido o `setInterval(enhanceSubNav,900)` da camada de chat; a mesma atualização já ocorre pelo wrapper de `renderSubNav`.
