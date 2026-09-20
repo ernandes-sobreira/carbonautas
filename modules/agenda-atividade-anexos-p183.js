@@ -24,6 +24,11 @@ function isImgActivity(a){return !!a&&(String(a.attachmentMime||a.mimeType||'').
 function readDataUrl(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(String(r.result||''));r.onerror=()=>reject(r.error||new Error('Não foi possível ler o arquivo.'));r.readAsDataURL(file)})}
 function revoke(){if(previewUrl){try{URL.revokeObjectURL(previewUrl)}catch(_e){}previewUrl=''}}
 function cleanUrl(v){const s=String(v||'').trim();if(!s)return'';if(/^https?:\/\//i.test(s))return s;if(/^[\w.-]+\.[a-z]{2,}(?:[\/:?#]|$)/i.test(s))return'https://'+s;return s}
+async function cleanupStoredAttachment(path,url){
+ if(!path&&!url)return[];
+ if(typeof window.deleteStorageArtifacts==='function')return window.deleteStorageArtifacts({storagePath:path||'',attachmentUrl:url||''});
+ const f=F();if(!f?.deleteObject||!f?.sRef||!window.storage||!path)return[];try{await f.deleteObject(f.sRef(window.storage,path));return[]}catch(e){if(e?.code==='storage/object-not-found')return[];return[{path,error:e}]}
+}
 
 function css(){if($('#p183Style'))return;const st=document.createElement('style');st.id='p183Style';st.textContent=`
 #p174TaskOverlay .p183-file-box{border:1px dashed #c7dcda;border-radius:13px;background:#f7fbfa;padding:10px;display:grid;gap:8px}
@@ -99,22 +104,24 @@ async function persistExtras(ctx){
  const ref=f.doc(window.db,'rede_activities',id),link=cleanUrl(ctx.link);
  try{await f.setDoc(ref,{link,externalUrl:link,updatedAt:f.serverTimestamp()},{merge:true})}catch(e){console.warn('P183 link',e)}
  if(ctx.remove&&!ctx.file){
-  try{await f.setDoc(ref,{attachmentUrl:'',attachmentName:'',attachmentMime:'',storagePath:'',imageUrl:'',fileUrl:'',fileName:'',mimeType:'',updatedAt:f.serverTimestamp()},{merge:true})}catch(e){console.warn('P183 remove',e)}
+  try{await f.setDoc(ref,{attachmentUrl:'',attachmentName:'',attachmentMime:'',storagePath:'',imageUrl:'',fileUrl:'',fileName:'',mimeType:'',updatedAt:f.serverTimestamp()},{merge:true});const failed=await cleanupStoredAttachment(ctx.previousStoragePath,ctx.previousAttachmentUrl);if(failed.length)console.warn('P183 remove storage',failed)}catch(e){console.warn('P183 remove',e)}
   return
  }
  if(!ctx.file)return;
+ let up=null;
  try{
   if(typeof fbUploadAny!=='function')throw new Error('Rotina de upload não carregada.');
-  const dataUrl=await readDataUrl(ctx.file),up=await fbUploadAny('rede_activities','activity_'+mine(),dataUrl,ctx.file.name||'anexo');
+  const dataUrl=await readDataUrl(ctx.file);up=await fbUploadAny('rede_activities','activity_'+mine(),dataUrl,ctx.file.name||'anexo');
   const image=isImgFile(ctx.file)?(up.url||''):'';
   await f.setDoc(ref,{attachmentUrl:up.url||'',attachmentName:ctx.file.name||'anexo',attachmentMime:ctx.file.type||'',storagePath:up.path||'',imageUrl:image,fileUrl:up.url||'',fileName:ctx.file.name||'anexo',mimeType:ctx.file.type||'',updatedAt:f.serverTimestamp()},{merge:true});
+  const failed=await cleanupStoredAttachment(ctx.previousStoragePath,ctx.previousAttachmentUrl);if(failed.length)console.warn('P183 replace storage',failed);
   toastS('Anexo da atividade enviado.')
- }catch(e){console.error('P183 upload',e);toastS('A atividade foi salva, mas o anexo não foi enviado.')}
+ }catch(e){if(up?.path||up?.url){const failed=await cleanupStoredAttachment(up.path,up.url);if(failed.length)console.warn('P183 cleanup upload',failed)}console.error('P183 upload',e);toastS('A atividade foi salva, mas o anexo não foi enviado.')}
 }
 function captureSave(){
  const ov=$('#p174TaskOverlay');if(!ov?.classList.contains('open'))return;
- ensureFields();const id=inferEdit(),file=$('#p183File')?.files?.[0]||null,pv=$('#p183Preview');
- const ctx={editId:id,before:new Set((S().activities||[]).map(a=>String(a.id))),title:$('#p174Title')?.value.trim()||'',date:$('#p174Date')?.value||'',link:$('#p183Link')?.value.trim()||'',file,remove:pv?.dataset?.remove==='1'};
+ ensureFields();const id=inferEdit(),file=$('#p183File')?.files?.[0]||null,pv=$('#p183Preview'),previous=id?activity(id):null;
+ const ctx={editId:id,before:new Set((S().activities||[]).map(a=>String(a.id))),title:$('#p174Title')?.value.trim()||'',date:$('#p174Date')?.value||'',link:$('#p183Link')?.value.trim()||'',file,remove:pv?.dataset?.remove==='1',previousStoragePath:previous?.storagePath||'',previousAttachmentUrl:previous?.attachmentUrl||previous?.fileUrl||''};
  setStatus(file?'A atividade será salva e o anexo será enviado em seguida.':'');persistExtras(ctx)
 }
 
