@@ -6,7 +6,7 @@ Plataforma da Rede Carbonautas (LIPAN/LEFA/CELBE, UNEMAT). Arquivo unico `index.
 
 | Caminho | Uso |
 |---|---|
-| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P195 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
+| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P196 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
 | `sw.js` | Service worker. So cache e pagina offline. Nao injeta mais nada no HTML |
 | `game.html`, `recovery.html`, `chrome-reset.html`, `manifest.webmanifest`, icones | Publicar junto na raiz |
 | `firestore.rules` | Unica fonte das regras. Publicar no Console do Firebase. Contem tambem as regras de outros sistemas (`projects/`) |
@@ -36,6 +36,14 @@ Para restaurar por Git: `git checkout P126-pre-consolidacao -- .`
 4. Testar em janela anonima.
 
 ## CHANGELOG
+
+### P196 · 2026-09-20 · Swipe físico nos passa-cards
+- Cards acompanham o dedo ou mouse durante o arraste horizontal.
+- Swipe para a esquerda avança; swipe para a direita volta ao card anterior.
+- Soltar antes do limite devolve o card com efeito de mola.
+- Swipe concluído lança o card para fora da tela e traz o seguinte com animação.
+- Botões Passar, Abrir e Dispensar continuam disponíveis como alternativa.
+- Não alterado: dados, regras, Firebase, VPS ou permissões.
 
 ### P195 · 2026-09-20 · Capa mínima em passa-card
 - Um único card flutuante por vez reúne pendências e novidades.
