@@ -7279,7 +7279,7 @@ if($('#fileCollaboratorsSaveBtn'))$('#fileCollaboratorsSaveBtn').onclick=saveFil
 if($('#privateNewBtn'))$('#privateNewBtn').onclick=openPrivateNew;
 if($('#privateThreadSearch'))$('#privateThreadSearch').oninput=renderPrivateThreads;
 if($('#privatePersonSearch'))$('#privatePersonSearch').oninput=renderPrivatePeople;
-if($('#privateBackBtn'))$('#privateBackBtn').onclick=()=>{$('#privateShell')?.classList.remove('chat-open')};
+if($('#privateBackBtn'))$('#privateBackBtn').onclick=e=>{e.preventDefault();e.stopPropagation();closePrivateThread()};
 if($('#privateSendBtn'))$('#privateSendBtn').onclick=sendPrivateMessage;
 if($('#privateInput')){$('#privateInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendPrivateMessage()}});$('#privateInput').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(130,e.target.scrollHeight)+'px'})}
 if($('#privateEmojiToggle'))$('#privateEmojiToggle').onclick=()=>$('#privateEmojiBar')?.classList.toggle('show');
@@ -7328,11 +7328,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P200-20260920';
+window.CARBONAUTAS_BUILD='P201-20260920';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P200-20260920',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P201-20260920',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -15604,6 +15604,11 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',boo
 
 
 
+
+
+<style id="p201PrivateBackStyle">
+#privateBackBtn{touch-action:manipulation;position:relative;z-index:6}
+</style>
 
 <style id="p200DestaquesTabStyle">
 #viewDestaques{overflow:hidden;background:linear-gradient(180deg,#f7fbfa 0%,#f4f8f7 100%)!important}
