@@ -1,7 +1,7 @@
-/* Carbonautas P166 · carregador sob demanda
+/* Carbonautas P167 · carregador sob demanda
    - não bloqueia a interface inicial com todos os módulos da Rede
    - carrega Rede/Acompanhamento quando a tela é usada
-   - pré-carrega em tempo ocioso
+   - centraliza a gestão de pessoas no Acompanhamento
    - mantém gestão avançada fora do caminho crítico
    - não altera Firebase nem VPS
 */
@@ -15,7 +15,13 @@ let redePromise=null,dossierPromise=null,peopleScheduled=false;
 function load(src,id){return new Promise((resolve,reject)=>{if(document.getElementById(id)){resolve();return}const s=document.createElement('script');s.id=id;s.src=src;s.async=false;s.onload=resolve;s.onerror=()=>reject(new Error('Falha ao carregar '+src));document.body.appendChild(s)})}
 function idle(fn,timeout=1200){if('requestIdleCallback'in window)requestIdleCallback(fn,{timeout});else setTimeout(fn,320)}
 function ensureDossier(){if(dossierPromise)return dossierPromise;dossierPromise=load('./modules/dossier-p133-original.js?v=P133-20260919','carbonautas-dossier-p133-original').catch(e=>{dossierPromise=null;console.error('Carbonautas dossiê',e)});return dossierPromise}
-function ensurePeople(){if(peopleScheduled)return;peopleScheduled=true;idle(()=>load('./modules/rede-pessoas-p164.js?v=P165-20260919','carbonautas-rede-pessoas-p164').catch(e=>console.error('Carbonautas gestão pessoas',e)),700)}
+function ensurePeople(){
+ if(peopleScheduled)return;peopleScheduled=true;
+ idle(async()=>{try{
+  await load('./modules/rede-pessoas-p164.js?v=P165-20260919','carbonautas-rede-pessoas-p164');
+  await load('./modules/rede-acompanhamento-gestao-p166.js?v=P167-20260920','carbonautas-rede-acompanhamento-gestao-p166');
+ }catch(e){console.error('Carbonautas gestão pessoas',e)}},700)
+}
 function ensureRede(){
  if(redePromise)return redePromise;
  redePromise=(async()=>{try{
