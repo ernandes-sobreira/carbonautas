@@ -33,8 +33,7 @@ function actor(){try{return typeof currentActor==='function'?currentActor():null
 function canManage(p){
  const u=window.auth?.currentUser;if(!u||!p)return false;
  if(String(p.authorUid||'')===String(u.uid||''))return true;
- if(String(u.email||'').toLowerCase()==='ernandes.sobreira@gmail.com')return true;
- const a=actor();return String(a?.nivel||'').toLowerCase()==='coord'||String(a?.role||'').toLowerCase()==='coordinator'
+ try{return !!(window.isAdmin??isAdmin)}catch(_e){return false}
 }
 function toastMsg(t){try{if(typeof toast==='function')toast(t);else console.log(t)}catch(_e){}}
 function addCss(){

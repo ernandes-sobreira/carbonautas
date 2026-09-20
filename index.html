@@ -2529,7 +2529,8 @@
       <div class="fg full"><label>Notas</label><textarea id="mNotas" placeholder="Observações internas"></textarea></div>
     </div>
     <div class="modal-f">
-      <button class="btn danger" id="deleteMember" style="margin-right:auto;display:none">Excluir aluno</button>
+      <button class="btn danger" id="deleteMember" style="margin-right:auto;display:none">Desligar acesso</button>
+      <button class="btn danger" id="purgeMember" style="display:none">Excluir definitivamente</button>
       <button class="btn" data-close="memberOverlay">Cancelar</button>
       <button class="btn primary" id="saveMember">Salvar</button>
     </div>
@@ -3135,7 +3136,7 @@ const P = 'https://ernandes-sobreira.github.io/';
 const DEFAULT_PIN = '2024';
 
 const SEED = [
-  {nome:'Ernandes Sobreira Oliveira Junior',nivel:'coord',programa:'',status:'ativo',origem:'UNEMAT · Cáceres-MT',tema:'Coordenação geral da rede LIPAN/LEFA/CELBE.',linhas:[],plataforma:'',protegido:true},
+  {nome:'Coordenação',nivel:'coord',programa:'',status:'ativo',origem:'',tema:'Coordenação geral da rede.',linhas:[],plataforma:'',protegido:true},
   {nome:'Ana Paula',nivel:'posdoc',programa:'PPGCA',status:'ativo',origem:'',tema:'Carbono estocado em solo e plantas, fluxo de carbono e correlação com a qualidade ambiental no Centro-Oeste de Mato Grosso.',linhas:['Carbono e GEE','Qualidade ambiental e sensoriamento'],plataforma:''},
   {nome:'Danielle Tavares',nivel:'posdoc',programa:'PPGCA',status:'ativo',origem:'',tema:'Plano de visibilidade da pós-graduação, abrangendo os 27 programas da UNEMAT.',linhas:['Extensão e visibilidade'],plataforma:P+'projetos-unemat/'},
   {nome:'Cleverson',nivel:'doutorado',programa:'PPGCA',status:'ativo',origem:'',tema:'Qualidade do ar e PM2.5, com foco em variáveis microclimáticas de temperatura, precipitação e umidade.',linhas:['Qualidade do ar e PM2.5','Microclima e meteorologia'],plataforma:P+'sopro/'},
@@ -3348,8 +3349,7 @@ async function bootstrap(){
     }
     state.members=memSnap.docs.map(d=>({...d.data(),id:d.id}));
     state.members.forEach(m=>{m.linhas=m.linhas||[];m.resultados=m.resultados||[];m.prazos=m.prazos||[];m.vinculos=m.vinculos||[];m.hub=!!m.hub;m.bolsista=!!m.bolsista});
-    const linkedNow=resolveCurrentMember();
-    if(linkedNow && (linkedNow.nivel==='coord' || linkedNow.protegido===true || COORDINATOR_MEMBER_IDS.has(linkedNow.id))) isAdmin=true;
+    // Privilégio administrativo vem exclusivamente de rede_users.role.
     if(isAdmin){
       const linked=resolveCurrentMember();
       if(linked && linked.id!==myId){
@@ -3465,18 +3465,24 @@ function subscribeAll(){
     state.publicacoes=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='pubs') renderPubs(); if(currentView==='lab') renderLab(); if(currentView==='painel') renderPainel(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
   }));
-  // P13 · DOSSIÊS/CONJUNTOS COM ACL EXPLÍCITA
+  // P13 · DOSSIÊS/CONJUNTOS: ACL explícita + "Toda a Rede" dinâmica.
   if(myId){
     try{
-      const pq=f.query(f.collection(window.db,'rede_repository_packages'),f.where('allowedMemberIds','array-contains',myId));
-      subscriptions.push(f.onSnapshot(pq,snap=>{
-        state.repositoryPackages=snap.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>{
+      const repoPackageSources={allowed:new Map(),group:new Map()},repoPackageErrors={allowed:'',group:''};
+      const syncRepositoryPackages=()=>{
+        const merged=new Map([...repoPackageSources.allowed,...repoPackageSources.group]);
+        state.repositoryPackages=[...merged.values()].sort((a,b)=>{
           const ta=a.ts?.toMillis?a.ts.toMillis():0,tb=b.ts?.toMillis?b.ts.toMillis():0;return tb-ta;
         });
-        state.repoPackagesError='';
+        state.repoPackagesError=Object.values(repoPackageErrors).filter(Boolean).join(' | ');
         if(currentView==='pubs')renderPubs();
         if($('#repoOverlay')?.classList.contains('open'))renderMemberRepository();
-      },e=>{console.error('Meu Repositório: consulta de pastas bloqueada:',e);state.repositoryPackages=[];state.repoPackagesError=(e?.code||'erro')+': '+(e?.message||'');if(currentView==='pubs')renderPubs();toast('Não consegui listar as pastas do repositório ('+(e?.code||'erro')+'). Veja o aviso na aba Repositório.');}));
+      };
+      const watchRepositoryPackages=(key,q)=>subscriptions.push(f.onSnapshot(q,snap=>{
+        repoPackageSources[key]=new Map(snap.docs.map(d=>[d.id,{...d.data(),id:d.id}]));repoPackageErrors[key]='';syncRepositoryPackages();
+      },e=>{console.error('Meu Repositório: consulta de pastas bloqueada:',e);repoPackageSources[key]=new Map();repoPackageErrors[key]=(e?.code||'erro')+': '+(e?.message||'');syncRepositoryPackages();toast('Não consegui listar as pastas do repositório ('+(e?.code||'erro')+'). Veja o aviso na aba Repositório.');}));
+      watchRepositoryPackages('allowed',f.query(f.collection(window.db,'rede_repository_packages'),f.where('allowedMemberIds','array-contains',myId)));
+      watchRepositoryPackages('group',f.query(f.collection(window.db,'rede_repository_packages'),f.where('accessMode','==','group')));
     }catch(e){console.warn('Não consegui iniciar a consulta de dossiês:',e)}
   }
   // P20 · RAÍZES DOS REPOSITÓRIOS PESSOAIS
@@ -3553,6 +3559,15 @@ function subscribeAll(){
       if(!notifInitial){snap.docChanges().filter(ch=>ch.type==='added').forEach(ch=>{const n={...ch.doc.data(),id:ch.doc.id};if(n.senderId!==myId)showDeviceNotification(n)})}
       notifInitial=false;
     },err=>console.warn('Notificações não disponíveis:',err)));
+  }
+
+  // DESLIGAMENTO EM TEMPO REAL — integrantes egressos perdem a sessão imediatamente.
+  if(myId && !isAdmin){
+    subscriptions.push(f.onSnapshot(f.doc(window.db,'rede_members',myId),snap=>{
+      if(!snap.exists()||snap.data()?.status==='egresso'){
+        doLogout().finally(()=>showLogin('Seu vínculo com esta rede foi encerrado. O histórico acadêmico permanece preservado.'));
+      }
+    },err=>console.warn('Monitoramento do vínculo:',err)));
   }
 
   // CONTAS (somente coordenador pode listar todas)
@@ -3704,14 +3719,8 @@ async function addSocialComment(targetType,targetId,inputId){
 function normName(v){
   return (v||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
 }
-const COORDINATOR_EMAILS=new Set(['ernandes.sobreira@gmail.com']);
-const COORDINATOR_MEMBER_IDS=new Set(['seed-ernandes-sobreira-oliveira-junior','ernandes-sobreira-oliveira-junior']);
 function shouldTreatAsCoordinator(profile,user){
-  if(profile?.role==='coordinator') return true;
-  const email=(user?.email||profile?.email||'').trim().toLowerCase();
-  if(email && COORDINATOR_EMAILS.has(email)) return true;
-  if(profile?.memberId && COORDINATOR_MEMBER_IDS.has(profile.memberId)) return true;
-  return normName(profile?.nome)==='ernandes sobreira oliveira junior';
+  return profile?.role==='coordinator';
 }
 function resolveCurrentMember(){
   if(myId){ const direct=memberById(myId); if(direct)return direct; }
@@ -3764,13 +3773,35 @@ function showRegister(){
   $('#authGate').classList.remove('off'); $('#authLoginPane').classList.add('hidden'); $('#authRegisterPane').classList.remove('hidden'); $('#authUnlinkedPane').classList.remove('on');
   $('#registerMsg').textContent=''; $('#loading').classList.add('off');
 }
+async function tryBootstrapCoordinator(user,existingProfile=null){
+  if(!user?.uid)return false;
+  const f=FB(),bootstrapRef=f.doc(window.db,'rede_settings','bootstrap');
+  try{
+    const snap=await f.getDoc(bootstrapRef);
+    if(!snap.exists())return false;
+    const cfg=snap.data()||{};
+    if(cfg.enabled!==true||cfg.coordinatorUid!==user.uid)return false;
+    const batch=f.writeBatch(window.db),userRef=f.doc(window.db,'rede_users',user.uid);
+    if(existingProfile){
+      batch.update(userRef,{role:'coordinator',updatedAt:f.serverTimestamp()});
+    }else{
+      batch.set(userRef,{nome:user.displayName||user.email||'Coordenação',email:user.email||'',role:'coordinator',createdAt:f.serverTimestamp()});
+    }
+    batch.update(bootstrapRef,{enabled:false,consumedByUid:user.uid,consumedAt:f.serverTimestamp()});
+    await batch.commit();
+    return true;
+  }catch(e){
+    if(e?.code==='permission-denied')return false;
+    throw e;
+  }
+}
 async function showUnlinked(user){
   $('#authGate').classList.remove('off'); $('#authLoginPane').classList.add('hidden'); $('#authRegisterPane').classList.add('hidden'); $('#authUnlinkedPane').classList.add('on');
   $('#unlinkedEmail').textContent=user.email||''; $('#claimMsg').textContent=''; $('#loading').classList.add('off');
   const sel=$('#selfMemberSelect'); sel.innerHTML='<option value="">Carregando perfis…</option>';
   try{
     const snap=await FB().getDocs(FB().collection(window.db,'rede_members'));
-    const members=snap.docs.map(d=>({...d.data(),id:d.id})).filter(m=>m.nivel!=='coord').sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+    const members=snap.docs.map(d=>({...d.data(),id:d.id})).filter(m=>m.nivel!=='coord'&&m.status!=='egresso').sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
     sel.innerHTML='<option value="">Selecione seu nome</option>'+members.map(m=>`<option value="${esc(m.id)}">${esc(m.nome||m.id)}</option>`).join('');
   }catch(e){console.error(e);sel.innerHTML='<option value="">Não foi possível carregar os perfis</option>';$('#claimMsg').textContent='Verifique as regras do Firestore.';}
 }
@@ -3856,13 +3887,30 @@ async function handleAuthUser(user){
     clearSubscriptions(); bootstrapped=false; state.users=[];state.privateThreads=[];state.privateDirectory=[];state.privateSchedule=[];privateDirectorySeeded=false;privateChatAccessError='';
     authUser=user; $('#loading').classList.remove('off'); $('#loadingMsg').textContent='Validando sua conta…';
     try{
-      const snap=await withTimeout(
+      let snap=await withTimeout(
         FB().getDoc(FB().doc(window.db,'rede_users',user.uid)),
         15000,
         'O Firestore demorou para validar seu perfil.'
       );
-      if(!snap.exists()){authProfile=null;myId=null;myName='';isAdmin=false;await showUnlinked(user);return}
-      authProfile={uid:user.uid,...snap.data()}; myId=authProfile.memberId||null; myName=authProfile.nome||user.email||''; isAdmin=shouldTreatAsCoordinator(authProfile,user);
+      if(!snap.exists()){
+        const bootstrapped=await tryBootstrapCoordinator(user);
+        if(!bootstrapped){authProfile=null;myId=null;myName='';isAdmin=false;await showUnlinked(user);return}
+        snap=await FB().getDoc(FB().doc(window.db,'rede_users',user.uid));
+      }else if(snap.data()?.role!=='coordinator'){
+        const promoted=await tryBootstrapCoordinator(user,snap.data());
+        if(promoted)snap=await FB().getDoc(FB().doc(window.db,'rede_users',user.uid));
+      }
+      authProfile={uid:user.uid,...snap.data()}; myId=authProfile.memberId||null;
+      if(myId && authProfile.role!=='coordinator'){
+        const memberSnap=await FB().getDoc(FB().doc(window.db,'rede_members',myId));
+        if(!memberSnap.exists()||memberSnap.data()?.status==='egresso'){
+          authProfile=null;myId=null;myName='';isAdmin=false;
+          await FB().signOut(window.auth);
+          showLogin('Seu vínculo com esta rede foi encerrado. O histórico acadêmico permanece preservado.');
+          return;
+        }
+      }
+      myName=authProfile.nome||user.email||''; isAdmin=shouldTreatAsCoordinator(authProfile,user);
       $('#authMsg').textContent='Conta validada. Carregando a rede…';
       await withTimeout(bootstrap(),25000,'A rede demorou para carregar. Tente novamente.');
     }catch(e){
@@ -4378,7 +4426,8 @@ function openMember(id){
   editingId=id||null;
   const m = id? state.members.find(x=>x.id===id): null;
   $('#memberTitle').textContent = m? 'Editar aluno':'Novo aluno';
-  $('#deleteMember').style.display = (m && isAdmin && !m.protegido)? 'inline-flex':'none';
+  $('#deleteMember').style.display = (m && isAdmin && !m.protegido && m.status!=='egresso')? 'inline-flex':'none';
+  $('#purgeMember').style.display = (m && isAdmin && !m.protegido && m.status==='egresso')? 'inline-flex':'none';
   $('#selfEditNote').style.display = (m && isMe(id) && !isAdmin) ? 'block':'none';
   $('#mNome').value=m?m.nome:''; $('#mNivel').value=m?m.nivel:'doutorado';
   $('#mPrograma').value=m?m.programa:''; $('#mStatus').value=m?m.status:'ativo';
@@ -4513,14 +4562,45 @@ async function saveMember(){
 async function deleteMember(){
   if(!editingId || !isAdmin)return;
   const m=memberById(editingId);
-  if(m && m.protegido){ toast('O perfil do coordenador não pode ser removido por aqui.'); return; }
-  if(!confirm('Excluir este aluno da rede? O perfil e o vínculo de acesso serão removidos. Esta ação não pode ser desfeita.'))return;
+  if(m && m.protegido){ toast('O perfil do coordenador não pode ser desligado por aqui.'); return; }
+  if(!m||m.status==='egresso')return;
+  if(!confirm(`Desligar o acesso de ${m.nome}? O cadastro, arquivos, atividades, fotos e histórico serão preservados como egresso.`))return;
   try{
-    const idToDelete=editingId, f=FB(), linked=(state.users||[]).filter(u=>u.memberId===idToDelete);
-    const batch=f.writeBatch(window.db); batch.delete(f.doc(window.db,'rede_members',idToDelete)); batch.delete(f.doc(window.db,'rede_member_claims',idToDelete)); linked.forEach(u=>batch.delete(f.doc(window.db,'rede_users',u.uid))); await batch.commit();
-    closeOverlay('memberOverlay'); if(selectedId===idToDelete)closeDetail();
-    toast('Aluno excluído da rede e acesso desvinculado.');
-  }catch(e){ console.error(e); toast('Erro ao remover.'); }
+    const idToDisable=editingId;
+    await fbSetMember(idToDisable,{status:'egresso'});
+    closeOverlay('memberOverlay'); if(selectedId===idToDisable)closeDetail();
+    toast('Acesso desligado. O histórico foi preservado e o cadastro agora é de egresso.');
+  }catch(e){ console.error(e); toast('Erro ao desligar o acesso.'); }
+}
+
+async function permanentlyDeleteMember(id=editingId){
+  if(!id||!isAdmin)return;
+  const m=memberById(id);
+  if(!m||m.protegido)return;
+  if(m.status!=='egresso'){toast('Primeiro desligue o acesso e transforme o cadastro em egresso.');return;}
+  if(!confirm(`EXCLUSÃO DEFINITIVA de ${m.nome}: o cadastro pessoal será removido e referências históricas poderão ficar sem o perfil de origem. Continuar?`))return;
+  const typed=prompt(`Confirmação final: digite exatamente o nome abaixo para excluir:
+
+${m.nome}`);
+  if((typed||'').trim()!==(m.nome||'').trim()){
+    toast('Exclusão cancelada: o nome digitado não confere.');
+    return;
+  }
+  try{
+    const f=FB(), linked=(state.users||[]).filter(u=>u.memberId===id), batch=f.writeBatch(window.db);
+    batch.delete(f.doc(window.db,'rede_members',id));
+    batch.delete(f.doc(window.db,'rede_member_claims',id));
+    await batch.commit();
+    closeOverlay('memberOverlay');
+    if(selectedId===id)closeDetail();
+    toast(linked.length
+      ?'Perfil excluído. A conta de autenticação permanece bloqueada até a limpeza administrativa final.'
+      :'Perfil excluído definitivamente.');
+    renderPeopleManager();
+  }catch(e){
+    console.error(e);
+    toast(e?.code==='permission-denied'?'Permissão negada pelas regras do Firestore.':'Erro na exclusão definitiva.');
+  }
 }
 
 /* ============ GERENCIAR PESSOAS ============ */
@@ -4528,22 +4608,17 @@ function renderPeopleManager(){
   if(!isAdmin || !$('#peopleList')) return;
   const q=($('#peopleSearch')?.value||'').trim().toLowerCase();
   const items=[...state.members].filter(m=>!q || [m.nome,m.programa,m.status,m.origem].some(v=>(v||'').toLowerCase().includes(q))).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
-  $('#peopleList').innerHTML=items.map(m=>{const nv=NIVEIS[m.nivel]||{color:'#607d8b',short:m.nivel||''};return `<div class="people-row"><div class="p-av" style="background:${nv.color}">${m.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m.nome)}</div><div><div class="p-name">${esc(m.nome)}</div><div class="p-meta">${esc(nv.short)}${m.programa?' · '+esc(m.programa):''}${m.status==='egresso'?' · Egresso':''}${m.bolsista?' · 🎓 Bolsista':''}</div></div><div class="p-actions"><button type="button" class="btn" onclick="editPersonFromManager('${m.id}')">Editar / vínculos</button>${!m.protegido?`<button type="button" class="btn danger" onclick="removePersonFromManager('${m.id}')">Excluir aluno</button>`:''}</div></div>`}).join('') || '<div class="crono-empty">Nenhuma pessoa encontrada.</div>';
+  $('#peopleList').innerHTML=items.map(m=>{const nv=NIVEIS[m.nivel]||{color:'#607d8b',short:m.nivel||''};return `<div class="people-row"><div class="p-av" style="background:${nv.color}">${m.foto?`<img src="${esc(m.foto)}" alt="">`:initials(m.nome)}</div><div><div class="p-name">${esc(m.nome)}</div><div class="p-meta">${esc(nv.short)}${m.programa?' · '+esc(m.programa):''}${m.status==='egresso'?' · Egresso':''}${m.bolsista?' · 🎓 Bolsista':''}</div></div><div class="p-actions"><button type="button" class="btn" onclick="editPersonFromManager('${m.id}')">Editar / vínculos</button>${!m.protegido?(m.status==='egresso'?`<button type="button" class="btn danger" onclick="permanentlyDeleteMember('${m.id}')">Excluir definitivamente</button>`:`<button type="button" class="btn danger" onclick="removePersonFromManager('${m.id}')">Desligar acesso</button>`):''}</div></div>`}).join('') || '<div class="crono-empty">Nenhuma pessoa encontrada.</div>';
 }
 function openPeopleManager(){if(!isAdmin)return;renderPeopleManager();openOverlay('peopleOverlay')}
 function editPersonFromManager(id){closeOverlay('peopleOverlay');openMember(id)}
 async function removePersonFromManager(id){
-  if(!isAdmin)return; const m=memberById(id); if(!m||m.protegido)return;
-  if(!confirm(`Excluir ${m.nome} da rede? O perfil e o vínculo de acesso também serão removidos.`))return;
+  if(!isAdmin)return; const m=memberById(id); if(!m||m.protegido||m.status==='egresso')return;
+  if(!confirm(`Desligar o acesso de ${m.nome}? O cadastro e todo o histórico serão preservados como egresso.`))return;
   try{
-    const f=FB(), linked=(state.users||[]).filter(u=>u.memberId===id);
-    const batch=f.writeBatch(window.db);
-    batch.delete(f.doc(window.db,'rede_members',id));
-    batch.delete(f.doc(window.db,'rede_member_claims',id));
-    linked.forEach(u=>batch.delete(f.doc(window.db,'rede_users',u.uid)));
-    await batch.commit();
-    toast('Aluno excluído da rede.'); renderPeopleManager();
-  }catch(e){console.error(e);toast(e?.code==='permission-denied'?'Permissão negada pelas regras do Firestore.':'Erro ao retirar pessoa.')}
+    await fbSetMember(id,{status:'egresso'});
+    toast('Acesso desligado. O histórico foi preservado.'); renderPeopleManager();
+  }catch(e){console.error(e);toast(e?.code==='permission-denied'?'Permissão negada pelas regras do Firestore.':'Erro ao desligar o acesso.')}
 }
 
 /* ============ VISUALIZADOR DE ARQUIVOS ============ */
@@ -4698,7 +4773,7 @@ async function openFilePreview(url,name='Arquivo',context=null){
   }
   body.innerHTML=`<div class="file-preview-fallback"><div><h3>Pré-visualização não disponível</h3><p>Use “Abrir em nova guia” ou “Baixar”.</p></div></div>`;
 }
-window.openFilePreview=openFilePreview; window.showWorkbookSheet=showWorkbookSheet; window.switchOnlineViewer=switchOnlineViewer; window.openPeopleManager=openPeopleManager; window.editPersonFromManager=editPersonFromManager; window.removePersonFromManager=removePersonFromManager;
+window.openFilePreview=openFilePreview; window.showWorkbookSheet=showWorkbookSheet; window.switchOnlineViewer=switchOnlineViewer; window.openPeopleManager=openPeopleManager; window.editPersonFromManager=editPersonFromManager; window.removePersonFromManager=removePersonFromManager; window.permanentlyDeleteMember=permanentlyDeleteMember;
 
 /* Photo upload with downscale -> dataURL (form foto do membro) */
 function handleFile(file){
@@ -5575,9 +5650,9 @@ function updateRepoPackageAccessUI(){
   const row=$('#repoPackagePeopleRow');if(row)row.style.display=mode==='selected'?'block':'none';
   if(mode==='selected')renderRepoPackagePeople();
 }
-function selectedRepoPackageExtraIds(ownerId,mode){const ids=new Set();if(mode==='group')state.members.filter(m=>m.status!=='inativo'&&m.id!==ownerId).forEach(m=>ids.add(m.id));if(mode==='selected')document.querySelectorAll('#repoPackagePeople input[type="checkbox"]:checked:not(:disabled)').forEach(x=>ids.add(x.value));return[...ids]}
+function selectedRepoPackageExtraIds(ownerId,mode){const ids=new Set();if(mode==='selected')document.querySelectorAll('#repoPackagePeople input[type="checkbox"]:checked:not(:disabled)').forEach(x=>ids.add(x.value));return[...ids]}
 function selectedRepoPackageAllowedIds(ownerId,mode){const ids=rootAllowedMemberIds(ownerId),extra=selectedRepoPackageExtraIds(ownerId,mode);extra.forEach(id=>ids.add(id));if(repoPackageUploadContext!=='personal')ids.add(myId);return[...ids]}
-async function saveRepoPackage(){const btn=$('#repoPackageSaveBtn'),ownerId=(repoPackageUploadContext==='personal'||!isAdmin)?myId:$('#repoPackageOwner').value,title=$('#repoPackageTitle').value.trim(),purpose=$('#repoPackagePurpose').value,purposeOther=$('#repoPackagePurposeOther').value.trim(),mode=document.querySelector('input[name="repoPackageAccess"]:checked')?.value||'private';if(!ownerId)return toast('Defina o proprietário.');if(!title)return toast('Dê um nome à pasta.');if(purpose==='outro'&&!purposeOther)return toast('Descreva o propósito.');if(!repoPackageSelectedFiles.length&&repoPackageUploadContext!=='personal')return toast('Escolha pelo menos um arquivo.');const folderExtraMemberIds=selectedRepoPackageExtraIds(ownerId,mode),rootSharedMemberIds=[...rootAllowedMemberIds(ownerId)].filter(id=>id!==ownerId),allowedMemberIds=selectedRepoPackageAllowedIds(ownerId,mode);const f=FB(),uid=window.auth.currentUser.uid,owner=memberById(ownerId),actor=currentActor(),ref=f.doc(f.collection(window.db,'rede_repository_packages')),ownerUid=(state.users||[]).find(u=>u.memberId===ownerId)?.uid||'';try{btn.disabled=true;await f.setDoc(ref,{title,purpose,purposeOther,accessMode:mode,allowedMemberIds,folderExtraMemberIds,rootSharedMemberIds,personalRepo:repoPackageUploadContext==='personal',ownerMemberId:ownerId,ownerUid,ownerName:owner?.nome||'',createdByUid:uid,createdByMemberId:myId,createdByName:actor?.name||myName||'',fileCount:0,ts:f.serverTimestamp(),updatedAt:f.serverTimestamp()});let ok=0;for(let i=0;i<repoPackageSelectedFiles.length;i++){const file=repoPackageSelectedFiles[i];btn.textContent=`Enviando ${i+1}/${repoPackageSelectedFiles.length}…`;const dataUrl=await fileToDataUrl(file),up=await fbUploadFile('repo_'+ref.id,dataUrl,file.name),child=f.doc(f.collection(ref,'files'));await f.setDoc(child,{fileName:file.name,title:file.name.replace(/\.[^.]+$/,''),url:up.url,storagePath:up.path,size:file.size,mimeType:file.type||'',ext:inferFileExt('',file.name),order:i,createdByUid:uid,ts:f.serverTimestamp()});ok++}await f.updateDoc(ref,{fileCount:ok,updatedAt:f.serverTimestamp()});await awardPoints(ownerId,'repo_package',ref.id,title);const recipients=allowedMemberIds.filter(id=>id&&id!==myId);await Promise.allSettled(recipients.map(id=>createRepoNotification(id,{kind:'repositorio_pacote',sourceType:'repositorio_pacote',sourceId:ref.id,ownerId,title:'📁 Pasta compartilhada com você',message:`${actor?.name||'Um Carbonauta'} compartilhou “${title}” (${ok} arquivo${ok===1?'':'s'}).`})));closeOverlay('repoPackageUploadOverlay');toast(ok?`Pasta criada com ${ok} arquivo${ok===1?'':'s'}.`:'Pasta criada. Agora você pode adicionar arquivos quando quiser.');repoViewMode=repoPackageUploadContext==='personal'?'mine':repoViewMode;renderPubs()}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou a pasta. Publique as regras P20.':(e.message||'Erro ao enviar a pasta.'))}finally{btn.disabled=false;btn.textContent=repoPackageUploadContext==='personal'?'Criar pasta':'Enviar conjunto'}}
+async function saveRepoPackage(){const btn=$('#repoPackageSaveBtn'),ownerId=(repoPackageUploadContext==='personal'||!isAdmin)?myId:$('#repoPackageOwner').value,title=$('#repoPackageTitle').value.trim(),purpose=$('#repoPackagePurpose').value,purposeOther=$('#repoPackagePurposeOther').value.trim(),mode=document.querySelector('input[name="repoPackageAccess"]:checked')?.value||'private';if(!ownerId)return toast('Defina o proprietário.');if(!title)return toast('Dê um nome à pasta.');if(purpose==='outro'&&!purposeOther)return toast('Descreva o propósito.');if(!repoPackageSelectedFiles.length&&repoPackageUploadContext!=='personal')return toast('Escolha pelo menos um arquivo.');const folderExtraMemberIds=selectedRepoPackageExtraIds(ownerId,mode),rootSharedMemberIds=[...rootAllowedMemberIds(ownerId)].filter(id=>id!==ownerId),allowedMemberIds=selectedRepoPackageAllowedIds(ownerId,mode);const f=FB(),uid=window.auth.currentUser.uid,owner=memberById(ownerId),actor=currentActor(),ref=f.doc(f.collection(window.db,'rede_repository_packages')),ownerUid=(state.users||[]).find(u=>u.memberId===ownerId)?.uid||'';try{btn.disabled=true;await f.setDoc(ref,{title,purpose,purposeOther,accessMode:mode,allowedMemberIds,folderExtraMemberIds,rootSharedMemberIds,personalRepo:repoPackageUploadContext==='personal',ownerMemberId:ownerId,ownerUid,ownerName:owner?.nome||'',createdByUid:uid,createdByMemberId:myId,createdByName:actor?.name||myName||'',fileCount:0,ts:f.serverTimestamp(),updatedAt:f.serverTimestamp()});let ok=0;for(let i=0;i<repoPackageSelectedFiles.length;i++){const file=repoPackageSelectedFiles[i];btn.textContent=`Enviando ${i+1}/${repoPackageSelectedFiles.length}…`;const dataUrl=await fileToDataUrl(file),up=await fbUploadFile('repo_'+ref.id,dataUrl,file.name),child=f.doc(f.collection(ref,'files'));await f.setDoc(child,{fileName:file.name,title:file.name.replace(/\.[^.]+$/,''),url:up.url,storagePath:up.path,size:file.size,mimeType:file.type||'',ext:inferFileExt('',file.name),order:i,createdByUid:uid,ts:f.serverTimestamp()});ok++}await f.updateDoc(ref,{fileCount:ok,updatedAt:f.serverTimestamp()});await awardPoints(ownerId,'repo_package',ref.id,title);const recipients=(mode==='group'?state.members.filter(m=>m.status!=='inativo'&&m.status!=='egresso').map(m=>m.id):allowedMemberIds).filter(id=>id&&id!==myId);await Promise.allSettled(recipients.map(id=>createRepoNotification(id,{kind:'repositorio_pacote',sourceType:'repositorio_pacote',sourceId:ref.id,ownerId,title:'📁 Pasta compartilhada com você',message:`${actor?.name||'Um Carbonauta'} compartilhou “${title}” (${ok} arquivo${ok===1?'':'s'}).`})));closeOverlay('repoPackageUploadOverlay');toast(ok?`Pasta criada com ${ok} arquivo${ok===1?'':'s'}.`:'Pasta criada. Agora você pode adicionar arquivos quando quiser.');repoViewMode=repoPackageUploadContext==='personal'?'mine':repoViewMode;renderPubs()}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou a pasta. Publique as regras P20.':(e.message||'Erro ao enviar a pasta.'))}finally{btn.disabled=false;btn.textContent=repoPackageUploadContext==='personal'?'Criar pasta':'Enviar conjunto'}}
 
 async function deleteRepositoryPackage(id){const p=state.repositoryPackages.find(x=>x.id===id);if(!p||!canManageRepoPackage(p))return toast('Você não pode excluir este conjunto.');if(!confirm(`Excluir “${p.title||'este conjunto'}” e seus arquivos?`))return;try{const f=FB(),pref=f.doc(window.db,'rede_repository_packages',id),snap=await f.getDocs(f.collection(pref,'files'));for(const d of snap.docs){const x=d.data();if(x.storagePath){try{await f.deleteObject(f.sRef(window.storage,x.storagePath))}catch(_e){}}await f.deleteDoc(d.ref)}await f.deleteDoc(pref);closeOverlay('repoPackageOverlay');toast('Conjunto excluído.')}catch(e){console.error(e);toast(e.message||'Não foi possível excluir o conjunto.')}}
 window.openRepositoryPackage=openRepositoryPackage;window.deleteRepositoryPackage=deleteRepositoryPackage;
@@ -5590,11 +5665,11 @@ async function publishRepositoryPackageFile(packageId,fileId){const p=state.repo
 function repoRootByOwner(ownerId){return (state.personalRepoRoots||[]).find(r=>r.ownerMemberId===ownerId)||(ownerId===myId?state.personalRepoRoot:null)}
 function renderPersonalRepoSharePeople(){const q=($('#personalRepoShareSearch')?.value||'').trim().toLowerCase(),selected=new Set(repoRootCollaborators()),wrap=$('#personalRepoShareList');if(!wrap)return;wrap.innerHTML=state.members.filter(m=>m.status!=='inativo'&&m.id!==myId&&(!q||m.nome.toLowerCase().includes(q))).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>`<label class="repo-share-row"><input type="checkbox" value="${m.id}" ${selected.has(m.id)?'checked':''}><span><b>${esc(m.nome)}</b><small>${esc(NIVEIS[m.nivel]?.label||m.programa||'Integrante da Rede')}</small></span></label>`).join('')}
 function openPersonalRepoSharing(){if(!myId)return;$('#personalRepoShareSearch').value='';renderPersonalRepoSharePeople();openOverlay('personalRepoShareOverlay')}
-async function savePersonalRepoSharing(){await ensurePersonalRepositoryRoot();const btn=$('#personalRepoShareSaveBtn'),selected=[...document.querySelectorAll('#personalRepoShareList input:checked')].map(x=>x.value),old=new Set(repoRootCollaborators()),newly=selected.filter(id=>!old.has(id)),f=FB(),uid=window.auth.currentUser.uid,m=memberById(myId),rootRef=f.doc(window.db,'rede_personal_repositories',myId);try{btn.disabled=true;await f.setDoc(rootRef,{ownerUid:uid,ownerMemberId:myId,ownerName:m?.nome||myName||'',allowedMemberIds:[myId,...selected],collaboratorMemberIds:selected,updatedAt:f.serverTimestamp()},{merge:true});const mine=personalPackagesOwned(),batch=f.writeBatch(window.db);for(const p of mine){const extras=new Set(p.folderExtraMemberIds||((p.allowedMemberIds||[]).filter(id=>id!==myId&&!(p.rootSharedMemberIds||[]).includes(id))));let allowed=[];if(p.accessMode==='group')allowed=state.members.filter(x=>x.status!=='inativo').map(x=>x.id);else allowed=[...new Set([myId,...selected,...extras])];batch.update(f.doc(window.db,'rede_repository_packages',p.id),{allowedMemberIds:allowed,rootSharedMemberIds:selected,folderExtraMemberIds:[...extras],updatedAt:f.serverTimestamp()})}if(mine.length)await batch.commit();await Promise.allSettled(newly.map(id=>createRepoNotification(id,{kind:'repositorio_compartilhado',sourceType:'repositorio_pessoal',sourceId:myId,ownerId:myId,title:'🔐 Repositório compartilhado com você',message:`${m?.nome||'Um Carbonauta'} deu acesso ao repositório pessoal.`})));closeOverlay('personalRepoShareOverlay');toast('Acessos do repositório atualizados.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'Publique as regras P22 no Firestore.':(e.message||'Não foi possível salvar os acessos.'))}finally{btn.disabled=false}}
+async function savePersonalRepoSharing(){await ensurePersonalRepositoryRoot();const btn=$('#personalRepoShareSaveBtn'),selected=[...document.querySelectorAll('#personalRepoShareList input:checked')].map(x=>x.value),old=new Set(repoRootCollaborators()),newly=selected.filter(id=>!old.has(id)),f=FB(),uid=window.auth.currentUser.uid,m=memberById(myId),rootRef=f.doc(window.db,'rede_personal_repositories',myId);try{btn.disabled=true;await f.setDoc(rootRef,{ownerUid:uid,ownerMemberId:myId,ownerName:m?.nome||myName||'',allowedMemberIds:[myId,...selected],collaboratorMemberIds:selected,updatedAt:f.serverTimestamp()},{merge:true});const mine=personalPackagesOwned(),batch=f.writeBatch(window.db);for(const p of mine){const extras=p.accessMode==='group'?new Set():new Set(p.folderExtraMemberIds||((p.allowedMemberIds||[]).filter(id=>id!==myId&&!(p.rootSharedMemberIds||[]).includes(id))));const allowed=[...new Set([myId,...selected,...extras])];batch.update(f.doc(window.db,'rede_repository_packages',p.id),{allowedMemberIds:allowed,rootSharedMemberIds:selected,folderExtraMemberIds:[...extras],updatedAt:f.serverTimestamp()})}if(mine.length)await batch.commit();await Promise.allSettled(newly.map(id=>createRepoNotification(id,{kind:'repositorio_compartilhado',sourceType:'repositorio_pessoal',sourceId:myId,ownerId:myId,title:'🔐 Repositório compartilhado com você',message:`${m?.nome||'Um Carbonauta'} deu acesso ao repositório pessoal.`})));closeOverlay('personalRepoShareOverlay');toast('Acessos do repositório atualizados.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'Publique as regras P22 no Firestore.':(e.message||'Não foi possível salvar os acessos.'))}finally{btn.disabled=false}}
 function renderFolderAccessPeople(p){const q=($('#repoFolderAccessSearch')?.value||'').trim().toLowerCase(),selected=new Set(p?.folderExtraMemberIds||[]),rootIds=rootAllowedMemberIds(p?.ownerMemberId),wrap=$('#repoFolderAccessList');if(!wrap)return;wrap.innerHTML=state.members.filter(m=>m.status!=='inativo'&&m.id!==p.ownerMemberId&&(!q||m.nome.toLowerCase().includes(q))).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).map(m=>`<label class="repo-share-row"><input type="checkbox" value="${m.id}" ${selected.has(m.id)?'checked':''} ${rootIds.has(m.id)?'disabled':''}><span><b>${esc(m.nome)}</b><small>${rootIds.has(m.id)?'Já tem acesso ao repositório inteiro':'Acesso somente a esta pasta'}</small></span></label>`).join('')}
 function syncFolderAccessPeopleVisibility(){const mode=$('#repoFolderAccessMode')?.value||'private';if($('#repoFolderExtraPeopleRow'))$('#repoFolderExtraPeopleRow').style.display=mode==='selected'?'block':'none'}
 function openRepoFolderAccess(id){const p=state.repositoryPackages.find(x=>x.id===id);if(!p||!canManageRepoPackage(p))return toast('Você não pode alterar o acesso desta pasta.');activeRepoFolderAccessId=id;$('#repoFolderAccessTitle').textContent='👥 Acesso · '+(p.title||'Pasta');$('#repoFolderAccessMode').value=p.accessMode||'private';$('#repoFolderAccessSearch').value='';renderFolderAccessPeople(p);syncFolderAccessPeopleVisibility();openOverlay('repoFolderAccessOverlay')}
-async function saveRepoFolderAccess(){const p=state.repositoryPackages.find(x=>x.id===activeRepoFolderAccessId);if(!p||!canManageRepoPackage(p))return;const mode=$('#repoFolderAccessMode').value,extras=mode==='selected'?[...document.querySelectorAll('#repoFolderAccessList input:checked:not(:disabled)')].map(x=>x.value):[],rootIds=rootAllowedMemberIds(p.ownerMemberId),allowed=mode==='group'?state.members.filter(m=>m.status!=='inativo').map(m=>m.id):[...new Set([...rootIds,...extras,myId])],btn=$('#repoFolderAccessSaveBtn'),f=FB();try{btn.disabled=true;await f.updateDoc(f.doc(window.db,'rede_repository_packages',p.id),{accessMode:mode,allowedMemberIds:allowed,folderExtraMemberIds:extras,rootSharedMemberIds:[...rootIds].filter(id=>id!==p.ownerMemberId),updatedAt:f.serverTimestamp()});closeOverlay('repoFolderAccessOverlay');toast('Acesso da pasta atualizado.');if($('#repoPackageOverlay')?.classList.contains('open'))await openRepositoryPackage(p.id)}catch(e){console.error(e);toast(e.message||'Não foi possível atualizar o acesso.')}finally{btn.disabled=false}}
+async function saveRepoFolderAccess(){const p=state.repositoryPackages.find(x=>x.id===activeRepoFolderAccessId);if(!p||!canManageRepoPackage(p))return;const mode=$('#repoFolderAccessMode').value,extras=mode==='selected'?[...document.querySelectorAll('#repoFolderAccessList input:checked:not(:disabled)')].map(x=>x.value):[],rootIds=rootAllowedMemberIds(p.ownerMemberId),allowed=[...new Set([...rootIds,...extras,myId])],btn=$('#repoFolderAccessSaveBtn'),f=FB();try{btn.disabled=true;await f.updateDoc(f.doc(window.db,'rede_repository_packages',p.id),{accessMode:mode,allowedMemberIds:allowed,folderExtraMemberIds:extras,rootSharedMemberIds:[...rootIds].filter(id=>id!==p.ownerMemberId),updatedAt:f.serverTimestamp()});closeOverlay('repoFolderAccessOverlay');toast('Acesso da pasta atualizado.');if($('#repoPackageOverlay')?.classList.contains('open'))await openRepositoryPackage(p.id)}catch(e){console.error(e);toast(e.message||'Não foi possível atualizar o acesso.')}finally{btn.disabled=false}}
 window.addFilesToRepositoryPackage=addFilesToRepositoryPackage;window.deleteRepositoryPackageFile=deleteRepositoryPackageFile;window.publishRepositoryPackageFile=publishRepositoryPackageFile;window.openRepoFolderAccess=openRepoFolderAccess;
 
 
@@ -6951,6 +7026,7 @@ $('#enableDeviceNotifications').onclick=requestDeviceNotifications;
 $('#markAllNotifications').onclick=markAllNotificationsRead;
 $('#saveMember').onclick=saveMember;
 $('#deleteMember').onclick=deleteMember;
+$('#purgeMember').onclick=()=>permanentlyDeleteMember(editingId);
 $('#mHub').onchange=e=>{$('#mHubMotivo').style.display=e.target.checked?'block':'none'};
 $('#mBolsista').onchange=toggleScholarFields;
 $('#vincSearch').addEventListener('input',renderVincPick);
@@ -8050,7 +8126,7 @@ let pendingImageData='', pendingImageName='', removeExistingImage=false, renderQ
 
 function S(){try{return state}catch(_e){return null}}
 function F(){return window.fbFns||null}
-function admin(){try{return !!isAdmin}catch(_e){return window.auth?.currentUser?.email==='ernandes.sobreira@gmail.com'}}
+function admin(){try{return !!isAdmin}catch(_e){return false}}
 function toastMsg(t){try{if(typeof toast==='function')return toast(t)}catch(_e){};window.toast?.(t)}
 function closeOv(id){try{if(typeof closeOverlay==='function')return closeOverlay(id)}catch(_e){};$('#'+id)?.classList.remove('open')}
 function esc(v=''){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]))}
@@ -9075,7 +9151,7 @@ function generalMessages(){return chatDocs.filter(x=>x.tipo!=='recado'&&x.tipo!=
 function groupMessages(id){return chatDocs.filter(x=>x.tipo==='chat_group_message'&&x.groupId===id)}
 function msgAuthor(item){const m=member(item.authorId);return {name:m?.nome||item.author||'Carbonauta',foto:m?.foto||item.authorFoto||'',color:item.authorColor||'#6b7f87'}}
 function topicOf(item){return norm(item.topic)||'Geral'}
-function canDelete(item){return !!(item.authorId&&item.authorId===myMemberId)||window.auth?.currentUser?.email==='ernandes.sobreira@gmail.com'}
+function canDelete(item){return !!(item.authorId&&item.authorId===myMemberId)||!!isAdmin}
 
 function injectCss(){
  if($('#p46ChatStyle'))return;
@@ -10713,8 +10789,8 @@ async function myProfile(){
   try{const F=f(),snap=await F.getDoc(F.doc(window.db,'rede_users',uid));if(!snap.exists())return null;myProfileCache={...snap.data(),uid};return myProfileCache}catch(e){console.warn('P64 perfil',e);return null}
 }
 async function isCoordinator(){
-  const u=window.auth?.currentUser;if(!u)return false;if((u.email||'').toLowerCase()==='ernandes.sobreira@gmail.com')return true;
-  const p=await myProfile();return p?.role==='coordinator'||p?.memberId==='seed-ernandes-sobreira-oliveira-junior';
+  const u=window.auth?.currentUser;if(!u)return false;
+  const p=await myProfile();return p?.role==='coordinator';
 }
 
 function injectCss(){
@@ -11623,7 +11699,7 @@ function injectSection(){
 function fillUnlinked(){
   const sel=document.getElementById('p74Member');if(!sel)return;
   const linked=new Set(usersCache.map(u=>u.memberId).filter(Boolean));
-  const rows=membersCache.filter(m=>m.status!=='inativo'&&!linked.has(m.id)).sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
+  const rows=membersCache.filter(m=>m.status!=='inativo'&&m.status!=='egresso'&&!linked.has(m.id)).sort((a,b)=>(a.nome||'').localeCompare(b.nome||'','pt-BR'));
   sel.innerHTML=rows.length?'<option value="">Selecione…</option>'+rows.map(m=>`<option value="${esc(m.id)}">${esc(m.nome||m.id)}</option>`).join(''):'<option value="">Todos os alunos já têm conta vinculada</option>';
 }
 function augmentResetButtons(){
@@ -11650,7 +11726,10 @@ async function createAccess(){
   try{
     btn.disabled=true;btn.textContent='Criando acesso…';
     const cred=await f.createUserWithEmailAndPassword(window.secondaryAuth,email,password);created=cred.user;await f.signOut(window.secondaryAuth);
-    await f.setDoc(f.doc(window.db,'rede_users',created.uid),{memberId,nome:m?.nome||'',email,role:'student',createdAt:f.serverTimestamp(),createdBy:window.auth?.currentUser?.uid||''});
+    const batch=f.writeBatch(window.db);
+    batch.set(f.doc(window.db,'rede_users',created.uid),{memberId,nome:m?.nome||'',email,role:'student',createdAt:f.serverTimestamp(),createdBy:window.auth?.currentUser?.uid||''});
+    batch.set(f.doc(window.db,'rede_member_claims',memberId),{uid:created.uid,memberId,email,createdAt:f.serverTimestamp()});
+    await batch.commit();
     document.getElementById('p74Email').value='';document.getElementById('p74Password').value='';
     toastSafe(`✓ Conta criada e vinculada a ${m?.nome||'Carbonauta'}.`);await refresh(true)
   }catch(e){
@@ -12761,7 +12840,7 @@ const BONUS_OPTIONS=[0,5,8,10,12,15];
 let items=[],monthCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1),editingId='',pendingImageData='',pendingImageName='',unsub=null,renderQueued=false;
 function F(){return window.fbFns}
 function S(){try{return state}catch(_e){return null}}
-function admin(){try{return !!isAdmin}catch(_e){return window.auth?.currentUser?.email==='ernandes.sobreira@gmail.com'}}
+function admin(){try{return !!isAdmin}catch(_e){return false}}
 function myMemberId(){try{return myId||''}catch(_e){return''}}
 function myDisplayName(){try{return myName||S()?.members?.find(m=>m.id===myMemberId())?.nome||'Coordenação'}catch(_e){return'Coordenação'}}
 function esc(v=''){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
