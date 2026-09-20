@@ -1,8 +1,10 @@
-/* Carbonautas P161 · controles unificados da Rede
+/* Carbonautas P162 · controles unificados da Rede
    - usa uma única barra para busca, filtros e ajustes
    - mantém os controles nativos e seus handlers; apenas reorganiza o DOM
    - remove a duplicação visual criada pelos dois toolbars P135
-   - filtros aplicam uma única renderização por clique
+   - filtros de relação aplicam uma única renderização por clique
+   - Ajustes abre/fecha instantaneamente no mesmo local dos filtros
+   - corrige controles móveis que herdavam posição lateral/oculta
    - não grava nem altera dados do Firebase
 */
 (function(){
@@ -30,14 +32,16 @@ function css(){
 #p135RedeToolbar.p161-unified .p135-rede-modes::-webkit-scrollbar{display:none}
 #p135RedeToolbar.p161-unified .p135-rede-mode{min-height:34px;border:1px solid #d7e4e2;background:#fff;color:#506b74;border-radius:999px;padding:7px 11px;font-size:11px;font-weight:850;white-space:nowrap}
 #p135RedeToolbar.p161-unified .p135-rede-mode.on{background:#168f94;border-color:#168f94;color:#fff}
+#p135RedeToolbar.p161-unified .p135-settings-btn,#p135RedeToolbar.p161-unified .p135-rede-settings-btn{display:none!important}
 .p161-settings-toggle{flex:0 0 auto;min-height:36px;border:1px solid #cadfdb;background:#f2f9f8;color:#244b58;border-radius:12px;padding:7px 11px;font-size:11px;font-weight:900;white-space:nowrap}
 .p161-settings-toggle[aria-expanded="true"]{background:#173f49;border-color:#173f49;color:#fff}
 #p135RedeToolbar.p161-unified .p135-rede-insight{order:4;flex:1 1 100%;font-size:10px;color:#71858d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#p161RedeSettings{order:5;flex:1 1 100%;display:none;border:1px solid #dce8e6;background:#f7fbfa;border-radius:16px;padding:10px;min-width:0}
+#p161RedeSettings{order:5;flex:1 1 100%;display:none;border:1px solid #dce8e6;background:#f7fbfa;border-radius:16px;padding:10px;min-width:0;max-height:min(58dvh,520px);overflow:auto;overscroll-behavior:contain}
 #p161RedeSettings.open{display:block}
-.p161-settings-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.p161-settings-head{display:flex;align-items:center;gap:8px;margin-bottom:9px;position:sticky;top:-10px;z-index:4;background:#f7fbfa;padding:4px 0 6px}
 .p161-settings-head b{font-size:13px;color:#21434e;flex:1}.p161-settings-head small{font-size:9.5px;color:#7a8c92}
-#p161RedeSettings .side{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%!important;max-width:none!important;border:0!important;padding:0!important;overflow:visible!important;background:transparent!important}
+#p161RedeSettings .side{position:static!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;transform:none!important;transition:none!important;box-shadow:none!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%!important;max-width:none!important;flex:none!important;border:0!important;padding:0!important;overflow:visible!important;background:transparent!important}
+#p161RedeSettings .side.open{transform:none!important}
 #p161RedeSettings .side>.side-mobile-head{display:none!important}
 #p161RedeSettings .side>.block{margin:0!important;border:1px solid #dfe9e7!important;border-radius:13px!important;background:#fff!important;padding:9px!important;min-width:0}
 #p161RedeSettings .side>.block h3{margin:0 0 7px!important;font-size:11px!important}
@@ -56,7 +60,8 @@ function css(){
   #p135RedeToolbar.p161-unified .p161-control-row{order:3;gap:6px}
   #p135RedeToolbar.p161-unified .p135-rede-modes{flex:1 1 auto}
   .p161-settings-toggle{padding:7px 9px}
-  #p161RedeSettings{padding:8px;border-radius:14px}
+  #p161RedeSettings{padding:8px;border-radius:14px;max-height:52dvh}
+  .p161-settings-head{top:-8px}
   #p161RedeSettings .side{grid-template-columns:1fr!important;gap:7px}
   #p161RedeSettings .graph-controls{grid-template-columns:1fr 1fr!important;gap:7px}
   #p161RedeSettings .graph-controls select{grid-column:1/-1}
@@ -70,7 +75,7 @@ function css(){
 function renderOnce(){
   cancelAnimationFrame(renderRAF);
   renderRAF=requestAnimationFrame(()=>{
-    try{(window.renderGraph||renderGraph)?.()}catch(e){console.warn('P161 render',e)}
+    try{(window.renderGraph||renderGraph)?.()}catch(e){console.warn('P162 render',e)}
   });
 }
 function syncLegend(mode){
@@ -79,12 +84,15 @@ function syncLegend(mode){
 }
 function bindModes(bar){
   const modes=$('.p135-rede-modes',bar);if(!modes)return;
+  const current=String(window.__p135NetworkMode||'all');
+  const normalized={orientacao:'orientation',projetos:'projects',producao:'production'}[current]||current;
   const defs=[['all','Todos'],['orientation','Orientação'],['projects','Projetos'],['production','Produção']];
-  modes.innerHTML=defs.map(([v,t],i)=>`<button type="button" class="p135-rede-mode${i===0?' on':''}" data-p135-mode="${v}">${t}</button>`).join('');
+  modes.innerHTML=defs.map(([v,t])=>`<button type="button" class="p135-rede-mode${v===normalized?' on':''}" data-p135-mode="${v}">${t}</button>`).join('');
   modes.querySelectorAll('[data-p135-mode]').forEach(btn=>{
     btn.onclick=e=>{
       e.preventDefault();
       const mode=btn.dataset.p135Mode||'all';
+      if(String(window.__p135NetworkMode||'all')===mode&&btn.classList.contains('on'))return;
       window.__p135NetworkMode=mode;
       modes.querySelectorAll('[data-p135-mode]').forEach(x=>x.classList.toggle('on',x===btn));
       syncLegend(mode);
@@ -93,8 +101,6 @@ function bindModes(bar){
       renderOnce();
     };
   });
-  const current=String(window.__p135NetworkMode||'all');
-  const normalized={orientacao:'orientation',projetos:'projects',producao:'production'}[current]||current;
   const active=$(`[data-p135-mode="${normalized}"]`,modes)||$('[data-p135-mode="all"]',modes);
   modes.querySelectorAll('[data-p135-mode]').forEach(x=>x.classList.toggle('on',x===active));
   window.__p135NetworkMode=active?.dataset.p135Mode||'all';
@@ -110,7 +116,7 @@ function bindFit(){
     try{
       if(typeof window.fitView==='function')window.fitView();
       else if(typeof fitView==='function')fitView();
-    }catch(err){console.warn('P161 fitView',err)}
+    }catch(err){console.warn('P162 fitView',err)}
   };
 }
 function ensurePlaceholder(){
@@ -152,7 +158,7 @@ function mount(){
   let panel=$('#p161RedeSettings',base);
   if(!panel){panel=document.createElement('div');panel.id='p161RedeSettings';panel.innerHTML='<div class="p161-settings-head"><b>Ajustes e filtros</b><small>toque novamente em Ajustes para fechar</small></div>';base.appendChild(panel)}
 
-  const side=$('#side');if(side&&side.parentElement!==panel)panel.appendChild(side);
+  const side=$('#side');if(side&&side.parentElement!==panel){side.classList.remove('open');panel.appendChild(side)}
   const controls=$('#viewRede .graph-controls')||$('#p135RedeSettings .graph-controls')||$('.graph-controls');
   if(controls&&controls.parentElement!==panel){controls.style.removeProperty('display');panel.appendChild(controls)}
   if(controls)controls.style.display='';
@@ -162,7 +168,6 @@ function mount(){
     const open=!panel.classList.contains('open');
     panel.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open));
   };
-  $('#sideCloseBtn')?.addEventListener('click',()=>{panel.classList.remove('open');toggle.setAttribute('aria-expanded','false')});
   bindModes(base);bindFit();
   return true;
 }
@@ -173,11 +178,11 @@ function repair(){
 function boot(){
   css();repair();
   [180,650,1200,2100].forEach(ms=>setTimeout(repair,ms));
-  document.addEventListener('carbonautas:viewchange',repair);
   const mo=new MutationObserver(ms=>{
     if(ms.some(m=>m.type==='attributes'&&m.attributeName==='data-view')&&document.body.dataset.view==='rede')setTimeout(repair,0);
+    if(ms.some(m=>m.type==='childList')&&document.body.dataset.view==='rede'&&!$('#p161SettingsToggle'))setTimeout(repair,0);
   });
-  mo.observe(document.body,{attributes:true,attributeFilter:['data-view']});
+  mo.observe(document.body,{attributes:true,attributeFilter:['data-view'],childList:true,subtree:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
