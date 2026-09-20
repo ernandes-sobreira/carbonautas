@@ -6,7 +6,7 @@ Plataforma da Rede Carbonautas (LIPAN/LEFA/CELBE, UNEMAT). Arquivo unico `index.
 
 | Caminho | Uso |
 |---|---|
-| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P201 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
+| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P202 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
 | `sw.js` | Service worker. So cache e pagina offline. Nao injeta mais nada no HTML |
 | `game.html`, `recovery.html`, `chrome-reset.html`, `manifest.webmanifest`, icones | Publicar junto na raiz |
 | `firestore.rules` | Unica fonte das regras. Publicar no Console do Firebase. Contem tambem as regras de outros sistemas (`projects/`) |
@@ -36,6 +36,14 @@ Para restaurar por Git: `git checkout P126-pre-consolidacao -- .`
 4. Testar em janela anonima.
 
 ## CHANGELOG
+
+### P202 · 2026-09-20 · Cartão acadêmico compartilhável
+- Perfis de Pessoas ganham uma carta acadêmica própria no baralho de acompanhamento.
+- A própria pessoa e a coordenação podem preencher minibio, Currículo Lattes e ORCID.
+- O cartão pode ser baixado em PNG e compartilhado pelo recurso nativo do celular; no desktop há fallback com download/cópia.
+- Os links de Lattes e ORCID ficam clicáveis dentro da plataforma.
+- `firestore.rules` passa a permitir que a própria pessoa atualize somente esses três novos campos, além dos campos pessoais já autorizados.
+- Não alterado: permissões administrativas, conversas privadas, VPS ou dados de acompanhamento.
 
 ### P201 · 2026-09-20 · Voltar das conversas privadas
 - O botão de voltar no chat privado agora fecha a conversa pelo fluxo completo (`closePrivateThread`).

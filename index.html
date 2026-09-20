@@ -7328,11 +7328,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P201-20260920';
+window.CARBONAUTAS_BUILD='P202-20260920';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P201-20260920',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P202-20260920',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -13525,6 +13525,17 @@ function overviewCard(m,can){
   const h=healthFor(m),details=p135HealthDetails(m),c=statusCounts(m),av=m.foto?`<img src="${esc97(m.foto)}" alt="">`:esc97(initials97(m.nome));
   return {title:'Visão geral',kicker:'ACOMPANHAMENTO',html:`<div class="p97-card-kicker">PASTA DE ACOMPANHAMENTO</div><div class="p97-card-title">Situação agora</div><div class="p97-personhero"><div class="av">${av}</div><div><h3>${esc97(m.nome)}</h3><p>${esc97(memberLevel(m))}${m.programa?' · '+esc97(m.programa):''}${m.bolsista?' · Bolsista':''}</p></div><span class="p97-health ${healthClass(h)}">● ${healthLabel(h)}</span></div><div class="p97-summarychips"><span>${c.open} itens abertos</span><span>${c.late} atrasados</span><span>${c.corr} correções</span><span>${c.soon} prazo(s) em 30 dias</span></div><div class="p97-info full"><label>Por que está assim?</label>${p135HealthDetailsHTML(details,h.reasons)}</div>${p135SnapshotHTML(m)}<div class="p97-card-actions">${can?`<button class="primary" type="button" data-p97-action="activity" data-mid="${esc97(m.id)}">＋ Registrar</button>`:''}<button type="button" data-p97-action="dossier" data-mid="${esc97(m.id)}">Dossiê</button><button type="button" data-p97-action="repo" data-mid="${esc97(m.id)}">As coisa tudo</button></div>`};
 }
+
+function p202AcademicUrl(v){
+  const raw=String(v||'').trim();if(!raw)return'';
+  try{const u=new URL(raw);return /^https?:$/.test(u.protocol)?u.href:''}catch(_e){return''}
+}
+function p202OrcidId(v){return (String(v||'').match(/\d{4}-\d{4}-\d{4}-[\dX]{4}/i)||[])[0]||''}
+function academicCard(m,can){
+  const bio=String(m.minibio||'').trim(),lattes=p202AcademicUrl(m.lattesUrl),orcid=p202AcademicUrl(m.orcidUrl),av=m.foto?`<img src="${esc97(m.foto)}" alt="">`:esc97(initials97(m.nome)),missing=[!bio?'minibio':'',!lattes?'Lattes':'',!orcid?'ORCID':''].filter(Boolean);
+  return {title:'Cartão acadêmico',kicker:'PERFIL',html:`<div class="p202-academic"><div class="p202-academic-head"><span class="p202-academic-badge">✦ perfil acadêmico</span><span class="p202-academic-note">pronto para evento</span></div><div class="p202-academic-person"><div class="p202-academic-av">${av}</div><div><h3>${esc97(m.nome)}</h3><p>${esc97(memberLevel(m))}${m.programa?' · '+esc97(m.programa):''}</p></div></div><div class="p202-academic-bio ${bio?'':'empty'}">${bio?esc97(bio):'Adicione uma minibio curta para apresentar esta pessoa em eventos, mesas e colaborações.'}</div><div class="p202-academic-links"><a class="p202-academic-link ${lattes?'':'off'}" ${lattes?`href="${esc97(lattes)}" target="_blank" rel="noopener"`:''}>📚 Currículo Lattes</a><a class="p202-academic-link ${orcid?'':'off'}" ${orcid?`href="${esc97(orcid)}" target="_blank" rel="noopener"`:''}>🟢 ORCID${orcid?` · ${esc97(p202OrcidId(orcid))}`:''}</a></div>${missing.length&&can?`<div class="p202-academic-missing">Complete ${esc97(missing.join(', '))} para deixar o cartão pronto para compartilhar.</div>`:''}<div class="p97-card-actions">${can?`<button class="primary" type="button" data-p97-action="academic-edit" data-mid="${esc97(m.id)}">✎ Editar cartão</button>`:''}<button type="button" data-p97-action="academic-download" data-mid="${esc97(m.id)}">↓ Baixar PNG</button><button type="button" data-p97-action="academic-share" data-mid="${esc97(m.id)}">↗ Compartilhar</button></div></div>`};
+}
+
 function timelineCard(m,can){
   const acts=actsFor(m.id),periods=acts.filter(a=>['mestrado','doutorado','tcc'].includes(a.type)),bits=[];
   if(m.bolsista)bits.push(periodHtml('🎓 Bolsa',m.bolsaModalidade||'Bolsa',m.bolsaInicio,m.bolsaFim,0));
@@ -13539,7 +13550,7 @@ function pendingCard(m,can){
   const c=statusCounts(m),acts=actsFor(m.id),pending=acts.filter(a=>!activityDone(a)&&(overdue(a)||['correcao','pendencia','entrega'].includes(a.type))).sort((a,b)=>(overdue(b)?1:0)-(overdue(a)?1:0)||(String(a.dueDate||'9999')).localeCompare(String(b.dueDate||'9999')));
   return {title:'Pendências e ação',kicker:'AÇÃO',html:`<div class="p97-card-kicker">⚡ pendências e ação</div><div class="p97-card-title">O que precisa acontecer agora?</div><div class="p97-pending-grid"><div class="p97-metric"><strong>${c.late}</strong><span>itens atrasados</span></div><div class="p97-metric"><strong>${c.corr}</strong><span>correções abertas</span></div><div class="p97-metric"><strong>${c.soon}</strong><span>prazos em 30 dias</span></div><div class="p97-metric"><strong>${c.open}</strong><span>itens abertos</span></div></div><div style="height:10px"></div>${pending.length?pending.slice(0,8).map(a=>followHtml(a,can)).join(''):'<div class="p97-empty">Nada urgente registrado nesta pasta.</div>'}${can?`<div class="p97-card-actions"><button type="button" data-p97-action="checkin" data-mid="${esc97(m.id)}">✓ Check-in</button><button type="button" data-p97-action="product" data-mid="${esc97(m.id)}">🎯 Produto</button><button type="button" data-p97-action="preset" data-kind="pendencia" data-mid="${esc97(m.id)}">⚠️ Pendência</button><button type="button" data-p97-action="preset" data-kind="correcao" data-mid="${esc97(m.id)}">✍️ Correção</button></div>`:''}`};
 }
-function buildDeckCards(m){const can=memberCanEdit(m.id);return [overviewCard(m,can),projectCard(m,can),timelineCard(m,can),historyCard(m,can),pendingCard(m,can)]}
+function buildDeckCards(m){const can=memberCanEdit(m.id);return [overviewCard(m,can),academicCard(m,can),projectCard(m,can),timelineCard(m,can),historyCard(m,can),pendingCard(m,can)]}
 
 function ensureDeck(){
   let ov=$('#p97Deck');if(ov)return ov;
@@ -13548,7 +13559,7 @@ function ensureDeck(){
     <section class="p97-table" role="dialog" aria-modal="true" aria-label="Acompanhamento em cartas">
       <header class="p97-deck-head"><button type="button" data-p97-close>← Pastas</button><div class="p97-deck-title"><span id="p97DeckKicker">ACOMPANHAMENTO</span><b id="p97DeckName">Carbonauta</b></div><button type="button" class="x" data-p97-close>×</button></header>
       <div class="p97-stage-wrap"><div class="p97-stage" id="p97Stage"></div></div>
-      <footer class="p97-deck-nav"><button type="button" class="prev">← Anterior</button><div class="p97-deck-count"><small id="p97CardTitle">CARTA</small><b id="p97CardCount">1 de 5</b></div><button type="button" class="next">Próxima →</button></footer>
+      <footer class="p97-deck-nav"><button type="button" class="prev">← Anterior</button><div class="p97-deck-count"><small id="p97CardTitle">CARTA</small><b id="p97CardCount">1 de 6</b></div><button type="button" class="next">Próxima →</button></footer>
     </section>`;
   document.body.appendChild(ov);
   ov.addEventListener('click',e=>{
@@ -13559,6 +13570,9 @@ function ensureDeck(){
     if(action==='activity')call('openActivity',null,mid);
     else if(action==='dossier')call('openDossier',mid);
     else if(action==='repo')call('openMemberRepository',mid);
+    else if(action==='academic-edit')call('openAcademicCardEditor',mid);
+    else if(action==='academic-download')call('downloadAcademicCard',mid);
+    else if(action==='academic-share')call('shareAcademicCard',mid);
     else if(action==='project')call('openProjectProfile',mid);
     else if(action==='checkin')call('openCheckin',mid);
     else if(action==='product')call('openProduct',mid);
@@ -13589,6 +13603,7 @@ function refreshOpenDeck(){
   if(!deckMemberId)return;const s=appState(),m=(s?.members||[]).find(x=>x.id===deckMemberId);if(!m){closeDeck();return}
   const oldTitle=deckCards[deckCardIndex]?.title;deckCards=buildDeckCards(m);const i=deckCards.findIndex(c=>c.title===oldTitle);if(i>=0)deckCardIndex=i;renderDeckCard(0,true);
 }
+window.p202RefreshAcademicDeck=refreshOpenDeck;
 
 function renderAfterTrack(){renderFolders();refreshOpenDeck()}
 function installTrackWrapper(){
@@ -15775,6 +15790,104 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',boo
   #p195Deck .p195-btn.primary{padding-inline:15px!important}
 }
 </style>
+
+<style id="p202AcademicCardStyle">
+/* P202 · cartão acadêmico compartilhável */
+.p202-academic{display:flex;flex-direction:column;gap:18px;min-height:100%;padding:4px 0 2px}
+.p202-academic-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.p202-academic-badge{display:inline-flex;align-items:center;gap:7px;width:max-content;border:1px solid #cce6e2;background:#eef9f7;color:#176d68;border-radius:999px;padding:7px 11px;font-size:10px;font-weight:900;letter-spacing:.09em;text-transform:uppercase}
+.p202-academic-note{font-size:10px;font-weight:800;color:#87989d;text-transform:uppercase;letter-spacing:.08em}
+.p202-academic-person{display:grid;grid-template-columns:112px minmax(0,1fr);gap:20px;align-items:center;padding:22px;border:1px solid #d9e7e5;border-radius:26px;background:linear-gradient(145deg,#fff 0%,#f2faf8 100%);box-shadow:0 16px 42px rgba(23,72,76,.08)}
+.p202-academic-av{width:112px;height:112px;border-radius:30px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(145deg,#138f92,#4f6f9e);color:#fff;font:900 34px/1 Inter,system-ui;box-shadow:0 12px 30px rgba(12,87,91,.18)}
+.p202-academic-av img{width:100%;height:100%;object-fit:cover}
+.p202-academic-person h3{margin:0;color:#173944;font-family:'Fraunces',serif;font-size:clamp(28px,4vw,42px);line-height:1.02;letter-spacing:-.03em}
+.p202-academic-person p{margin:8px 0 0;color:#688087;font-size:14px;font-weight:750}
+.p202-academic-bio{border:1px solid #dce7e5;border-radius:22px;padding:18px 20px;background:#fff;color:#294750;font-size:15px;line-height:1.58;min-height:116px;box-shadow:0 8px 24px rgba(22,61,66,.04)}
+.p202-academic-bio.empty{color:#839398;font-style:italic;display:flex;align-items:center}
+.p202-academic-links{display:flex;gap:10px;flex-wrap:wrap}
+.p202-academic-link{display:inline-flex;align-items:center;gap:8px;border:1px solid #d3e2e0;background:#fff;color:#1d5558;border-radius:15px;padding:11px 14px;text-decoration:none;font-size:12px;font-weight:900;box-shadow:0 6px 18px rgba(23,68,73,.04)}
+.p202-academic-link:hover{border-color:#9dcfca;background:#f2fbf9}
+.p202-academic-link.off{opacity:.45;pointer-events:none}
+.p202-academic-missing{border:1px dashed #e0c889;background:#fffaf0;color:#856a22;border-radius:16px;padding:11px 13px;font-size:11.5px;line-height:1.45}
+#p202AcademicOverlay{position:fixed;inset:0;z-index:2147483646;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(10,33,39,.58);backdrop-filter:blur(7px)}
+#p202AcademicOverlay.open{display:flex}
+.p202-editor{width:min(620px,100%);max-height:min(760px,92dvh);overflow:hidden;background:#fff;border:1px solid #dbe6e4;border-radius:28px;box-shadow:0 28px 90px rgba(12,43,49,.28);display:flex;flex-direction:column}
+.p202-editor-head{display:flex;align-items:center;gap:14px;padding:20px 22px;border-bottom:1px solid #e6eeec}
+.p202-editor-head .mark{width:46px;height:46px;border-radius:15px;background:linear-gradient(145deg,#138f92,#6670b9);display:grid;place-items:center;color:#fff;font-size:22px}
+.p202-editor-head div:nth-child(2){min-width:0;flex:1}.p202-editor-head b{display:block;color:#173944;font:700 22px/1.05 'Fraunces',serif}.p202-editor-head small{display:block;color:#7a8d92;margin-top:4px}
+.p202-editor-close{width:42px;height:42px;border:1px solid #d7e3e1;border-radius:14px;background:#fff;color:#284b54;font-size:22px}
+.p202-editor-body{padding:20px 22px;overflow:auto;display:flex;flex-direction:column;gap:15px}
+.p202-editor-field label{display:flex;justify-content:space-between;gap:12px;margin-bottom:7px;color:#425f66;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em}.p202-editor-field label span{color:#8a9a9f;font-weight:700;text-transform:none;letter-spacing:0}
+.p202-editor-field input,.p202-editor-field textarea{width:100%;border:1px solid #d3e1df;border-radius:15px;background:#fbfdfc;color:#173944;padding:12px 13px;outline:0;font:500 14px/1.45 Inter,system-ui}.p202-editor-field textarea{min-height:150px;resize:vertical}.p202-editor-field input:focus,.p202-editor-field textarea:focus{border-color:#168f94;box-shadow:0 0 0 3px rgba(22,143,148,.09)}
+.p202-editor-foot{display:flex;justify-content:flex-end;gap:9px;padding:14px 22px 20px;border-top:1px solid #e7eeee}.p202-editor-foot button{border:1px solid #d4e1df;background:#fff;color:#284a52;border-radius:14px;padding:11px 16px;font-weight:900}.p202-editor-foot .save{background:#168f94;color:#fff;border-color:#168f94}
+@media(max-width:760px){.p202-academic{gap:13px}.p202-academic-head{align-items:flex-start}.p202-academic-note{display:none}.p202-academic-person{grid-template-columns:82px minmax(0,1fr);gap:14px;padding:17px;border-radius:22px}.p202-academic-av{width:82px;height:82px;border-radius:24px;font-size:26px}.p202-academic-person h3{font-size:28px}.p202-academic-person p{font-size:12px}.p202-academic-bio{font-size:14px;min-height:100px;padding:15px 16px}.p202-academic-link{flex:1;justify-content:center;min-width:132px}.p202-editor{height:min(680px,92dvh);border-radius:24px}.p202-editor-head,.p202-editor-body{padding-left:17px;padding-right:17px}.p202-editor-foot{padding-left:17px;padding-right:17px}}
+</style>
+<script data-src="academic-card-p202.js" data-carbonautas-p202-academic="1">
+/* Carbonautas P202 · cartão acadêmico compartilhável */
+(function(){
+'use strict';
+const VERSION='P202';
+const $=(s,r=document)=>r.querySelector(s);
+let editingMemberId='';
+function appState(){try{return state}catch(_e){return null}}
+function member(id){return appState()?.members?.find?.(m=>m.id===id)||null}
+function canEdit(id){try{return typeof canEditMember==='function'?!!canEditMember(id):!!isAdmin||myId===id}catch(_e){return false}}
+function safeName(v){return String(v||'Carbonauta').trim()||'Carbonauta'}
+function slug(v){return safeName(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,70)||'carbonauta'}
+function normalizeLattes(v){v=String(v||'').trim();if(!v)return'';if(!/^https?:\/\//i.test(v))v='https://'+v;try{const u=new URL(v);return /^https?:$/.test(u.protocol)?u.href:''}catch(_e){return''}}
+function normalizeOrcid(v){v=String(v||'').trim();if(!v)return'';const id=(v.match(/\d{4}-\d{4}-\d{4}-[\dX]{4}/i)||[])[0];if(id)return'https://orcid.org/'+id.toUpperCase();if(!/^https?:\/\//i.test(v))v='https://orcid.org/'+v.replace(/^orcid\.org\//i,'');try{const u=new URL(v);return u.hostname.toLowerCase()==='orcid.org'?u.href:''}catch(_e){return''}}
+function orcidId(v){return (String(v||'').match(/\d{4}-\d{4}-\d{4}-[\dX]{4}/i)||[])[0]||''}
+function ensureOverlay(){
+  let ov=$('#p202AcademicOverlay');if(ov)return ov;
+  ov=document.createElement('div');ov.id='p202AcademicOverlay';ov.innerHTML=`<section class="p202-editor" role="dialog" aria-modal="true" aria-label="Editar cartão acadêmico"><header class="p202-editor-head"><div class="mark">✦</div><div><b>Cartão acadêmico</b><small>Minibio, Lattes e ORCID para compartilhar em eventos.</small></div><button type="button" class="p202-editor-close" data-p202-close>×</button></header><div class="p202-editor-body"><div class="p202-editor-field"><label>Minibio <span id="p202BioCount">0/500</span></label><textarea id="p202Bio" maxlength="500" placeholder="Ex.: Doutoranda em Ciências Ambientais. Pesquisa... "></textarea></div><div class="p202-editor-field"><label>Currículo Lattes <span>link completo</span></label><input id="p202Lattes" inputmode="url" placeholder="https://lattes.cnpq.br/..."></div><div class="p202-editor-field"><label>ORCID <span>link ou número</span></label><input id="p202Orcid" inputmode="url" placeholder="0000-0000-0000-0000"></div></div><footer class="p202-editor-foot"><button type="button" data-p202-close>Cancelar</button><button type="button" class="save" id="p202Save">Salvar cartão</button></footer></section>`;
+  document.body.appendChild(ov);
+  ov.addEventListener('click',e=>{if(e.target===ov||e.target.closest('[data-p202-close]'))closeEditor()});
+  $('#p202Bio',ov).addEventListener('input',e=>{$('#p202BioCount',ov).textContent=`${e.target.value.length}/500`});
+  $('#p202Save',ov).addEventListener('click',saveEditor);
+  return ov;
+}
+function closeEditor(){const ov=$('#p202AcademicOverlay');if(ov)ov.classList.remove('open');editingMemberId=''}
+function openEditor(id){
+  const m=member(id);if(!m)return window.toast?.('Não encontrei este perfil.');if(!canEdit(id))return window.toast?.('Só a própria pessoa ou a coordenação podem editar este cartão.');
+  const ov=ensureOverlay();editingMemberId=id;$('#p202Bio',ov).value=m.minibio||'';$('#p202Lattes',ov).value=m.lattesUrl||'';$('#p202Orcid',ov).value=m.orcidUrl||'';$('#p202BioCount',ov).textContent=`${($('#p202Bio',ov).value||'').length}/500`;ov.classList.add('open');setTimeout(()=>$('#p202Bio',ov)?.focus(),70);
+}
+async function saveEditor(){
+  const m=member(editingMemberId);if(!m||!canEdit(editingMemberId))return;
+  const ov=ensureOverlay(),bio=$('#p202Bio',ov).value.trim().slice(0,500),latRaw=$('#p202Lattes',ov).value.trim(),orcRaw=$('#p202Orcid',ov).value.trim(),lattes=normalizeLattes(latRaw),orcid=normalizeOrcid(orcRaw);
+  if(latRaw&&!lattes)return window.toast?.('Confira o link do Lattes.');if(orcRaw&&!orcid)return window.toast?.('Confira o ORCID. Ex.: 0000-0000-0000-0000.');
+  const btn=$('#p202Save',ov);btn.disabled=true;btn.textContent='Salvando…';
+  try{
+    await fbSetMember(editingMemberId,{minibio:bio,lattesUrl:lattes,orcidUrl:orcid});Object.assign(m,{minibio:bio,lattesUrl:lattes,orcidUrl:orcid});closeEditor();try{window.p202RefreshAcademicDeck?.()}catch(_e){}try{if(typeof renderDetail==='function'&&selectedId===m.id)renderDetail()}catch(_e){}window.toast?.('Cartão acadêmico atualizado.');
+  }catch(e){console.error('P202 salvar cartão',e);window.toast?.(e?.code==='permission-denied'?'As regras P202 do Firestore ainda precisam ser publicadas.':'Não consegui salvar o cartão acadêmico.');}
+  finally{btn.disabled=false;btn.textContent='Salvar cartão'}
+}
+function roundRect(ctx,x,y,w,h,r){r=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+function initials(name){return safeName(name).split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'?'}
+function wrapText(ctx,text,maxWidth,maxLines=99){const words=String(text||'').split(/\s+/).filter(Boolean),lines=[];let line='';for(const word of words){const next=line?line+' '+word:word;if(ctx.measureText(next).width<=maxWidth){line=next;continue}if(line)lines.push(line);line=word;if(lines.length>=maxLines-1)break}if(line&&lines.length<maxLines)lines.push(line);if(words.length&&lines.length===maxLines){let last=lines[maxLines-1];while(last&&ctx.measureText(last+'…').width>maxWidth)last=last.slice(0,-1);lines[maxLines-1]=last+'…'}return lines}
+async function imageFor(url){if(!url)return null;return await new Promise(resolve=>{const im=new Image();let done=false;const finish=v=>{if(done)return;done=true;resolve(v)};im.crossOrigin='anonymous';im.onload=()=>finish(im);im.onerror=()=>finish(null);setTimeout(()=>finish(null),3500);im.src=url})}
+function roleText(m){let level='';try{level=NIVEIS?.[m.nivel]?.label||NIVEIS?.[m.nivel]?.short||m.nivel||'Carbonauta'}catch(_e){level=m.nivel||'Carbonauta'}return [level,m.programa].filter(Boolean).join(' · ')}
+async function makeCanvas(m){
+  try{await document.fonts?.ready}catch(_e){}
+  const c=document.createElement('canvas');c.width=1080;c.height=1350;const x=c.getContext('2d');x.fillStyle='#f4faf8';x.fillRect(0,0,c.width,c.height);
+  const g=x.createLinearGradient(0,0,1080,360);g.addColorStop(0,'#0f7477');g.addColorStop(1,'#526da0');x.fillStyle=g;roundRect(x,52,52,976,270,42);x.fill();
+  x.fillStyle='rgba(255,255,255,.18)';x.beginPath();x.arc(930,110,130,0,Math.PI*2);x.fill();x.fillStyle='#fff';x.font='800 34px Inter, Arial';x.fillText('CARBONAUTAS',102,125);x.font='600 21px Inter, Arial';x.fillStyle='rgba(255,255,255,.82)';x.fillText('cartão acadêmico',102,164);
+  const photo=await imageFor(m.foto);x.save();x.beginPath();x.arc(195,315,96,0,Math.PI*2);x.clip();if(photo){const s=Math.min(photo.width,photo.height),sx=(photo.width-s)/2,sy=(photo.height-s)/2;x.drawImage(photo,sx,sy,s,s,99,219,192,192)}else{x.fillStyle='#ca5c79';x.fillRect(99,219,192,192);x.fillStyle='#fff';x.font='900 55px Inter, Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(initials(m.nome),195,315)}x.restore();x.textAlign='left';x.textBaseline='alphabetic';x.strokeStyle='#fff';x.lineWidth=12;x.beginPath();x.arc(195,315,102,0,Math.PI*2);x.stroke();
+  x.fillStyle='#173a45';x.font='700 47px Fraunces, Georgia, serif';const nameLines=wrapText(x,m.nome,650,2);nameLines.forEach((line,i)=>x.fillText(line,335,267+i*54));x.fillStyle='#61787f';x.font='700 23px Inter, Arial';x.fillText(roleText(m)||'Carbonauta',335,390);
+  x.fillStyle='#fff';roundRect(x,74,478,932,470,34);x.fill();x.strokeStyle='#dce9e6';x.lineWidth=2;roundRect(x,74,478,932,470,34);x.stroke();x.fillStyle='#7c9095';x.font='800 18px Inter, Arial';x.fillText('MINIBIO',112,530);x.fillStyle='#294952';x.font='500 26px Inter, Arial';const bio=m.minibio||'Minibio ainda não preenchida.';const bioLines=wrapText(x,bio,850,10);bioLines.forEach((line,i)=>x.fillText(line,112,584+i*39));
+  x.fillStyle='#edf8f6';roundRect(x,74,982,932,210,30);x.fill();x.fillStyle='#176d68';x.font='800 18px Inter, Arial';x.fillText('IDENTIFICADORES',112,1037);x.fillStyle='#244950';x.font='800 25px Inter, Arial';x.fillText(m.lattesUrl?'Currículo Lattes':'Lattes não informado',112,1092);x.font='700 23px Inter, Arial';x.fillStyle='#4f676d';x.fillText(m.orcidUrl?`ORCID ${orcidId(m.orcidUrl)||'informado'}`:'ORCID não informado',112,1140);
+  x.fillStyle='#173a45';x.font='800 21px Inter, Arial';x.fillText('Rede Carbonautas',74,1272);x.textAlign='right';x.fillStyle='#789095';x.font='600 18px Inter, Arial';x.fillText('perfil para eventos e colaboração',1006,1272);x.textAlign='left';return c;
+}
+function canvasBlob(canvas){return new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('PNG não gerado')),'image/png',0.96))}
+async function cardBlob(m){return canvasBlob(await makeCanvas(m))}
+function shareText(m){return [safeName(m.nome),roleText(m),m.minibio||'',m.lattesUrl?`Lattes: ${m.lattesUrl}`:'',m.orcidUrl?`ORCID: ${m.orcidUrl}`:''].filter(Boolean).join('\n\n')}
+function downloadBlob(blob,m){const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`cartao-academico-${slug(m.nome)}.png`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2500)}
+async function downloadCard(id){const m=member(id);if(!m)return;try{window.toast?.('Gerando cartão…');const b=await cardBlob(m);downloadBlob(b,m);window.toast?.('Cartão baixado em PNG.')}catch(e){console.error('P202 download',e);window.toast?.('Não consegui gerar a imagem do cartão.')}}
+async function shareCard(id){const m=member(id);if(!m)return;try{window.toast?.('Preparando compartilhamento…');const blob=await cardBlob(m),file=new File([blob],`cartao-academico-${slug(m.nome)}.png`,{type:'image/png'}),text=shareText(m);if(navigator.share&&navigator.canShare?.({files:[file]})){await navigator.share({title:`Cartão acadêmico · ${m.nome}`,text,files:[file]});return}if(navigator.share){await navigator.share({title:`Cartão acadêmico · ${m.nome}`,text});return}downloadBlob(blob,m);try{await navigator.clipboard?.writeText(text);window.toast?.('Imagem baixada e dados copiados.')}catch(_e){window.toast?.('Imagem baixada.')}}catch(e){if(e?.name!=='AbortError'){console.error('P202 compartilhar',e);window.toast?.('Não consegui compartilhar o cartão.')}}}
+window.openAcademicCardEditor=openEditor;window.downloadAcademicCard=downloadCard;window.shareAcademicCard=shareCard;
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ensureOverlay,{once:true});else ensureOverlay();
+console.info('Carbonautas',VERSION,'cartão acadêmico carregado');
+})();
+</script>
 
 </body>
 </html>
