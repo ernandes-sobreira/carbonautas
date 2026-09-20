@@ -2172,6 +2172,13 @@
     </div>
   </div>
 
+  <!-- ============ VIEW: DESTAQUES ============ -->
+  <div class="view" id="viewDestaques">
+    <div class="p200-highlights-scroll">
+      <div class="p200-highlights-wrap"></div>
+    </div>
+  </div>
+
   <!-- ============ VIEW: LABORATÓRIO DE DADOS ============ -->
   <div class="view" id="viewLab">
     <div class="lab-scroll"><div class="lab-wrap">
@@ -6975,7 +6982,7 @@ const VIEW_GROUPS={
   pessoas:{views:['rede','track'],labels:{rede:'Rede',track:'Acompanhamento'}},
   agenda:{views:['crono']},
   conversas:{views:['mensagens','conversas'],labels:{mensagens:'Equipe',conversas:'Privadas'},badges:{mensagens:'msgBadge',conversas:'privateBadge'}},
-  mural:{views:['mural','fotos'],labels:{mural:'Mural',fotos:'Fotos'},badges:{mural:'muralBadge'}},
+  mural:{views:['mural','fotos','destaques'],labels:{mural:'Mural',fotos:'Fotos',destaques:'Destaques'},badges:{mural:'muralBadge'}},
   lab:{views:['lab']},
   medalhas:{views:['medalhas']},
   jogo:{views:['jogo']}
@@ -6996,7 +7003,7 @@ function switchView(v){
   $$('.view').forEach(el=>el.classList.remove('on'));
   $$('.tab').forEach(el=>el.classList.toggle('on',(el.dataset.group||el.dataset.view)===grp));
   renderSubNav(v);
-  const map={painel:'viewPainel',rede:'viewRede',crono:'viewCrono',track:'viewTrack',lab:'viewLab',feed:'viewFeed',mensagens:'viewMensagens',conversas:'viewConversas',mural:'viewMural',fotos:'viewFotos',pubs:'viewPubs',medalhas:'viewMedalhas',jogo:'viewJogo'};
+  const map={painel:'viewPainel',rede:'viewRede',crono:'viewCrono',track:'viewTrack',lab:'viewLab',feed:'viewFeed',mensagens:'viewMensagens',conversas:'viewConversas',mural:'viewMural',fotos:'viewFotos',destaques:'viewDestaques',pubs:'viewPubs',medalhas:'viewMedalhas',jogo:'viewJogo'};
   map[v] && $('#'+map[v]).classList.add('on');
   if(v==='painel') renderPainel();
   if(v==='rede') renderAll();
@@ -7321,11 +7328,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P199-20260920';
+window.CARBONAUTAS_BUILD='P200-20260920';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P199-20260920',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P200-20260920',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -12900,13 +12907,14 @@ function ensureCss(){if($('#p117Style'))return;const st=document.createElement('
 `;document.head.appendChild(st)}
 
 function ensurePanel(){
-  let host=$('#p117Highlights');if(host)return host;
+  let host=$('#p117Highlights');
+  const dest=$('#viewDestaques .p200-highlights-wrap');
+  if(host){if(dest&&host.parentElement!==dest)dest.appendChild(host);return host}
   host=document.createElement('section');host.id='p117Highlights';
-  const msgs=$('#viewMural #muralMsgs'),mural=$('#viewMural .mural-board');
-  if(msgs)msgs.appendChild(host);else if(mural)mural.appendChild(host);else $('#viewMural')?.appendChild(host);
+  if(dest)dest.appendChild(host);else $('#viewDestaques')?.appendChild(host);
   return host;
 }
-function relocatePanel(){const host=$('#p117Highlights'),msgs=$('#viewMural #muralMsgs');if(!host||!msgs)return;if(host.parentElement!==msgs||host!==msgs.lastElementChild)msgs.appendChild(host)}
+function relocatePanel(){const host=$('#p117Highlights'),dest=$('#viewDestaques .p200-highlights-wrap');if(!host||!dest)return;if(host.parentElement!==dest)dest.appendChild(host)}
 function initials(n=''){return String(n).trim().split(/\s+/).slice(0,2).map(x=>x[0]?.toUpperCase()||'').join('')||'★'}
 function cardHTML(x){
   const c=cat(x.category),m=member(x.memberId),name=m?.nome||x.memberName||'Carbonauta',photo=m?.foto||'';
@@ -12975,7 +12983,7 @@ function renderMedalsWithHighlights(points){
 }
 function installMedalPatch(){try{renderMedalsFrom=renderMedalsWithHighlights;window.renderMedalsFrom=renderMedalsWithHighlights;renderScoreRules=scoreRules;window.renderScoreRules=scoreRules}catch(e){console.warn('P117 medal patch',e)}}
 
-async function openHighlightNotification(n){if(!n)return;try{if(F()&&n.id)await F().updateDoc(F().doc(window.db,'rede_notifications',n.id),{read:true,readAt:F().serverTimestamp()})}catch(_e){};try{if(typeof window.switchView==='function')window.switchView('mural');else if(typeof switchView==='function')switchView('mural')}catch(_e){};const x=items.find(i=>i.id===n.sourceId);if(x){monthCursor=new Date(Number(x.monthKey.slice(0,4)),Number(x.monthKey.slice(5,7))-1,1);renderPanel()}await sleep(120);const el=x?$(`[data-p117-card="${CSS.escape(x.id)}"]`):$('#p117Highlights');el?.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});try{if(F()&&n.id)await F().deleteDoc(F().doc(window.db,'rede_notifications',n.id))}catch(_e){}
+async function openHighlightNotification(n){if(!n)return;try{if(F()&&n.id)await F().updateDoc(F().doc(window.db,'rede_notifications',n.id),{read:true,readAt:F().serverTimestamp()})}catch(_e){};try{if(typeof window.switchView==='function')window.switchView('destaques');else if(typeof switchView==='function')switchView('destaques')}catch(_e){};const x=items.find(i=>i.id===n.sourceId);if(x){monthCursor=new Date(Number(x.monthKey.slice(0,4)),Number(x.monthKey.slice(5,7))-1,1);renderPanel()}await sleep(120);const el=x?$(`[data-p117-card="${CSS.escape(x.id)}"]`):$('#p117Highlights');el?.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});try{if(F()&&n.id)await F().deleteDoc(F().doc(window.db,'rede_notifications',n.id))}catch(_e){}
 }
 function interceptNotifications(e){const b=e.target.closest?.('[data-p39nid]');if(!b)return;const n=(S()?.notifications||[]).find(x=>x.id===b.getAttribute('data-p39nid'));if(n?.sourceType!=='highlight')return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();const p=$('#notifyPanelP39');if(p)p.style.display='none';document.documentElement.style.overflow='';openHighlightNotification(n)}
 function scheduleRender(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;renderPanel();relocatePanel()})}
@@ -15595,6 +15603,20 @@ document.readyState==='loading'?document.addEventListener('DOMContentLoaded',boo
 </script>
 
 
+
+
+<style id="p200DestaquesTabStyle">
+#viewDestaques{overflow:hidden;background:linear-gradient(180deg,#f7fbfa 0%,#f4f8f7 100%)!important}
+#viewDestaques .p200-highlights-scroll{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#viewDestaques .p200-highlights-wrap{width:100%;max-width:980px;margin:0 auto;padding:18px 18px 120px}
+#viewDestaques #p117Highlights{margin:0!important;width:100%!important;box-sizing:border-box}
+#viewMural .mural-filterbar-pro{flex:0 0 auto!important;min-height:50px!important;align-items:center!important}
+@media(max-width:700px){
+  #viewDestaques .p200-highlights-wrap{padding:12px 14px 118px}
+  #viewDestaques .p117-deck{grid-auto-columns:minmax(255px,88%)!important}
+  #viewDestaques .p117-head{gap:8px}
+}
+</style>
 
 <style id="p199HighlightsBottomStyle">
 #viewMural #muralMsgs > #p117Highlights{flex:0 0 auto!important;width:100%!important;margin:6px 0 18px!important}

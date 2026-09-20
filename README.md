@@ -6,7 +6,7 @@ Plataforma da Rede Carbonautas (LIPAN/LEFA/CELBE, UNEMAT). Arquivo unico `index.
 
 | Caminho | Uso |
 |---|---|
-| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P199 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
+| `index.html` | O aplicativo inteiro. Todas as camadas P44 a P200 estao dentro dele, no fim do `<body>`, cada uma marcada com `data-src` (nome do arquivo de origem) |
 | `sw.js` | Service worker. So cache e pagina offline. Nao injeta mais nada no HTML |
 | `game.html`, `recovery.html`, `chrome-reset.html`, `manifest.webmanifest`, icones | Publicar junto na raiz |
 | `firestore.rules` | Unica fonte das regras. Publicar no Console do Firebase. Contem tambem as regras de outros sistemas (`projects/`) |
@@ -36,6 +36,13 @@ Para restaurar por Git: `git checkout P126-pre-consolidacao -- .`
 4. Testar em janela anonima.
 
 ## CHANGELOG
+
+### P200 · 2026-09-20 · Destaques viram aba própria
+- Ó nóis! passa a ter três abas: Mural, Fotos e Destaques.
+- Destaques do mês saem completamente do feed e ganham tela própria rolável.
+- Notificações de Destaques abrem diretamente nessa nova aba.
+- Corrigido o encolhimento da barra de filtros do Mural no celular.
+- Não alterado: dados, Firebase, regras, VPS ou permissões.
 
 ### P199 · 2026-09-20 · Destaques no fim do Mural
 - Destaques do mês deixam o topo do Mural.
