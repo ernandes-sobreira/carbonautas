@@ -1,8 +1,9 @@
-/* Carbonautas P180 · carregador sob demanda
+/* Carbonautas P181 · carregador sob demanda
    - Rede e Acompanhamento só carregam quando usados
    - projetos macro também carregam diretamente no Repositório
    - agenda carrega reuniões, foco e detalhe visual só quando usada
    - capa usa foco compacto da agenda e ações datadas do Mural
+   - capa recebe “Olha rapidão” e atalho direto para o Mural
    - Mural é único para toda a Rede, sem mensagens direcionadas
    - publicação do Mural salva texto antes do anexo para não perder a mensagem
    - destaques carregam compactação/ajuste visual só no Painel
@@ -24,7 +25,14 @@ function ensureDossier(){if(dossierPromise)return dossierPromise;dossierPromise=
 function ensureAgenda(){if(agendaPromise)return agendaPromise;agendaPromise=load('./modules/agenda-reunioes-p172.js?v=P172-20260920','carbonautas-agenda-reunioes-p172').catch(e=>{agendaPromise=null;console.error('Carbonautas agenda',e)});return agendaPromise}
 function ensureAgendaFocus(){if(agendaFocusPromise)return agendaFocusPromise;agendaFocusPromise=load('./modules/agenda-foco-p174.js?v=P174-20260920','carbonautas-agenda-foco-p174').catch(e=>{agendaFocusPromise=null;console.error('Carbonautas foco agenda',e)});return agendaFocusPromise}
 function ensureAgendaDetail(){if(agendaDetailPromise)return agendaDetailPromise;agendaDetailPromise=load('./modules/agenda-detalhe-p175.js?v=P175-20260920','carbonautas-agenda-detalhe-p175').catch(e=>{agendaDetailPromise=null;console.error('Carbonautas detalhe agenda',e)});return agendaDetailPromise}
-function ensureHomePolish(){if(homePolishPromise)return homePolishPromise;homePolishPromise=load('./modules/agenda-mural-home-p176.js?v=P176-20260920','carbonautas-agenda-mural-home-p176').catch(e=>{homePolishPromise=null;console.error('Carbonautas capa/Mural',e)});return homePolishPromise}
+function ensureHomePolish(){
+ if(homePolishPromise)return homePolishPromise;
+ homePolishPromise=(async()=>{try{
+  await load('./modules/agenda-mural-home-p176.js?v=P176-20260920','carbonautas-agenda-mural-home-p176');
+  await load('./modules/home-olha-rapidao-p181.js?v=P181-20260920','carbonautas-home-olha-rapidao-p181');
+ }catch(e){homePolishPromise=null;console.error('Carbonautas capa/Mural',e)}})();
+ return homePolishPromise
+}
 function ensureMuralVisual(){if(muralVisualPromise)return muralVisualPromise;muralVisualPromise=load('./modules/mural-visual-p177.js?v=P177-20260920','carbonautas-mural-visual-p177').catch(e=>{muralVisualPromise=null;console.error('Carbonautas Mural visual',e)});return muralVisualPromise}
 function ensureMuralPolish(){if(muralPolishPromise)return muralPolishPromise;muralPolishPromise=load('./modules/mural-visual-p178.js?v=P178-20260920','carbonautas-mural-visual-p178').catch(e=>{muralPolishPromise=null;console.error('Carbonautas Mural não vistos',e)});return muralPolishPromise}
 function ensureMuralSave(){if(muralSavePromise)return muralSavePromise;muralSavePromise=load('./modules/mural-publicacao-p179.js?v=P180-20260920','carbonautas-mural-publicacao-p179').catch(e=>{muralSavePromise=null;console.error('Carbonautas publicação Mural',e)});return muralSavePromise}
