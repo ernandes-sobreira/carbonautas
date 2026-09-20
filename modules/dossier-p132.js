@@ -1,7 +1,7 @@
-/* Carbonautas P186 · carregador sob demanda pós-login
+/* Carbonautas P187 · carregador sob demanda pós-login
    - reconhece o app aberto pelo shell visível ou Firebase Auth, sem confundir DOM antigo de login
    - restaura Olha rapidão/Ver mural mesmo se o botão de login continuar no DOM
-   - carrega salvamento robusto e compatibilidade de imagens do Mural
+   - carrega salvamento robusto, imagens, compartilhamento e gestão do Mural
    - mantém Rede, Agenda, Mural e Acompanhamento sob demanda
    - não altera Firebase, regras ou VPS
 */
@@ -32,7 +32,7 @@ function ensureMuralPolish(){if(muralPolishPromise)return muralPolishPromise;mur
 function ensureMuralSave(){if(muralSavePromise)return muralSavePromise;muralSavePromise=load('./modules/mural-publicacao-p179.js?v=P186-20260920','carbonautas-mural-publicacao-p179').catch(e=>{muralSavePromise=null;console.error('Carbonautas publicação Mural',e)});return muralSavePromise}
 function ensureMuralUnified(){if(muralUnifiedPromise)return muralUnifiedPromise;muralUnifiedPromise=load('./modules/mural-unificado-p180.js?v=P180-20260920','carbonautas-mural-unificado-p180').catch(e=>{muralUnifiedPromise=null;console.error('Carbonautas Mural unificado',e)});return muralUnifiedPromise}
 function ensureMuralCards(){if(muralCardsPromise)return muralCardsPromise;muralCardsPromise=load('./modules/mural-cards-p182.js?v=P182-20260920','carbonautas-mural-cards-p182').catch(e=>{muralCardsPromise=null;console.error('Carbonautas cards do Mural',e)});return muralCardsPromise}
-function ensureMuralImage(){if(muralImagePromise)return muralImagePromise;muralImagePromise=load('./modules/mural-imagem-p186.js?v=P186-20260920','carbonautas-mural-imagem-p186').catch(e=>{muralImagePromise=null;console.error('Carbonautas imagens do Mural',e)});return muralImagePromise}
+function ensureMuralImage(){if(muralImagePromise)return muralImagePromise;muralImagePromise=load('./modules/mural-imagem-p186.js?v=P187-20260920','carbonautas-mural-imagem-p186').catch(e=>{muralImagePromise=null;console.error('Carbonautas imagens/gestão do Mural',e)});return muralImagePromise}
 function ensureHighlights(){if(highlightsPromise)return highlightsPromise;highlightsPromise=load('./modules/destaques-ui-p173.js?v=P173-20260920','carbonautas-destaques-ui-p173').catch(e=>{highlightsPromise=null;console.error('Carbonautas destaques',e)});return highlightsPromise}
 function ensureProjects(){if(projectsPromise)return projectsPromise;projectsPromise=(async()=>{try{await load('./modules/projetos-hierarquia-p169.js?v=P169-20260920','carbonautas-projetos-hierarquia-p169');await load('./modules/projetos-repositorio-p170.js?v=P170-20260920','carbonautas-projetos-repositorio-p170')}catch(e){projectsPromise=null;console.error('Carbonautas projetos',e)}})();return projectsPromise}
 function wireMacroShortcut(){const actions=$('#p166TrackAdmin .p166-admin-actions');if(!actions||!window.openMacroProjectsRepository)return;let b=actions.querySelector('[data-p170-admin]')||actions.querySelector('[data-p169-admin]');if(!b){b=document.createElement('button');b.type='button';const types=actions.querySelector('[data-p166="types"]');types?actions.insertBefore(b,types):actions.appendChild(b)}b.removeAttribute('data-p169-admin');b.dataset.p170Admin='1';b.textContent='Projetos macro';b.onclick=window.openMacroProjectsRepository}
