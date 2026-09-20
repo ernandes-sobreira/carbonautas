@@ -1,0 +1,46 @@
+name: P191 versionamento
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: ${{ !contains(github.event.head_commit.message, '[p191-applied]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Alinhar versoes e hash
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          idx=Path('index.html'); s=idx.read_text(encoding='utf-8')
+          a="window.CARBONAUTAS_BUILD='P129-MENOS-20260919';"; b="navigator.serviceWorker.register('./sw.js?v=P129-20260919',{updateViaCache:'none'})"
+          assert s.count(a)==1 and s.count(b)==1
+          s=s.replace(a,"window.CARBONAUTAS_BUILD='P191-20260920';").replace(b,"navigator.serviceWorker.register('./sw.js?v=P191-20260920',{updateViaCache:'none'})")
+          idx.write_text(s,encoding='utf-8')
+          sw=Path('sw.js'); t=sw.read_text(encoding='utf-8')
+          assert t.count('service worker P154')==1 and t.count("const CACHE='carbonautas-p154-20260919';")==1
+          t=t.replace('service worker P154','service worker P191').replace("const CACHE='carbonautas-p154-20260919';","const CACHE='carbonautas-p191-20260920';")
+          sw.write_text(t,encoding='utf-8')
+          readme=Path('README.md'); r=readme.read_text(encoding='utf-8')
+          old='Todas as camadas P44 a P129 estao dentro dele'; marker='### P129 · 2026-09-19 · Menos na tela, abertura mais leve'
+          assert r.count(old)==1 and r.count(marker)==1
+          r=r.replace(old,'Todas as camadas P44 a P191 estao dentro dele')
+          sec='''### P191 · 2026-09-20 · Versionamento alinhado\n- Build do app, registro do service worker e cache do `sw.js` passam a usar `P191-20260920`.\n- README atualizado para refletir a versao corrente apos as correcoes de seguranca, Storage e mobile.\n- `index.html.sha512` regenerado a partir do `index.html` publicado.\n- Nao alterado: regras, dados, layout e VPS.\n\n'''
+          r=r.replace(marker,sec+marker); readme.write_text(r,encoding='utf-8')
+          Path('index.html.sha512').write_text(hashlib.sha512(idx.read_bytes()).hexdigest()+'  index.html\n',encoding='utf-8')
+          PY
+          sha512sum -c index.html.sha512
+          git diff --check
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html sw.js README.md index.html.sha512
+          git commit -m "P191: alinha versionamento do app e service worker [p191-applied]"
+          git push
