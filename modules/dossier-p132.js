@@ -1,8 +1,9 @@
-/* Carbonautas P170 · carregador sob demanda
+/* Carbonautas P171 · carregador sob demanda
    - Rede e Acompanhamento só carregam quando usados
    - projetos macro também carregam diretamente no Repositório
    - centraliza pessoas no Acompanhamento e projetos macro no Repositório
    - mantém histórico de bolsas e projetos dos alunos
+   - carrega imediatamente a proteção do check-in diário no celular
    - não altera regras do Firebase nem VPS
 */
 (function(){
@@ -55,6 +56,7 @@ function ensureRede(){
 function currentView(){return document.body?.dataset?.view||''}
 function route(){const v=currentView();if(v==='rede'||v==='track')ensureRede();if(v==='pubs')ensureProjects()}
 function boot(){
+ load('./modules/checkin-mobile-p171.js?v=P171-20260920','carbonautas-checkin-mobile-p171').catch(e=>console.error('Carbonautas check-in móvel',e));
  route();
  const mo=new MutationObserver(ms=>{if(ms.some(m=>m.attributeName==='data-view')){route();if(currentView()==='track')setTimeout(wireMacroShortcut,900)}});mo.observe(document.body,{attributes:true,attributeFilter:['data-view']});
  document.addEventListener('click',e=>{const t=e.target.closest?.('#dashDossierBtn,#trackDossierBtn,[data-open-dossier]');if(t)ensureDossier();const p=e.target.closest?.('#managePeopleBtn');if(p){ensureRede();ensurePeople()}},true);
