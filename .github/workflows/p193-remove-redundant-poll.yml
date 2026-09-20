@@ -1,0 +1,62 @@
+name: P193 remove polling redundante
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: ${{ !contains(github.event.head_commit.message, '[p193-applied]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Remover polling redundante e validar
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,re,subprocess,sys
+          idx=Path('index.html'); s=idx.read_text(encoding='utf-8')
+          old="async function boot(){injectCss();if(!ensureMount())return;installOverrides();enhanceSubNav();let tries=0;while(tries++<80){if(await loadIdentityAndSubscribe())break;await new Promise(r=>setTimeout(r,250))}renderHeader();setInterval(enhanceSubNav,900);console.info('Carbonautas chat',VERSION,'carregado')}"
+          new="async function boot(){injectCss();if(!ensureMount())return;installOverrides();enhanceSubNav();let tries=0;while(tries++<80){if(await loadIdentityAndSubscribe())break;await new Promise(r=>setTimeout(r,250))}renderHeader();console.info('Carbonautas chat',VERSION,'carregado')}"
+          assert s.count(old)==1, f'polling anchor count={s.count(old)}'
+          assert s.count("const wrapped=function(v){oldSub(v);setTimeout(enhanceSubNav,0)}")==1
+          s=s.replace(old,new)
+          assert s.count("window.CARBONAUTAS_BUILD='P192-20260920';")==1
+          assert s.count("navigator.serviceWorker.register('./sw.js?v=P192-20260920',{updateViaCache:'none'})")==1
+          s=s.replace("window.CARBONAUTAS_BUILD='P192-20260920';","window.CARBONAUTAS_BUILD='P193-20260920';")
+          s=s.replace("navigator.serviceWorker.register('./sw.js?v=P192-20260920',{updateViaCache:'none'})","navigator.serviceWorker.register('./sw.js?v=P193-20260920',{updateViaCache:'none'})")
+          idx.write_text(s,encoding='utf-8')
+          sw=Path('sw.js'); t=sw.read_text(encoding='utf-8')
+          assert t.count('service worker P192')==1 and t.count("const CACHE='carbonautas-p192-20260920';")==1
+          t=t.replace('service worker P192','service worker P193').replace("const CACHE='carbonautas-p192-20260920';","const CACHE='carbonautas-p193-20260920';")
+          sw.write_text(t,encoding='utf-8')
+          readme=Path('README.md'); r=readme.read_text(encoding='utf-8')
+          assert r.count('Todas as camadas P44 a P192 estao dentro dele')==1
+          marker='### P192 · 2026-09-20 · Sobre mais encontrável sem aumentar o menu'
+          assert r.count(marker)==1
+          r=r.replace('Todas as camadas P44 a P192 estao dentro dele','Todas as camadas P44 a P193 estao dentro dele')
+          sec='''### P193 · 2026-09-20 · Menos polling redundante\n- Removido o `setInterval(enhanceSubNav,900)` da camada de chat; a mesma atualização já ocorre pelo wrapper de `renderSubNav`.\n- Mantidos os demais pollings quando ainda há dependência funcional ou de notificações.\n- Não alterado: Firebase, regras, VPS, dados ou layout.\n\n'''
+          r=r.replace(marker,sec+marker); readme.write_text(r,encoding='utf-8')
+          Path('index.html.sha512').write_text(hashlib.sha512(idx.read_bytes()).hexdigest()+'  index.html\n',encoding='utf-8')
+          blocks=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>',s,re.I|re.S)
+          for i,b in enumerate(blocks):
+            p=Path(f'/tmp/p193-{i}.mjs'); p.write_text(b,encoding='utf-8')
+            z=subprocess.run(['node','--check',str(p)],capture_output=True,text=True)
+            if z.returncode:
+              print(f'JS block {i} failed\n{z.stderr}');sys.exit(1)
+          print(f'Validated {len(blocks)} inline script blocks')
+          PY
+          sha512sum -c index.html.sha512
+          git diff --check
+      - name: Commit validado
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/p193-remove-redundant-poll.yml
+          git add index.html sw.js README.md index.html.sha512
+          git commit -m "P193: remove polling redundante do chat [p193-applied]"
+          git push
