@@ -23,6 +23,12 @@ function ensureProjects(){
  }catch(e){projectsPromise=null;console.error('Carbonautas projetos',e)}})();
  return projectsPromise
 }
+function wireMacroShortcut(){
+ const actions=$('#p166TrackAdmin .p166-admin-actions');if(!actions||!window.openMacroProjectsRepository)return;
+ let b=actions.querySelector('[data-p170-admin]')||actions.querySelector('[data-p169-admin]');
+ if(!b){b=document.createElement('button');b.type='button';const types=actions.querySelector('[data-p166="types"]');types?actions.insertBefore(b,types):actions.appendChild(b)}
+ b.removeAttribute('data-p169-admin');b.dataset.p170Admin='1';b.textContent='Projetos macro';b.onclick=window.openMacroProjectsRepository
+}
 function ensurePeople(){
  if(peopleScheduled)return;peopleScheduled=true;
  idle(async()=>{try{
@@ -30,6 +36,7 @@ function ensurePeople(){
   await load('./modules/rede-acompanhamento-gestao-p166.js?v=P167-20260920','carbonautas-rede-acompanhamento-gestao-p166');
   await load('./modules/bolsas-historico-p168.js?v=P168-20260920','carbonautas-bolsas-historico-p168');
   await ensureProjects();
+  wireMacroShortcut();setTimeout(wireMacroShortcut,160);
  }catch(e){console.error('Carbonautas gestão pessoas',e)}},700)
 }
 function ensureRede(){
@@ -49,7 +56,7 @@ function currentView(){return document.body?.dataset?.view||''}
 function route(){const v=currentView();if(v==='rede'||v==='track')ensureRede();if(v==='pubs')ensureProjects()}
 function boot(){
  route();
- const mo=new MutationObserver(ms=>{if(ms.some(m=>m.attributeName==='data-view'))route()});mo.observe(document.body,{attributes:true,attributeFilter:['data-view']});
+ const mo=new MutationObserver(ms=>{if(ms.some(m=>m.attributeName==='data-view')){route();if(currentView()==='track')setTimeout(wireMacroShortcut,900)}});mo.observe(document.body,{attributes:true,attributeFilter:['data-view']});
  document.addEventListener('click',e=>{const t=e.target.closest?.('#dashDossierBtn,#trackDossierBtn,[data-open-dossier]');if(t)ensureDossier();const p=e.target.closest?.('#managePeopleBtn');if(p){ensureRede();ensurePeople()}},true);
  idle(()=>ensureDossier(),1800)
 }
