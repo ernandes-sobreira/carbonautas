@@ -1,0 +1,57 @@
+name: Apply security P188
+
+on:
+  push:
+    branches:
+      - security-fixes-p188
+    paths:
+      - tools/security-p188.patch.gz.b64
+      - .github/workflows/security-p188.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-security-p188:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          ref: security-fixes-p188
+          fetch-depth: 0
+
+      - name: Decode and apply validated patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, gzip
+          src = Path('tools/security-p188.patch.gz.b64').read_text().strip()
+          Path('/tmp/security-p188.patch').write_bytes(gzip.decompress(base64.b64decode(src)))
+          PY
+          git apply --check /tmp/security-p188.patch
+          git apply /tmp/security-p188.patch
+          node --check modules/mural-imagem-p186.js
+          node --check modules/rede-acompanhamento-gestao-p166.js
+          git diff --check
+
+      - name: Remove one-time patch helpers
+        shell: bash
+        run: |
+          rm -f tools/security-p188.patch.gz.b64
+          rm -f .github/workflows/security-p188.yml
+          rmdir tools 2>/dev/null || true
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+
+      - name: Commit security fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m 'P188: aplica correções de segurança e acesso'
+          git push origin HEAD:security-fixes-p188
