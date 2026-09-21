@@ -1687,6 +1687,17 @@
  #viewPainel .p142-body{padding:0 10px 12px!important}
 }
 </style>
+
+<style id="p209-panelinhas-off">
+/* P209: Panelinhas desativadas. Fofoca geral e Privadas permanecem. */
+#subNav .p46-panel-btn,
+#p46NewGroup,
+#p48New,
+#p48GroupsRoot,
+#p46GroupOverlay,
+#p48GroupOverlay{display:none!important;visibility:hidden!important;pointer-events:none!important}
+body.p98-panel-active #viewMensagens{pointer-events:auto!important}
+</style>
 </head>
 <body data-view="painel">
 
@@ -6648,7 +6659,7 @@ function exportDossierCsv(){const id=$('#dossierPerson').value,m=memberById(id);
 function exportDossierWord(){const m=memberById($('#dossierPerson').value);if(!m)return;const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Dossiê · ${esc(m.nome)}</title><style>body{font-family:Arial,sans-serif;margin:32px;color:#152b38}h1,h2,h3{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:11pt}td,th{border:1px solid #ddd;padding:7px;text-align:left}.dossier-question{padding:14px;background:#f2efff;border:1px solid #d7cdfa}</style></head><body><h1>Dossiê do Carbonauta</h1>${dossierHTML(m)}
 
 
-</body></html>`;const blob=new Blob(['\ufeff',html],{type:'application/msword'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.doc`;a.click();URL.revokeObjectURL(u)}
+\n<script id="p209-panelinhas-off-js">\n(function(){\n'use strict';\nif(window.__CARBONAUTAS_P209_NO_PANELINHAS)return;\nwindow.__CARBONAUTAS_P209_NO_PANELINHAS=true;\nlet cleaning=false;\nfunction cleanPanelinhas(){\n  if(cleaning)return; cleaning=true;\n  try{\n    try{ if(typeof window.closePanelinhas==='function') window.closePanelinhas(); }catch(_e){}\n    document.body.classList.remove('p98-panel-active');\n    document.body.removeAttribute('data-p48-groups');\n\n    const hadRoot=!!document.querySelector('#p48GroupsRoot');\n    document.querySelectorAll('#subNav .p46-panel-btn,#p48GroupsRoot,#p46GroupOverlay,#p48GroupOverlay').forEach(n=>n.remove());\n\n    const side=document.querySelector('#p46SideList');\n    if(side){\n      const direct=[...side.children];\n      const idx=direct.findIndex(n=>/CONVERSAS\\s+EM\\s+PANELINHA/i.test((n.textContent||'').trim()));\n      if(idx>=0) direct.slice(idx).forEach(n=>n.remove());\n      side.querySelectorAll('#p46NewGroup').forEach(n=>n.remove());\n      [...side.querySelectorAll('*')].forEach(n=>{\n        const t=(n.textContent||'').trim();\n        if(/^Nenhuma panelinha/i.test(t)||/^\\+?\\s*Nova panelinha$/i.test(t)) n.remove();\n      });\n    }\n\n    document.querySelectorAll('#p46NewGroup,#p48New').forEach(n=>n.remove());\n\n    // Se algum controlador antigo chegou a substituir Fofoca geral pela shell P48, restaura Fofoca geral.\n    if(hadRoot && document.body.dataset.view==='mensagens' && typeof window.openGeneralChat==='function'){\n      try{window.openGeneralChat()}catch(_e){}\n    }\n\n    // De agora em diante chamadas antigas não reabrem a funcionalidade removida.\n    window.openPanelinhas=function(){\n      document.body.classList.remove('p98-panel-active');\n      document.body.removeAttribute('data-p48-groups');\n      if(typeof window.openGeneralChat==='function') try{window.openGeneralChat()}catch(_e){}\n    };\n    window.openNewPanelinha=window.openPanelinhas;\n  } finally { cleaning=false; }\n}\n\nfunction boot(){\n  cleanPanelinhas();\n  const mo=new MutationObserver(()=>queueMicrotask(cleanPanelinhas));\n  mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','data-p48-groups','data-view']});\n  document.addEventListener('click',e=>{\n    const bad=e.target.closest?.('.p46-panel-btn,#p46NewGroup,#p48New');\n    if(bad){e.preventDefault();e.stopImmediatePropagation();cleanPanelinhas()}\n  },true);\n  console.info('Carbonautas P209 · Panelinhas removidas; Fofoca geral + Privadas preservadas');\n}\nif(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();\n})();\n</script>\n</body></html>`;const blob=new Blob(['\ufeff',html],{type:'application/msword'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.doc`;a.click();URL.revokeObjectURL(u)}
 function printDossier(){const m=memberById($('#dossierPerson').value);if(!m)return;const w=window.open('','_blank');w.document.write(`<html><head><title>Dossiê · ${esc(m.nome)}</title><style>body{font-family:Arial,sans-serif;margin:30px;color:#152b38}h1,h2,h3{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:12px}td,th{border-bottom:1px solid #ddd;padding:7px;text-align:left}.dossier-question{padding:14px;background:#f2efff;border:1px solid #d7cdfa;border-radius:10px}</style></head><body>${dossierHTML(m)}</body></html>`);w.document.close();setTimeout(()=>w.print(),350)}
 function exportGeneralBackup(){if(isAdmin&&!window.XLSX){ensureLib('xlsx').then(exportGeneralBackup).catch(e=>toast(e.message));return}if(!isAdmin||!window.XLSX){toast('Relatório geral disponível somente para o coordenador.');return}const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.members.map(m=>({id:m.id,nome:m.nome,nivel:m.nivel,programa:m.programa||'',status:m.status||'',bolsista:m.bolsista?'Sim':'Não',pergunta:m.perguntaCientifica||'',objetivo:m.objetivoProjeto||'',publico:m.grupoAtendido||'',visibilidade:m.ideiaVisibilidade||''}))), 'Pessoas');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.activities.map(a=>({id:a.id,ownerId:a.ownerId,ownerName:a.ownerName||'',tipo:a.type,status:a.status,titulo:a.title||'',descricao:a.description||'',inicio:a.startDate||'',prazo:a.dueDate||'',mes:a.checkinMonth||'',produto:a.productType||''}))), 'Acompanhamento');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.publicacoes.map(x=>({id:x.id,ownerUid:x.ownerUid||'',titulo:x.titulo||x.title||'',categoria:x.categoria||'',url:x.fileUrl||x.url||x.externalUrl||''}))), 'Repositorio');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(buildCronoItems().map(x=>({tipo:x.kind,titulo:x.titulo,data:x.data,owner:x.ownerName,concluido:x.feito?'Sim':'Não'}))), 'Cronograma');XLSX.writeFile(wb,`Carbonautas_relatorio_${new Date().toISOString().slice(0,10)}.xlsx`);toast('Relatório Excel gerado. Fotos e arquivos precisam do backup do servidor.')}
 
@@ -7455,11 +7466,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P208-20260921';
+window.CARBONAUTAS_BUILD='P209-20260921';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P208-20260921',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P209-20260921',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
