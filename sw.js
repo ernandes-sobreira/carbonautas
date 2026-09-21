@@ -1,6 +1,6 @@
-/* Carbonautas · service worker P206
+/* Carbonautas · service worker P207
    Cache de recursos e página offline. Atualização ocorre na próxima abertura/reload. */
-const CACHE='carbonautas-p206-20260921';
+const CACHE='carbonautas-p207-20260921';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#f6faf9;color:#183844"><h1>Carbonautas</h1><p>Sem conexão agora. Reconecte-se para carregar a versão mais recente.</p></body>';
 
 self.addEventListener('install',()=>{self.skipWaiting();});
