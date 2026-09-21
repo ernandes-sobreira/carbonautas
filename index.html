@@ -6658,6 +6658,7 @@ function exportDossierCsv(){const id=$('#dossierPerson').value,m=memberById(id);
 function exportDossierWord(){const m=memberById($('#dossierPerson').value);if(!m)return;const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Dossiê · ${esc(m.nome)}</title><style>body{font-family:Arial,sans-serif;margin:32px;color:#152b38}h1,h2,h3{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:11pt}td,th{border:1px solid #ddd;padding:7px;text-align:left}.dossier-question{padding:14px;background:#f2efff;border:1px solid #d7cdfa}</style></head><body><h1>Dossiê do Carbonauta</h1>${dossierHTML(m)}
 
 
+<script src="./modules/agenda-integracao-p211.js?v=P211-20260921"></script>
 </body></html>`;const blob=new Blob(['\ufeff',html],{type:'application/msword'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.doc`;a.click();URL.revokeObjectURL(u)}
 function printDossier(){const m=memberById($('#dossierPerson').value);if(!m)return;const w=window.open('','_blank');w.document.write(`<html><head><title>Dossiê · ${esc(m.nome)}</title><style>body{font-family:Arial,sans-serif;margin:30px;color:#152b38}h1,h2,h3{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:12px}td,th{border-bottom:1px solid #ddd;padding:7px;text-align:left}.dossier-question{padding:14px;background:#f2efff;border:1px solid #d7cdfa;border-radius:10px}</style></head><body>${dossierHTML(m)}</body></html>`);w.document.close();setTimeout(()=>w.print(),350)}
 function exportGeneralBackup(){if(isAdmin&&!window.XLSX){ensureLib('xlsx').then(exportGeneralBackup).catch(e=>toast(e.message));return}if(!isAdmin||!window.XLSX){toast('Relatório geral disponível somente para o coordenador.');return}const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.members.map(m=>({id:m.id,nome:m.nome,nivel:m.nivel,programa:m.programa||'',status:m.status||'',bolsista:m.bolsista?'Sim':'Não',pergunta:m.perguntaCientifica||'',objetivo:m.objetivoProjeto||'',publico:m.grupoAtendido||'',visibilidade:m.ideiaVisibilidade||''}))), 'Pessoas');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.activities.map(a=>({id:a.id,ownerId:a.ownerId,ownerName:a.ownerName||'',tipo:a.type,status:a.status,titulo:a.title||'',descricao:a.description||'',inicio:a.startDate||'',prazo:a.dueDate||'',mes:a.checkinMonth||'',produto:a.productType||''}))), 'Acompanhamento');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.publicacoes.map(x=>({id:x.id,ownerUid:x.ownerUid||'',titulo:x.titulo||x.title||'',categoria:x.categoria||'',url:x.fileUrl||x.url||x.externalUrl||''}))), 'Repositorio');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(buildCronoItems().map(x=>({tipo:x.kind,titulo:x.titulo,data:x.data,owner:x.ownerName,concluido:x.feito?'Sim':'Não'}))), 'Cronograma');XLSX.writeFile(wb,`Carbonautas_relatorio_${new Date().toISOString().slice(0,10)}.xlsx`);toast('Relatório Excel gerado. Fotos e arquivos precisam do backup do servidor.')}
@@ -7465,11 +7466,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P210-20260921';
+window.CARBONAUTAS_BUILD='P211-20260921';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P210-20260921',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P211-20260921',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
