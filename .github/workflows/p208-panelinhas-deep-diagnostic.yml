@@ -1,53 +1,8 @@
 name: P208 diagnostico final panelinhas
 on:
-  push:
-    branches: [main]
-permissions:
-  contents: write
+  workflow_dispatch:
 jobs:
-  inspect:
-    if: "${{ !contains(github.event.head_commit.message, '[p208-report]') }}"
+  noop:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Gerar relatorio profundo
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          s=Path('index.html').read_text(encoding='utf-8')
-          out=[]
-          out.append(f'LEN={len(s)}')
-          keys=[
-            'function openPanelinhas','function leave()','function mount()','function renderHeader()',
-            'function setMode(','function enhanceSubNav','function openGeneralChat','function installSentinel',
-            'function captureGeneralShell','p98-panel-active','data-p48-groups','p46-panel-btn',
-            'rede_group_threads','chat_group_meta','setInterval(()=>{if(active)'
-          ]
-          for k in keys:
-            idxs=[]; start=0
-            while True:
-              i=s.find(k,start)
-              if i<0: break
-              idxs.append(i); start=i+1
-            out.append(f'\n## {k} COUNT={len(idxs)} POS={idxs}')
-            for n,i in enumerate(idxs[:8],1):
-              a=max(0,i-1800); b=min(len(s),i+4200)
-              out.append(f'\n--- {k} #{n} @{i} ---\n{s[a:b]}')
-          for marker in ['chat-groups-p46.js','panelinhas-private-p48.js','tabs-stability-p50.js','conversation-mode-stability-p98.js']:
-            i=s.find(marker)
-            out.append(f'\n## MARKER {marker} POS={i}')
-            if i>=0:
-              a=max(0,i-1000); b=min(len(s),i+12000)
-              out.append(s[a:b])
-          Path('.p208-panelinhas-report.txt').write_text('\n'.join(out),encoding='utf-8')
-          PY
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .p208-panelinhas-report.txt
-          git commit -m "P208: relatorio profundo das panelinhas [p208-report]"
-          git push
+      - run: echo "Diagnostico P208 encerrado."
