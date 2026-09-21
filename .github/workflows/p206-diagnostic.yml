@@ -19,15 +19,15 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           s=Path('index.html').read_text(encoding='utf-8')
-          needles=['openActivity','openProjectProfile','openCheckin','openProduct','openActivityPreset','editActivity','openMemberRepository','openDossier','p97Deck','Situação agora','Editar cadastro','Desligar acesso']
+          needles=['function openOverlay','openOverlay(','function closeOverlay','activityOverlay','projectOverlay','checkinOverlay','productOverlay','memberOverlay','memberModal','class="overlay"','.overlay{','#p97Deck','p97Deck{','z-index:200500','Editar cadastro','Desligar acesso']
           out=[]
           for needle in needles:
               out.append('\n\n===== '+needle+' =====')
               start=0; count=0
               while True:
                   i=s.find(needle,start)
-                  if i<0 or count>=8: break
-                  a=max(0,i-2200); b=min(len(s),i+3500)
+                  if i<0 or count>=12: break
+                  a=max(0,i-3000); b=min(len(s),i+4500)
                   out.append(f'\n--- occurrence {count+1} at char {i} ---\n'+s[a:b])
                   start=i+len(needle);count+=1
               if count==0: out.append('\nNOT FOUND')
@@ -36,5 +36,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .p206-diagnostic.txt
-          git commit -m "P206: diagnóstico temporário de camadas [p206-diag-generated]"
+          git commit -m "P206: diagnóstico temporário de modais [p206-diag-generated]"
           git push
