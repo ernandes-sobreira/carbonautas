@@ -9,6 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -17,6 +19,18 @@ jobs:
       - run: npm test
       - run: node --test tests/agenda-p213.cjs
       - run: node --test tests/agenda-dom-p213.cjs
+      - name: Garantir que login e app-base continuam idênticos à P210
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          from pathlib import Path
+          base=subprocess.check_output(['git','show','c0240930b4a30fdbb9b22177777577cccdf252cb:index.html']).decode('utf-8')
+          cur=Path('index.html').read_text(encoding='utf-8')
+          tag='<script src="./modules/agenda-core-p213.js?v=P213-20260921"></script>\n'
+          stripped=cur.replace(tag,'')
+          assert stripped==base, 'P213 alterou algo no index além de carregar o módulo da Agenda'
+          print('Base P210 preservada byte a byte; somente o script P213 foi acrescentado.')
+          PY
       - name: Agenda static checks
         run: |
           node --check modules/agenda-core-p213.js
