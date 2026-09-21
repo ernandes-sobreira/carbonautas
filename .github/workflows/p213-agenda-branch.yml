@@ -1,0 +1,23 @@
+name: P213 agenda branch checks
+on:
+  push:
+    branches: [agenda-rebuild-p213]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - name: Agenda static checks
+        run: |
+          node --check modules/agenda-core-p213.js
+          grep -q 'agenda-core-p213.js' index.html
+          grep -q 'CARBONAUTAS_AGENDA_P213' modules/agenda-core-p213.js
+          ! grep -q 'P211' index.html
