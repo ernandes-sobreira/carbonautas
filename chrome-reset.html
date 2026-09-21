@@ -14,7 +14,7 @@ h1{margin:0 0 10px;font-size:28px}p{line-height:1.5;color:#506672}.status{margin
 <body>
 <main><div class="card">
 <h1>Reparando o Carbonautas no Chrome</h1>
-<p>Esta página limpa apenas os dados locais do Carbonautas neste navegador. <b>Não apaga nada do Firebase, do Repositório ou dos alunos.</b> Depois você fará login novamente.</p>
+<p>Esta página limpa apenas os dados locais do Carbonautas neste navegador. <b>Não apaga nada do Firebase, do Repositório ou dos alunos.</b> Sua sessão e os outros aplicativos deste navegador são preservados.</p>
 <div class="status" id="status">Iniciando limpeza…</div>
 <div class="small">Se a abertura automática não acontecer, use o botão abaixo.</div>
 <button id="go" style="display:none">Abrir Carbonautas</button>
@@ -27,42 +27,28 @@ h1{margin:0 0 10px;font-size:28px}p{line-height:1.5;color:#506672}.status{margin
     say('1/4 · Removendo service workers antigos…');
     if('serviceWorker' in navigator){
       const regs=await navigator.serviceWorker.getRegistrations();
-      await Promise.all(regs.map(r=>r.unregister().catch(()=>{})));
+      await Promise.all(regs.filter(r=>r.scope===new URL('./',location.href).href).map(r=>r.unregister().catch(()=>{})));
     }
     say('2/4 · Limpando caches do Carbonautas…');
     if('caches' in window){
       const keys=await caches.keys();
       await Promise.all(keys.filter(k=>k.toLowerCase().includes('carbonautas')).map(k=>caches.delete(k)));
     }
-    say('3/4 · Limpando sessão local deste navegador…');
-    try{localStorage.clear()}catch(e){}
-    try{sessionStorage.clear()}catch(e){}
-    if('indexedDB' in window){
-      try{
-        if(indexedDB.databases){
-          const dbs=await indexedDB.databases();
-          await Promise.all((dbs||[]).filter(d=>d.name).map(d=>new Promise(resolve=>{try{const req=indexedDB.deleteDatabase(d.name);req.onsuccess=req.onerror=req.onblocked=()=>resolve()}catch(e){resolve()}})));
-        }else{
-          for(const name of ['firebaseLocalStorageDb','firebase-heartbeat-database','firebase-installations-database']){
-            await new Promise(resolve=>{try{const req=indexedDB.deleteDatabase(name);req.onsuccess=req.onerror=req.onblocked=()=>resolve()}catch(e){resolve()}});
-          }
-        }
-      }catch(e){}
-    }
+    say('3/4 · Preservando sua sessão e os dados dos outros aplicativos…');
     say('4/4 · Instalando a versão limpa…');
     if('serviceWorker' in navigator){
-      try{const reg=await navigator.serviceWorker.register('./sw.js?v=P42-20260916',{updateViaCache:'none'});await reg.update()}catch(e){}
+      try{const reg=await navigator.serviceWorker.register('./sw.js?v=P203-20260921',{updateViaCache:'none'});await reg.update()}catch(e){}
     }
     status.textContent='Pronto. Abrindo o Carbonautas limpo…';
     go.style.display='inline-block';
-    const target='./?fresh=P42&t='+Date.now();
+    const target='./?fresh=P203&t='+Date.now();
     go.onclick=()=>location.replace(target);
     setTimeout(()=>location.replace(target),1000);
   }catch(e){
     console.error(e);
     status.textContent='A limpeza terminou parcialmente. Clique em “Abrir Carbonautas”.';
     go.style.display='inline-block';
-    go.onclick=()=>location.replace('./?fresh=P42&t='+Date.now());
+    go.onclick=()=>location.replace('./?fresh=P203&t='+Date.now());
   }
 })();
 </script>

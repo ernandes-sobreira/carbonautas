@@ -1,0 +1,14 @@
+{
+  "name": "carbonautas-validation",
+  "private": true,
+  "version": "203.0.0",
+  "scripts": {
+    "test": "node --test tests/client.cjs tests/backup.cjs"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "3.0.4",
+    "firebase": "10.12.0",
+    "firebase-tools": "14.27.0",
+    "jsdom": "26.1.0"
+  }
+}

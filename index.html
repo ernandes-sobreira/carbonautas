@@ -1834,7 +1834,7 @@
       <div class="dash-hero">
         <div><h2>O que precisa da minha atenção?</h2><p id="dashGreeting">O que espera você hoje.</p></div>
         <div class="spacer"></div>
-        <div class="dash-hero-actions"><button class="btn" id="dashCheckinBtn">✓ Check-in mensal</button><button class="btn" id="dashProductBtn">🎯 Registrar produto</button><button class="btn" id="dashMedalsBtn">🏅 Medalhas</button><button class="btn" id="dashGameBtn">🎮 Jogo</button><button class="btn primary" id="dashDossierBtn">📚 Dossiê</button><button class="btn" id="dashBackupBtn" style="display:none">📦 Backup Excel</button></div>
+        <div class="dash-hero-actions"><button class="btn" id="dashCheckinBtn">✓ Check-in mensal</button><button class="btn" id="dashProductBtn">🎯 Registrar produto</button><button class="btn" id="dashMedalsBtn">🏅 Medalhas</button><button class="btn" id="dashGameBtn">🎮 Jogo</button><button class="btn primary" id="dashDossierBtn">📚 Dossiê</button><button class="btn" id="dashBackupBtn" style="display:none">📊 Relatório Excel</button></div>
       </div>
       <div class="dash-kpis" id="dashKpis"></div>
       <div class="dash-grid p142-home-grid">
@@ -2743,7 +2743,7 @@
         <option value="mestrado">Mestrado</option><option value="doutorado">Doutorado</option><option value="tcc">TCC</option>
         <option value="orientacao">Orientação</option><option value="correcao">Correção</option><option value="qualificacao">Qualificação</option><option value="defesa">Defesa</option><option value="entrega">Entrega / prazo</option><option value="pendencia">Pendência</option><option value="checkin">Check-in mensal</option><option value="produto">Produto / entrega do projeto</option><option value="outro">Outro acompanhamento</option>
       </select></div>
-      <div class="fg"><label>Status</label><select id="activityStatus"><option value="planejado">Planejado</option><option value="afazer">A fazer</option><option value="andamento">Em andamento</option><option value="recebido">Orientador recebeu</option><option value="revisao">Em correção / revisão</option><option value="devolvido">Correção devolvida</option><option value="revisando">Aluno revisando</option><option value="aprovado">Aprovado</option><option value="concluido">Concluído</option><option value="pausado">Pausado</option></select></div>
+      <div class="fg"><label>Status</label><select id="activityStatus"><option value="planejado">Planejado</option><option value="afazer">A fazer</option><option value="andamento">Em andamento</option><option value="recebido">Orientador recebeu</option><option value="revisao">Em correção / revisão</option><option value="devolvido">Correção devolvida</option><option value="revisando">Aluno revisando</option><option value="aprovado">Aprovado</option><option value="reprovado">Reprovado</option><option value="concluido">Concluído</option><option value="pausado">Pausado</option></select></div>
     </div>
     <div class="notice" id="correctionCycleHint" style="display:none;margin-top:-4px">✍️ <b>Ciclo de correção:</b> Aluno enviou → Orientador recebeu → Em correção → Correção devolvida → Aluno revisando → Aprovado.</div>
     <div class="fg"><label>Etapa / assunto</label><input id="activityName" placeholder="Ex.: Correção do capítulo 2; período do mestrado; qualificação"></div>
@@ -3064,7 +3064,7 @@
 <div class="toast" id="toast"></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp, addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion, increment }
+import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp, addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion, increment, runTransaction }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref as sRef, uploadString, getDownloadURL, deleteObject }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
@@ -3087,7 +3087,7 @@ window.auth = getAuth(app);
 window.secondaryAuth = getAuth(secondaryApp);
 window.fbFns = {
   collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp,
-  addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion, increment, sRef, uploadString, getDownloadURL, deleteObject,
+  addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion, increment, runTransaction, sRef, uploadString, getDownloadURL, deleteObject,
   onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail
 };
 window.dispatchEvent(new Event('firebase-ready'));
@@ -3243,6 +3243,9 @@ function slugify(s){
 }
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2400)}
 function initials(n){return (n||'?').trim().split(/\s+/).slice(0,2).map(w=>w[0]).join('').toUpperCase()}
+// URI arguments embedded in single-quoted HTML handlers must also encode apostrophes.
+function encodeInlineComponent(value){return encodeURIComponent(String(value??'')).replace(/[!'()*]/g,c=>'%'+c.charCodeAt(0).toString(16).toUpperCase())}
+function csvTextCell(value){const text=String(value??'');return (/^[\s\u0000-\u001f]*[=+@-]/.test(text)?"'":'')+text}
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
 function dateInfo(d){
   if(!d) return null;
@@ -3293,7 +3296,7 @@ function renderMemberRepository(){
   const canAdd=isAdmin||isMe(m.id); $('#repoAddBtn').style.display=canAdd?'inline-flex':'none';
   $('#repoList').innerHTML=list.length?list.map(it=>{
     const icon=it.reviewFlow?'✍️':(it.isFile?'📄':'🔗');
-    const view=it.source==='package'?`<button class="btn ghost" type="button" onclick="openRepositoryPackage('${it.id}')">📦 Abrir dossiê</button>`:it.raw?.labRun?`<button class="btn primary" type="button" onclick="openLabRun('${it.raw.labRunId}')">📈 Resultados</button>`:it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'),{source:'publication',id:'${it.id}'})">Visualizar</button><button class="btn review-download" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(it.url)}'),decodeURIComponent('${encodeURIComponent(it.fileName||it.title||'Arquivo')}'))">Baixar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;
+    const view=it.source==='package'?`<button class="btn ghost" type="button" onclick="openRepositoryPackage('${it.id}')">📦 Abrir dossiê</button>`:it.raw?.labRun?`<button class="btn primary" type="button" onclick="openLabRun('${it.raw.labRunId}')">📈 Resultados</button>`:it.isFile?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeInlineComponent(it.url)}'),decodeURIComponent('${encodeInlineComponent(it.fileName||it.title||'Arquivo')}'),{source:'publication',id:'${it.id}'})">Visualizar</button><button class="btn review-download" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeInlineComponent(it.url)}'),decodeURIComponent('${encodeInlineComponent(it.fileName||it.title||'Arquivo')}'))">Baixar</button>`:`<a class="btn ghost" href="${esc(it.url)}" target="_blank" rel="noopener">Abrir</a>`;
     const rev=it.reviewFlow?reviewBadgeHTML(it.raw):'';
     const online=it.source==='publicacao'?officeActionButtons(it.raw):'';
     const chat=it.source==='publicacao'&&it.isFile?repositoryCommunicationButtons(it.raw):'';
@@ -3899,7 +3902,7 @@ async function handleAuthUser(user){
   if(!user){
     authOpenPromise=null;authOpenUid='';
     clearSubscriptions();bootstrapped=false;authUser=null;authProfile=null;myId=null;myName='';isAdmin=false;
-    state.users=[];state.privateThreads=[];state.privateDirectory=[];state.privateSchedule=[];privateDirectorySeeded=false;privateChatAccessError='';
+    Object.keys(state).forEach(key=>{if(Array.isArray(state[key])&&key!=='linhas')state[key]=[]});state.personalRepoRoot=null;privateMessagesState=[];privateActiveThreadId=null;privateReplyTarget=null;privateDirectorySeeded=false;privateChatAccessError='';
     showLogin();refreshIdentityUI();return;
   }
   // Login direto e onAuthStateChanged podem disparar quase juntos. Uma única inicialização vence.
@@ -4699,7 +4702,7 @@ async function renderPdfJs(viewUrl,name='PDF'){
     if(!window.pdfjsLib?.getDocument)throw new Error('Leitor PDF não carregou. Verifique sua conexão e tente novamente.');
     window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     body.innerHTML='<div class="preview-loading">Lendo PDF com o visualizador interno…</div>';
-    const task=window.pdfjsLib.getDocument({url:viewUrl,withCredentials:false});
+    const task=window.pdfjsLib.getDocument({url:viewUrl,withCredentials:false,isEvalSupported:false});
     const pdf=await task.promise;
     const host=document.createElement('div');host.className='pdfjs-preview';
     const bar=document.createElement('div');bar.className='pdfjs-toolbar';bar.textContent=`PDF · ${pdf.numPages} página${pdf.numPages===1?'':'s'} · visualização interna`;
@@ -5247,7 +5250,7 @@ function muralItemHTML(item){
   const ms=item.__ms||muralTime(item)||Date.now();
   if(item.__type==='post'){
     const m=memberForAuthor(item.authorId,item.authorName),can=isAdmin||isMe(item.authorId),pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.authorName||'Carbonauta',isImg=item.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(item.fileName||item.fileUrl)||item.mime?.startsWith('image/')),km=muralKindMeta(item.kind),dest=item.para?`<span class="mural-recado-dest">🔔 Para: ${esc(item.paraNome||memberById(item.para)?.nome||'Pessoa')}</span>`:`<span class="mural-recado-dest">🔔 Todo o grupo</span>`;
-    return `<article class="feed-card mural-post kind-${km.cls}" data-mural-id="${esc(item.id||'')}" data-mural-type="post"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div><div class="feed-author">${esc(nm)}</div><div class="feed-time">${fmtTime(ms)}</div></div><span class="feed-kind kind-${km.cls}">${km.icon} ${esc(km.label)}</span>${dest}${can?`<button class="mini-x" onclick="deleteFeedPost('${item.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${item.title?`<div class="feed-title">${esc(item.title)}</div>`:''}${item.text?`<div class="feed-text">${esc(item.text)}</div>`:''}${item.externalUrl?`<a class="feed-attachment" href="${esc(item.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${item.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(item.fileUrl)}'),decodeURIComponent('${encodeURIComponent(item.fileName||item.title||'Anexo')}'))">👁️ Visualizar · ${esc(item.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(item.fileUrl)}" alt="${esc(item.title||'Foto publicada')}">`:''}${socialBar('post',item.id)}${renderComments('post',item.id)}</article>`;
+    return `<article class="feed-card mural-post kind-${km.cls}" data-mural-id="${esc(item.id||'')}" data-mural-type="post"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div><div class="feed-author">${esc(nm)}</div><div class="feed-time">${fmtTime(ms)}</div></div><span class="feed-kind kind-${km.cls}">${km.icon} ${esc(km.label)}</span>${dest}${can?`<button class="mini-x" onclick="deleteFeedPost('${item.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${item.title?`<div class="feed-title">${esc(item.title)}</div>`:''}${item.text?`<div class="feed-text">${esc(item.text)}</div>`:''}${item.externalUrl?`<a class="feed-attachment" href="${esc(item.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${item.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeInlineComponent(item.fileUrl)}'),decodeURIComponent('${encodeInlineComponent(item.fileName||item.title||'Anexo')}'))">👁️ Visualizar · ${esc(item.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(item.fileUrl)}" alt="${esc(item.title||'Foto publicada')}">`:''}${socialBar('post',item.id)}${renderComments('post',item.id)}</article>`;
   }
   const m=memberForAuthor(item.authorId,item.author),can=isAdmin||isMe(item.authorId),pic=m?.foto||item.authorFoto||'',nm=m?.nome||item.author||'Carbonauta',to=item.para?(item.paraNome||memberById(item.para)?.nome||'Pessoa'):'Todo o grupo',prio=item.prioridade||'media';
   return `<article class="mural-recado-card" data-mural-id="${esc(item.id||'')}" data-mural-type="recado"><div class="mural-recado-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${pic?`<img src="${esc(pic)}" alt="">`:initials(nm)}</div><div class="mural-recado-main"><div class="mural-recado-name">${esc(nm)}</div><div class="mural-recado-time">${fmtTime(ms)}</div></div><span class="mural-recado-dest">✈️ Para: ${esc(to)}</span><span class="mural-recado-prio ${prio}">${prio==='alta'?'URGENTE':prio==='baixa'?'Baixa prioridade':'Importante'}</span>${can?`<button class="mini-x" onclick="deleteChatMsg('${item.id}')" title="Excluir">×</button>`:''}</div><div class="mural-recado-text">${esc(item.text)}</div>${socialBar('chat',item.id)}${renderComments('chat',item.id)}</article>`;
@@ -5614,7 +5617,7 @@ function renderPubs(){
     const canDel = isAdmin || (p.reviewFlow ? p.ownerUid===(window.auth.currentUser?.uid||'') : canEditMember(p.memberId));
     const dt = p.ts?.toMillis?new Date(p.ts.toMillis()):null;
     const dateLabel = dt ? dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}) : '';
-    return `<div class="pub-row"><div class="pub-cat" style="background:${cfg.color}"></div><div class="pub-body"><div class="pub-t">${esc(p.titulo)}</div><div class="pub-meta"><span class="pub-cat-tag" style="background:${cfg.color}">${esc(catLabel)}</span><span class="pub-author"><span class="d" style="background:${m?NIVEIS[m.nivel]?.color:'var(--ink-3)'}"></span>${esc(p.memberNome||(m?m.nome:'—'))}</span>${dateLabel?`<span class="pub-date">${dateLabel}</span>`:''}</div>${!p.reviewFlow&&Number(p.onlineEditVersion||1)>1?`<span class="office-version">✏️ edição v${Number(p.onlineEditVersion||1)}</span>`:''}${!p.reviewFlow?repositorySequenceHTML(p):''}${p.reviewFlow?reviewBadgeHTML(p):''}${p.reviewNote?`<div class="review-note">💬 ${esc(p.reviewNote)}</div>`:''}${scientificContextHTML(p)}${officeFileChip(p)}${publicationCollaboratorIds(p).length?`<span class="repo-collab-chip">👥 ${publicationCollaboratorIds(p).length} colaborador${publicationCollaboratorIds(p).length===1?'':'es'}</span>`:''}</div><div class="pub-act">${p.labRun?`<button type="button" class="btn primary" onclick="openLabRun('${p.labRunId}')">📈 Resultados</button>`:p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'),{source:'publication',id:'${p.id}'})" title="Visualizar" style="padding:6px 9px">👁️</button><button type="button" class="btn review-download" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(p.url)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Baixar" style="padding:6px 9px">⬇</button>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}${labRepoButton(p)}${officeActionButtons(p,'compact')}${p.tipo==='arquivo'?repositoryCommunicationButtons(p):''}${p.reviewFlow&&canActOnReview(p)?`<button type="button" class="btn review-action" onclick="openReviewResponse('${p.id}')">${reviewActionLabel(p)}</button>`:''}${canDel?`<button class="mini-x" onclick="deletePublicacao('${p.id}')" title="Excluir">×</button>`:''}</div></div>`;
+    return `<div class="pub-row"><div class="pub-cat" style="background:${cfg.color}"></div><div class="pub-body"><div class="pub-t">${esc(p.titulo)}</div><div class="pub-meta"><span class="pub-cat-tag" style="background:${cfg.color}">${esc(catLabel)}</span><span class="pub-author"><span class="d" style="background:${m?NIVEIS[m.nivel]?.color:'var(--ink-3)'}"></span>${esc(p.memberNome||(m?m.nome:'—'))}</span>${dateLabel?`<span class="pub-date">${dateLabel}</span>`:''}</div>${!p.reviewFlow&&Number(p.onlineEditVersion||1)>1?`<span class="office-version">✏️ edição v${Number(p.onlineEditVersion||1)}</span>`:''}${!p.reviewFlow?repositorySequenceHTML(p):''}${p.reviewFlow?reviewBadgeHTML(p):''}${p.reviewNote?`<div class="review-note">💬 ${esc(p.reviewNote)}</div>`:''}${scientificContextHTML(p)}${officeFileChip(p)}${publicationCollaboratorIds(p).length?`<span class="repo-collab-chip">👥 ${publicationCollaboratorIds(p).length} colaborador${publicationCollaboratorIds(p).length===1?'':'es'}</span>`:''}</div><div class="pub-act">${p.labRun?`<button type="button" class="btn primary" onclick="openLabRun('${p.labRunId}')">📈 Resultados</button>`:p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeInlineComponent(p.url)}'),decodeURIComponent('${encodeInlineComponent(p.fileName||p.titulo||'Arquivo')}'),{source:'publication',id:'${p.id}'})" title="Visualizar" style="padding:6px 9px">👁️</button><button type="button" class="btn review-download" onclick="downloadRepoFile(decodeURIComponent('${encodeInlineComponent(p.url)}'),decodeURIComponent('${encodeInlineComponent(p.fileName||p.titulo||'Arquivo')}'))" title="Baixar" style="padding:6px 9px">⬇</button>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}${labRepoButton(p)}${officeActionButtons(p,'compact')}${p.tipo==='arquivo'?repositoryCommunicationButtons(p):''}${p.reviewFlow&&canActOnReview(p)?`<button type="button" class="btn review-action" onclick="openReviewResponse('${p.id}')">${reviewActionLabel(p)}</button>`:''}${canDel?`<button class="mini-x" onclick="deletePublicacao('${p.id}')" title="Excluir">×</button>`:''}</div></div>`;
   }).join('');
 }
 
@@ -5646,7 +5649,7 @@ async function openRepositoryPackage(id){
     $('#repoPackageDetailFiles').innerHTML=files.length?files.map(x=>{
       const ext=String(x.ext||inferFileExt('',x.fileName)||'').toLowerCase();
       const officeEditable=['docx','xlsx','pptx'].includes(ext);
-      return `<div class="repo-package-file"><div class="pf-ico">${repoFileIcon(x.fileName)}</div><div class="pf-main"><div class="pf-name">${esc(x.fileName||x.title||'Arquivo')}</div><div class="pf-meta">${esc((ext||'arquivo').toUpperCase())} · ${esc(humanBytes(x.size||0))}${Number(x.onlineEditVersion||1)>1?` · ✏️ v${Number(x.onlineEditVersion||1)}`:''}</div></div><div class="repo-package-actions"><button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(x.url||'')}'),decodeURIComponent('${encodeURIComponent(x.fileName||'Arquivo')}'),{source:'package',packageId:'${id}',fileId:'${x.id}'})">👁 Ver</button><button class="btn" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(x.url||'')}'),decodeURIComponent('${encodeURIComponent(x.fileName||'arquivo')}'))">⬇ Baixar</button>${manage&&officeEditable?`<button class="btn office-edit-btn" type="button" onclick="openPackageOnlineEdit('${id}','${x.id}')">✏️ Editar</button>`:''}<button class="btn repo-file-chat-btn" type="button" onclick="openRepoFileConversationPackage('${id}','${x.id}')">💬 Conversa</button>${manage?`<button class="btn" type="button" onclick="publishRepositoryPackageFile('${id}','${x.id}')">🌐 Publicar no Geral</button><button class="btn" type="button" onclick="deleteRepositoryPackageFile('${id}','${x.id}')">🗑</button>`:''}</div></div>`
+      return `<div class="repo-package-file"><div class="pf-ico">${repoFileIcon(x.fileName)}</div><div class="pf-main"><div class="pf-name">${esc(x.fileName||x.title||'Arquivo')}</div><div class="pf-meta">${esc((ext||'arquivo').toUpperCase())} · ${esc(humanBytes(x.size||0))}${Number(x.onlineEditVersion||1)>1?` · ✏️ v${Number(x.onlineEditVersion||1)}`:''}</div></div><div class="repo-package-actions"><button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeInlineComponent(x.url||'')}'),decodeURIComponent('${encodeInlineComponent(x.fileName||'Arquivo')}'),{source:'package',packageId:'${id}',fileId:'${x.id}'})">👁 Ver</button><button class="btn" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeInlineComponent(x.url||'')}'),decodeURIComponent('${encodeInlineComponent(x.fileName||'arquivo')}'))">⬇ Baixar</button>${manage&&officeEditable?`<button class="btn office-edit-btn" type="button" onclick="openPackageOnlineEdit('${id}','${x.id}')">✏️ Editar</button>`:''}<button class="btn repo-file-chat-btn" type="button" onclick="openRepoFileConversationPackage('${id}','${x.id}')">💬 Conversa</button>${manage?`<button class="btn" type="button" onclick="publishRepositoryPackageFile('${id}','${x.id}')">🌐 Publicar no Geral</button><button class="btn" type="button" onclick="deleteRepositoryPackageFile('${id}','${x.id}')">🗑</button>`:''}</div></div>`
     }).join(''):'<div class="repo-empty">Nenhum arquivo nesta pasta.</div>'
   }catch(e){console.error(e);$('#repoPackageDetailFiles').innerHTML='<div class="repo-empty">Não foi possível abrir os arquivos. Verifique se sua conta ainda está autorizada.</div>'}
 }
@@ -5881,7 +5884,7 @@ let activeReviewConversationId='',reviewConversationMessages=[],reviewConversati
 function closeReviewConversation(){if(reviewConversationUnsub){try{reviewConversationUnsub()}catch(_e){}reviewConversationUnsub=null}activeReviewConversationId='';reviewConversationMessages=[];closeOverlay('reviewConversationOverlay')}
 function renderReviewVersionList(threadId){
   const box=$('#reviewVersionList');if(!box)return;const versions=reviewThreadItems(threadId).sort((a,b)=>(Number(b.reviewVersion)||1)-(Number(a.reviewVersion)||1));
-  box.innerHTML=versions.length?versions.map((v,i)=>{const when=repoEventDate(v.ts,true),who=v.reviewSenderName||v.memberNome||'',can=canActOnReview(v);return `<div class="review-version-card ${i===0?'latest':''}"><div class="review-version-top"><b>v${Number(v.reviewVersion)||1}</b><span class="review-badge ${v.reviewStatus==='correcao_devolvida'?'returned':'waiting'}">${esc(reviewStatusLabel(v))}</span>${i===0?'<span class="review-badge">MAIS RECENTE</span>':''}</div><div class="review-version-note">${when?esc(when)+' · ':''}${esc(who)}${v.reviewNote?' — '+esc(v.reviewNote):''}</div><div class="review-version-actions">${v.tipo==='arquivo'?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(v.url||'')}'),decodeURIComponent('${encodeURIComponent(v.fileName||v.titulo||'Arquivo')}'),{source:'publication',id:'${v.id}'})">👁 Ver</button><button class="btn" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeURIComponent(v.url||'')}'),decodeURIComponent('${encodeURIComponent(v.fileName||v.titulo||'arquivo')}'))">⬇ Baixar</button>`:''}${officeActionButtons(v,'compact')}${can?`<button class="btn review-action" type="button" onclick="closeReviewConversation();setTimeout(()=>openReviewResponse('${v.id}'),80)">${reviewActionLabel(v)}</button>`:''}</div></div>`}).join(''):'<div class="repo-empty">Nenhuma versão encontrada.</div>';
+  box.innerHTML=versions.length?versions.map((v,i)=>{const when=repoEventDate(v.ts,true),who=v.reviewSenderName||v.memberNome||'',can=canActOnReview(v);return `<div class="review-version-card ${i===0?'latest':''}"><div class="review-version-top"><b>v${Number(v.reviewVersion)||1}</b><span class="review-badge ${v.reviewStatus==='correcao_devolvida'?'returned':'waiting'}">${esc(reviewStatusLabel(v))}</span>${i===0?'<span class="review-badge">MAIS RECENTE</span>':''}</div><div class="review-version-note">${when?esc(when)+' · ':''}${esc(who)}${v.reviewNote?' — '+esc(v.reviewNote):''}</div><div class="review-version-actions">${v.tipo==='arquivo'?`<button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeInlineComponent(v.url||'')}'),decodeURIComponent('${encodeInlineComponent(v.fileName||v.titulo||'Arquivo')}'),{source:'publication',id:'${v.id}'})">👁 Ver</button><button class="btn" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeInlineComponent(v.url||'')}'),decodeURIComponent('${encodeInlineComponent(v.fileName||v.titulo||'arquivo')}'))">⬇ Baixar</button>`:''}${officeActionButtons(v,'compact')}${can?`<button class="btn review-action" type="button" onclick="closeReviewConversation();setTimeout(()=>openReviewResponse('${v.id}'),80)">${reviewActionLabel(v)}</button>`:''}</div></div>`}).join(''):'<div class="repo-empty">Nenhuma versão encontrada.</div>';
 }
 function renderReviewConversationMessages(){const box=$('#reviewChatMessages');if(!box)return;if(!reviewConversationMessages.length){box.innerHTML='<div class="review-chat-empty"><b>Sem mensagens ainda.</b><br>Use este espaço para orientar a correção, explicar o que mudou ou pedir nova revisão.</div>';return}box.innerHTML=reviewConversationMessages.map(m=>{const mine=m.authorMemberId===myId,when=repoEventDate(m.createdAt,true);return `<div class="review-chat-msg ${mine?'mine':'other'}"><div class="who">${esc(m.authorName||memberById(m.authorMemberId)?.nome||'Carbonauta')}</div><div class="txt">${esc(m.text||'')}</div><div class="when">${esc(when)}</div>${mine?`<button type="button" onclick="deleteReviewConversationMessage('${m.id}')">Excluir</button>`:''}</div>`}).join('');requestAnimationFrame(()=>{box.scrollTop=box.scrollHeight})}
 async function openReviewConversation(idOrThread){
@@ -5914,7 +5917,7 @@ const OO_DEFAULT_SERVER='https://docs.carbonautas.online';
 const OO_EXTS=new Set(['docx','xlsx','pptx']);
 const OO_LEGACY_CONVERTIBLE=new Set(['doc','xls','ppt']);
 let ooEditorInstance=null,ooSession=null,ooPendingPubId='',officeNewType='docx';
-function onlyOfficeBase(){return (localStorage.getItem(OO_SERVER_KEY)||OO_DEFAULT_SERVER).trim().replace(/\/+$/,'')}
+function onlyOfficeBase(){return OO_DEFAULT_SERVER}
 function officeExt(p){
   if(!p||p.tipo!=='arquivo')return '';
   let ext=String(p.detectedExt||p.officeExt||'').toLowerCase();
@@ -6031,7 +6034,8 @@ async function launchOnlyOffice(p,base,opts={}){
     const mode=(isReview&&ext==='docx'&&myId===p.reviewReviewerId)?'review':'edit';
     $('#ooModePill').textContent=mode==='review'?'✍️ Controle de alterações':'✏️ '+officeKindLabel(ext);
     await loadOnlyOfficeApi(base);
-    ooSession={key:data.sessionKey,pubId:p.id,p,base,mode,purpose,ext,packageId:opts.packageId||p.__packageId||'',packageFileId:opts.fileId||p.__packageFileId||'',saved:false,changed:false,syncPending:false,lastChangeAt:0,lastSyncAt:0,saveLabel,closingForSave:false,discarding:false};
+    ooSession={key:data.sessionKey,pubId:p.id,p,expectedRevision:{url:p.url||'',onlineEditVersion:Number(p.onlineEditVersion||1)},base,mode,purpose,ext,packageId:opts.packageId||p.__packageId||'',packageFileId:opts.fileId||p.__packageFileId||'',saved:false,changed:false,syncPending:false,lastChangeAt:0,lastSyncAt:0,saveLabel,closingForSave:false,discarding:false};
+    const recovery=$('#ooRecoveryFile');if(recovery){if(recovery.href?.startsWith('blob:'))URL.revokeObjectURL(recovery.href);recovery.remove()}
     $('#onlyOfficeEditor').innerHTML='';
     const cfg=data.config||{};cfg.height='100%';cfg.width='100%';cfg.events={
       onDocumentReady:()=>{setOoStatus(isReview?'Documento pronto. Corrija normalmente. Use “Salvar e sair” ao terminar ou “Sair” para descartar.':'Arquivo pronto. Edite normalmente. Use “Salvar e sair” ao terminar ou “Sair” para descartar.');},
@@ -6093,6 +6097,23 @@ function showOoFinalizing(title='Salvando suas alterações…',detail='O editor
 }
 
 function splitOfficeName(name,ext){const clean=(name||'arquivo').replace(new RegExp('\\.'+ext+'$','i'),'');return clean||'arquivo'}
+async function commitOfficeRevision(ref,expected,patch){
+  const f=FB();
+  return f.runTransaction(window.db,async tx=>{
+    const snap=await tx.get(ref);
+    if(!snap.exists())throw new Error('O arquivo foi removido em outra tela.');
+    const live=snap.data();
+    if(Number(live.onlineEditVersion||1)!==Number(expected.onlineEditVersion||1)||(live.url||'')!==(expected.url||'')){
+      throw new Error('Outra edição foi salva enquanto você trabalhava. Baixe sua edição abaixo antes de sair; nenhuma versão foi substituída.');
+    }
+    tx.update(ref,patch);
+  });
+}
+function showOfficeRecovery(blob,name){
+  let box=$('#ooRecoveryFile');if(!box){box=document.createElement('a');box.id='ooRecoveryFile';box.className='btn';$('#ooSaveBtn')?.parentElement?.appendChild(box)}
+  if(box.href?.startsWith('blob:'))URL.revokeObjectURL(box.href);
+  box.href=URL.createObjectURL(blob);box.download=name||'minha-edicao';box.textContent='⬇️ Guardar minha edição no computador';box.hidden=false;
+}
 async function persistReadyOnlineDocument(token){
   const btn=$('#ooSaveBtn'),p=state.publicacoes.find(x=>x.id===ooSession.pubId)||ooSession.p;
   const fr=await fetch(ooSession.base+'/carbonautas-api/api/session/'+encodeURIComponent(ooSession.key)+'/file',{headers:{Authorization:'Bearer '+token}});
@@ -6106,8 +6127,8 @@ async function persistReadyOnlineDocument(token){
     const current={...snap.data(),id:fileId},currentV=Number(current.onlineEditVersion||1),nextV=currentV+1,fileName=current.fileName||p.fileName||`arquivo.${ext}`;
     const history={version:currentV,url:current.url||'',storagePath:current.storagePath||'',fileName,savedAt:new Date().toISOString(),byUid:uid,byMemberId:actor?.id||myId||'',byName:actor?.name||myName||'Carbonauta'};
     const up=await fbUploadFile('onlyoffice_private_'+packageId,dataUrl,fileName);
-    try{await f.updateDoc(fileRef,{url:up.url,storagePath:up.path,onlineEditVersion:nextV,onlineEditHistory:f.arrayUnion(history),editedOnline:true,editedAt:f.serverTimestamp(),editedByUid:uid,editedByMemberId:actor?.id||myId||'',editedByName:actor?.name||myName||''})}catch(e){await deleteStorageArtifacts({storagePath:up.path,url:up.url},{allowUrlFallback:false});throw e}
-    await f.updateDoc(f.doc(window.db,'rede_repository_packages',packageId),{updatedAt:f.serverTimestamp()});
+    try{await commitOfficeRevision(fileRef,ooSession.expectedRevision||current,{url:up.url,storagePath:up.path,onlineEditVersion:nextV,onlineEditHistory:f.arrayUnion(history),editedOnline:true,editedAt:f.serverTimestamp(),editedByUid:uid,editedByMemberId:actor?.id||myId||'',editedByName:actor?.name||myName||''})}catch(e){showOfficeRecovery(blob,p.fileName);await deleteStorageArtifacts({storagePath:up.path,url:up.url},{allowUrlFallback:false});throw e}
+    await f.updateDoc(f.doc(window.db,'rede_repository_packages',packageId),{updatedAt:f.serverTimestamp()}).catch(e=>console.warn('Arquivo salvo; data da pasta não atualizada',e));
     setOoStatus(`✅ Alterações salvas no Meu Repositório · v${nextV}.`);toast(`Arquivo salvo no Meu Repositório · v${nextV}.`);
   }else if(ooSession.purpose==='review'){
     const tid=p.reviewThreadId||p.id,same=contentHash?reviewThreadItems(tid).find(x=>x.contentHash===contentHash):null;if(same){setOoStatus(`✅ O arquivo final é idêntico à versão ${same.reviewVersion||1}. Nenhuma duplicação foi criada.`);toast('Nenhuma nova versão: o conteúdo já estava salvo.');ooSession.saved=true;ooSession.changed=false;ooSession.syncPending=false;return}
@@ -6115,16 +6136,16 @@ async function persistReadyOnlineDocument(token){
     const up=await fbUploadFile('onlyoffice_'+p.memberId,dataUrl,fileName),url=up.url,storagePath=up.path,ref=f.doc(window.db,'rede_publicacoes',reviewVersionDocId(tid,nextVersion));
     const reviewerId=p.reviewReviewerId,returnToId=p.reviewReturnToId,actingAsReviewer=(myId===reviewerId);
     const nextRecipientId=actingAsReviewer?returnToId:reviewerId,status=actingAsReviewer?'correcao_devolvida':'nova_versao',baseTitle=p.reviewBaseTitle||p.titulo||'Documento';
-    try{await f.setDoc(ref,{memberId:p.memberId,ownerUid:uid,createdByUid:uid,memberNome:p.memberNome||memberById(p.memberId)?.nome||'',categoria:p.categoria||'outro',categoriaOutro:p.categoriaOutro||'',titulo:baseTitle,tipo:'arquivo',url,storagePath,fileName,contentHash,reviewFlow:true,reviewThreadId:tid,reviewVersion:nextVersion,reviewStatus:status,reviewReviewerId:reviewerId,reviewReturnToId:returnToId,reviewNextRecipientId:nextRecipientId,reviewParentId:p.id,reviewSenderId:actor?.id||myId||'',reviewSenderName:actor?.name||'',reviewBaseTitle:baseTitle,reviewNote:actingAsReviewer?(ext==='docx'?'Correção realizada online com controle de alterações.':'Arquivo revisado online.'):'Nova versão revisada online.',editedOnline:true,ts:f.serverTimestamp()})}catch(e){await deleteStorageArtifacts({storagePath,url},{allowUrlFallback:false});throw e}
-    await createRepoNotification(nextRecipientId,{sourceId:ref.id,ownerId:p.memberId,title:actingAsReviewer?'✅ Correção online devolvida':'⬆️ Nova versão para revisar',message:`${baseTitle} · versão ${nextVersion} · editada no ONLYOFFICE`});
+    try{await f.runTransaction(window.db,async tx=>{const existing=await tx.get(ref);if(existing.exists())throw new Error('Outra versão já foi salva. Guarde sua edição antes de sair.');tx.set(ref,{memberId:p.memberId,ownerUid:uid,createdByUid:uid,memberNome:p.memberNome||memberById(p.memberId)?.nome||'',categoria:p.categoria||'outro',categoriaOutro:p.categoriaOutro||'',titulo:baseTitle,tipo:'arquivo',url,storagePath,fileName,contentHash,reviewFlow:true,reviewThreadId:tid,reviewVersion:nextVersion,reviewStatus:status,reviewReviewerId:reviewerId,reviewReturnToId:returnToId,reviewNextRecipientId:nextRecipientId,reviewParentId:p.id,reviewSenderId:actor?.id||myId||'',reviewSenderName:actor?.name||'',reviewBaseTitle:baseTitle,reviewNote:actingAsReviewer?(ext==='docx'?'Correção realizada online com controle de alterações.':'Arquivo revisado online.'):'Nova versão revisada online.',editedOnline:true,ts:f.serverTimestamp()})})}catch(e){showOfficeRecovery(blob,p.fileName);await deleteStorageArtifacts({storagePath,url},{allowUrlFallback:false});throw e}
+    await createRepoNotification(nextRecipientId,{sourceId:ref.id,ownerId:p.memberId,title:actingAsReviewer?'✅ Correção online devolvida':'⬆️ Nova versão para revisar',message:`${baseTitle} · versão ${nextVersion} · editada no ONLYOFFICE`}).catch(e=>console.warn('Versão salva; notificação pendente',e));
     setOoStatus('✅ Nova versão salva e destinatário notificado.');toast('Nova versão salva e notificação enviada.');
   }else{
     const currentV=Number(p.onlineEditVersion||1),nextV=currentV+1,baseName=splitOfficeName(p.fileName||p.titulo||'arquivo',ext),fileName=`${baseName}_v${nextV}.${ext}`;
     const up=await fbUploadFile('onlyoffice_workspace_'+p.memberId,dataUrl,fileName),url=up.url;const editorMemberId=actor?.id||myId||'',editorName=actor?.name||myName||'Carbonauta';
     const ownerMemberId=p.memberId||'',owner=memberById(ownerMemberId),ownerName=p.memberNome||owner?.nome||'proprietário';const editingSomeoneElsesFile=!!(ownerMemberId&&editorMemberId&&ownerMemberId!==editorMemberId);
     const history={version:currentV,url:p.url||'',storagePath:p.storagePath||'',fileName:p.fileName||`${baseName}.${ext}`,savedAt:new Date().toISOString(),byUid:uid,byMemberId:editorMemberId,byName:editorName};
-    try{await f.updateDoc(f.doc(window.db,'rede_publicacoes',p.id),{url,storagePath:up.path,fileName,onlineEditVersion:nextV,onlineEditHistory:f.arrayUnion(history),editedOnline:true,editedAt:f.serverTimestamp(),editedByUid:uid,editedByMemberId:editorMemberId,editedByName:editorName,repositoryTurnMemberId:editingSomeoneElsesFile?ownerMemberId:'',repositoryTurnFromId:editingSomeoneElsesFile?editorMemberId:'',repositoryTurnFromName:editingSomeoneElsesFile?editorName:'',repositoryTurnAt:f.serverTimestamp()})}catch(e){await deleteStorageArtifacts({storagePath:up.path,url:up.url},{allowUrlFallback:false});throw e}
-    if(editingSomeoneElsesFile){await createRepoNotification(ownerMemberId,{kind:'repositorio_retorno',sourceId:p.id,ownerId:ownerMemberId,title:`✨ Agora é sua vez, ${ownerName}`,message:`${editorName} editou “${p.titulo||p.fileName||'seu arquivo'}”. Dê uma olhada no que foi ajustado e continue a partir daqui.`});setOoStatus(`✅ Edição v${nextV} salva. ${ownerName} foi notificado(a) para continuar.`);toast(`Edição v${nextV} salva. ${ownerName} foi notificado(a).`);}else{setOoStatus(`✅ Edição v${nextV} salva. A versão anterior foi preservada no histórico.`);toast(`Edição v${nextV} salva no Repositório.`);}
+    try{await commitOfficeRevision(f.doc(window.db,'rede_publicacoes',p.id),ooSession.expectedRevision||p,{url,storagePath:up.path,fileName,onlineEditVersion:nextV,onlineEditHistory:f.arrayUnion(history),editedOnline:true,editedAt:f.serverTimestamp(),editedByUid:uid,editedByMemberId:editorMemberId,editedByName:editorName,repositoryTurnMemberId:editingSomeoneElsesFile?ownerMemberId:'',repositoryTurnFromId:editingSomeoneElsesFile?editorMemberId:'',repositoryTurnFromName:editingSomeoneElsesFile?editorName:'',repositoryTurnAt:f.serverTimestamp()})}catch(e){showOfficeRecovery(blob,p.fileName);await deleteStorageArtifacts({storagePath:up.path,url:up.url},{allowUrlFallback:false});throw e}
+    if(editingSomeoneElsesFile){await createRepoNotification(ownerMemberId,{kind:'repositorio_retorno',sourceId:p.id,ownerId:ownerMemberId,title:`✨ Agora é sua vez, ${ownerName}`,message:`${editorName} editou “${p.titulo||p.fileName||'seu arquivo'}”. Dê uma olhada no que foi ajustado e continue a partir daqui.`}).catch(e=>console.warn('Edição salva; notificação pendente',e));setOoStatus(`✅ Edição v${nextV} salva. ${ownerName} foi notificado(a) para continuar.`);toast(`Edição v${nextV} salva. ${ownerName} foi notificado(a).`);}else{setOoStatus(`✅ Edição v${nextV} salva. A versão anterior foi preservada no histórico.`);toast(`Edição v${nextV} salva no Repositório.`);}
   }
   ooSession.saved=true;ooSession.changed=false;ooSession.syncPending=false;if(btn){btn.disabled=true;btn.textContent='✅ Salvo'};
 }
@@ -6224,7 +6245,7 @@ $('#newOfficeBtn')?.addEventListener('click',openNewOffice);
 $$('#officeNewGrid [data-office-type]').forEach(b=>b.addEventListener('click',()=>{officeNewType=b.dataset.officeType;$$('#officeNewGrid [data-office-type]').forEach(x=>x.classList.toggle('on',x===b))}));
 $('#officeNewCreateBtn')?.addEventListener('click',createBlankOffice);
 $('#officeContextType')?.addEventListener('change',()=>updateContextUI('office'));
-$('#ooSaveConfigBtn')?.addEventListener('click',async()=>{const v=($('#ooServerUrl')?.value||'').trim().replace(/\/+$/,'');if(!/^https:\/\//i.test(v)){toast('Informe um endereço HTTPS válido.');return}localStorage.setItem(OO_SERVER_KEY,v);closeOverlay('onlyOfficeSetupOverlay');toast('Servidor do editor salvo.');const id=ooPendingPubId;ooPendingPubId='';if(id)setTimeout(()=>openOnlineEdit(id),150)});
+$('#ooSaveConfigBtn')?.addEventListener('click',async()=>{const v=($('#ooServerUrl')?.value||'').trim().replace(/\/+$/,'');if(v!==OO_DEFAULT_SERVER){toast('O editor do Carbonautas usa '+OO_DEFAULT_SERVER+'.');return}localStorage.setItem(OO_SERVER_KEY,v);closeOverlay('onlyOfficeSetupOverlay');toast('Servidor do editor salvo.');const id=ooPendingPubId;ooPendingPubId='';if(id)setTimeout(()=>openOnlineEdit(id),150)});
 $('#ooConfigBtn')?.addEventListener('click',openOnlyOfficeSetup);
 $('#ooSaveBtn')?.addEventListener('click',saveOnlineDocument);
 $('#ooCloseBtn')?.addEventListener('click',()=>discardOnlineDocument());
@@ -6398,11 +6419,11 @@ async function deletePublicacao(id){
 
 /* ============ ACOMPANHAMENTO ============ */
 const ACTIVITY_TYPES={bolsa:'Bolsa',mestrado:'Mestrado',doutorado:'Doutorado',tcc:'TCC',orientacao:'Orientação',correcao:'Correção',qualificacao:'Qualificação',defesa:'Defesa',entrega:'Entrega / prazo',pendencia:'Pendência',checkin:'Check-in mensal',produto:'Produto / entrega',outro:'Outro acompanhamento',projeto:'Registro antigo · Projeto',acao:'Registro antigo · Ação',apresentacao:'Registro antigo · Apresentação',cronograma:'Registro antigo · Cronograma',relatorio:'Registro antigo · Relatório',arquivo:'Registro antigo · Arquivo'};
-const ACTIVITY_STATUS={planejado:'Planejado',afazer:'A fazer',andamento:'Em andamento',recebido:'Orientador recebeu',revisao:'Em correção / revisão',devolvido:'Correção devolvida',revisando:'Aluno revisando',aprovado:'Aprovado',concluido:'Concluído',pausado:'Pausado'};
+const ACTIVITY_STATUS={planejado:'Planejado',afazer:'A fazer',andamento:'Em andamento',recebido:'Orientador recebeu',revisao:'Em correção / revisão',devolvido:'Correção devolvida',revisando:'Aluno revisando',aprovado:'Aprovado',reprovado:'Reprovado',concluido:'Concluído',pausado:'Pausado'};
 const TRACK_PERIOD_TYPES=new Set(['mestrado','doutorado','tcc']);
 const TRACK_LEGACY_TYPES=new Set(['projeto','acao','apresentacao','cronograma','relatorio','arquivo']);
 const TRACK_ICONS={bolsa:'🎓',mestrado:'📘',doutorado:'📚',tcc:'📝',orientacao:'🧭',correcao:'✍️',qualificacao:'🎯',defesa:'🎓',entrega:'📌',pendencia:'⚠️',checkin:'🗓',produto:'🎯',outro:'•',projeto:'•',acao:'•',apresentacao:'•',cronograma:'•',relatorio:'•',arquivo:'•'};
-let editingActivityId=null, activityOwnerPreset='';
+let editingActivityId=null, activityOwnerPreset='',activitySaving=false,activityLoadedRevision=null;
 function refreshTrackOwners(){
   const el=$('#trackOwner'),cur=el.value; const list=[...state.members].sort((a,b)=>a.nome.localeCompare(b.nome));
   el.innerHTML='<option value="">Todos os Carbonautas</option>'+list.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join(''); el.value=cur;
@@ -6484,18 +6505,59 @@ function openActivity(id=null,ownerPreset=''){
   if(!myId&&!isAdmin){toast('Seu perfil precisa estar vinculado ao login.');return}
   editingActivityId=id;activityOwnerPreset=ownerPreset||'';const a=id?state.activities.find(x=>x.id===id):null;
   if(a&&!(isAdmin||isMe(a.ownerId))){toast('Sem permissão para editar este acompanhamento.');return}
+  activityLoadedRevision=a?.updatedAt?.toMillis?.()??null;
   const sel=$('#activityOwnerSel'),ordered=[...state.members].sort((x,y)=>x.nome.localeCompare(y.nome));sel.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');
   $('#activityOwnerRow').style.display=isAdmin?'block':'none';sel.value=a?.ownerId||activityOwnerPreset||(myId||ordered[0]?.id||'');
-  $('#activityTitle').textContent=a?'Editar acompanhamento':'Registrar acompanhamento';$('#activityType').value=a?.type&&ACTIVITY_TYPES[a.type]?a.type:'orientacao';$('#activityStatus').value=a?.status||'andamento';$('#activityName').value=a?.title||'';$('#activityDesc').value=a?.description||'';$('#activityStart').value=a?.startDate||'';$('#activityDue').value=a?.dueDate||'';$('#activityProgress').value=a?.progress||0;$('#activityProgressLabel').textContent=(a?.progress||0)+'%';$('#deleteActivityBtn').style.display=a?'inline-flex':'none';syncActivityTypeUi();openOverlay('activityOverlay');
+  $('#activityTitle').textContent=a?'Editar acompanhamento':'Registrar acompanhamento';$('#activityType').value=a?.type&&ACTIVITY_TYPES[a.type]?a.type:'orientacao';$('#activityStatus').value=a?.status||'andamento';$('#activityName').value=a?.title||'';$('#activityDesc').value=a?.description||'';$('#activityStart').value=a?.startDate||'';$('#activityDue').value=a?.dueDate||'';$('#activityProgress').value=a?.progress||0;$('#activityProgressLabel').textContent=(a?.progress||0)+'%';$('#deleteActivityBtn').style.display=a?'inline-flex':'none';syncActivityTypeUi();syncActivityDecisionUi(a);openOverlay('activityOverlay');
+}
+function syncActivityDecisionUi(activity){
+  const select=$('#activityStatus');
+  [...select.options].forEach(o=>{o.disabled=!isAdmin&&['aprovado','reprovado'].includes(o.value)});
+  if(!isAdmin&&['aprovado','reprovado'].includes(select.value))select.value='revisando';
+  let note=$('#activityDecisionHint');
+  if(!note){note=document.createElement('p');note.id='activityDecisionHint';note.className='muted';select.parentElement.appendChild(note)}
+  note.textContent=isAdmin?'Você pode aprovar, reprovar ou editar este registro.':
+    (['aprovado','reprovado'].includes(activity?.status)?'Pode ajustar seu registro. Ao salvar, ele volta para revisão do orientador.':'O registro é seu: pode editar. A aprovação fica com o orientador.');
 }
 function editActivity(id){openActivity(id)}
 function openActivityPreset(type,ownerPreset=''){openActivity(null,ownerPreset);setTimeout(()=>{if($('#activityType'))$('#activityType').value=type;if(type==='pendencia'){$('#activityStatus').value='afazer';$('#activityName').placeholder='Ex.: Enviar capítulo revisado';}if(type==='correcao'){$('#activityStatus').value='recebido';$('#activityName').placeholder='Ex.: Correção do capítulo 2';}},20)}
 async function notifyAcompanhamentoOwner(ownerId,meta={}){if(!isAdmin||!ownerId||ownerId===myId)return;const me=currentActor(),f=FB();try{await f.addDoc(f.collection(window.db,'rede_notifications'),{recipientId:ownerId,senderId:me?.id||myId||'',senderUid:window.auth.currentUser?.uid||'',senderName:me?.name||'Coordenação',kind:meta.kind||'acompanhamento',title:meta.title||'Novo item de acompanhamento',message:(meta.message||'').slice(0,240),sourceType:'acompanhamento',sourceId:meta.sourceId||'',ownerId,read:false,ts:f.serverTimestamp()})}catch(e){console.warn('Não foi possível notificar o acompanhamento',e)}}
 async function saveActivity(){
-  const ownerId=isAdmin?$('#activityOwnerSel').value:myId,type=$('#activityType').value;let title=$('#activityName').value.trim();if(!title)title=ACTIVITY_TYPES[type]||'Acompanhamento';if(!ownerId){toast('Selecione o Carbonauta.');return}
-  const startDate=$('#activityStart').value,dueDate=$('#activityDue').value;if(startDate&&dueDate&&startDate>dueDate){toast('A data final não pode ser anterior ao início.');return}const m=memberById(ownerId),data={ownerId,ownerUid:(state.users||[]).find(u=>u.memberId===ownerId)?.uid || (ownerId===myId ? (window.auth.currentUser?.uid||'') : ''),ownerName:m?.nome||'',type,status:$('#activityStatus').value,title,description:$('#activityDesc').value.trim(),startDate,dueDate,progress:+$('#activityProgress').value||0,updatedAt:FB().serverTimestamp()};
-  try{let savedId=editingActivityId||'',wasNew=!editingActivityId;if(editingActivityId){await FB().setDoc(FB().doc(window.db,'rede_activities',editingActivityId),data,{merge:true})}else{const ref=await FB().addDoc(FB().collection(window.db,'rede_activities'),{...data,createdAt:FB().serverTimestamp()});savedId=ref.id}if(wasNew)await awardPoints(ownerId,'activity_created',savedId,title);if(['concluido','aprovado','feito'].includes(String(data.status||'').toLowerCase())||Number(data.progress)>=100)await awardPoints(ownerId,'activity_completed',savedId,title);if(isAdmin&&ownerId!==myId){const notifyNew=wasNew&&['pendencia','correcao','entrega'].includes(type);const notifyReturn=!wasNew&&type==='correcao'&&['devolvido','aprovado'].includes(data.status);if(notifyNew||notifyReturn)await notifyAcompanhamentoOwner(ownerId,{kind:type,title:type==='correcao'?'✍️ Correção no acompanhamento':type==='pendencia'?'⚠️ Nova pendência':'📌 Nova entrega / prazo',message:`${title}${dueDate?' · prazo '+fmtDate(dueDate):''}`,sourceId:savedId})}closeOverlay('activityOverlay');toast('Acompanhamento salvo.')}catch(e){console.error(e);toast(e?.code==='permission-denied'?'O Firestore bloqueou o acompanhamento.':'Erro ao salvar acompanhamento.')}
+  if(activitySaving)return false;
+  const ownerId=isAdmin?$('#activityOwnerSel').value:myId,type=$('#activityType').value;
+  const title=$('#activityName').value.trim()||ACTIVITY_TYPES[type]||'Acompanhamento';
+  if(!ownerId){toast('Selecione o Carbonauta.');return false}
+  const startDate=$('#activityStart').value,dueDate=$('#activityDue').value;
+  if(startDate&&dueDate&&startDate>dueDate){toast('A data final não pode ser anterior ao início.');return false}
+  const m=memberById(ownerId),status=$('#activityStatus').value;
+  if(!isAdmin&&['aprovado','reprovado'].includes(status)){toast('A aprovação fica com o orientador.');return false}
+  const f=FB(),actorUid=window.auth.currentUser?.uid||'',wasNew=!editingActivityId;
+  const ref=editingActivityId?f.doc(window.db,'rede_activities',editingActivityId):f.doc(f.collection(window.db,'rede_activities'));
+  const data={ownerId,ownerName:m?.nome||'',type,status,title,description:$('#activityDesc').value.trim(),startDate,dueDate,
+    progress:Math.max(0,Math.min(100,+$('#activityProgress').value||0)),updatedAt:f.serverTimestamp()};
+  const button=$('#saveActivityBtn');activitySaving=true;button.disabled=true;button.textContent='Salvando…';
+  try{
+    await f.runTransaction(window.db,async tx=>{
+      const snap=await tx.get(ref);
+      if(!wasNew&&!snap.exists())throw new Error('Este registro foi excluído em outra tela. Reabra o acompanhamento.');
+      if(snap.exists()){
+        const previous=snap.data();
+        if((previous.updatedAt?.toMillis?.()??null)!==activityLoadedRevision)throw new Error('Esse registro mudou em outra tela. Reabra antes de salvar para não perder nenhuma alteração.');
+      }else{data.createdAt=f.serverTimestamp();data.ownerUid=(state.users||[]).find(u=>u.memberId===ownerId)?.uid||(ownerId===myId?actorUid:'')}
+      tx.set(ref,data,{merge:true});
+    });
+    activitySaving=false;closeOverlay('activityOverlay');toast('Acompanhamento salvo.');
+    // Rewards/notifications must not turn a successful save into a false error.
+    try{
+      if(wasNew)await awardPoints(ownerId,'activity_created',ref.id,title);
+      if(['concluido','aprovado','feito'].includes(status)||data.progress>=100)await awardPoints(ownerId,'activity_completed',ref.id,title);
+      if(isAdmin&&ownerId!==myId)await notifyAcompanhamentoOwner(ownerId,{kind:type,title:'📌 Acompanhamento atualizado',message:`${title}${dueDate?' · prazo '+fmtDate(dueDate):''}`,sourceId:ref.id});
+    }catch(e){console.warn('Registro salvo; aviso/pontos pendentes',e)}
+    return true;
+  }catch(e){console.error(e);toast(e?.code==='permission-denied'?'Não foi possível salvar. Seu texto continua aqui; confira as permissões.':e.message||'Erro ao salvar acompanhamento.');return false}
+  finally{activitySaving=false;button.disabled=false;button.textContent='Salvar acompanhamento'}
 }
+
 async function deleteActivity(){if(!editingActivityId||!confirm('Excluir este registro de acompanhamento?'))return;const a=state.activities.find(x=>x.id===editingActivityId);if(!a||!(isAdmin||isMe(a.ownerId)))return;try{await FB().deleteDoc(FB().doc(window.db,'rede_activities',editingActivityId));const failed=await deleteStorageArtifacts({storagePath:a.storagePath||'',url:a.attachmentUrl||a.fileUrl||''});closeOverlay('activityOverlay');toast(failed.length?'Registro excluído, mas o anexo não pôde ser removido do Storage.':'Registro excluído.')}catch(e){console.error(e);toast('Erro ao excluir.')}}
 
 
@@ -6553,13 +6615,13 @@ function renderDossier(){const m=memberById($('#dossierPerson')?.value);if(!m)re
 function openDossier(memberId=''){refreshDossierPerson();if(memberId&&[...$('#dossierPerson').options].some(o=>o.value===memberId))$('#dossierPerson').value=memberId;renderDossier();openOverlay('dossierOverlay')}
 function dossierWorkbook(memberId){const m=memberById(memberId),{acts,repo,cron,checkins,products}=dossierRowsFor(m);const wb=XLSX.utils.book_new();const profile=[{Nome:m.nome,Nivel:NIVEIS[m.nivel]?.label||m.nivel,Programa:m.programa||'',Status:m.status||'',Bolsista:m.bolsista?'Sim':'Não','Pergunta científica':m.perguntaCientifica||'','Objetivo central':m.objetivoProjeto||'','Grupo atendido':m.grupoAtendido||'','Ideia de visibilidade':m.ideiaVisibilidade||'',Outros:m.projetoOutros||''}];XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(profile),'Perfil');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(acts.map(a=>({Tipo:ACTIVITY_TYPES[a.type]||a.type,Titulo:a.title||'',Status:ACTIVITY_STATUS[a.status]||a.status,Inicio:a.startDate||'',Prazo:a.dueDate||'',Descricao:a.description||''}))), 'Acompanhamento');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(products.map(a=>({Produto:a.title||'',Tipo:PRODUCT_TYPES[a.productType]||a.productType,Status:ACTIVITY_STATUS[a.status]||a.status,Prazo:a.dueDate||'',Observacoes:a.description||''}))), 'Produtos');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(checkins.map(a=>({Mes:a.checkinMonth||'',Fez:a.checkinDid||'',Entregou:a.checkinDelivered||'',Dificuldade:a.checkinDifficulty||'',Proximo:a.checkinNext||''}))), 'Checkins');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(repo.map(r=>({Titulo:r.title||'',Tipo:r.kind||'',Arquivo:r.fileName||'',URL:r.url||'',Correcao:r.reviewFlow?'Sim':'Não',Versao:r.reviewVersion||'',Status:r.reviewStatus||''}))), 'Repositorio');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(cron.map(c=>({Titulo:c.titulo||'',Data:c.data||'',Concluido:c.feito?'Sim':'Não'}))), 'Prazos');return wb}
 function exportDossierExcel(){const id=$('#dossierPerson').value,m=memberById(id);if(!m)return;if(!window.XLSX){ensureLib('xlsx').then(exportDossierExcel).catch(e=>toast(e.message));return}XLSX.writeFile(dossierWorkbook(id),`Dossie_${slugify(m.nome)}.xlsx`)}
-function exportDossierCsv(){const id=$('#dossierPerson').value,m=memberById(id);if(!m)return;const {acts}=dossierRowsFor(m),rows=[['Nome','Tipo','Título','Status','Início','Prazo','Descrição'],...acts.map(a=>[m.nome,ACTIVITY_TYPES[a.type]||a.type,a.title||'',ACTIVITY_STATUS[a.status]||a.status,a.startDate||'',a.dueDate||'',a.description||''])];const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\n');const b=new Blob([csv],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.csv`;a.click();URL.revokeObjectURL(u)}
+function exportDossierCsv(){const id=$('#dossierPerson').value,m=memberById(id);if(!m)return;const {acts}=dossierRowsFor(m),rows=[['Nome','Tipo','Título','Status','Início','Prazo','Descrição'],...acts.map(a=>[m.nome,ACTIVITY_TYPES[a.type]||a.type,a.title||'',ACTIVITY_STATUS[a.status]||a.status,a.startDate||'',a.dueDate||'',a.description||''])];const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+csvTextCell(v).replace(/"/g,'""')+'"').join(';')).join('\n');const b=new Blob([csv],{type:'text/csv;charset=utf-8'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.csv`;a.click();URL.revokeObjectURL(u)}
 function exportDossierWord(){const m=memberById($('#dossierPerson').value);if(!m)return;const html=`<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>Dossiê · ${esc(m.nome)}</title><style>body{font-family:Arial,sans-serif;margin:32px;color:#152b38}h1,h2,h3{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:11pt}td,th{border:1px solid #ddd;padding:7px;text-align:left}.dossier-question{padding:14px;background:#f2efff;border:1px solid #d7cdfa}</style></head><body><h1>Dossiê do Carbonauta</h1>${dossierHTML(m)}
 
 
 </body></html>`;const blob=new Blob(['\ufeff',html],{type:'application/msword'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=`Dossie_${slugify(m.nome)}.doc`;a.click();URL.revokeObjectURL(u)}
 function printDossier(){const m=memberById($('#dossierPerson').value);if(!m)return;const w=window.open('','_blank');w.document.write(`<html><head><title>Dossiê · ${esc(m.nome)}</title><style>body{font-family:Arial,sans-serif;margin:30px;color:#152b38}h1,h2,h3{font-family:Georgia,serif}table{width:100%;border-collapse:collapse;font-size:12px}td,th{border-bottom:1px solid #ddd;padding:7px;text-align:left}.dossier-question{padding:14px;background:#f2efff;border:1px solid #d7cdfa;border-radius:10px}</style></head><body>${dossierHTML(m)}</body></html>`);w.document.close();setTimeout(()=>w.print(),350)}
-function exportGeneralBackup(){if(isAdmin&&!window.XLSX){ensureLib('xlsx').then(exportGeneralBackup).catch(e=>toast(e.message));return}if(!isAdmin||!window.XLSX){toast('Backup geral disponível somente para o coordenador.');return}const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.members.map(m=>({id:m.id,nome:m.nome,nivel:m.nivel,programa:m.programa||'',status:m.status||'',bolsista:m.bolsista?'Sim':'Não',pergunta:m.perguntaCientifica||'',objetivo:m.objetivoProjeto||'',publico:m.grupoAtendido||'',visibilidade:m.ideiaVisibilidade||''}))), 'Pessoas');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.activities.map(a=>({id:a.id,ownerId:a.ownerId,ownerName:a.ownerName||'',tipo:a.type,status:a.status,titulo:a.title||'',descricao:a.description||'',inicio:a.startDate||'',prazo:a.dueDate||'',mes:a.checkinMonth||'',produto:a.productType||''}))), 'Acompanhamento');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.publicacoes.map(x=>({id:x.id,ownerUid:x.ownerUid||'',titulo:x.titulo||x.title||'',categoria:x.categoria||'',url:x.fileUrl||x.url||x.externalUrl||''}))), 'Repositorio');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(buildCronoItems().map(x=>({tipo:x.kind,titulo:x.titulo,data:x.data,owner:x.ownerName,concluido:x.feito?'Sim':'Não'}))), 'Cronograma');XLSX.writeFile(wb,`Carbonautas_backup_${new Date().toISOString().slice(0,10)}.xlsx`);toast('Backup Excel gerado.')}
+function exportGeneralBackup(){if(isAdmin&&!window.XLSX){ensureLib('xlsx').then(exportGeneralBackup).catch(e=>toast(e.message));return}if(!isAdmin||!window.XLSX){toast('Relatório geral disponível somente para o coordenador.');return}const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.members.map(m=>({id:m.id,nome:m.nome,nivel:m.nivel,programa:m.programa||'',status:m.status||'',bolsista:m.bolsista?'Sim':'Não',pergunta:m.perguntaCientifica||'',objetivo:m.objetivoProjeto||'',publico:m.grupoAtendido||'',visibilidade:m.ideiaVisibilidade||''}))), 'Pessoas');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.activities.map(a=>({id:a.id,ownerId:a.ownerId,ownerName:a.ownerName||'',tipo:a.type,status:a.status,titulo:a.title||'',descricao:a.description||'',inicio:a.startDate||'',prazo:a.dueDate||'',mes:a.checkinMonth||'',produto:a.productType||''}))), 'Acompanhamento');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(state.publicacoes.map(x=>({id:x.id,ownerUid:x.ownerUid||'',titulo:x.titulo||x.title||'',categoria:x.categoria||'',url:x.fileUrl||x.url||x.externalUrl||''}))), 'Repositorio');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(buildCronoItems().map(x=>({tipo:x.kind,titulo:x.titulo,data:x.data,owner:x.ownerName,concluido:x.feito?'Sim':'Não'}))), 'Cronograma');XLSX.writeFile(wb,`Carbonautas_relatorio_${new Date().toISOString().slice(0,10)}.xlsx`);toast('Relatório Excel gerado. Fotos e arquivos precisam do backup do servidor.')}
 
 /* ============ FEED SOCIAL ============ */
 let postFileData='',postFileName='';
@@ -6585,7 +6647,7 @@ function socialBar(targetType,targetId){
 }
 function renderFeed(){
   renderFeedSide();const a=currentActor();const av=$('#feedMeAv'); if(av){av.innerHTML=a?.foto?`<img src="${esc(a.foto)}" alt="">`:initials(a?.name||'?');av.style.background=a?.color||'#7c8b90'}
-  const list=$('#feedList');$('#feedEmpty').style.display=state.feed.length?'none':'block';list.innerHTML=state.feed.map(p=>{const m=memberForAuthor(p.authorId,p.authorName),dt=p.ts?.toMillis?new Date(p.ts.toMillis()):null,can=isAdmin||isMe(p.authorId);const isImg=p.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(p.fileName||p.fileUrl)||p.mime?.startsWith('image/'));return `<article class="feed-card"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${(m?.foto||p.authorFoto)?`<img src="${esc(m?.foto||p.authorFoto)}" alt="">`:initials(m?.nome||p.authorName||'?')}</div><div><div class="feed-author">${esc(p.authorName||'Carbonauta')}</div><div class="feed-time">${dt?dt.toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div><span class="feed-kind">${esc((p.kind||'atualizacao').replace(/^./,x=>x.toUpperCase()))}</span>${can?`<button class="mini-x" onclick="deleteFeedPost('${p.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${p.title?`<div class="feed-title">${esc(p.title)}</div>`:''}${p.text?`<div class="feed-text">${esc(p.text)}</div>`:''}${p.externalUrl?`<a class="feed-attachment" href="${esc(p.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${p.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeURIComponent(p.fileUrl)}'),decodeURIComponent('${encodeURIComponent(p.fileName||p.title||'Anexo')}'))">👁️ Visualizar · ${esc(p.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(p.fileUrl)}" alt="${esc(p.title||'Foto publicada')}">`:''}${socialBar('post',p.id)}${renderComments('post',p.id)}</article>`}).join('');
+  const list=$('#feedList');$('#feedEmpty').style.display=state.feed.length?'none':'block';list.innerHTML=state.feed.map(p=>{const m=memberForAuthor(p.authorId,p.authorName),dt=p.ts?.toMillis?new Date(p.ts.toMillis()):null,can=isAdmin||isMe(p.authorId);const isImg=p.fileUrl&&(/\.(png|jpe?g|webp|gif)(\?|$)/i.test(p.fileName||p.fileUrl)||p.mime?.startsWith('image/'));return `<article class="feed-card"><div class="feed-head"><div class="feed-av" style="background:${m?NIVEIS[m.nivel]?.color:'#7c8b90'}">${(m?.foto||p.authorFoto)?`<img src="${esc(m?.foto||p.authorFoto)}" alt="">`:initials(m?.nome||p.authorName||'?')}</div><div><div class="feed-author">${esc(p.authorName||'Carbonauta')}</div><div class="feed-time">${dt?dt.toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div><span class="feed-kind">${esc((p.kind||'atualizacao').replace(/^./,x=>x.toUpperCase()))}</span>${can?`<button class="mini-x" onclick="deleteFeedPost('${p.id}')" title="Excluir">×</button>`:''}</div><div class="feed-body">${p.title?`<div class="feed-title">${esc(p.title)}</div>`:''}${p.text?`<div class="feed-text">${esc(p.text)}</div>`:''}${p.externalUrl?`<a class="feed-attachment" href="${esc(p.externalUrl)}" target="_blank" rel="noopener">🔗 Abrir link relacionado</a>`:''}${p.fileUrl&&!isImg?`<button type="button" class="feed-attachment" onclick="openFilePreview(decodeURIComponent('${encodeInlineComponent(p.fileUrl)}'),decodeURIComponent('${encodeInlineComponent(p.fileName||p.title||'Anexo')}'))">👁️ Visualizar · ${esc(p.fileName||'anexo')}</button>`:''}</div>${isImg?`<img class="feed-image" src="${esc(p.fileUrl)}" alt="${esc(p.title||'Foto publicada')}">`:''}${socialBar('post',p.id)}${renderComments('post',p.id)}</article>`}).join('');
 }
 function openPostModal(kind='atualizacao'){
   if(!myId){toast('Identifique-se primeiro para publicar.');openIdentity();return}
@@ -6823,7 +6885,7 @@ function optList(cols,selected=''){return `<option value="">Selecione…</option
 function varChecks(cols,selected=[]){return `<div class="lab-variable-box">${cols.map((c,i)=>`<label class="lab-var-check"><input type="checkbox" data-lab-var value="${esc(c)}" ${selected.includes(c)||(!selected.length&&i<6)?'checked':''}> ${esc(c)}</label>`).join('')}</div>`}
 function labSheetOptions(wb,selected){return (wb?.sheets||[]).map(s=>`<option value="${esc(s.name)}" ${s.name===selected?'selected':''}>${esc(s.name)} · ${s.rows}×${s.columns} · ${s.numericCount} num.</option>`).join('')}
 function labPreviewHTML(ins,limit=8){const rows=(ins?.preview||[]).slice(0,limit),cols=(ins?.columnInfo||[]).map(x=>x.name);if(!cols.length)return '<div class="lab-empty">Esta aba não contém uma tabela reconhecível.</div>';return `<div class="lab-preview-mini"><div class="head"><b>Prévia da aba</b><span>${esc(ins.sheetName||'')}</span><span>· ${ins.rows} linhas</span><span>· ${ins.numeric.length} numéricas</span></div><div class="lab-preview-tablewrap"><table class="lab-preview-table"><thead><tr>${cols.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${cols.map(c=>`<td title="${esc(String(r[c]??''))}">${esc(fmtLabValue(r[c]))}</td>`).join('')}</tr>`).join('')}</tbody></table></div></div>`}
-function applyLabInspect(pack,p){labActiveInspect=pack.inspect;labActiveWorkbook=pack.workbook;labCurrentSheet=pack.inspect?.sheetName||pack.workbook?.bestSheet||'';const ins=labActiveInspect;$('#labAnalyzeSource').innerHTML=`<span style="font-size:24px">📊</span><div><b>${esc(p.titulo||p.fileName||'Base')}</b><div class="lab-muted">Aba: <b>${esc(labCurrentSheet||'CSV')}</b> · ${ins.rows.toLocaleString('pt-BR')} linhas · ${ins.columns} variáveis · ${ins.numeric.length} numéricas</div></div>`;$('#labInspectKpis').innerHTML=`<div class="lab-kpi"><span>Linhas</span><b>${ins.rows.toLocaleString('pt-BR')}</b></div><div class="lab-kpi"><span>Variáveis</span><b>${ins.columns}</b></div><div class="lab-kpi"><span>Numéricas</span><b>${ins.numeric.length}</b></div><div class="lab-kpi"><span>Ausentes</span><b>${ins.missingTotal}</b></div>`;const wb=pack.workbook||{};$('#labWorkbookToolbar').innerHTML=wb.isWorkbook&&wb.sheets?.length>1?`<div class="lab-sheetbar"><label>📚 Aba a analisar</label><select id="labSheetSelect" onchange="changeLabAnalyzeSheet(this.value)">${labSheetOptions(wb,labCurrentSheet)}</select><button class="btn" type="button" onclick="openLabData('${p.id}','${encodeURIComponent(labCurrentSheet)}')">👁 Ver dados</button>${labCanOpenExcel(p)?`<button class="btn" type="button" onclick="openOnlineEdit('${p.id}')">✏️ Abrir Excel</button>`:''}</div>`:`<div class="lab-sheetbar"><span class="lab-muted">Fonte analisada: <b>${esc(labCurrentSheet||'CSV')}</b></span><button class="btn" type="button" onclick="openLabData('${p.id}','${encodeURIComponent(labCurrentSheet)}')">👁 Ver dados</button>${labCanOpenExcel(p)?`<button class="btn" type="button" onclick="openOnlineEdit('${p.id}')">✏️ Abrir Excel</button>`:''}</div>`;$('#labQuickPreview').innerHTML=labPreviewHTML(ins,6);renderLabControls()}
+function applyLabInspect(pack,p){labActiveInspect=pack.inspect;labActiveWorkbook=pack.workbook;labCurrentSheet=pack.inspect?.sheetName||pack.workbook?.bestSheet||'';const ins=labActiveInspect;$('#labAnalyzeSource').innerHTML=`<span style="font-size:24px">📊</span><div><b>${esc(p.titulo||p.fileName||'Base')}</b><div class="lab-muted">Aba: <b>${esc(labCurrentSheet||'CSV')}</b> · ${ins.rows.toLocaleString('pt-BR')} linhas · ${ins.columns} variáveis · ${ins.numeric.length} numéricas</div></div>`;$('#labInspectKpis').innerHTML=`<div class="lab-kpi"><span>Linhas</span><b>${ins.rows.toLocaleString('pt-BR')}</b></div><div class="lab-kpi"><span>Variáveis</span><b>${ins.columns}</b></div><div class="lab-kpi"><span>Numéricas</span><b>${ins.numeric.length}</b></div><div class="lab-kpi"><span>Ausentes</span><b>${ins.missingTotal}</b></div>`;const wb=pack.workbook||{};$('#labWorkbookToolbar').innerHTML=wb.isWorkbook&&wb.sheets?.length>1?`<div class="lab-sheetbar"><label>📚 Aba a analisar</label><select id="labSheetSelect" onchange="changeLabAnalyzeSheet(this.value)">${labSheetOptions(wb,labCurrentSheet)}</select><button class="btn" type="button" onclick="openLabData('${p.id}','${encodeInlineComponent(labCurrentSheet)}')">👁 Ver dados</button>${labCanOpenExcel(p)?`<button class="btn" type="button" onclick="openOnlineEdit('${p.id}')">✏️ Abrir Excel</button>`:''}</div>`:`<div class="lab-sheetbar"><span class="lab-muted">Fonte analisada: <b>${esc(labCurrentSheet||'CSV')}</b></span><button class="btn" type="button" onclick="openLabData('${p.id}','${encodeInlineComponent(labCurrentSheet)}')">👁 Ver dados</button>${labCanOpenExcel(p)?`<button class="btn" type="button" onclick="openOnlineEdit('${p.id}')">✏️ Abrir Excel</button>`:''}</div>`;$('#labQuickPreview').innerHTML=labPreviewHTML(ins,6);renderLabControls()}
 async function changeLabAnalyzeSheet(sheet){try{$('#labAnalysisControls').innerHTML='<div class="lab-empty">Lendo a aba selecionada…</div>';const p=state.publicacoes.find(x=>x.id===labCurrentPubId);const pack=await loadLabInspect(labCurrentPubId,false,sheet);applyLabInspect(pack,p)}catch(e){toast(e.message)}}
 function renderLabControls(){const ins=labActiveInspect;if(!ins)return;const n=ins.numeric||[],all=(ins.columnInfo||[]).map(x=>x.name),m=labSelectedMethod;let h='';if(['descriptive','correlation','pca','cluster'].includes(m))h=`<div class="fg"><label>Variáveis numéricas</label>${varChecks(n)}</div>`;if(m==='correlation')h+=`<div class="fg"><label>Coeficiente</label><select id="labCorrelation"><option value="pearson">Pearson</option><option value="spearman">Spearman</option></select></div>`;if(['regression','glm','mixed'].includes(m)){h=`<div class="grid2"><div class="fg"><label>Variável resposta (Y)</label><select id="labY">${optList(n)}</select></div>${m==='mixed'?`<div class="fg"><label>Grupo aleatório</label><select id="labGroup">${optList(all)}</select></div>`:''}</div><div class="fg"><label>Preditores</label>${varChecks(n)}</div>`;if(m==='glm')h+=`<div class="fg"><label>Família</label><select id="labFamily"><option value="gaussian">Gaussian</option><option value="binomial">Binomial (0/1)</option><option value="poisson">Poisson (contagem)</option></select></div>`}if(['ttest','anova','kruskal'].includes(m))h=`<div class="grid2"><div class="fg"><label>Resposta numérica</label><select id="labY">${optList(n)}</select></div><div class="fg"><label>Variável de grupo</label><select id="labGroup">${optList(all)}</select></div></div>`;if(m==='timeseries')h=`<div class="grid2"><div class="fg"><label>Tempo / data / ano</label><select id="labTime">${optList(all)}</select></div><div class="fg"><label>Resposta numérica</label><select id="labY">${optList(n)}</select></div></div>`;if(m==='cluster')h+=`<div class="fg"><label>Número de clusters (k)</label><input id="labK" type="number" min="2" max="8" value="3"></div>`;if(m==='diagnostic')h='<div class="notice"><b>Automático.</b> O motor audita a aba selecionada, tipos, ausências e estrutura e sugere próximos passos.</div>';$('#labAnalysisControls').innerHTML=h;const advice=$('#labAnalysisAdvice'),sug=ins.suggestions||[];advice.style.display=sug.length?'block':'none';advice.innerHTML=sug.length?'<b>💡 O que esta aba sugere</b><br>'+sug.map(x=>'• '+esc(x)).join('<br>'):''}
 function fillAnalyzeContext(p){const type=p.labContextType||'project';$('#labAnalyzeContextType').value=type;labFillMemberSelect('#labAnalyzeMember',p.labMemberId||p.memberId||myId);const mid=$('#labAnalyzeMember').value||p.labMemberId||p.memberId||myId;$('#labAnalyzeProject').value=p.labProject||memberById(mid)?.tema||p.titulo||'';$('#labAnalyzeChapter').value=p.labChapter||'';updateContextUI('labAnalyze');refreshLabContextStatus(p)}
@@ -6863,7 +6925,14 @@ async function checkScienceEngine(){
 
 /* ============ OVERLAYS ============ */
 function openOverlay(id){$('#'+id).classList.add('open')}
-function closeOverlay(id){$('#'+id).classList.remove('open')}
+function closeOverlay(id){
+  if(id==='onlyOfficeOverlay'&&ooSession&&!ooSession.saved&&!ooSession.discarding){
+    if(ooSession.closingForSave){toast('Só um instante: o arquivo está sendo salvo.');return}
+    discardOnlineDocument();return;
+  }
+  if(id==='activityOverlay'&&activitySaving){toast('Só um instante: estamos salvando.');return}
+  $('#'+id)?.classList.remove('open');
+}
 
 /* ============ VIEW SWITCHING ============ */
 
@@ -7286,8 +7355,8 @@ if($('#privateEmojiToggle'))$('#privateEmojiToggle').onclick=()=>$('#privateEmoj
 $$('#privateEmojiBar button').forEach(b=>b.onclick=()=>{const i=$('#privateInput');if(!i)return;i.value+=(i.value?' ':'')+b.textContent;i.focus()});
 if($('#privateReplyCancel'))$('#privateReplyCancel').onclick=()=>{privateReplyTarget=null;renderPrivateReply()};
 $$('[data-close]').forEach(b=>b.onclick=()=>closeOverlay(b.dataset.close));
-$$('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
-window.addEventListener('keydown',e=>{if(e.key==='Escape'){$$('.overlay.open').forEach(o=>o.classList.remove('open'));closeDetail();closeLightbox()}});
+$$('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)closeOverlay(o.id)}));
+window.addEventListener('keydown',e=>{if(e.key==='Escape'){$$('.overlay.open').forEach(o=>closeOverlay(o.id));closeDetail();closeLightbox()}});
 window.addEventListener('resize',()=>{if(simulation){const[W,H]=graphSize();simulation.force('center')&&simulation.force('center').x(W/2).y(H/2);simulation.alpha(.3).restart()}});
 
 // expose for inline handlers
@@ -7328,11 +7397,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P202-20260920';
+window.CARBONAUTAS_BUILD='P203-20260921';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P202-20260920',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P203-20260921',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -9643,19 +9712,10 @@ function when54(v){
 function name54(id,fallback=''){return members.get(id)?.nome||fallback||''}
 
 async function loadData54(){
-  if(loading)return;loading=true;
-  try{
-    const f=window.fbFns;
-    if(!f||!window.db)return;
-    const [ps,ms]=await Promise.all([
-      f.getDocs(f.collection(window.db,'rede_publicacoes')),
-      f.getDocs(f.collection(window.db,'rede_members'))
-    ]);
-    pubs=ps.docs.map(d=>({...d.data(),id:d.id}));
-    members=new Map(ms.docs.map(d=>[d.id,{...d.data(),id:d.id}]));
-    loaded=true;
-  }catch(e){console.warn('P54 não conseguiu carregar histórico do repositório',e)}
-  finally{loading=false}
+  if(!window.auth?.currentUser || !authProfile){pubs=[];members=new Map();loaded=false;return}
+  pubs=state.publicacoes||[];
+  members=new Map((state.members||[]).map(m=>[m.id,m]));
+  loaded=true;
 }
 
 function histRow54(date,person,action,version,icon='•'){
@@ -9784,14 +9844,15 @@ function injectCss54(){
 }
 
 async function cycle54(){
-  if(!loaded)await loadData54();
+  await loadData54();
+  if(!loaded)return;
   normalizeActions54();
   document.querySelectorAll('.pub-row,.repo-item').forEach(enhanceCard54);
 }
 function boot54(){
   injectCss54();
   const wait=setInterval(async()=>{
-    if(window.db&&window.fbFns){clearInterval(wait);await cycle54();setInterval(cycle54,1800);setInterval(loadData54,15000);console.info('Carbonautas repository UI',VERSION,'carregado');}
+    if(window.db&&window.fbFns){clearInterval(wait);await cycle54();setInterval(cycle54,1800);console.info('Carbonautas repository UI',VERSION,'carregado');}
   },250);
   setTimeout(()=>clearInterval(wait),20000);
 }
@@ -11916,7 +11977,7 @@ function bindRepoReset(){if(document.documentElement.dataset.p78RepoBound)return
 async function createOwnerNotification(ownerId,meta={}){if(!ownerId||ownerId===myMember()||!admin()||!window.fbFns||!window.db)return;const f=window.fbFns;try{await f.addDoc(f.collection(window.db,'rede_notifications'),{recipientId:ownerId,senderId:myMember(),senderUid:window.auth?.currentUser?.uid||'',senderName:memberName(myMember()),kind:meta.kind||'acompanhamento',title:(meta.title||'📌 Atualização no seu projeto').slice(0,200),message:(meta.message||'').slice(0,240),sourceType:'acompanhamento',sourceId:meta.sourceId||'',ownerId,read:false,ts:f.serverTimestamp()})}catch(e){console.warn('P78 notificação de acompanhamento',e)}}
 function currentEditingId(){try{return typeof editingActivityId!=='undefined'?String(editingActivityId||''):''}catch(_e){return''}}
 async function waitActivity(match,tries=14){for(let i=0;i<tries;i++){const a=(S()?.activities||[]).find(match);if(a)return a;await sleep(100)}return null}
-function bindActivityNotification(){const b=qs('#saveActivityBtn');if(!b||b.dataset.p78Wrap)return;const original=b.onclick;if(typeof original!=='function')return;b.dataset.p78Wrap='1';b.onclick=async function(e){const s=S(),owner=admin()?qs('#activityOwnerSel')?.value:myMember(),type=qs('#activityType')?.value||'',title=(qs('#activityName')?.value||'').trim()||'Acompanhamento',due=qs('#activityDue')?.value||'',status=qs('#activityStatus')?.value||'',eid=currentEditingId(),old=(s?.activities||[]).find(a=>a.id===eid)||null,oldDue=old?.dueDate||'',oldStatus=old?.status||'',oldTitle=old?.title||'';const result=await original.call(this,e);if(admin()&&owner&&owner!==myMember()){const coreNewHandled=!old&&['pendencia','correcao','entrega'].includes(type),coreEditHandled=!!old&&type==='correcao'&&['devolvido','aprovado'].includes(status),changedDue=!!old&&due!==oldDue,changedMain=!!old&&(status!==oldStatus||title!==oldTitle);if((!old&&!coreNewHandled)||(old&&(changedDue||changedMain)&&!coreEditHandled)){const saved=old?await waitActivity(a=>a.id===eid&&a.title===title&&String(a.dueDate||'')===due&&String(a.status||'')===status):await waitActivity(a=>a.ownerId===owner&&a.title===title&&String(a.dueDate||'')===due);if(saved){const nt=changedDue?'📅 Prazo atualizado':(!old?'📌 Nova ação no projeto':'📌 Acompanhamento atualizado'),msg=`${title}${due?' · prazo '+new Date(due+'T12:00:00').toLocaleDateString('pt-BR'):''}`;await createOwnerNotification(owner,{kind:'acompanhamento',title:nt,message:msg,sourceId:saved.id})}}}return result}}
+function bindActivityNotification(){const b=qs('#saveActivityBtn');if(!b||b.dataset.p78Wrap)return;const original=b.onclick;if(typeof original!=='function')return;b.dataset.p78Wrap='1';b.onclick=async function(e){const s=S(),owner=admin()?qs('#activityOwnerSel')?.value:myMember(),type=qs('#activityType')?.value||'',title=(qs('#activityName')?.value||'').trim()||'Acompanhamento',due=qs('#activityDue')?.value||'',status=qs('#activityStatus')?.value||'',eid=currentEditingId(),old=(s?.activities||[]).find(a=>a.id===eid)||null,oldDue=old?.dueDate||'',oldStatus=old?.status||'',oldTitle=old?.title||'';const result=await original.call(this,e);if(result===false||result===true)return result;if(admin()&&owner&&owner!==myMember()){const coreNewHandled=!old&&['pendencia','correcao','entrega'].includes(type),coreEditHandled=!!old&&type==='correcao'&&['devolvido','aprovado'].includes(status),changedDue=!!old&&due!==oldDue,changedMain=!!old&&(status!==oldStatus||title!==oldTitle);if((!old&&!coreNewHandled)||(old&&(changedDue||changedMain)&&!coreEditHandled)){const saved=old?await waitActivity(a=>a.id===eid&&a.title===title&&String(a.dueDate||'')===due&&String(a.status||'')===status):await waitActivity(a=>a.ownerId===owner&&a.title===title&&String(a.dueDate||'')===due);if(saved){const nt=changedDue?'📅 Prazo atualizado':(!old?'📌 Nova ação no projeto':'📌 Acompanhamento atualizado'),msg=`${title}${due?' · prazo '+new Date(due+'T12:00:00').toLocaleDateString('pt-BR'):''}`;await createOwnerNotification(owner,{kind:'acompanhamento',title:nt,message:msg,sourceId:saved.id})}}}return result}}
 function bindProductNotification(){const b=qs('#saveProductBtn');if(!b||b.dataset.p78Wrap)return;const original=b.onclick;if(typeof original!=='function')return;b.dataset.p78Wrap='1';b.onclick=async function(e){const owner=admin()?qs('#productOwner')?.value:myMember(),title=(qs('#productTitle')?.value||'').trim()||'Produto',due=qs('#productDue')?.value||'';const before=new Set((S()?.activities||[]).filter(a=>a.ownerId===owner&&a.type==='produto').map(a=>a.id));const result=await original.call(this,e);if(admin()&&owner&&owner!==myMember()){const saved=await waitActivity(a=>a.ownerId===owner&&a.type==='produto'&&a.title===title&&String(a.dueDate||'')===due&&!before.has(a.id));if(saved)await createOwnerNotification(owner,{kind:'acompanhamento',title:'🎯 Nova entrega / produto',message:`${title}${due?' · prazo '+new Date(due+'T12:00:00').toLocaleDateString('pt-BR'):''}`,sourceId:saved.id})}return result}}
 function applyAll(){ensureCss();simplifyMural();ensureAbout();renderBriefing();bindBolsistas();applyBolsistas();bindRepoReset();bindActivityNotification();bindProductNotification()}
 function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;applyAll()})}
@@ -13359,7 +13420,7 @@ function statusCounts(m){
   return {all:acts.length,open:open.length,late:late.length,corr:corr.length,soon:soon.length};
 }
 function typeLabel(a){const map={bolsa:'Bolsa',mestrado:'Mestrado',doutorado:'Doutorado',tcc:'TCC',orientacao:'Orientação',correcao:'Correção',qualificacao:'Qualificação',defesa:'Defesa',entrega:'Entrega / prazo',pendencia:'Pendência',checkin:'Check-in',produto:'Produto / entrega',outro:'Outro'};return map[a?.type]||a?.type||'Acompanhamento'}
-function statusLabel(a){const map={planejado:'Planejado',afazer:'A fazer',andamento:'Em andamento',recebido:'Orientador recebeu',revisao:'Em correção / revisão',devolvido:'Correção devolvida',revisando:'Aluno revisando',aprovado:'Aprovado',concluido:'Concluído',pausado:'Pausado'};return map[a?.status]||a?.status||''}
+function statusLabel(a){const map={planejado:'Planejado',afazer:'A fazer',andamento:'Em andamento',recebido:'Orientador recebeu',revisao:'Em correção / revisão',devolvido:'Correção devolvida',revisando:'Aluno revisando',aprovado:'Aprovado',reprovado:'Reprovado',concluido:'Concluído',pausado:'Pausado'};return map[a?.status]||a?.status||''}
 function iconFor(type){return ({bolsa:'🎓',mestrado:'📘',doutorado:'📚',tcc:'📝',orientacao:'🧭',correcao:'✍️',qualificacao:'🎯',defesa:'🎓',entrega:'📌',pendencia:'⚠️',checkin:'🗓',produto:'🎯'})[type]||'•'}
 
 function injectCss(){
@@ -15147,7 +15208,7 @@ body.p130-dossier-open .soft-bottom-nav{display:none!important}
 })();
 </script>
 
-<script src="./modules/dossier-p132.js?v=P132-20260919"></script>
+<script src="./modules/dossier-p132.js?v=P203-20260921"></script>
 
 <style id="p135-rede-acompanhamento-fix">
 #viewRede>.stats{display:none!important}

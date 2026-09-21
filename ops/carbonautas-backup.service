@@ -1,0 +1,14 @@
+[Unit]
+Description=Backup externo criptografado do Carbonautas
+Wants=network-online.target
+After=network-online.target
+[Service]
+Type=oneshot
+User=root
+EnvironmentFile=/etc/carbonautas-backup.env
+ExecStart=/opt/carbonautas-backup/backup-daily.sh
+UMask=0077
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/carbonautas-backup /root/.cache/restic
+TimeoutStartSec=6h

@@ -37,6 +37,13 @@ Para restaurar por Git: `git checkout P126-pre-consolidacao -- .`
 
 ## CHANGELOG
 
+### P203 · 2026-09-21 · Proteção e salvamento, com a cara do Carbonautas
+- Preservados fotos, mural, laboratório, jogo, palavras e identidade visual.
+- Corrigidos seleção na agenda, carregamento, argumentos de arquivos, consultas antes do login, conflitos de salvamento e fechamento do editor.
+- Preparada rotina externa de backup; ativação ainda pendente no VPS.
+- Esta etapa não publica regras Firebase. As proteções adicionais estão preparadas para a P204.
+- Detalhes: [CORRECOES_P203.md](CORRECOES_P203.md) e [ops/README.md](ops/README.md).
+
 ### P202 · 2026-09-20 · Cartão acadêmico compartilhável
 - Perfis de Pessoas ganham uma carta acadêmica própria no baralho de acompanhamento.
 - A própria pessoa e a coordenação podem preencher minibio, Currículo Lattes e ORCID.

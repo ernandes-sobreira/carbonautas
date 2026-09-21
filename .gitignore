@@ -1,0 +1,9 @@
+node_modules/
+*-debug.log
+.env
+.env.*
+!.env.example
+*service-account*.json
+*serviceAccount*.json
+backup-data/
+*.restic

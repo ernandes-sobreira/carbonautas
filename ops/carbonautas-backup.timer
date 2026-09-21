@@ -1,0 +1,8 @@
+[Unit]
+Description=Backup diário Carbonautas às 03h de Cuiabá
+[Timer]
+OnCalendar=*-*-* 03:00:00 America/Cuiaba
+RandomizedDelaySec=10m
+Persistent=true
+[Install]
+WantedBy=timers.target
