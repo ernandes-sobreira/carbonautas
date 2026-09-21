@@ -1,8 +1,0 @@
-name: P208 diagnostico final panelinhas
-on:
-  workflow_dispatch:
-jobs:
-  noop:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Diagnostico P208 encerrado."
