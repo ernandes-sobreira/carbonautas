@@ -87,14 +87,31 @@ service cloud.firestore {
         && myMemberId() == memberId;
     }
 
-    function registrationOpen(code) {
-      return get(
-        /databases/$(database)/documents/rede_settings/registration
-      ).data.enabled == true
-      && get(
-        /databases/$(database)/documents/rede_settings/registration
-      ).data.code == code;
+    function validPersonalInvite(code, memberId) {
+      let invitation = get(/databases/$(database)/documents/rede_invites/$(code)).data;
+      return canClaimProfile()
+        && request.auth.token.email_verified == true
+        && invitation.email == request.auth.token.email.lower()
+        && invitation.memberId == memberId
+        && invitation.expiresAt > request.time
+        && invitation.get('usedByUid', '') == ''
+        && getAfter(/databases/$(database)/documents/rede_invites/$(code)).data.usedByUid == request.auth.uid;
     }
+
+    match /rede_invites/{inviteId} {
+      allow list: if isCoordinator();
+      allow get: if isCoordinator() || (signedIn()
+        && request.auth.token.email_verified == true
+        && resource.data.email == request.auth.token.email.lower());
+      allow create, delete: if isCoordinator();
+      allow update: if isCoordinator() || (
+        validPersonalInvite(inviteId, resource.data.memberId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['usedByUid','usedAt'])
+        && request.resource.data.usedAt == request.time
+        && getAfter(/databases/$(database)/documents/rede_users/$(request.auth.uid)).data.memberId == resource.data.memberId
+      );
+    }
+
 
 
     // ============================================================
@@ -272,7 +289,7 @@ service cloud.firestore {
           'createdAt'
         ])
 
-        && registrationOpen(request.resource.data.registrationCode)
+        && validPersonalInvite(request.resource.data.registrationCode, memberId)
         && exists(
           /databases/$(database)/documents/rede_members/$(memberId)
         )
@@ -329,6 +346,7 @@ service cloud.firestore {
             'grupoAtendido',
             'ideiaVisibilidade',
             'projetoOutros',
+            'projetosAluno',
             'projectProfileUpdatedAt',
             'panelStateV1',
             'panelStateUpdatedAt',
@@ -349,8 +367,7 @@ service cloud.firestore {
           && myMemberId() == memberId
         );
 
-      allow list: if hasProfile()
-        || canClaimProfile();
+      allow list: if hasProfile();
 
       allow create, delete: if isCoordinator();
 
@@ -377,22 +394,38 @@ service cloud.firestore {
     // ============================================================
 
     match /rede_activities/{documentId} {
-
       allow read: if hasProfile();
-
+      // O aluno continua dono do registro. Somente a coordenação decide aprovação.
+      function studentStatus() {
+        return request.resource.data.get('status', '') in [
+          '', 'planejado', 'afazer', 'andamento', 'recebido', 'revisao', 'devolvido',
+          'revisando', 'concluido', 'pausado', 'feito', 'finalizado', 'ativo', 'encerrada', 'done', 'open'
+        ];
+      }
       allow create: if isCoordinator() || (
-        hasProfile()
-        && request.resource.data.ownerId == myMemberId()
+        hasProfile() && request.resource.data.ownerId == myMemberId() && studentStatus()
       );
-
       allow update: if isCoordinator() || (
         isMine(resource.data.ownerId)
-        && request.resource.data.ownerId ==
-           resource.data.ownerId
+        && request.resource.data.ownerId == resource.data.ownerId
+        && studentStatus()
       );
-
-      allow delete: if isCoordinator()
-        || isMine(resource.data.ownerId);
+      allow delete: if isCoordinator() || isMine(resource.data.ownerId);
+      // Cópia anterior verificável; ninguém altera uma versão já registrada pelo app.
+      match /history/{versionId} {
+        allow read: if isCoordinator() || isMine(
+          get(/databases/$(database)/documents/rede_activities/$(documentId)).data.ownerId
+        );
+        allow create: if (isCoordinator() || isMine(
+          get(/databases/$(database)/documents/rede_activities/$(documentId)).data.ownerId
+        )) && request.resource.data.keys().hasOnly(['before','actorUid','at'])
+          && request.resource.data.actorUid == request.auth.uid
+          && request.resource.data.at == request.time
+          && request.resource.data.before == get(
+            /databases/$(database)/documents/rede_activities/$(documentId)
+          ).data;
+        allow update, delete: if false;
+      }
     }
 
 
@@ -432,6 +465,7 @@ service cloud.firestore {
           'collaboratorMemberIds',
           'collaborationUpdatedAt',
           'url',
+          'storagePath',
           'fileName',
           'onlineEditVersion',
           'onlineEditHistory',
@@ -445,6 +479,8 @@ service cloud.firestore {
           'repositoryTurnFromName',
           'repositoryTurnAt'
         ])
+        && (request.resource.data.get('storagePath', '') == resource.data.get('storagePath', '')
+          || request.resource.data.get('storagePath', '').matches('rede_publicacoes/' + request.auth.uid + '/[^/]+'))
         && request.resource.data.ownerUid == resource.data.ownerUid
         && request.resource.data.memberId == resource.data.memberId;
       }
@@ -452,6 +488,7 @@ service cloud.firestore {
       function validCollaboratorOfficeUpdate() {
         return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'url',
+          'storagePath',
           'fileName',
           'onlineEditVersion',
           'onlineEditHistory',
@@ -465,6 +502,8 @@ service cloud.firestore {
           'repositoryTurnFromName',
           'repositoryTurnAt'
         ])
+        && (request.resource.data.get('storagePath', '') == resource.data.get('storagePath', '')
+          || request.resource.data.get('storagePath', '').matches('rede_publicacoes/' + request.auth.uid + '/[^/]+'))
         && request.resource.data.ownerUid == resource.data.ownerUid
         && request.resource.data.memberId == resource.data.memberId
         && request.resource.data.get('collaboratorMemberIds', []) == resource.data.get('collaboratorMemberIds', []);
@@ -879,7 +918,11 @@ service cloud.firestore {
 
       allow read: if hasProfile();
 
-      allow create, update: if hasProfile()
+      allow create: if hasProfile()
+        && request.resource.data.actorUid == request.auth.uid;
+
+      allow update: if hasProfile()
+        && resource.data.actorUid == request.auth.uid
         && request.resource.data.actorUid == request.auth.uid;
 
       allow delete: if isCoordinator()

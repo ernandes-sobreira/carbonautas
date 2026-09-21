@@ -3,7 +3,8 @@
   "private": true,
   "version": "203.0.0",
   "scripts": {
-    "test": "node --test tests/client.cjs tests/backup.cjs"
+    "test": "node --test tests/client.cjs tests/backup.cjs",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-carbonautas --config firebase.test.json 'node tests/security.cjs'"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "3.0.4",

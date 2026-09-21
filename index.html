@@ -1717,12 +1717,13 @@
     </div>
     <div class="auth-unlinked" id="authUnlinkedPane">
       <h3 style="margin:0 0 8px;font-family:'Fraunces';font-size:19px">Finalize seu cadastro</h3>
-      <p class="hint" style="margin:0 0 12px">Escolha o seu próprio nome na lista e informe o código de entrada dos Carbonautas. Isso é feito uma única vez.</p>
-      <div class="fg"><label>Seu perfil Carbonauta</label><select id="selfMemberSelect" class="claim-select"><option value="">Carregando perfis…</option></select></div>
-      <div class="fg"><label>Código de entrada</label><input id="selfInviteCode" type="password" inputmode="numeric" placeholder="Código do projeto"></div>
+      <p class="hint" style="margin:0 0 12px">Use seu convite pessoal e confirme seu e-mail. Assim ninguém entra por engano no perfil de outro Carbonauta.</p>
+      <div class="fg" hidden><select id="selfMemberSelect"><option value=""></option></select></div>
+      <div class="fg"><label for="selfInviteCode">Seu convite pessoal</label><input id="selfInviteCode" type="text" autocomplete="off" placeholder="Cole o código que recebeu"></div>
       <div class="hint" id="unlinkedEmail" style="margin-bottom:10px"></div>
       <div class="auth-msg" id="claimMsg"></div>
       <button class="btn primary" id="claimProfileBtn" style="width:100%;justify-content:center;margin-bottom:8px">Concluir meu cadastro</button>
+      <button class="btn" id="verifyEmailBtn" type="button" onclick="sendMyVerification()" style="width:100%;margin-bottom:8px">Confirmar meu e-mail</button>
       <button class="btn ghost" id="unlinkedLogoutBtn" style="width:100%;justify-content:center">Sair</button>
     </div>
   </div>
@@ -3064,11 +3065,11 @@
 <div class="toast" id="toast"></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp, addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion, increment, runTransaction }
+import { getFirestore, collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp, addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion, increment, runTransaction, Timestamp }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { getStorage, ref as sRef, uploadString, getDownloadURL, deleteObject }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail }
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, reload }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
 const firebaseConfig = {
@@ -3087,8 +3088,8 @@ window.auth = getAuth(app);
 window.secondaryAuth = getAuth(secondaryApp);
 window.fbFns = {
   collection, doc, getDocs, setDoc, deleteDoc, onSnapshot, query, orderBy, where, serverTimestamp,
-  addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion, increment, runTransaction, sRef, uploadString, getDownloadURL, deleteObject,
-  onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail
+  addDoc, updateDoc, getDoc, limit, writeBatch, arrayUnion, increment, runTransaction, Timestamp, sRef, uploadString, getDownloadURL, deleteObject,
+  onAuthStateChanged, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, reload
 };
 window.dispatchEvent(new Event('firebase-ready'));
 </script>
@@ -3821,15 +3822,34 @@ async function tryBootstrapCoordinator(user,existingProfile=null){
   }
 }
 async function showUnlinked(user){
-  $('#authGate').classList.remove('off'); $('#authLoginPane').classList.add('hidden'); $('#authRegisterPane').classList.add('hidden'); $('#authUnlinkedPane').classList.add('on');
-  $('#unlinkedEmail').textContent=user.email||''; $('#claimMsg').textContent=''; $('#loading').classList.add('off');
-  const sel=$('#selfMemberSelect'); sel.innerHTML='<option value="">Carregando perfis…</option>';
-  try{
-    const snap=await FB().getDocs(FB().collection(window.db,'rede_members'));
-    const members=snap.docs.map(d=>({...d.data(),id:d.id})).filter(m=>m.nivel!=='coord'&&m.status!=='egresso').sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
-    sel.innerHTML='<option value="">Selecione seu nome</option>'+members.map(m=>`<option value="${esc(m.id)}">${esc(m.nome||m.id)}</option>`).join('');
-  }catch(e){console.error(e);sel.innerHTML='<option value="">Não foi possível carregar os perfis</option>';$('#claimMsg').textContent='Verifique as regras do Firestore.';}
+  $('#authGate').classList.remove('off');$('#authLoginPane').classList.add('hidden');$('#authRegisterPane').classList.add('hidden');$('#authUnlinkedPane').classList.add('on');
+  $('#unlinkedEmail').textContent=user.email||'';$('#loading').classList.add('off');
+  $('#claimMsg').textContent=user.emailVerified?'Cole seu convite e bora entrar!':'Confirme seu e-mail. Depois volte aqui e conclua seu cadastro.';
+  $('#verifyEmailBtn').hidden=!!user.emailVerified;
 }
+async function sendMyVerification(){
+  const user=window.auth?.currentUser;if(!user)return;
+  const button=$('#verifyEmailBtn');button.disabled=true;
+  try{await FB().sendEmailVerification(user);$('#claimMsg').textContent='E-mail enviado. Confira também o spam; depois clique em Concluir meu cadastro.'}
+  catch(e){$('#claimMsg').textContent=authErrorMessage(e)}finally{button.disabled=false}
+}
+async function createMemberInvite(){
+  if(!isAdmin||!editingId)return;
+  const m=memberById(editingId);if(!m||m.nivel==='coord'||m.status==='egresso')return;
+  const input=prompt('Qual é o e-mail de '+m.nome+'? O convite só funciona com esse e-mail.');
+  if(input===null)return;const email=input.trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast('Confira o e-mail.');return}
+  const f=FB(),token=crypto.randomUUID().replace(/-/g,'');
+  try{
+    await f.setDoc(f.doc(window.db,'rede_invites',token),{memberId:m.id,nome:m.nome||'',email,expiresAt:f.Timestamp.fromMillis(Date.now()+7*86400000),createdByUid:window.auth.currentUser.uid,createdAt:f.serverTimestamp(),usedByUid:''});
+    let box=$('#memberInviteResult');if(!box){box=document.createElement('div');box.id='memberInviteResult';$('#memberOverlay .modal-b').prepend(box)}
+    box.replaceChildren();const label=document.createElement('p');label.textContent='Convite de '+m.nome+' · '+email+' · válido por 7 dias. Copie e entregue à pessoa.';
+    const code=document.createElement('input');code.readOnly=true;code.value=token;code.setAttribute('aria-label','Código do convite');
+    const copy=document.createElement('button');copy.type='button';copy.className='btn';copy.textContent='Copiar convite';copy.onclick=async()=>{try{await navigator.clipboard.writeText(token);toast('Convite copiado.')}catch(_e){code.select();toast('Selecione e copie o código.')}};
+    box.append(label,code,copy);box.scrollIntoView({block:'nearest'});toast('Convite pessoal criado.');
+  }catch(e){console.error(e);toast('Não consegui criar o convite. Confira se as regras P203 foram publicadas.')}
+}
+
 async function registerSelf(){
   const email=$('#registerEmail').value.trim(), password=$('#registerPassword').value, password2=$('#registerPassword2').value;
   if(!email||!password){$('#registerMsg').textContent='Digite e-mail e senha.';return}
@@ -3839,26 +3859,26 @@ async function registerSelf(){
   try{await FB().createUserWithEmailAndPassword(window.auth,email,password)}catch(e){$('#registerMsg').textContent=authErrorMessage(e)}finally{$('#registerBtn').disabled=false}
 }
 async function claimMyProfile(){
-  const user=window.auth.currentUser, memberId=$('#selfMemberSelect').value, code=$('#selfInviteCode').value.trim();
+  const user=window.auth.currentUser,code=$('#selfInviteCode').value.trim();
   if(!user){showLogin();return}
-  if(!memberId){$('#claimMsg').textContent='Selecione o seu nome.';return}
-  if(!code){$('#claimMsg').textContent='Digite o código de entrada.';return}
-  $('#claimProfileBtn').disabled=true; $('#claimMsg').textContent='Vinculando seu perfil…';
+  if(!/^[a-f0-9]{32}$/.test(code)){$('#claimMsg').textContent='Cole o convite pessoal que recebeu do orientador.';return}
+  $('#claimProfileBtn').disabled=true;$('#claimMsg').textContent='Vinculando seu perfil…';
   try{
-    const ms=await FB().getDoc(FB().doc(window.db,'rede_members',memberId));
-    if(!ms.exists()) throw new Error('Perfil não encontrado.');
-    const m=ms.data();
-    const batch=FB().writeBatch(window.db);
-    batch.set(FB().doc(window.db,'rede_member_claims',memberId),{uid:user.uid,memberId,email:user.email||'',registrationCode:code,createdAt:FB().serverTimestamp()});
-    batch.set(FB().doc(window.db,'rede_users',user.uid),{memberId,nome:m.nome||'',email:user.email||'',role:'student',createdAt:FB().serverTimestamp()});
-    await batch.commit();
-    $('#selfInviteCode').value='';
-    await handleAuthUser(user);
-  }catch(e){
-    console.error(e);
-    $('#claimMsg').textContent=(e?.code==='permission-denied'||String(e?.message||'').includes('permission'))?'Não foi possível vincular. Confira o código ou escolha outro perfil; este nome pode já estar vinculado.':authErrorMessage(e);
-  }finally{$('#claimProfileBtn').disabled=false}
+    const f=FB();await f.reload(user);await user.getIdToken(true);
+    if(!user.emailVerified)throw new Error('Confirme seu e-mail primeiro. Depois volte aqui e conclua o cadastro.');
+    const inviteRef=f.doc(window.db,'rede_invites',code),snap=await f.getDoc(inviteRef);
+    if(!snap.exists())throw new Error('Convite não encontrado.');
+    const invite=snap.data(),memberId=invite.memberId;
+    if(invite.usedByUid||invite.expiresAt.toMillis()<=Date.now())throw new Error('Esse convite expirou ou já foi usado. Peça um novo ao orientador.');
+    const batch=f.writeBatch(window.db);
+    batch.set(f.doc(window.db,'rede_member_claims',memberId),{uid:user.uid,memberId,email:user.email||'',registrationCode:code,createdAt:f.serverTimestamp()});
+    batch.set(f.doc(window.db,'rede_users',user.uid),{memberId,nome:invite.nome||'',email:user.email||'',role:'student',createdAt:f.serverTimestamp()});
+    batch.update(inviteRef,{usedByUid:user.uid,usedAt:f.serverTimestamp()});await batch.commit();
+    $('#selfInviteCode').value='';await handleAuthUser(user);
+  }catch(e){console.error(e);$('#claimMsg').textContent=e?.code==='permission-denied'?'O convite precisa ser do seu e-mail e ainda estar válido. Confira com o orientador.':authErrorMessage(e)}
+  finally{$('#claimProfileBtn').disabled=false}
 }
+
 async function login(){
   const email=$('#loginEmail').value.trim(), password=$('#loginPassword').value;
   if(!email||!password){$('#authMsg').textContent='Digite e-mail e senha.';return}
@@ -4448,8 +4468,9 @@ let formHub=false, formHubMotivo='', formVinculos=[];
 function openMember(id){
   if(id && !canEditMember(id)){ toast('Só '+memberById(id).nome+' ou o coordenador podem editar este cadastro.'); return; }
   if(!id && !isAdmin){ toast('Só o coordenador pode cadastrar novos membros.'); return; }
-  editingId=id||null;
+  editingId=id||null;$('#memberInviteResult')?.remove();
   const m = id? state.members.find(x=>x.id===id): null;
+  let inviteButton=$('#memberInviteBtn');if(!inviteButton){inviteButton=document.createElement('button');inviteButton.id='memberInviteBtn';inviteButton.type='button';inviteButton.className='btn';inviteButton.textContent='✉️ Convite pessoal';inviteButton.onclick=createMemberInvite;$('#memberOverlay .modal-b').prepend(inviteButton)}inviteButton.style.display=(m&&isAdmin&&m.nivel!=='coord'&&m.status!=='egresso')?'inline-flex':'none';
   $('#memberTitle').textContent = m? 'Editar aluno':'Novo aluno';
   $('#deleteMember').style.display = (m && isAdmin && !m.protegido && m.status!=='egresso')? 'inline-flex':'none';
   $('#purgeMember').style.display = (m && isAdmin && !m.protegido && m.status==='egresso')? 'inline-flex':'none';
@@ -6505,7 +6526,8 @@ function openActivity(id=null,ownerPreset=''){
   if(!myId&&!isAdmin){toast('Seu perfil precisa estar vinculado ao login.');return}
   editingActivityId=id;activityOwnerPreset=ownerPreset||'';const a=id?state.activities.find(x=>x.id===id):null;
   if(a&&!(isAdmin||isMe(a.ownerId))){toast('Sem permissão para editar este acompanhamento.');return}
-  activityLoadedRevision=a?.updatedAt?.toMillis?.()??null;
+  activityLoadedRevision=a?.updatedAt?.toMillis?.()??null;$('#activityHistory')?.remove();
+  let historyButton=$('#activityHistoryBtn');if(!historyButton){historyButton=document.createElement('button');historyButton.id='activityHistoryBtn';historyButton.type='button';historyButton.className='btn';historyButton.textContent='🕘 Versões anteriores';historyButton.onclick=showActivityHistory;$('#activityOverlay .modal-b').appendChild(historyButton)}historyButton.style.display=a?'inline-flex':'none';
   const sel=$('#activityOwnerSel'),ordered=[...state.members].sort((x,y)=>x.nome.localeCompare(y.nome));sel.innerHTML=ordered.map(m=>`<option value="${m.id}">${esc(m.nome)}</option>`).join('');
   $('#activityOwnerRow').style.display=isAdmin?'block':'none';sel.value=a?.ownerId||activityOwnerPreset||(myId||ordered[0]?.id||'');
   $('#activityTitle').textContent=a?'Editar acompanhamento':'Registrar acompanhamento';$('#activityType').value=a?.type&&ACTIVITY_TYPES[a.type]?a.type:'orientacao';$('#activityStatus').value=a?.status||'andamento';$('#activityName').value=a?.title||'';$('#activityDesc').value=a?.description||'';$('#activityStart').value=a?.startDate||'';$('#activityDue').value=a?.dueDate||'';$('#activityProgress').value=a?.progress||0;$('#activityProgressLabel').textContent=(a?.progress||0)+'%';$('#deleteActivityBtn').style.display=a?'inline-flex':'none';syncActivityTypeUi();syncActivityDecisionUi(a);openOverlay('activityOverlay');
@@ -6518,6 +6540,19 @@ function syncActivityDecisionUi(activity){
   if(!note){note=document.createElement('p');note.id='activityDecisionHint';note.className='muted';select.parentElement.appendChild(note)}
   note.textContent=isAdmin?'Você pode aprovar, reprovar ou editar este registro.':
     (['aprovado','reprovado'].includes(activity?.status)?'Pode ajustar seu registro. Ao salvar, ele volta para revisão do orientador.':'O registro é seu: pode editar. A aprovação fica com o orientador.');
+}
+async function showActivityHistory(){
+  const id=editingActivityId;if(!id)return;
+  let box=$('#activityHistory');
+  if(!box){box=document.createElement('section');box.id='activityHistory';$('#activityOverlay .modal-b').appendChild(box)}
+  box.textContent='Buscando as versões anteriores…';
+  try{
+    const f=FB(),snap=await f.getDocs(f.query(f.collection(window.db,'rede_activities',id,'history'),f.orderBy('at','desc'),f.limit(30)));
+    if(editingActivityId!==id)return;box.replaceChildren();
+    const heading=document.createElement('h3');heading.textContent='O que ficou registrado';box.appendChild(heading);
+    if(snap.empty){const note=document.createElement('p');note.textContent='As próximas edições por este formulário guardarão aqui a versão anterior.';box.appendChild(note)}
+    snap.docs.forEach(doc=>{const h=doc.data(),before=h.before||{},item=document.createElement('details'),label=document.createElement('summary'),text=document.createElement('p');label.textContent=(h.at?.toDate?.().toLocaleString('pt-BR')||'Data não disponível')+' · '+(before.title||'Registro');text.style.whiteSpace='pre-wrap';text.textContent=(ACTIVITY_STATUS[before.status]||before.status||'')+'\n'+(before.description||'Sem descrição.');item.append(label,text);box.appendChild(item)});
+  }catch(e){box.textContent='Não consegui carregar o histórico agora. Seu registro continua aqui.';console.error(e)}
 }
 function editActivity(id){openActivity(id)}
 function openActivityPreset(type,ownerPreset=''){openActivity(null,ownerPreset);setTimeout(()=>{if($('#activityType'))$('#activityType').value=type;if(type==='pendencia'){$('#activityStatus').value='afazer';$('#activityName').placeholder='Ex.: Enviar capítulo revisado';}if(type==='correcao'){$('#activityStatus').value='recebido';$('#activityName').placeholder='Ex.: Correção do capítulo 2';}},20)}
@@ -6543,6 +6578,8 @@ async function saveActivity(){
       if(snap.exists()){
         const previous=snap.data();
         if((previous.updatedAt?.toMillis?.()??null)!==activityLoadedRevision)throw new Error('Esse registro mudou em outra tela. Reabra antes de salvar para não perder nenhuma alteração.');
+        const historyRef=f.doc(f.collection(ref,'history'));
+        tx.set(historyRef,{before:previous,actorUid,at:f.serverTimestamp()});
       }else{data.createdAt=f.serverTimestamp();data.ownerUid=(state.users||[]).find(u=>u.memberId===ownerId)?.uid||(ownerId===myId?actorUid:'')}
       tx.set(ref,data,{merge:true});
     });
@@ -7397,11 +7434,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P203-20260921';
+window.CARBONAUTAS_BUILD='P204-20260921';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P203-20260921',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P204-20260921',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -15208,7 +15245,7 @@ body.p130-dossier-open .soft-bottom-nav{display:none!important}
 })();
 </script>
 
-<script src="./modules/dossier-p132.js?v=P203-20260921"></script>
+<script src="./modules/dossier-p132.js?v=P204-20260921"></script>
 
 <style id="p135-rede-acompanhamento-fix">
 #viewRede>.stats{display:none!important}

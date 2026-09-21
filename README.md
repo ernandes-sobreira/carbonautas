@@ -37,6 +37,12 @@ Para restaurar por Git: `git checkout P126-pre-consolidacao -- .`
 
 ## CHANGELOG
 
+### P204 · 2026-09-21 · Regras e convites — ativação pendente
+- Preparadas regras para aprovação pelo coordenador, edição própria, convites pessoais, reações e salvamento Office.
+- Versões anteriores no formulário de acompanhamento.
+- Publicar regras antes do aplicativo; conferir [CORRECOES_P204.md](CORRECOES_P204.md).
+- Esta branch não foi ativada em produção.
+
 ### P203 · 2026-09-21 · Proteção e salvamento, com a cara do Carbonautas
 - Preservados fotos, mural, laboratório, jogo, palavras e identidade visual.
 - Corrigidos seleção na agenda, carregamento, argumentos de arquivos, consultas antes do login, conflitos de salvamento e fechamento do editor.

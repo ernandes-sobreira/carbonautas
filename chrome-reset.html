@@ -37,18 +37,18 @@ h1{margin:0 0 10px;font-size:28px}p{line-height:1.5;color:#506672}.status{margin
     say('3/4 · Preservando sua sessão e os dados dos outros aplicativos…');
     say('4/4 · Instalando a versão limpa…');
     if('serviceWorker' in navigator){
-      try{const reg=await navigator.serviceWorker.register('./sw.js?v=P203-20260921',{updateViaCache:'none'});await reg.update()}catch(e){}
+      try{const reg=await navigator.serviceWorker.register('./sw.js?v=P204-20260921',{updateViaCache:'none'});await reg.update()}catch(e){}
     }
     status.textContent='Pronto. Abrindo o Carbonautas limpo…';
     go.style.display='inline-block';
-    const target='./?fresh=P203&t='+Date.now();
+    const target='./?fresh=P204&t='+Date.now();
     go.onclick=()=>location.replace(target);
     setTimeout(()=>location.replace(target),1000);
   }catch(e){
     console.error(e);
     status.textContent='A limpeza terminou parcialmente. Clique em “Abrir Carbonautas”.';
     go.style.display='inline-block';
-    go.onclick=()=>location.replace('./?fresh=P203&t='+Date.now());
+    go.onclick=()=>location.replace('./?fresh=P204&t='+Date.now());
   }
 })();
 </script>
