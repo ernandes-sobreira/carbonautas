@@ -7443,11 +7443,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P204-20260921';
+window.CARBONAUTAS_BUILD='P205-20260921';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P204-20260921',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=P205-20260921',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -9501,7 +9501,33 @@ async function sendMessage(){const t=thread(),inp=$('#p48Input'),text=norm(inp?.
 function ensureModal(){let o=$('#p48GroupOverlay');if(o)return o;o=document.createElement('div');o.id='p48GroupOverlay';o.innerHTML=`<div class="p48-modal"><div class="p48-mh"><b>Nova conversa em panelinha</b><button id="p48Close">×</button></div><div class="p48-mb"><input id="p48Name" type="text" placeholder="Nome da panelinha — ex.: Artigo do Pantanal"><input id="p48Search" type="text" placeholder="Buscar participante…"><div class="p48-people" id="p48People"></div><p style="font-size:11px;color:#70838a">🔐 Apenas as pessoas marcadas poderão carregar as mensagens desta panelinha.</p></div><div class="p48-mf"><button id="p48Cancel">Cancelar</button><button class="primary" id="p48Create">Criar panelinha</button></div></div>`;document.body.appendChild(o);$('#p48Close').onclick=$('#p48Cancel').onclick=()=>o.style.display='none';$('#p48Search').oninput=renderPeople;$('#p48Create').onclick=createGroup;o.onclick=e=>{if(e.target===o)o.style.display='none'};return o}
 function renderPeople(){const box=$('#p48People');if(!box)return;const q=norm($('#p48Search')?.value).toLowerCase();box.innerHTML=members.filter(m=>m.status!=='inativo'&&(!q||norm(m.nome).toLowerCase().includes(q))).sort((a,b)=>norm(a.nome).localeCompare(norm(b.nome),'pt-BR')).map(m=>`<label class="p48-person"><input type="checkbox" value="${esc(m.id)}" ${m.id===myMemberId?'checked disabled':''}><span>${esc(m.nome||'Carbonauta')}</span><small>${esc(m.nivel||'')}</small></label>`).join('')}
 function openModal(){if(!myMemberId)return toast('Seu login precisa estar vinculado a uma pessoa.');const o=ensureModal();$('#p48Name').value='';$('#p48Search').value='';renderPeople();o.style.display='flex';setTimeout(()=>$('#p48Name')?.focus(),30)}
-async function createGroup(){const name=norm($('#p48Name')?.value);if(!name)return toast('Dê um nome para a panelinha.');const ids=Array.from(document.querySelectorAll('#p48People input:checked')).map(x=>x.value);if(!ids.includes(myMemberId))ids.push(myMemberId);const uniq=[...new Set(ids)];if(uniq.length<2)return toast('Escolha pelo menos mais uma pessoa.');if(uniq.length>60)return toast('Uma panelinha pode ter até 60 participantes.');const meM=member(myMemberId);try{const ref=await f().addDoc(f().collection(window.db,'rede_group_threads'),{groupName:name.slice(0,80),memberIds:uniq,createdByUid:window.auth.currentUser.uid,createdByMemberId:myMemberId,createdByName:meM?.nome||me?.nome||'Carbonauta',active:true,createdAt:f().serverTimestamp(),updatedAt:f().serverTimestamp()});$('#p48GroupOverlay').style.display='none';activeThreadId=ref.id;toast('Panelinha criada.');setTimeout(()=>{renderList();selectThread(ref.id)},120)}catch(e){console.error('P48 create group',e);showRulesWarning();toast(e?.code==='permission-denied'?'Falta publicar as regras P48 no Firestore.':'Não consegui criar a panelinha.') }}
+async function createGroup(){
+  const name=norm($('#p48Name')?.value);
+  if(!name)return toast('Dê um nome para a panelinha.');
+  const ids=Array.from(document.querySelectorAll('#p48People input:checked')).map(x=>x.value);
+  if(!ids.includes(myMemberId))ids.push(myMemberId);
+  const uniq=[...new Set(ids)];
+  if(uniq.length<2)return toast('Escolha pelo menos mais uma pessoa.');
+  if(uniq.length>60)return toast('Uma panelinha pode ter até 60 participantes.');
+  const meM=member(myMemberId),groupName=name.slice(0,80),createdByName=meM?.nome||me?.nome||'Carbonauta',btn=$('#p48Create');
+  if(btn){btn.disabled=true;btn.textContent='Criando…'}
+  try{
+    const ref=await f().addDoc(f().collection(window.db,'rede_group_threads'),{groupName,memberIds:uniq,createdByUid:window.auth.currentUser.uid,createdByMemberId:myMemberId,createdByName,active:true,createdAt:f().serverTimestamp(),updatedAt:f().serverTimestamp()});
+    const localThread={id:ref.id,groupName,memberIds:uniq,createdByUid:window.auth.currentUser.uid,createdByMemberId:myMemberId,createdByName,active:true,lastMessage:'',createdAt:{toMillis:()=>Date.now()},updatedAt:{toMillis:()=>Date.now()}};
+    threads=[localThread,...threads.filter(x=>x.id!==ref.id)];
+    $('#p48GroupOverlay').style.display='none';
+    activeThreadId=ref.id;
+    mount();renderList();renderHead();renderMessages();subscribeMessages(ref.id);
+    $('#p48Shell')?.classList.add('chat-open');
+    toast('Panelinha criada.');
+    setTimeout(()=>{subscribe().catch(e=>console.warn('P205 resubscribe',e))},300);
+  }catch(e){
+    console.error('P48 create group',e);showRulesWarning();
+    toast(e?.code==='permission-denied'?'O Firestore recusou a criação. Falta publicar as regras atuais.':'Não consegui criar a panelinha: '+(e?.message||'erro desconhecido'));
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='Criar panelinha'}
+  }
+}
 function showRulesWarning(){$('#p48RulesWarn')?.classList.add('show')}
 function subscribeMessages(id){if(unsubMessages){unsubMessages();unsubMessages=null}messages=[];renderMessages();if(!id)return;try{const q=f().query(f().collection(window.db,'rede_group_threads',id,'messages'),f().orderBy('createdAt','asc'));unsubMessages=f().onSnapshot(q,s=>{messages=s.docs.map(d=>({...d.data(),id:d.id}));renderMessages()},e=>{console.error('P48 messages',e);if(e?.code==='permission-denied')showRulesWarning()})}catch(e){console.error(e)}}
 async function identity(){if(!window.auth?.currentUser||!window.db||!window.fbFns)return false;try{const s=await f().getDoc(f().doc(window.db,'rede_users',window.auth.currentUser.uid));if(s.exists()){me=s.data();myMemberId=me.memberId||''}}catch(e){console.warn('P48 profile',e)}return !!myMemberId}
