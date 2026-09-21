@@ -53,6 +53,18 @@ function calendarMutation(ms){
   }
   return false;
 }
+function css(){
+  if(!hasDocument()||$('#p213IntegrationStyle'))return;
+  const st=document.createElement('style');st.id='p213IntegrationStyle';st.textContent=`
+    /* O P213 é a fonte única da contagem. Esconde contadores/dots antigos para não duplicar informação. */
+    #viewCrono .ag-day .p110-count,#viewCrono .ag-day .ag-dots{display:none!important}
+    @media(min-width:901px){
+      #viewCrono .ag-month::-webkit-scrollbar{display:block!important;height:10px!important}
+      #viewCrono .ag-month::-webkit-scrollbar-track{background:#edf5f3!important;border-radius:999px!important}
+      #viewCrono .ag-month::-webkit-scrollbar-thumb{background:#a8cac4!important;border-radius:999px!important}
+    }
+  `;document.head.appendChild(st);
+}
 let pendingEventDate='';
 let pendingUntil=0;
 function bindOverlayObservers(){
@@ -76,15 +88,27 @@ function bindCalendarObserver(){
   view.dataset.p213CalendarObserver='1';
   new MutationObserver(ms=>{if(calendarMutation(ms))setTimeout(coreRender,0)}).observe(view,{subtree:true,childList:true});
 }
+function scheduleActivityPrefill(date){
+  [0,30,90,180].forEach(ms=>setTimeout(()=>{bindOverlayObservers();applyActivityDate(date)},ms));
+}
+function scheduleEventPrefill(date){
+  [0,40,120,260,500].forEach(ms=>setTimeout(()=>{bindOverlayObservers();applyEventDate(date,false)},ms));
+}
 function boot(){
   if(!hasDocument())return;
+  css();
   document.addEventListener('click',e=>{
     const day=e.target.closest?.('#viewCrono .ag-day[data-iso]');if(day)rememberDate(day.dataset.iso);
     if(e.target.closest?.('[data-p174-new],[data-p174-new-ag],[data-p174-menu]')){
-      const d=selectedDate();[0,30,90].forEach(ms=>setTimeout(()=>applyActivityDate(d),ms));
+      scheduleActivityPrefill(selectedDate());
     }
     if(e.target.closest?.('#agNewBtn,#newEventBtn')){
-      pendingEventDate=selectedDate();pendingUntil=Date.now()+15000;
+      pendingEventDate=selectedDate();pendingUntil=Date.now()+15000;bindOverlayObservers();
+    }
+    // Depois do botão +, o usuário ainda escolhe o tipo no menu. Ao escolher,
+    // reaplica a data selecionada sem depender da velocidade do clique.
+    if(Date.now()<pendingUntil&&e.target.closest?.('#agNewMenu button,#agNewMenu [role="button"],#agNewMenu .btn')){
+      scheduleEventPrefill(pendingEventDate||selectedDate());
     }
   },true);
   const install=()=>{bindOverlayObservers();bindCalendarObserver()};
@@ -97,7 +121,7 @@ function boot(){
     }
   }).observe(document.body,{attributes:true,attributeFilter:['data-view']});
 }
-const api={selectedDate,rememberDate,editingEvent,activityIsNew,applyActivityDate,applyEventDate,calendarMutation};
+const api={selectedDate,rememberDate,editingEvent,activityIsNew,applyActivityDate,applyEventDate,calendarMutation,scheduleActivityPrefill,scheduleEventPrefill};
 if(hasDocument()){
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 }
