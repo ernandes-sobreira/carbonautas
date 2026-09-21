@@ -19,6 +19,7 @@ jobs:
       - run: npm test
       - run: node --test tests/agenda-p213.cjs
       - run: node --test tests/agenda-dom-p213.cjs
+      - run: node --test tests/agenda-integration-p213.cjs
       - name: Garantir que login e app-base continuam idênticos à P210
         run: |
           python3 - <<'PY'
@@ -26,14 +27,21 @@ jobs:
           from pathlib import Path
           base=subprocess.check_output(['git','show','c0240930b4a30fdbb9b22177777577cccdf252cb:index.html']).decode('utf-8')
           cur=Path('index.html').read_text(encoding='utf-8')
-          tag='<script src="./modules/agenda-core-p213.js?v=P213-20260921"></script>\n'
-          stripped=cur.replace(tag,'')
-          assert stripped==base, 'P213 alterou algo no index além de carregar o módulo da Agenda'
-          print('Base P210 preservada byte a byte; somente o script P213 foi acrescentado.')
+          tags=[
+            '<script src="./modules/agenda-core-p213.js?v=P213-20260921"></script>\n',
+            '<script src="./modules/agenda-integration-p213.js?v=P213-20260921"></script>\n'
+          ]
+          stripped=cur
+          for tag in tags: stripped=stripped.replace(tag,'')
+          assert stripped==base, 'P213 alterou algo no index além de carregar os módulos isolados da Agenda'
+          print('Base P210 preservada byte a byte; somente os módulos P213 foram acrescentados.')
           PY
       - name: Agenda static checks
         run: |
           node --check modules/agenda-core-p213.js
+          node --check modules/agenda-integration-p213.js
           grep -q 'agenda-core-p213.js' index.html
+          grep -q 'agenda-integration-p213.js' index.html
           grep -q 'CARBONAUTAS_AGENDA_P213' modules/agenda-core-p213.js
+          grep -q 'CARBONAUTAS_AGENDA_INTEGRATION_P213' modules/agenda-integration-p213.js
           ! grep -q 'P211' index.html
