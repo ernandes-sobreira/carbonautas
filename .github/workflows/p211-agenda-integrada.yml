@@ -1,0 +1,43 @@
+name: P211 agenda integrada
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: "${{ !contains(github.event.head_commit.message, '[p211-done]') }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Carregar integracao da agenda
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="./modules/agenda-integracao-p211.js?v=P211-20260921"></script>'
+          if tag not in s:
+              if '</body>' not in s: raise SystemExit('P211: body final não encontrado')
+              s=s.replace('</body>',tag+'\n</body>',1)
+          s=s.replace("window.CARBONAUTAS_BUILD='P210-20260921';","window.CARBONAUTAS_BUILD='P211-20260921';")
+          s=s.replace('./sw.js?v=P210-20260921','./sw.js?v=P211-20260921')
+          p.write_text(s,encoding='utf-8')
+          sw=Path('sw.js')
+          w=sw.read_text(encoding='utf-8')
+          w=w.replace('service worker P210','service worker P211').replace('carbonautas-p210-20260921','carbonautas-p211-20260921')
+          sw.write_text(w,encoding='utf-8')
+          PY
+          grep -q 'agenda-integracao-p211.js?v=P211-20260921' index.html
+          grep -q "CARBONAUTAS_BUILD='P211-20260921'" index.html
+          grep -q 'carbonautas-p211-20260921' sw.js
+          rm -f .github/workflows/p211-agenda-integrada.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "P211: agenda integrada e navegacao desktop [p211-done]"
+          git push
