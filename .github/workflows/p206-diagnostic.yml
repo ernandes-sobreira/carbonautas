@@ -1,0 +1,40 @@
+name: P206 diagnostic layers
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  inspect:
+    if: "${{ !contains(github.event.head_commit.message, '[p206-diag-generated]') }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Gerar diagnóstico preciso
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          needles=['openActivity','openProjectProfile','openCheckin','openProduct','openActivityPreset','editActivity','openMemberRepository','openDossier','p97Deck','Situação agora','Editar cadastro','Desligar acesso']
+          out=[]
+          for needle in needles:
+              out.append('\n\n===== '+needle+' =====')
+              start=0; count=0
+              while True:
+                  i=s.find(needle,start)
+                  if i<0 or count>=8: break
+                  a=max(0,i-2200); b=min(len(s),i+3500)
+                  out.append(f'\n--- occurrence {count+1} at char {i} ---\n'+s[a:b])
+                  start=i+len(needle);count+=1
+              if count==0: out.append('\nNOT FOUND')
+          Path('.p206-diagnostic.txt').write_text('\n'.join(out),encoding='utf-8')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .p206-diagnostic.txt
+          git commit -m "P206: diagnóstico temporário de camadas [p206-diag-generated]"
+          git push
