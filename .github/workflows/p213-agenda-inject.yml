@@ -12,22 +12,25 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Injetar apenas os módulos isolados da Agenda
+      - name: Restaurar P210 e injetar módulos somente no body real
         shell: bash
         run: |
           set -euo pipefail
           python3 - <<'PY'
+          import subprocess
           from pathlib import Path
           p=Path('index.html')
-          s=p.read_text(encoding='utf-8')
-          tags=[
+          # Sempre parte da versão estável que comprovadamente permite login.
+          s=subprocess.check_output(['git','show','c0240930b4a30fdbb9b22177777577cccdf252cb:index.html']).decode('utf-8')
+          tags='\n'.join([
             '<script src="./modules/agenda-core-p213.js?v=P213-20260921"></script>',
             '<script src="./modules/agenda-integration-p213.js?v=P213-20260921"></script>'
-          ]
-          for tag in tags:
-              if tag not in s:
-                  if '</body>' not in s: raise SystemExit('index sem </body>')
-                  s=s.replace('</body>',tag+'\n</body>',1)
+          ])+'\n'
+          # IMPORTANTÍSSIMO: o index contém strings HTML com </body> dentro do JavaScript.
+          # Usa a ÚLTIMA ocorrência para alcançar o fechamento real do documento.
+          pos=s.rfind('</body>')
+          if pos<0: raise SystemExit('body real não encontrado')
+          s=s[:pos]+tags+s[pos:]
           p.write_text(s,encoding='utf-8')
           PY
           grep -q 'agenda-core-p213.js' index.html
@@ -36,5 +39,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m "P213: carregar módulos isolados da Agenda [p213-injected]"
+          git commit -m "P213: módulos no body real, base P210 intacta [p213-injected]"
           git push
