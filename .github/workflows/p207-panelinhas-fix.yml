@@ -1,0 +1,86 @@
+name: P207 corrigir panelinhas
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: "${{ !contains(github.event.head_commit.message, '[p207-applied]') }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Aplicar correção P207
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          old_render="function renderHeader(){if(!ensureMount())return;const title=$('#p46ChatTitle'),sub=$('#p46ChatSub'),ico=$('#p46ChatIcon');if(mode==='general'){title.textContent='Fofoca geral';sub.textContent='Conversa aberta da equipe';ico.textContent='💬'}else{const g=groupById(activeGroupId);title.textContent=g?.groupName||'Conversas em panelinha';sub.textContent=g?`${(g.memberIds||[]).length} participantes · grupo da equipe`:'Escolha ou crie uma panelinha';ico.textContent='👥'}renderTopics();renderSide();renderMessages();renderReply();enhanceSubNav()}"
+          new_render="function renderHeader(){if(document.body.dataset.view==='mensagens'&&$('#p48GroupsRoot'))return;if(!ensureMount())return;const title=$('#p46ChatTitle'),sub=$('#p46ChatSub'),ico=$('#p46ChatIcon');if(mode==='general'){title.textContent='Fofoca geral';sub.textContent='Conversa aberta da equipe';ico.textContent='💬'}else{const g=groupById(activeGroupId);title.textContent=g?.groupName||'Conversas em panelinha';sub.textContent=g?`${(g.memberIds||[]).length} participantes · grupo da equipe`:'Escolha ou crie uma panelinha';ico.textContent='👥'}renderTopics();renderSide();renderMessages();renderReply();enhanceSubNav()}"
+          if s.count(old_render)!=1: raise SystemExit(f'P207 renderHeader esperado 1 vez, encontrado {s.count(old_render)}')
+          s=s.replace(old_render,new_render)
+
+          old_mode="function setMode(next){mode=next==='groups'?'groups':'general';if(mode==='groups'&&!activeGroupId){activeGroupId=groupMetas()[0]?.groupId||''}renderHeader();if(window.innerWidth<760){const side=$('.p46-side');if(side)side.style.display='none'}}"
+          new_mode="function setMode(next){if(next==='groups'){if(typeof window.openPanelinhas==='function')window.openPanelinhas();return}mode='general';renderHeader();if(window.innerWidth<760){const side=$('.p46-side');if(side)side.style.display='none'}}"
+          if s.count(old_mode)!=1: raise SystemExit(f'P207 setMode esperado 1 vez, encontrado {s.count(old_mode)}')
+          s=s.replace(old_mode,new_mode)
+
+          old_click="pan.onclick=()=>{if(typeof window.switchView==='function'&&document.body.dataset.view!=='mensagens')window.switchView('mensagens');setTimeout(()=>setMode('groups'),20)};nav.insertBefore(pan,priv)"
+          new_click="pan.onclick=()=>{if(typeof window.openPanelinhas==='function')window.openPanelinhas()};nav.insertBefore(pan,priv)"
+          if s.count(old_click)!=1: raise SystemExit(f'P207 clique P46 esperado 1 vez, encontrado {s.count(old_click)}')
+          s=s.replace(old_click,new_click)
+
+          old_mount="function mount(){const v=$('#viewMensagens');if(!v)return false;if(!$('#p48GroupsRoot')){v.innerHTML=shellHTML();bindUI()}markTabs();return true}"
+          new_mount="function mount(){const v=$('#viewMensagens');if(!v)return false;let created=false;if(!$('#p48GroupsRoot')){v.innerHTML=shellHTML();bindUI();created=true}markTabs();if(created){renderList();renderHead();renderMessages()}return true}"
+          if s.count(old_mount)!=1: raise SystemExit(f'P207 mount P48 esperado 1 vez, encontrado {s.count(old_mount)}')
+          s=s.replace(old_mount,new_mount)
+
+          old_open="function openPanelinhas(){active=true;if(typeof window.switchView==='function'&&document.body.dataset.view!=='mensagens')window.switchView('mensagens');setTimeout(()=>{mount();renderList();if(!activeThreadId&&threads.length)activeThreadId=threads[0].id;renderHead();renderList();if(activeThreadId)subscribeMessages(activeThreadId)},40)}"
+          new_open="function openPanelinhas(){active=true;document.body.setAttribute('data-p48-groups','1');document.body.classList.add('p98-panel-active');if(typeof window.switchView==='function'&&document.body.dataset.view!=='mensagens')window.switchView('mensagens');setTimeout(()=>{mount();renderList();if(!activeThreadId&&threads.length)activeThreadId=threads[0].id;renderHead();renderList();if(activeThreadId)subscribeMessages(activeThreadId)},40)}"
+          if s.count(old_open)!=1: raise SystemExit(f'P207 openPanelinhas esperado 1 vez, encontrado {s.count(old_open)}')
+          s=s.replace(old_open,new_open)
+
+          old_oldmodal="function openGroupModal(){if(!myMemberId)return toast('Seu login precisa estar vinculado a uma pessoa.');const ov=ensureGroupModal();$('#p46GroupName').value='';$('#p46PersonSearch').value='';renderPeople();ov.style.display='flex';setTimeout(()=>$('#p46GroupName')?.focus(),40)}"
+          new_oldmodal="function openGroupModal(){if(typeof window.openNewPanelinha==='function'){window.openNewPanelinha();return}if(!myMemberId)return toast('Seu login precisa estar vinculado a uma pessoa.');const ov=ensureGroupModal();$('#p46GroupName').value='';$('#p46PersonSearch').value='';renderPeople();ov.style.display='flex';setTimeout(()=>$('#p46GroupName')?.focus(),40)}"
+          if s.count(old_oldmodal)!=1: raise SystemExit(f'P207 openGroupModal esperado 1 vez, encontrado {s.count(old_oldmodal)}')
+          s=s.replace(old_oldmodal,new_oldmodal)
+
+          if s.count("window.CARBONAUTAS_BUILD='P206-20260921';")!=1: raise SystemExit('P207 build P206 não encontrado exatamente uma vez')
+          s=s.replace("window.CARBONAUTAS_BUILD='P206-20260921';","window.CARBONAUTAS_BUILD='P207-20260921';")
+          if s.count("./sw.js?v=P206-20260921")!=1: raise SystemExit('P207 registro SW P206 não encontrado exatamente uma vez')
+          s=s.replace("./sw.js?v=P206-20260921","./sw.js?v=P207-20260921")
+          p.write_text(s,encoding='utf-8')
+
+          sw=Path('sw.js'); w=sw.read_text(encoding='utf-8')
+          if w.count('service worker P206')!=1 or w.count("carbonautas-p206-20260921")!=1: raise SystemExit('P207 sw.js não está na versão P206 esperada')
+          w=w.replace('service worker P206','service worker P207').replace("carbonautas-p206-20260921","carbonautas-p207-20260921")
+          sw.write_text(w,encoding='utf-8')
+          PY
+
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          assert "document.body.dataset.view==='mensagens'&&$('#p48GroupsRoot')" in s
+          assert "if(next==='groups'){if(typeof window.openPanelinhas==='function')window.openPanelinhas();return}" in s
+          assert "if(created){renderList();renderHead();renderMessages()}" in s
+          assert "document.body.setAttribute('data-p48-groups','1');document.body.classList.add('p98-panel-active')" in s
+          assert "window.CARBONAUTAS_BUILD='P207-20260921';" in s
+          w=Path('sw.js').read_text(encoding='utf-8')
+          assert 'service worker P207' in w and 'carbonautas-p207-20260921' in w
+          print('P207 checks OK')
+          PY
+
+          rm -f .p207-panelinhas-diagnostic.txt
+          rm -f .github/workflows/p207-panelinhas-diagnostic.yml
+          rm -f .github/workflows/p207-panelinhas-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "P207: estabilizar panelinhas e preservar lista [p207-applied]"
+          git push
