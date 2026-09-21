@@ -1,0 +1,40 @@
+name: P207 panelinhas diagnostic
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  inspect:
+    if: "${{ !contains(github.event.head_commit.message, '[p207-diag-generated]') }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Diagnosticar panelinhas
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path('index.html').read_text(encoding='utf-8')
+          needles=['panelinha','Panelinha','renderPanel','createPanel','newPanel','groupChat','GroupChat','privateGroup','conversationGroup','participantes','participants']
+          out=[]
+          for needle in needles:
+              out.append('\n\n===== '+needle+' =====')
+              start=0; count=0
+              while True:
+                  i=s.find(needle,start)
+                  if i<0 or count>=30: break
+                  a=max(0,i-2600); b=min(len(s),i+5200)
+                  out.append(f'\n--- occurrence {count+1} at char {i} ---\n'+s[a:b])
+                  start=i+len(needle); count+=1
+              if count==0: out.append('\nNOT FOUND')
+          Path('.p207-panelinhas-diagnostic.txt').write_text('\n'.join(out),encoding='utf-8')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .p207-panelinhas-diagnostic.txt
+          git commit -m "P207: diagnóstico temporário das panelinhas [p207-diag-generated]"
+          git push
