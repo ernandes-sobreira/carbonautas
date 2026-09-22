@@ -1,6 +1,6 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const api=require('../modules/file-handoff-p214.js');
+const api=require('../modules/file-handoff.js');
 
 test('private thread id is stable',()=>{
   assert.equal(api.privateThreadId('b','a'),api.privateThreadId('a','b'));

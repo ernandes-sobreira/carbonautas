@@ -433,6 +433,9 @@ service cloud.firestore {
           'collaborationUpdatedAt',
           'url',
           'fileName',
+          'storagePath',
+          'reviewVersion',
+          'reviewNextRecipientId',
           'onlineEditVersion',
           'onlineEditHistory',
           'editedOnline',
@@ -453,6 +456,9 @@ service cloud.firestore {
         return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'url',
           'fileName',
+          'storagePath',
+          'reviewVersion',
+          'reviewNextRecipientId',
           'onlineEditVersion',
           'onlineEditHistory',
           'editedOnline',
@@ -470,10 +476,31 @@ service cloud.firestore {
         && request.resource.data.get('collaboratorMemberIds', []) == resource.data.get('collaboratorMemberIds', []);
       }
 
+      // A reader may append their own download receipt, never rewrite past events.
+      function validDownloadReceipt() {
+        let old = resource.data.get('onlineEditHistory', []);
+        let next = request.resource.data.onlineEditHistory;
+        let event = next[next.size() - 1];
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['onlineEditHistory'])
+          && next is list && next.size() == old.size() + 1
+          && next == old.concat([event])
+          && event.action in ['download','message']
+          && event.byUid == request.auth.uid
+          && event.byMemberId == myMemberId()
+          && event.version is int && event.version >= 1;
+      }
+      function reviewParticipant() {
+        return resource.data.get('reviewFlow', false) == true
+          && myMemberId() in [resource.data.get('reviewReviewerId', ''), resource.data.get('reviewReturnToId', resource.data.memberId)]
+          && validCollaboratorOfficeUpdate();
+      }
+
       allow update: if hasProfile()
         && (
           resource.data.ownerUid == request.auth.uid
           || isCoordinator()
+          || validDownloadReceipt()
+          || reviewParticipant()
           || (publicationLinkedOwner() && validLinkedOwnerUpdate())
           || (publicationCollaborator() && validCollaboratorOfficeUpdate())
         );
@@ -747,7 +774,31 @@ service cloud.firestore {
         allow create: if parentManager()
           && request.resource.data.createdByUid == request.auth.uid;
 
-        allow update: if parentManager();
+        function allowedFileReader() {
+          return hasProfile() && (parentPackage().data.get('accessMode','') == 'group'
+            || myMemberId() in parentPackage().data.allowedMemberIds);
+        }
+        function fileDownloadReceipt() {
+          let old = resource.data.get('onlineEditHistory', []);
+          let next = request.resource.data.onlineEditHistory;
+          let event = next[next.size()-1];
+          return next is list && next.size() == old.size()+1 && next == old.concat([event])
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['onlineEditHistory'])
+            && event.action in ['download','message'] && event.byUid == request.auth.uid
+            && event.byMemberId == myMemberId() && event.version is int && event.version >= 1;
+        }
+        function fileVersionUpdate() {
+          return (myMemberId() in parentPackage().data.allowedMemberIds || parentPublicCoordinator())
+            && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+              'url','storagePath','fileName','onlineEditVersion','onlineEditHistory','editedOnline',
+              'editedAt','editedByUid','editedByMemberId','editedByName','repositoryTurnMemberId',
+              'repositoryTurnFromId','repositoryTurnFromName','repositoryTurnAt'])
+            && request.resource.data.onlineEditVersion == resource.data.get('onlineEditVersion',1)+1
+            && request.resource.data.editedByUid == request.auth.uid
+            && request.resource.data.editedByMemberId == myMemberId();
+        }
+        allow update: if parentManager()
+          || (allowedFileReader() && (fileDownloadReceipt() || fileVersionUpdate()));
 
         allow delete: if parentManager()
           || parentPublicCoordinator();

@@ -1697,6 +1697,7 @@
 #p46GroupOverlay,
 #p48GroupOverlay{display:none!important;visibility:hidden!important;pointer-events:none!important}
 </style>
+<link rel="stylesheet" href="./modules/repository.css?v=handoff-20260922">
 </head>
 <body data-view="painel">
 
@@ -2250,7 +2251,7 @@
             <div class="sub" id="repoMainSubtitle">Público, privado e compartilhado.</div>
           </div>
           <div class="spacer"></div>
-          <button class="btn" type="button" id="newOfficeBtn">✨ Novo Word / Excel / PPT</button>
+
           <button class="btn" type="button" id="addRepoPackageBtn">📦 Nova pasta</button>
           <button class="btn repo-dedupe-btn clean" type="button" id="repoDedupeBtn" title="Remove somente duplicações exatas, sem apagar versões diferentes">🧹 Sem duplicados</button>
           <button class="btn primary" type="button" id="addPubBtn">＋ Adicionar publicação</button>
@@ -3224,6 +3225,7 @@ let repoPackageUploadContext = 'general';
 let activeRepoFolderAccessId = '';
 let pendingRepoAddFilesId = '';
 const FB = () => window.fbFns;
+window.CarbonautasApp={get state(){return state},get memberId(){return myId},get name(){return myName},get isAdmin(){return isAdmin}};
 // P129 · bibliotecas pesadas so quando a tela precisa
 const P129_LIBS={
   d3:{src:'https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js',ok:()=>!!window.d3},
@@ -5627,6 +5629,7 @@ function renderPubs(){
   list=compactPublicationsForDisplay(list);updateRepoDedupeButton();
   if(!list.length){ wrap.innerHTML=packageCount?'':'<div class="crono-empty">Nenhuma publicação encontrada com esses filtros.</div>'; return; }
   wrap.innerHTML=list.map(p=>{
+    if(p.tipo==='arquivo'&&!p.labRun&&window.CarbonautasRepository)return window.CarbonautasRepository.cardHTML(p);
     const normalizedCategory=repoCategoryKey(p.categoria);
     const cfg=CATEGORIAS[normalizedCategory]||CATEGORIAS.outro;
     const catLabel = normalizedCategory==='outro' && p.categoriaOutro ? p.categoriaOutro : cfg.label;
@@ -5636,6 +5639,7 @@ function renderPubs(){
     const dateLabel = dt ? dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}) : '';
     return `<div class="pub-row"><div class="pub-cat" style="background:${cfg.color}"></div><div class="pub-body"><div class="pub-t">${esc(p.titulo)}</div><div class="pub-meta"><span class="pub-cat-tag" style="background:${cfg.color}">${esc(catLabel)}</span><span class="pub-author"><span class="d" style="background:${m?NIVEIS[m.nivel]?.color:'var(--ink-3)'}"></span>${esc(p.memberNome||(m?m.nome:'—'))}</span>${dateLabel?`<span class="pub-date">${dateLabel}</span>`:''}</div>${!p.reviewFlow&&Number(p.onlineEditVersion||1)>1?`<span class="office-version">✏️ edição v${Number(p.onlineEditVersion||1)}</span>`:''}${!p.reviewFlow?repositorySequenceHTML(p):''}${p.reviewFlow?reviewBadgeHTML(p):''}${p.reviewNote?`<div class="review-note">💬 ${esc(p.reviewNote)}</div>`:''}${scientificContextHTML(p)}${officeFileChip(p)}${publicationCollaboratorIds(p).length?`<span class="repo-collab-chip">👥 ${publicationCollaboratorIds(p).length} colaborador${publicationCollaboratorIds(p).length===1?'':'es'}</span>`:''}</div><div class="pub-act">${p.labRun?`<button type="button" class="btn primary" onclick="openLabRun('${p.labRunId}')">📈 Resultados</button>`:p.tipo==='arquivo'?`<button type="button" class="btn ghost" onclick="openFilePreview(decodeURIComponent('${encodeInlineComponent(p.url)}'),decodeURIComponent('${encodeInlineComponent(p.fileName||p.titulo||'Arquivo')}'),{source:'publication',id:'${p.id}'})" title="Visualizar" style="padding:6px 9px">👁️</button><button type="button" class="btn review-download" onclick="downloadRepoFile(decodeURIComponent('${encodeInlineComponent(p.url)}'),decodeURIComponent('${encodeInlineComponent(p.fileName||p.titulo||'Arquivo')}'),decodeURIComponent('${encodeInlineComponent(p.storagePath||'')}'))" title="Baixar" style="padding:6px 9px">⬇</button>`:`<a class="btn ghost" href="${esc(p.url)}" target="_blank" rel="noopener" title="Abrir link" style="padding:6px 9px">↗</a>`}${labRepoButton(p)}${officeActionButtons(p,'compact')}${p.tipo==='arquivo'?repositoryCommunicationButtons(p):''}${p.reviewFlow&&canActOnReview(p)?`<button type="button" class="btn review-action" onclick="openReviewResponse('${p.id}')">${reviewActionLabel(p)}</button>`:''}${canDel?`<button class="mini-x" onclick="deletePublicacao('${p.id}')" title="Excluir">×</button>`:''}</div></div>`;
   }).join('');
+  document.dispatchEvent(new CustomEvent('carbonautas:repository-rendered'));
 }
 
 
@@ -5664,9 +5668,10 @@ async function openRepositoryPackage(id){
     const f=FB(),snap=await f.getDocs(f.collection(f.doc(window.db,'rede_repository_packages',id),'files'));
     const files=snap.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>(a.order||0)-(b.order||0));
     $('#repoPackageDetailFiles').innerHTML=files.length?files.map(x=>{
+      if(window.CarbonautasRepository)return window.CarbonautasRepository.cardHTML(window.CarbonautasFiles.normalizePackage(p,x));
       const ext=String(x.ext||inferFileExt('',x.fileName)||'').toLowerCase();
       const officeEditable=['docx','xlsx','pptx'].includes(ext);
-      return `<div class="repo-package-file"><div class="pf-ico">${repoFileIcon(x.fileName)}</div><div class="pf-main"><div class="pf-name">${esc(x.fileName||x.title||'Arquivo')}</div><div class="pf-meta">${esc((ext||'arquivo').toUpperCase())} · ${esc(humanBytes(x.size||0))}${Number(x.onlineEditVersion||1)>1?` · ✏️ v${Number(x.onlineEditVersion||1)}`:''}</div></div><div class="repo-package-actions"><button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeInlineComponent(x.url||'')}'),decodeURIComponent('${encodeInlineComponent(x.fileName||'Arquivo')}'),{source:'package',packageId:'${id}',fileId:'${x.id}'})">👁 Ver</button><button class="btn" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeInlineComponent(x.url||'')}'),decodeURIComponent('${encodeInlineComponent(x.fileName||'arquivo')}'),decodeURIComponent('${encodeInlineComponent(x.storagePath||'')}'))">⬇ Baixar</button>${manage&&officeEditable?`<button class="btn office-edit-btn" type="button" onclick="openPackageOnlineEdit('${id}','${x.id}')">✏️ Editar</button>`:''}<button class="btn repo-file-chat-btn" type="button" onclick="openRepoFileConversationPackage('${id}','${x.id}')">💬 Conversa</button>${manage?`<button class="btn" type="button" onclick="publishRepositoryPackageFile('${id}','${x.id}')">🌐 Publicar no Geral</button><button class="btn" type="button" onclick="deleteRepositoryPackageFile('${id}','${x.id}')">🗑</button>`:''}</div></div>`
+      return `<div class="repo-package-file"><div class="pf-ico">${repoFileIcon(x.fileName)}</div><div class="pf-main"><div class="pf-name">${esc(x.fileName||x.title||'Arquivo')}</div><div class="pf-meta">${esc((ext||'arquivo').toUpperCase())} · ${esc(humanBytes(x.size||0))}${Number(x.onlineEditVersion||1)>1?` · ✏️ v${Number(x.onlineEditVersion||1)}`:''}</div></div><div class="repo-package-actions"><button class="btn ghost" type="button" onclick="openFilePreview(decodeURIComponent('${encodeInlineComponent(x.url||'')}'),decodeURIComponent('${encodeInlineComponent(x.fileName||'Arquivo')}'),{source:'package',packageId:'${id}',fileId:'${x.id}'})">👁 Ver</button><button class="btn" type="button" onclick="downloadRepoFile(decodeURIComponent('${encodeInlineComponent(x.url||'')}'),decodeURIComponent('${encodeInlineComponent(x.fileName||'arquivo')}'),decodeURIComponent('${encodeInlineComponent(x.storagePath||'')}'))">⬇ Baixar</button><button class="btn repo-file-chat-btn" type="button" onclick="openRepoFileConversationPackage('${id}','${x.id}')">💬 Conversa</button>${manage?`<button class="btn" type="button" onclick="publishRepositoryPackageFile('${id}','${x.id}')">🌐 Publicar no Geral</button><button class="btn" type="button" onclick="deleteRepositoryPackageFile('${id}','${x.id}')">🗑</button>`:''}</div></div>`
     }).join(''):'<div class="repo-empty">Nenhum arquivo nesta pasta.</div>'
   }catch(e){console.error(e);$('#repoPackageDetailFiles').innerHTML='<div class="repo-empty">Não foi possível abrir os arquivos. Verifique se sua conta ainda está autorizada.</div>'}
 }
@@ -6977,6 +6982,7 @@ function openOverlay(id){
   el.classList.add('open');
 }
 function closeOverlay(id){
+  if(id==='filePreviewOverlay')document.getElementById('repositoryPreview')?.close();
   if(id==='onlyOfficeOverlay'&&ooSession&&!ooSession.saved&&!ooSession.discarding){
     if(ooSession.closingForSave){toast('Só um instante: o arquivo está sendo salvo.');return}
     discardOnlineDocument();return;
@@ -7092,7 +7098,7 @@ async function markPrivateThreadRead(thread){
 async function sendPrivateMessage(){
   const input=$('#privateInput'),text=(input?.value||'').trim(),thread=state.privateThreads.find(t=>t.id===privateActiveThreadId);if(!thread||!text)return;if(text.length>5000){toast('A mensagem pode ter no máximo 5.000 caracteres.');return}const uidv=privateUid(),targetUid=privateOtherUid(thread);if(!targetUid)return toast('Participante da conversa não encontrado.');
   const f=FB(),msgRef=f.doc(f.collection(window.db,'rede_private_threads',thread.id,'messages')),threadRef=f.doc(window.db,'rede_private_threads',thread.id),batch=f.writeBatch(window.db),payload={senderUid:uidv,senderMemberId:myId,text,createdAt:f.serverTimestamp(),readBy:[uidv],replyTo:privateReplyTarget?{...privateReplyTarget}:null};
-  try{batch.set(msgRef,payload);batch.update(threadRef,{updatedAt:f.serverTimestamp(),lastMessage:text.slice(0,160),lastSenderUid:uidv,lastSenderMemberId:myId,[`unreadBy.${targetUid}`]:f.increment(1)});await batch.commit();input.value='';privateReplyTarget=null;renderPrivateReply();$('#privateEmojiBar')?.classList.remove('show');const targetMemberId=privateOtherMemberId(thread),target=memberById(targetMemberId),me=memberById(myId);try{await f.addDoc(f.collection(window.db,'rede_notifications'),{recipientId:targetMemberId,senderId:myId,senderUid:uidv,senderName:me?.nome||myName||'Carbonauta',kind:'private_message',title:`🔐 Nova mensagem privada de ${me?.nome||myName||'um Carbonauta'}`,message:'Você recebeu uma nova mensagem privada.',sourceType:'private_chat',sourceId:thread.id,threadId:thread.id,read:false,ts:f.serverTimestamp()})}catch(e){console.warn('Mensagem enviada, mas a notificação não pôde ser criada:',e)}}catch(e){console.error(e);toast(e?.code==='permission-denied'?'Sem permissão para enviar. Recarregue o app; se persistir, confira o vínculo da conta.':'Não consegui enviar a mensagem.')}
+  try{await window.CarbonautasFiles?.addMessageReceipt(batch,window.repositoryMessageContext,thread.id);batch.set(msgRef,payload);batch.update(threadRef,{updatedAt:f.serverTimestamp(),lastMessage:text.slice(0,160),lastSenderUid:uidv,lastSenderMemberId:myId,[`unreadBy.${targetUid}`]:f.increment(1)});await batch.commit();if(window.repositoryMessageContext?.threadId===thread.id)window.repositoryMessageContext=null;input.value='';privateReplyTarget=null;renderPrivateReply();$('#privateEmojiBar')?.classList.remove('show');const targetMemberId=privateOtherMemberId(thread),target=memberById(targetMemberId),me=memberById(myId);try{await f.addDoc(f.collection(window.db,'rede_notifications'),{recipientId:targetMemberId,senderId:myId,senderUid:uidv,senderName:me?.nome||myName||'Carbonauta',kind:'private_message',title:`🔐 Nova mensagem privada de ${me?.nome||myName||'um Carbonauta'}`,message:'Você recebeu uma nova mensagem privada.',sourceType:'private_chat',sourceId:thread.id,threadId:thread.id,read:false,ts:f.serverTimestamp()})}catch(e){console.warn('Mensagem enviada, mas a notificação não pôde ser criada:',e)}}catch(e){console.error(e);toast(e?.code==='permission-denied'?'Sem permissão para enviar. Recarregue o app; se persistir, confira o vínculo da conta.':'Não consegui enviar a mensagem.')}
 }
 async function deletePrivateMessage(id){const msg=privateMessagesState.find(x=>x.id===id);if(!msg||msg.senderUid!==privateUid())return;if(!confirm('Excluir esta mensagem da conversa?'))return;const mark='[[CARBONAUTAS_IMAGE_V1]]',raw=String(msg.text||''),rest=raw.startsWith(mark)?raw.slice(mark.length):'',nl=rest.indexOf('\n'),imageUrl=rest?(nl>=0?rest.slice(0,nl):rest):'';try{await FB().deleteDoc(FB().doc(window.db,'rede_private_threads',privateActiveThreadId,'messages',id));const isLast=privateMessagesState[privateMessagesState.length-1]?.id===id;if(isLast){const prev=privateMessagesState[privateMessagesState.length-2];await FB().updateDoc(FB().doc(window.db,'rede_private_threads',privateActiveThreadId),{lastMessage:prev?.text?.slice(0,160)||'Mensagem excluída'})}const failed=imageUrl?await deleteStorageArtifacts({url:imageUrl}):[];toast(failed.length?'Mensagem excluída, mas a imagem não pôde ser removida do Storage.':'Mensagem excluída.')}catch(e){console.error(e);toast('Não foi possível excluir a mensagem.')}}
 
@@ -7465,11 +7471,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='P210-20260921';
+window.CARBONAUTAS_BUILD='handoff-20260922';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=P210-20260921',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=handoff-20260922',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -9716,361 +9722,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 
 </script>
-<script data-src="review-flow-p52.js">
-/* Carbonautas P52 · fluxo de correção legível: quem fez o quê e com quem está */
-(function(){
-'use strict';
-const VERSION='P52';
-function esc52(v=''){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function personById(id){try{return typeof memberById==='function'?memberById(id):null}catch(e){return null}}
-function versionCount(p){
-  try{
-    const tid=p?.reviewThreadId||p?.id;
-    if(typeof reviewThreadItems==='function')return reviewThreadItems(tid).length;
-    if(typeof state!=='undefined'&&Array.isArray(state.publicacoes))return state.publicacoes.filter(x=>x.reviewFlow&&(x.reviewThreadId||x.id)===tid).length;
-  }catch(e){}
-  return Number(p?.reviewVersion||1)||1;
-}
-function nameOf(p,id,fallback=''){const m=personById(id);return m?.nome||fallback||''}
-function flowHTML(p){
-  if(!p?.reviewFlow)return '';
-  const v=Number(p.reviewVersion||1)||1;
-  const author=nameOf(p,p.memberId,p.memberNome||'Autor do arquivo')||'Autor do arquivo';
-  const reviewer=nameOf(p,p.reviewReviewerId,'Revisor')||'Revisor';
-  const next=nameOf(p,p.reviewNextRecipientId,'');
-  const vc=versionCount(p);
-  let now='',last='',tone='review';
-  if(p.reviewStatus==='correcao_devolvida'){
-    tone='adjust';
-    now=next?`${next} está com a versão ${v} para ajustar`:`A versão ${v} voltou para ajustes`;
-    last=`${reviewer} devolveu a correção`;
-  }else if(p.reviewStatus==='nova_versao'){
-    tone='review';
-    now=next?`${next} está com a versão ${v} para revisar`:`Versão ${v} enviada para revisão`;
-    last=`${author} enviou a versão ${v}`;
-  }else{
-    tone='review';
-    now=next?`${next} está com a versão ${v} para revisar`:`Aguardando revisão da versão ${v}`;
-    last=`${author} enviou o arquivo para correção`;
-  }
-  const reviewerExtra=reviewer&&next&&reviewer!==next?`<span>👤 Revisor responsável: <b>${esc52(reviewer)}</b></span>`:'';
-  return `<div class="p52-review-flow ${tone}">
-    <div class="p52-now"><span class="p52-label">AGORA</span><b>${esc52(now)}</b></div>
-    <div class="p52-last"><span>↳ Última ação: <b>${esc52(last)}</b></span><span>🗂 ${vc} ${vc===1?'versão':'versões'} no histórico</span>${reviewerExtra}</div>
-  </div>`;
-}
-function injectCss(){
-  if(document.getElementById('p52ReviewStyle'))return;
-  const st=document.createElement('style');st.id='p52ReviewStyle';st.textContent=`
-  .p52-review-flow{margin:8px 0 5px;border:1px solid #d9e5e8;border-left:4px solid #1e88c7;border-radius:12px;background:#f8fbfc;padding:9px 11px;max-width:760px}
-  .p52-review-flow.adjust{border-left-color:#e0912e;background:#fffaf1}.p52-now{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:#18323d}.p52-now>b{font-size:12.5px;line-height:1.35}.p52-label{font-size:9px;font-weight:900;letter-spacing:.08em;background:#0e5c63;color:#fff;border-radius:999px;padding:4px 7px}.p52-review-flow.adjust .p52-label{background:#b87316}.p52-last{display:flex;gap:10px 16px;flex-wrap:wrap;margin-top:5px;color:#6b7e85;font-size:10.5px;line-height:1.35}.p52-last b{color:#344e58}.review-note{margin-top:5px!important;color:#708188!important;font-size:10.5px!important;padding-left:0!important}.review-note:before{content:'Observação · ';font-weight:800;color:#566b73}
-  @media(max-width:700px){.p52-review-flow{padding:8px 9px}.p52-now>b{font-size:12px}.p52-last{display:grid;gap:3px}}
-  `;document.head.appendChild(st);
-}
-function install(){
-  injectCss();
-  try{window.reviewBadgeHTML=flowHTML}catch(e){console.warn('P52 review override',e)}
-  try{reviewBadgeHTML=flowHTML}catch(e){}
-  setTimeout(()=>{try{if(document.body.dataset.view==='pubs'&&typeof renderPubs==='function')renderPubs()}catch(e){}},250);
-  console.info('Carbonautas fluxo de correção',VERSION,'carregado');
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
-})();
-
-</script>
-<script data-src="repository-ui-p54.js">
-/* Carbonautas P54 · histórico auditável + ações padronizadas */
-(function(){
-'use strict';
-const VERSION='P54';
-let pubs=[];
-let members=new Map();
-let loaded=false;
-let loading=false;
-
-function esc54(v=''){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function norm54(v=''){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim()}
-function toDate54(v){
-  if(!v)return null;
-  try{
-    if(typeof v.toDate==='function')return v.toDate();
-    if(typeof v.toMillis==='function')return new Date(v.toMillis());
-    const d=v instanceof Date?v:new Date(v);
-    return Number.isNaN(d.getTime())?null:d;
-  }catch(_e){return null}
-}
-function ms54(v){const d=toDate54(v);return d?d.getTime():0}
-function when54(v){
-  const d=toDate54(v);if(!d)return '—';
-  return d.toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}).replace(',',' ·');
-}
-function name54(id,fallback=''){return members.get(id)?.nome||fallback||''}
-
-async function loadData54(){
-  if(!window.auth?.currentUser || !authProfile){pubs=[];members=new Map();loaded=false;return}
-  pubs=state.publicacoes||[];
-  members=new Map((state.members||[]).map(m=>[m.id,m]));
-  loaded=true;
-}
-
-function histRow54(date,person,action,version,icon='•'){
-  return `<div class="p54-row">
-    <div class="p54-date">${esc54(date)}</div>
-    <div class="p54-person"><span>${icon}</span><b>${esc54(person||'Carbonauta')}</b></div>
-    <div class="p54-action-text">${esc54(action)}</div>
-    <div class="p54-version">v${esc54(version)}</div>
-  </div>`;
-}
-function histBox54(rows,next=''){
-  return `<div class="p54-history">
-    <div class="p54-title">Histórico do arquivo</div>
-    <div class="p54-head"><span>Data e hora</span><span>Pessoa</span><span>O que fez</span><span>Versão</span></div>
-    ${rows.join('')}
-    ${next?`<div class="p54-next"><b>Próxima ação</b><span>${esc54(next)}</span></div>`:''}
-  </div>`;
-}
-
-function regularHistory54(p){
-  const rows=[];
-  const owner=p.memberNome||name54(p.memberId,'Proprietário');
-  rows.push(histRow54(when54(p.ts),owner,'enviou o arquivo',1,'⬆'));
-  const hist=Array.isArray(p.onlineEditHistory)?p.onlineEditHistory:[];
-  hist.forEach((h,i)=>{
-    const person=h?.byName||name54(h?.byMemberId,'Carbonauta');
-    const version=Number(h?.version||i+1)+1;
-    rows.push(histRow54(when54(h?.savedAt),person,'editou o arquivo',version,'✎'));
-  });
-  const current=Number(p.onlineEditVersion||1);
-  if(hist.length===0&&current>1&&(p.editedAt||p.editedByName)){
-    rows.push(histRow54(when54(p.editedAt),p.editedByName||name54(p.editedByMemberId,'Carbonauta'),'editou o arquivo',current,'✎'));
-  }
-  const turnId=p.repositoryTurnMemberId||'';
-  const next=turnId?`${name54(turnId,turnId===p.memberId?owner:'Carbonauta')} · continuar a partir da versão ${current}`:'';
-  return histBox54(rows,next);
-}
-
-function reviewGroup54(p){
-  const tid=p.reviewThreadId||p.id;
-  return pubs.filter(x=>x.reviewFlow&&(x.reviewThreadId||x.id)===tid).sort((a,b)=>(Number(a.reviewVersion)||1)-(Number(b.reviewVersion)||1));
-}
-function reviewHistory54(p){
-  const group=reviewGroup54(p);const versions=group.length?group:[p];
-  const rows=versions.map((v,i)=>{
-    const person=v.reviewSenderName||v.memberNome||name54(v.memberId,'Carbonauta');
-    let action='enviou para correção';
-    if(v.reviewStatus==='correcao_devolvida')action='devolveu a correção';
-    else if(v.reviewStatus==='nova_versao')action='enviou nova versão para revisão';
-    else if(i>0)action='enviou nova versão';
-    return histRow54(when54(v.ts),person,action,Number(v.reviewVersion)||i+1,v.reviewStatus==='correcao_devolvida'?'↩':'⬆');
-  });
-  const latest=versions[versions.length-1]||p;
-  const nextName=name54(latest.reviewNextRecipientId,'');
-  let next='';
-  if(nextName){
-    next=latest.reviewStatus==='correcao_devolvida'
-      ?`${nextName} · ajustar a versão ${Number(latest.reviewVersion)||1}`
-      :`${nextName} · revisar a versão ${Number(latest.reviewVersion)||1}`;
-  }
-  return histBox54(rows,next);
-}
-
-function publicationForCard54(card){
-  const titleEl=card.querySelector('.pub-t,.repo-title');if(!titleEl)return null;
-  const title=norm54(titleEl.textContent);if(!title)return null;
-  const matches=pubs.filter(p=>norm54(p.titulo||p.reviewBaseTitle||'')===title);
-  if(!matches.length)return null;
-  return matches.sort((a,b)=>{
-    const av=Number(a.reviewVersion||a.onlineEditVersion||1),bv=Number(b.reviewVersion||b.onlineEditVersion||1);
-    if(av!==bv)return bv-av;return ms54(b.ts||b.editedAt)-ms54(a.ts||a.editedAt);
-  })[0];
-}
-
-function enhanceCard54(card){
-  if(!loaded)return;
-  const p=publicationForCard54(card);if(!p||p.tipo!=='arquivo')return;
-  const signature=`${p.id}:${p.reviewVersion||p.onlineEditVersion||1}:${(p.onlineEditHistory||[]).length}`;
-  if(card.dataset.p54Signature===signature&&card.querySelector('.p54-history'))return;
-  card.dataset.p54Signature=signature;
-  card.querySelectorAll('.p54-history').forEach(x=>x.remove());
-  const html=p.reviewFlow?reviewHistory54(p):regularHistory54(p);
-  if(!html)return;
-  const body=card.querySelector('.pub-body,.repo-main');if(!body)return;
-  const tmp=document.createElement('div');tmp.innerHTML=html;const history=tmp.firstElementChild;
-  const after=body.querySelector('.office-version');
-  if(after)after.insertAdjacentElement('afterend',history);else body.appendChild(history);
-  card.classList.add('p54-enhanced');
-}
-
-function normalizeAction54(btn,type,label){
-  btn.classList.add('p54-action-btn',`p54-${type}`);
-  btn.textContent=label;
-}
-function normalizeActions54(){
-  document.querySelectorAll('.pub-act button,.repo-actions button,.review-version-actions button').forEach(b=>{
-    if(b.classList.contains('mini-x'))return;
-    const title=(b.getAttribute('title')||'').toLowerCase();
-    const txt=(b.textContent||'').trim().toLowerCase();
-    if(title.includes('visualizar')||txt==='👁️'||txt==='👁'||txt.includes('👁 ver')||txt==='ver') normalizeAction54(b,'view','👁 Visualizar');
-    else if(title.includes('baixar')||txt.includes('baixar')) normalizeAction54(b,'download','⬇ Baixar');
-    else if(b.classList.contains('office-edit-btn')||txt.includes('corrigir online')) normalizeAction54(b,'edit',txt.includes('corrigir')?'✎ Corrigir':'✎ Editar');
-    else if(txt.includes('editar')&&!b.classList.contains('review-action')) normalizeAction54(b,'edit','✎ Editar');
-    else if(b.classList.contains('repo-room-btn')||txt.includes('conversa do arquivo')) normalizeAction54(b,'chat','💬 Conversa');
-    else if(b.classList.contains('review-action')) b.classList.add('p54-action-btn','p54-review');
-  });
-}
-
-function injectCss54(){
-  if(document.getElementById('p54RepoStyle'))return;
-  const s=document.createElement('style');s.id='p54RepoStyle';s.textContent=`
-    .p54-enhanced .repo-sequence,.p54-enhanced .p52-review-flow,.p54-enhanced .review-meta{display:none!important}
-    .p54-history{margin-top:10px;border:1px solid #d8e4e7;border-radius:14px;background:#fff;overflow:hidden;max-width:860px}
-    .p54-title{padding:9px 12px;background:#f2f7f8;border-bottom:1px solid #e3ecee;color:#526a73;font-size:10.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
-    .p54-head,.p54-row{display:grid;grid-template-columns:170px minmax(190px,1.25fr) minmax(175px,1fr) 58px;gap:10px;align-items:center}
-    .p54-head{padding:7px 12px;background:#fafcfc;border-bottom:1px solid #edf2f3;color:#87969b;font-size:8.5px;font-weight:900;text-transform:uppercase;letter-spacing:.05em}
-    .p54-row{padding:9px 12px;border-bottom:1px solid #edf2f3;font-size:11.5px;line-height:1.3;color:#425962}
-    .p54-date{font-variant-numeric:tabular-nums;font-weight:750;color:#5f737b}.p54-person{display:flex;gap:7px;align-items:center;min-width:0}.p54-person span{width:18px;text-align:center;flex:0 0 18px}.p54-person b{color:#17313d}.p54-action-text{color:#52676f}.p54-version{justify-self:end;padding:3px 7px;border-radius:999px;background:#edf4f5;color:#566c74;font-size:9.5px;font-weight:900}
-    .p54-next{display:flex;gap:9px;align-items:center;flex-wrap:wrap;padding:9px 12px;background:#fff8df;border-top:1px solid #eedc91;color:#635722;font-size:11.5px}.p54-next b{color:#3e3618;text-transform:uppercase;font-size:9px;letter-spacing:.05em}
-    .pub-act,.repo-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important;align-items:center!important;justify-content:flex-end!important;max-width:300px!important}
-    .p54-action-btn{height:40px!important;min-width:128px!important;padding:0 13px!important;border-radius:10px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;font-size:12px!important;font-weight:800!important;line-height:1!important;box-shadow:none!important;white-space:nowrap!important}
-    .p54-view,.p54-download,.p54-chat{background:#fff!important;color:#17313d!important;border:1px solid #cbdade!important}.p54-edit{background:#0e8897!important;color:#fff!important;border:1px solid #0e8897!important}.p54-review{background:#6c5ce0!important;color:#fff!important;border:1px solid #6c5ce0!important}
-    .pub-act .mini-x,.repo-actions .mini-x{width:40px!important;height:40px!important;min-width:40px!important;border-radius:10px!important;display:grid!important;place-items:center!important;font-size:18px!important;margin:0!important}
-    @media(max-width:820px){.p54-head{display:none}.p54-row{grid-template-columns:1fr auto;gap:4px 10px}.p54-date{grid-column:1/2;font-size:10.5px}.p54-version{grid-column:2/3;grid-row:1/3}.p54-person{grid-column:1/2}.p54-action-text{grid-column:1/2;padding-left:25px}.pub-act,.repo-actions{max-width:none!important;justify-content:flex-start!important}.p54-action-btn{min-width:118px!important}}
-  `;document.head.appendChild(s);
-}
-
-async function cycle54(){
-  await loadData54();
-  if(!loaded)return;
-  normalizeActions54();
-  document.querySelectorAll('.pub-row,.repo-item').forEach(enhanceCard54);
-}
-function boot54(){
-  injectCss54();
-  const wait=setInterval(async()=>{
-    if(window.db&&window.fbFns){clearInterval(wait);await cycle54();setInterval(cycle54,1800);console.info('Carbonautas repository UI',VERSION,'carregado');}
-  },250);
-  setTimeout(()=>clearInterval(wait),20000);
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot54,{once:true});else boot54();
-})();
-
-</script>
-<script data-src="repository-actions-p55.js">
-/* Carbonautas P55 · barra de ações uniforme no Repositório */
-(function(){
-'use strict';
-const VERSION='P55';
-
-function txt55(el){return String(el?.textContent||'').replace(/\s+/g,' ').trim()}
-function norm55(v=''){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim()}
-function setAction55(btn,type,label){
-  btn.classList.remove('p55-view','p55-download','p55-edit','p55-chat','p55-return','p55-other');
-  btn.classList.add('p55-action',`p55-${type}`);
-  btn.textContent=label;
-}
-function classify55(btn){
-  if(!btn||btn.classList.contains('mini-x'))return;
-  const raw=txt55(btn),t=norm55(raw),title=norm55(btn.getAttribute('title')||'');
-  const box=btn.closest('.pub-act,.repo-actions,.review-version-actions');
-  const boxText=norm55(box?.textContent||'');
-
-  if(title.includes('visualizar')||t==='ver'||t.includes('visualizar')||t.includes('👁')){
-    setAction55(btn,'view','👁 Visualizar');return;
-  }
-  if(title.includes('baixar')||t.includes('baixar')){
-    setAction55(btn,'download','↓ Baixar');return;
-  }
-  if(btn.classList.contains('repo-room-btn')||t.includes('conversa do arquivo')||t.includes('conversa da correcao')||t==='conversa'){
-    setAction55(btn,'chat','💬 Conversa');return;
-  }
-  if(btn.classList.contains('review-action')||t.includes('devolver correcao')||t.includes('devolver correção')||t==='devolver'){
-    setAction55(btn,'return','↩ Devolver');return;
-  }
-  const penOnly = raw.length<=6 && /[✏✎🖊🖋📝✍🧪]/u.test(raw);
-  if(btn.classList.contains('office-edit-btn')||t.includes('corrigir online')||t.includes('corrigir')||t.includes('editar')||penOnly){
-    const isReview=boxText.includes('devolver')||boxText.includes('correcao')||boxText.includes('correção');
-    setAction55(btn,'edit',isReview||t.includes('corrigir')?'✎ Corrigir':'✎ Editar');return;
-  }
-  // Qualquer outro comando funcional ganha o mesmo tamanho, sem alterar seu texto.
-  btn.classList.add('p55-action','p55-other');
-}
-
-function standardize55(){
-  document.querySelectorAll('.pub-act,.repo-actions').forEach(box=>{
-    box.classList.add('p55-actions-grid');
-    box.querySelectorAll('button').forEach(classify55);
-    box.querySelectorAll('.mini-x').forEach(x=>{x.classList.add('p55-close');x.title=x.title||'Remover';});
-  });
-  document.querySelectorAll('.review-version-actions button').forEach(classify55);
-}
-
-function css55(){
-  if(document.getElementById('p55ActionsStyle'))return;
-  const s=document.createElement('style');s.id='p55ActionsStyle';s.textContent=`
-  /* P55: todos os comandos do cartão ocupam células iguais */
-  .pub-act.p55-actions-grid,.repo-actions.p55-actions-grid{
-    display:grid!important;
-    grid-template-columns:repeat(2,154px)!important;
-    grid-auto-rows:44px!important;
-    gap:8px!important;
-    width:316px!important;
-    min-width:316px!important;
-    max-width:316px!important;
-    align-items:stretch!important;
-    align-content:start!important;
-    justify-content:end!important;
-  }
-  .p55-actions-grid button:not(.mini-x){
-    width:154px!important;min-width:154px!important;max-width:154px!important;
-    height:44px!important;min-height:44px!important;max-height:44px!important;
-    padding:0 10px!important;margin:0!important;border-radius:10px!important;
-    display:inline-flex!important;align-items:center!important;justify-content:center!important;
-    gap:6px!important;font-size:12px!important;font-weight:800!important;line-height:1!important;
-    white-space:nowrap!important;box-sizing:border-box!important;box-shadow:none!important;
-  }
-  .p55-actions-grid .p55-view,.p55-actions-grid .p55-download,.p55-actions-grid .p55-chat,.p55-actions-grid .p55-other{
-    background:#fff!important;color:#17313d!important;border:1px solid #cbdade!important;
-  }
-  .p55-actions-grid .p55-edit{background:#168c98!important;color:#fff!important;border:1px solid #168c98!important}
-  .p55-actions-grid .p55-return{background:#6c5ce0!important;color:#fff!important;border:1px solid #6c5ce0!important}
-  .p55-actions-grid .mini-x,.p55-actions-grid .p55-close{
-    width:44px!important;min-width:44px!important;max-width:44px!important;
-    height:44px!important;min-height:44px!important;max-height:44px!important;
-    padding:0!important;margin:0!important;border-radius:10px!important;
-    display:grid!important;place-items:center!important;justify-self:end!important;
-    font-size:18px!important;line-height:1!important;box-sizing:border-box!important;
-  }
-  /* Se a linha terminar com apenas o X, ele fica alinhado à direita sem esticar. */
-  .p55-actions-grid .mini-x:last-child{grid-column:2!important}
-
-  /* Histórico também cabe inteiro no lado esquerdo do cartão. */
-  .p54-history{max-width:100%!important;width:100%!important}
-  .p54-head,.p54-row{grid-template-columns:150px minmax(150px,1.2fr) minmax(145px,1fr) 52px!important}
-
-  @media(max-width:980px){
-    .pub-act.p55-actions-grid,.repo-actions.p55-actions-grid{
-      width:100%!important;min-width:0!important;max-width:none!important;
-      grid-template-columns:repeat(2,minmax(128px,1fr))!important;
-    }
-    .p55-actions-grid button:not(.mini-x){width:100%!important;min-width:0!important;max-width:none!important}
-  }
-  @media(max-width:620px){
-    .pub-act.p55-actions-grid,.repo-actions.p55-actions-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
-    .p55-actions-grid button:not(.mini-x){height:42px!important;min-height:42px!important;max-height:42px!important;font-size:11px!important;padding:0 7px!important}
-    .p55-actions-grid .mini-x,.p55-actions-grid .p55-close{width:42px!important;min-width:42px!important;max-width:42px!important;height:42px!important;min-height:42px!important;max-height:42px!important}
-  }
-  `;document.head.appendChild(s);
-}
-function boot55(){
-  css55();standardize55();
-  // A tela é re-renderizada pelo app; reaplica somente classes/estilo, sem MutationObserver.
-  setInterval(standardize55,1000);
-  console.info('Carbonautas repository actions',VERSION,'carregado');
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot55,{once:true});else boot55();
-})();
-
-</script>
 <script data-src="dashboard-medals-p56.js">
 /* Carbonautas P56 · Painel acionável + medalhas com métrica 0–100 */
 (function(){
@@ -10473,133 +10124,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 
 </script>
-<script data-src="mobile-repo-rescue-p58.js">
-/* Carbonautas P58 · resgate do Repositório no app/celular */
-(function(){
-'use strict';
-const VERSION='P58';
-
-function mobile58(){
-  const vv=window.visualViewport?.width||9999;
-  const sw=window.screen?.width||9999;
-  return Math.min(window.innerWidth||9999,vv,sw)<=900;
-}
-function imp(el,prop,val){if(el)el.style.setProperty(prop,val,'important')}
-
-function css58(){
-  if(document.getElementById('p58MobileRepoStyle'))return;
-  const s=document.createElement('style');
-  s.id='p58MobileRepoStyle';
-  s.textContent=`
-  @media(max-width:900px){
-    #viewPubs .pub-row{
-      display:block!important;position:relative!important;
-      width:100%!important;min-width:0!important;max-width:100%!important;
-      height:auto!important;min-height:0!important;max-height:none!important;
-      overflow:visible!important;padding:12px 10px 12px 20px!important;
-      margin:0 0 10px!important;box-sizing:border-box!important;
-    }
-    #viewPubs .pub-cat{
-      position:absolute!important;left:8px!important;top:10px!important;bottom:10px!important;
-      width:5px!important;min-width:5px!important;max-width:5px!important;
-      height:auto!important;min-height:0!important;margin:0!important;display:block!important;
-    }
-    #viewPubs .pub-body{
-      display:block!important;float:none!important;position:static!important;
-      width:100%!important;min-width:0!important;max-width:100%!important;
-      height:auto!important;min-height:0!important;max-height:none!important;
-      flex:none!important;padding:0!important;margin:0!important;overflow:visible!important;
-    }
-    #viewPubs .pub-t{
-      display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;
-      white-space:normal!important;word-break:normal!important;overflow-wrap:anywhere!important;
-      overflow:visible!important;text-overflow:clip!important;
-      font-size:14px!important;line-height:1.3!important;letter-spacing:0!important;
-      writing-mode:horizontal-tb!important;text-orientation:mixed!important;
-    }
-    #viewPubs .pub-meta{
-      display:flex!important;width:100%!important;min-width:0!important;max-width:100%!important;
-      flex-wrap:wrap!important;gap:5px 7px!important;align-items:center!important;
-      margin-top:6px!important;font-size:10.5px!important;line-height:1.3!important;
-    }
-    #viewPubs .pub-body>*{max-width:100%!important;min-width:0!important;box-sizing:border-box!important}
-    #viewPubs .review-note,#viewPubs .repo-sequence,#viewPubs .repo-seq,
-    #viewPubs .p52-review-flow,#viewPubs .scientific-context,#viewPubs .p54-history{
-      display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;
-      height:auto!important;min-height:0!important;max-height:none!important;
-      overflow:hidden!important;white-space:normal!important;overflow-wrap:anywhere!important;
-    }
-    #viewPubs .p54-history{margin:10px 0 0!important}
-    #viewPubs .p54-head{display:none!important}
-    #viewPubs .p54-row{
-      display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;
-      grid-template-rows:auto auto auto!important;gap:3px 8px!important;
-      width:100%!important;min-width:0!important;max-width:100%!important;
-      height:auto!important;min-height:0!important;padding:8px 9px!important;
-    }
-    #viewPubs .p54-date{grid-column:1!important;grid-row:1!important;font-size:10px!important}
-    #viewPubs .p54-version{grid-column:2!important;grid-row:1!important;justify-self:end!important}
-    #viewPubs .p54-person{grid-column:1/-1!important;grid-row:2!important;min-width:0!important}
-    #viewPubs .p54-person b{white-space:normal!important;overflow-wrap:anywhere!important}
-    #viewPubs .p54-action-text{grid-column:1/-1!important;grid-row:3!important;padding-left:0!important;white-space:normal!important}
-    #viewPubs .p54-next{display:block!important;width:100%!important;height:auto!important;min-height:0!important}
-    #viewPubs .p54-next b{display:block!important;margin-bottom:3px!important}
-
-    #viewPubs .pub-act,#viewPubs .pub-act.p55-actions-grid{
-      display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
-      grid-auto-flow:row!important;grid-auto-rows:40px!important;
-      gap:6px!important;position:static!important;float:none!important;inset:auto!important;
-      transform:none!important;width:100%!important;min-width:0!important;max-width:100%!important;
-      height:auto!important;min-height:0!important;max-height:none!important;
-      padding:0!important;margin:10px 0 0!important;align-items:stretch!important;justify-content:stretch!important;
-    }
-    #viewPubs .pub-act button:not(.mini-x),#viewPubs .pub-act a,
-    #viewPubs .p55-actions-grid button:not(.mini-x),#viewPubs .p55-actions-grid a{
-      width:100%!important;min-width:0!important;max-width:100%!important;
-      height:40px!important;min-height:40px!important;max-height:40px!important;
-      margin:0!important;padding:0 7px!important;border-radius:9px!important;
-      display:flex!important;align-items:center!important;justify-content:center!important;
-      font-size:10.5px!important;line-height:1!important;white-space:nowrap!important;
-      overflow:hidden!important;text-overflow:ellipsis!important;box-sizing:border-box!important;
-    }
-    #viewPubs .pub-act .mini-x,#viewPubs .pub-act .p55-close{
-      grid-column:2!important;justify-self:end!important;
-      width:40px!important;min-width:40px!important;max-width:40px!important;
-      height:40px!important;min-height:40px!important;max-height:40px!important;
-      margin:0!important;padding:0!important;position:static!important;
-    }
-  }
-  `;
-  document.head.appendChild(s);
-}
-
-function repair58(){
-  if(!mobile58())return;
-  document.querySelectorAll('#viewPubs .pub-row').forEach(card=>{
-    imp(card,'display','block');imp(card,'position','relative');imp(card,'width','100%');imp(card,'min-width','0');imp(card,'max-width','100%');imp(card,'height','auto');imp(card,'min-height','0');imp(card,'max-height','none');imp(card,'overflow','visible');
-    const cat=card.querySelector('.pub-cat');
-    if(cat){imp(cat,'position','absolute');imp(cat,'left','8px');imp(cat,'top','10px');imp(cat,'bottom','10px');imp(cat,'width','5px');imp(cat,'height','auto');}
-    const body=card.querySelector('.pub-body');
-    if(body){imp(body,'display','block');imp(body,'width','100%');imp(body,'min-width','0');imp(body,'max-width','100%');imp(body,'height','auto');imp(body,'min-height','0');imp(body,'flex','none');imp(body,'margin','0');}
-    const title=card.querySelector('.pub-t');
-    if(title){imp(title,'display','block');imp(title,'width','100%');imp(title,'min-width','0');imp(title,'max-width','100%');imp(title,'white-space','normal');imp(title,'word-break','normal');imp(title,'overflow-wrap','anywhere');imp(title,'writing-mode','horizontal-tb');}
-    const act=card.querySelector('.pub-act');
-    if(act){imp(act,'position','static');imp(act,'display','grid');imp(act,'grid-template-columns','repeat(2,minmax(0,1fr))');imp(act,'width','100%');imp(act,'min-width','0');imp(act,'max-width','100%');imp(act,'height','auto');imp(act,'min-height','0');imp(act,'padding','0');imp(act,'margin','10px 0 0');imp(act,'transform','none');}
-    card.querySelectorAll('.p54-history,.review-note,.repo-sequence,.repo-seq,.p52-review-flow,.scientific-context').forEach(el=>{imp(el,'width','100%');imp(el,'min-width','0');imp(el,'max-width','100%');imp(el,'height','auto');imp(el,'min-height','0');});
-  });
-}
-function boot58(){
-  css58();repair58();
-  // Sem MutationObserver: reaplica de forma leve porque o app recria os cartões.
-  setInterval(repair58,900);
-  window.addEventListener('resize',repair58,{passive:true});
-  window.visualViewport?.addEventListener('resize',repair58,{passive:true});
-  console.info('Carbonautas mobile repository rescue',VERSION,'carregado');
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot58,{once:true});else boot58();
-})();
-
-</script>
 <script data-src="repo-checkin-ui-p59.js">
 /* Carbonautas P59 · check-in grande + cards visuais no Repositório */
 (function(){
@@ -10726,7 +10250,7 @@ function showCheckin(){
   },250);
 }
 
-function boot(){css59();decorateRepo();showCheckin();setInterval(decorateRepo,800);console.info('Carbonautas',VERSION,'check-in e cards carregados');}
+function boot(){css59();showCheckin();console.info('Carbonautas',VERSION,'check-in e cards carregados');}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 
@@ -10764,199 +10288,6 @@ function watchSave(){const save=document.getElementById('ooSaveBtn'),ov=document
 function showAfter(title){document.querySelector('.p62-after-save')?.remove();const el=document.createElement('div');el.className='p62-after-save';el.innerHTML=`<div><b>✅ Arquivo salvo</b><small>${String(title||'Arquivo')}</small></div><button type="button">💬 Mandar mensagem</button>`;el.querySelector('button').onclick=()=>{if(openConversation(title))el.remove()};document.body.appendChild(el);setTimeout(()=>el.remove(),12000)}
 function boot(){addCss();installChat();watchSave();setInterval(()=>{installChat();watchSave()},900);console.info('Carbonautas',VERSION,'editor original restaurado; sem interceptar config/fetch')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-})();
-
-</script>
-<script data-src="repository-cleanup-p63.js">
-/* Carbonautas P63 · Repositório mais limpo + uma conversa por arquivo */
-(function(){
-'use strict';
-const VERSION='P63';
-
-function norm(v=''){
-  return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim().toLowerCase();
-}
-
-function css63(){
-  if(document.getElementById('p63Style'))return;
-  const s=document.createElement('style');s.id='p63Style';s.textContent=`
-  /* ===== UM ÚNICO BOTÃO DE CONVERSA POR ARQUIVO ===== */
-  .p55-actions-grid button.p63-duplicate-action,
-  .p55-actions-grid a.p63-duplicate-action,
-  .pub-act button.p63-duplicate-action,
-  .pub-act a.p63-duplicate-action{display:none!important}
-  .p63-file-chat-primary{background:#fff!important;color:#17313d!important;border:1px solid #cbdade!important}
-
-  /* ===== PACOTES/PASTAS DO TOPO DO REPOSITÓRIO ===== */
-  #repoPackageList.repo-package-zone{
-    display:grid!important;
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:12px!important;
-    margin:14px 0 20px!important;
-  }
-  #repoPackageList .repo-package-card{
-    --p63-accent:#168c98;
-    position:relative!important;
-    display:grid!important;
-    grid-template-columns:52px minmax(0,1fr) auto!important;
-    gap:12px!important;
-    align-items:center!important;
-    min-height:92px!important;
-    margin:0!important;
-    padding:14px 14px 14px 18px!important;
-    border:1px solid color-mix(in srgb,var(--p63-accent) 24%,#d8e5ea)!important;
-    border-radius:19px!important;
-    background:linear-gradient(135deg,color-mix(in srgb,var(--p63-accent) 7%,white),#fff 55%)!important;
-    box-shadow:0 8px 22px rgba(11,44,57,.07)!important;
-    overflow:hidden!important;
-  }
-  #repoPackageList .repo-package-card:before{
-    content:"";position:absolute;left:0;top:12px;bottom:12px;width:5px;border-radius:999px;background:var(--p63-accent)
-  }
-  #repoPackageList .repo-package-card:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(11,44,57,.11)!important}
-  #repoPackageList .repo-package-icon{
-    width:48px!important;height:48px!important;border-radius:15px!important;
-    background:color-mix(in srgb,var(--p63-accent) 12%,white)!important;
-    border:1px solid color-mix(in srgb,var(--p63-accent) 18%,#dce8ec)!important;
-    font-size:24px!important
-  }
-  #repoPackageList .repo-package-title{font-size:14px!important;line-height:1.24!important;font-weight:900!important;color:#142b36!important;white-space:normal!important}
-  #repoPackageList .repo-package-meta{margin-top:6px!important;gap:6px!important;font-size:10px!important;color:#6b7f87!important}
-  #repoPackageList .repo-access-chip{padding:3px 7px!important}
-  #repoPackageList .repo-package-actions{
-    width:auto!important;display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:7px!important;
-    padding:0!important;border:0!important
-  }
-  #repoPackageList .repo-package-actions .btn{
-    min-width:88px!important;height:40px!important;padding:0 12px!important;border-radius:11px!important;
-    background:#fff!important;border:1px solid #cad9de!important;color:#17313d!important;font-size:11px!important;font-weight:850!important;justify-content:center!important
-  }
-  #repoPackageList .repo-package-actions .mini-x{
-    width:40px!important;height:40px!important;border-radius:11px!important;border:1px solid #f0c9cf!important;background:#fff7f8!important;color:#b4233d!important;font-size:18px!important;display:grid!important;place-items:center!important
-  }
-
-  /* ===== CONVERSA DO ARQUIVO: MAIS BONITA E COMPACTA ===== */
-  #repoFileConversationOverlay{padding:12px!important;align-items:center!important;justify-content:center!important}
-  #repoFileConversationOverlay .modal{
-    width:min(760px,calc(100vw - 24px))!important;
-    max-width:760px!important;
-    max-height:calc(100dvh - 24px)!important;
-    border-radius:24px!important;
-    overflow:hidden!important;
-    box-shadow:0 28px 80px rgba(4,25,37,.28)!important
-  }
-  #repoFileConversationOverlay .modal-h{
-    min-height:64px!important;padding:13px 16px!important;background:#fff!important;border-bottom:1px solid #e0e8eb!important
-  }
-  #repoFileConversationOverlay .modal-h h2{font-size:19px!important;margin:0!important;color:#102b38!important}
-  #repoFileConversationOverlay .modal-h .hint{font-size:10.5px!important;margin-top:3px!important;color:#6d8089!important}
-  #repoFileConversationOverlay .modal-h .btn{height:38px!important;padding:0 12px!important;border-radius:11px!important}
-  #repoFileConversationOverlay .modal-b{padding:0!important;overflow:hidden!important;background:#f2f7f8!important}
-  #repoFileConversationOverlay .file-thread-shell{
-    height:auto!important;min-height:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;
-    grid-template-rows:auto minmax(190px,44dvh) auto!important;background:#f2f7f8!important
-  }
-  #repoFileConversationOverlay .file-thread-head{
-    padding:13px 16px!important;background:linear-gradient(135deg,#0c4e5b,#0d7d86)!important;border:0!important
-  }
-  #repoFileConversationOverlay .file-thread-head b{font-size:15px!important;line-height:1.25!important}
-  #repoFileConversationOverlay .file-thread-head small{font-size:10.5px!important;color:#d1ecee!important;margin-top:4px!important}
-  #repoFileConversationOverlay .file-thread-visibility{background:rgba(255,255,255,.15)!important;color:#fff!important;border:1px solid rgba(255,255,255,.20)!important;margin-top:8px!important}
-  #repoFileConversationOverlay .file-thread-messages{
-    min-height:0!important;padding:15px 16px!important;gap:10px!important;
-    background:radial-gradient(circle at 20% 0%,rgba(22,140,152,.07),transparent 32%),#eef4f5!important
-  }
-  #repoFileConversationOverlay .file-thread-msg{
-    max-width:82%!important;padding:10px 12px!important;border-radius:16px!important;border:1px solid #d7e3e6!important;background:#fff!important;
-    box-shadow:0 4px 12px rgba(11,44,57,.05)!important;color:#17313d!important
-  }
-  #repoFileConversationOverlay .file-thread-msg.mine{
-    align-self:flex-end!important;background:#dff1ef!important;border-color:#afd4d0!important;color:#12333a!important
-  }
-  #repoFileConversationOverlay .file-thread-msg .who{font-size:10px!important;color:#526b73!important;opacity:1!important}
-  #repoFileConversationOverlay .file-thread-msg .txt{font-size:13.5px!important;line-height:1.45!important}
-  #repoFileConversationOverlay .file-thread-msg .when{font-size:9px!important;color:#75888f!important;opacity:1!important}
-  #repoFileConversationOverlay .file-thread-compose{padding:11px 12px 12px!important;background:#fff!important;border-top:1px solid #dbe6e9!important}
-  #repoFileConversationOverlay .file-thread-compose textarea{
-    min-height:54px!important;max-height:110px!important;resize:vertical!important;border-radius:14px!important;padding:11px 12px!important;font-size:13px!important
-  }
-  #repoFileConversationOverlay .file-thread-compose .row{margin-top:8px!important;gap:8px!important}
-  #repoFileConversationOverlay .file-thread-compose .row .btn.primary{
-    height:40px!important;border-radius:12px!important;background:#138c97!important;border-color:#138c97!important;padding:0 16px!important
-  }
-
-  @media(max-width:760px){
-    #repoPackageList.repo-package-zone{grid-template-columns:1fr!important;gap:10px!important}
-    #repoPackageList .repo-package-card{grid-template-columns:46px minmax(0,1fr) auto!important;gap:10px!important;min-height:86px!important;padding:12px 10px 12px 16px!important;border-radius:17px!important}
-    #repoPackageList .repo-package-icon{width:44px!important;height:44px!important;border-radius:13px!important;font-size:21px!important}
-    #repoPackageList .repo-package-title{font-size:13px!important}
-    #repoPackageList .repo-package-meta{font-size:9.5px!important}
-    #repoPackageList .repo-package-actions{flex-direction:column!important;gap:5px!important}
-    #repoPackageList .repo-package-actions .btn{min-width:72px!important;width:72px!important;height:34px!important;padding:0 7px!important;font-size:10px!important}
-    #repoPackageList .repo-package-actions .mini-x{width:34px!important;height:34px!important;font-size:16px!important}
-
-    #repoFileConversationOverlay{padding:8px!important;align-items:center!important}
-    #repoFileConversationOverlay .modal{width:calc(100vw - 16px)!important;max-height:calc(100dvh - 16px)!important;border-radius:20px!important}
-    #repoFileConversationOverlay .modal-h{min-height:58px!important;padding:11px 12px!important}
-    #repoFileConversationOverlay .modal-h h2{font-size:17px!important}
-    #repoFileConversationOverlay .modal-h .hint{display:none!important}
-    #repoFileConversationOverlay .file-thread-shell{grid-template-rows:auto minmax(190px,46dvh) auto!important}
-    #repoFileConversationOverlay .file-thread-head{padding:11px 12px!important}
-    #repoFileConversationOverlay .file-thread-head b{font-size:14px!important}
-    #repoFileConversationOverlay .file-thread-messages{padding:12px!important}
-    #repoFileConversationOverlay .file-thread-msg{max-width:88%!important}
-    #repoFileConversationOverlay .file-thread-compose{padding:10px!important}
-    #repoFileConversationOverlay .file-thread-compose .row{display:grid!important;grid-template-columns:1fr!important}
-    #repoFileConversationOverlay .file-thread-compose .row .hint{display:none!important}
-    #repoFileConversationOverlay .file-thread-compose .row .btn.primary{width:100%!important;margin:0!important;justify-content:center!important}
-  }
-  `;document.head.appendChild(s);
-}
-
-function classifyPackage(card){
-  const t=norm(card.textContent||'');
-  let c='#168c98';
-  if(/resumo|evento|sapi|congresso/.test(t))c='#7357d8';
-  else if(/visibilidade|divulgacao|comunicacao/.test(t))c='#df941f';
-  else if(/dados|planilha|excel|csv/.test(t))c='#168dc0';
-  else if(/projeto|pesquisa/.test(t))c='#14966b';
-  card.style.setProperty('--p63-accent',c);
-  const open=card.querySelector('.repo-package-actions .btn');
-  if(open&&!open.dataset.p63){open.dataset.p63='1';if(norm(open.textContent)==='abrir')open.textContent='📂 Abrir';}
-}
-
-function dedupeConversations(){
-  document.querySelectorAll('#viewPubs .pub-row').forEach(card=>{
-    const area=card.querySelector('.pub-act,.repo-actions');if(!area)return;
-    const all=[...area.querySelectorAll('button,a')];
-    all.forEach(x=>x.classList.remove('p63-duplicate-action','p63-file-chat-primary'));
-    const fileCandidates=all.filter(x=>{
-      const t=norm(x.textContent||''),oc=String(x.getAttribute('onclick')||'');
-      return x.classList.contains('repo-room-btn')||x.classList.contains('repo-file-chat-btn')||/openRepoFileConversation|openReviewConversation/.test(oc)||/conversa do arquivo|conversa da correcao|conversa da correção/.test(t);
-    });
-    const generic=all.filter(x=>/^💬?\s*conversa$/.test(norm(x.textContent||''))||norm(x.textContent||'')==='conversa');
-    const direct=all.filter(x=>/^falar com\b/.test(norm(x.textContent||''))||x.classList.contains('repo-direct-btn'));
-    let keep=fileCandidates[0]||generic[0]||null;
-    if(!keep && direct.length===1)keep=direct[0];
-    if(keep){
-      keep.classList.add('p63-file-chat-primary');
-      const review=/devolver|correcao|correção/.test(norm(card.textContent||''));
-      keep.textContent=review?'💬 Conversa da correção':'💬 Conversa do arquivo';
-      [...fileCandidates,...generic,...direct].forEach(x=>{if(x!==keep)x.classList.add('p63-duplicate-action')});
-    }
-  });
-}
-
-function decoratePackages(){
-  document.querySelectorAll('#repoPackageList .repo-package-card').forEach(classifyPackage);
-}
-
-function boot63(){
-  css63();dedupeConversations();decoratePackages();
-  setInterval(()=>{dedupeConversations();decoratePackages()},850);
-  console.info('Carbonautas',VERSION,'repositório limpo + conversa única carregados');
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot63,{once:true});else boot63();
 })();
 
 </script>
@@ -11051,7 +10382,7 @@ async function ensurePrivateConversation(targetMemberId,ctx){
   await window.startPrivateConversation(targetMemberId);const tid=privateThreadId(me.memberId,targetMemberId);
   for(let i=0;i<8;i++){try{const snap=await f().getDoc(f().doc(window.db,'rede_private_threads',tid));if(snap.exists())break}catch(e){}await new Promise(r=>setTimeout(r,80))}
   try{await createContextMessage(targetMemberId,ctx)}catch(e){console.error('P64 contexto',e);toast(e?.code==='permission-denied'?'A conversa abriu, mas o Firestore bloqueou o cartão de referência.':'A conversa abriu, mas não consegui inserir a referência.')}
-  if(typeof window.switchView==='function')window.switchView('conversas');if(typeof window.openPrivateThread==='function')window.openPrivateThread(tid);watchContextThread(tid);setTimeout(decorateContextMessages,120);
+  if(typeof window.switchView==='function')window.switchView('conversas');if(typeof window.openPrivateThread==='function')window.openPrivateThread(tid);
 }
 async function openPublicationChat(pubId){
   try{const p=await getPublication(pubId);if(!p)return toast('Arquivo não encontrado.');const me=await myProfile();if(!me?.memberId)return toast('Seu perfil ainda não está vinculado.');let targetId=p.memberId||'',root=p;
@@ -11088,54 +10419,9 @@ async function deletePackageP64(id){
 function patchGlobals(){
   if(patched)return;patched=true;
   window.messagePublicationOwner=id=>openPublicationChat(id);window.openRepoFileConversationPublication=id=>openPublicationChat(id);window.openReviewConversation=id=>openPublicationChat(id);window.openRepoFileConversationPackage=(packageId,fileId)=>openPackageChat(packageId,fileId);window.openRepositoryPrivateChat=openPublicationChat;window.openPrivateChatWithContext=openPrivateChatWithContext;window.deleteRepositoryPackage=deletePackageP64;
-  const originalOpen=window.openPrivateThread;if(typeof originalOpen==='function'&&!originalOpen.__p64){const wrapped=function(id){const out=originalOpen.apply(this,arguments);watchContextThread(id);setTimeout(decorateContextMessages,80);return out};wrapped.__p64=true;window.openPrivateThread=wrapped}
-}
-function boot(){injectCss();patchGlobals();decorateRepository();setInterval(()=>{decorateRepository();decorateContextMessages()},900);console.info('Carbonautas',VERSION,BUILD,'repositório → privadas 1:1 + exclusão segura carregados')}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-})();
 
-</script>
-<script data-src="repository-delete-dedupe-p65.js">
-/* Carbonautas P65 · corrige duplicação infinita do botão Excluir nas pastas */
-(function(){
-'use strict';
-let scheduled=false;
-function packageId(card){
-  const el=card.querySelector('[onclick*="openRepositoryPackage"]');
-  const m=String(el?.getAttribute('onclick')||'').match(/openRepositoryPackage\('([^']+)'\)/);
-  return m?.[1]||'';
 }
-function fixDeleteButtons(){
-  document.querySelectorAll('#repoPackageList .repo-package-card').forEach(card=>{
-    const area=card.querySelector('.repo-package-actions');
-    if(!area)return;
-    const id=packageId(card);
-    if(!id)return;
-    const buttons=[...area.querySelectorAll('button.p64-delete,button[onclick*="deleteRepositoryPackage"]')];
-    if(!buttons.length)return;
-    const keep=buttons.find(b=>String(b.getAttribute('onclick')||'').includes('deleteRepositoryPackage'))||buttons[0];
-    buttons.forEach(b=>{if(b!==keep)b.remove()});
-    keep.classList.remove('mini-x');
-    keep.classList.add('btn','p64-delete');
-    keep.textContent='🗑 Excluir';
-    keep.title='Excluir pasta';
-    keep.setAttribute('onclick',`deleteRepositoryPackage(${JSON.stringify(id)})`);
-    keep.dataset.p65SingleDelete='1';
-  });
-}
-function schedule(){
-  if(scheduled)return;
-  scheduled=true;
-  requestAnimationFrame(()=>{scheduled=false;fixDeleteButtons()});
-}
-function boot(){
-  fixDeleteButtons();
-  const root=document.getElementById('repoPackageList')||document.body;
-  new MutationObserver(schedule).observe(root,{childList:true,subtree:true});
-  setTimeout(fixDeleteButtons,300);
-  setTimeout(fixDeleteButtons,1200);
-  console.info('Carbonautas P65 · exclusão única por pasta carregada');
-}
+function boot(){injectCss();patchGlobals();console.info('Carbonautas',VERSION,BUILD,'repositório → privadas 1:1 + exclusão segura carregados')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 
@@ -12415,463 +11701,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 })();
 
 </script>
-<script data-src="repository-archive-p88.js">
-/* Carbonautas P88 · Arquivo Vivo do Repositório */
-(function(){
-'use strict';
-const BUILD='P88';
-let mode=localStorage.getItem('carbonautas_repo_archive_mode')||'az';
-let selectedFolder='';
-let selectedLetter='*';
-let query='';
-let lastSig='';
-let openCtx=null;
-
-const $=(s,r=document)=>r.querySelector(s);
-const $$=(s,r=document)=>[...r.querySelectorAll(s)];
-function norm(v=''){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim()}
-function esc(v=''){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function appState(){try{return state}catch(_e){return null}}
-function ms(v){try{if(!v)return 0;if(typeof v.toMillis==='function')return v.toMillis();if(typeof v.seconds==='number')return v.seconds*1000;const n=+new Date(v);return Number.isFinite(n)?n:0}catch(_e){return 0}}
-function ptMonth(d){return d.toLocaleDateString('pt-BR',{month:'long',year:'numeric'}).replace(/^./,c=>c.toUpperCase())}
-function sameDay(a,b){return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate()}
-function memberName(id){const s=appState();return s?.members?.find?.(m=>m.id===id)?.nome||''}
-function latestPublication(title,person){const s=appState();if(!s?.publicacoes)return null;const nt=norm(title),np=norm(person);return [...s.publicacoes].filter(p=>norm(p.titulo||p.fileName||p.reviewBaseTitle||'')===nt&&(!np||norm(p.memberNome||memberName(p.memberId))===np)).sort((a,b)=>ms(b.ts||b.updatedAt||b.editedAt)-ms(a.ts||a.updatedAt||a.editedAt))[0]||null}
-function latestPackage(title,person){const s=appState();if(!s?.repositoryPackages)return null;const nt=norm(title),np=norm(person);return [...s.repositoryPackages].filter(p=>norm(p.title||'')===nt&&(!np||norm(p.ownerName||memberName(p.ownerMemberId))===np)).sort((a,b)=>ms(b.ts||b.updatedAt)-ms(a.ts||a.updatedAt))[0]||null}
-function iconFor(title='',category='',type='pub'){
-  if(type==='package')return '📦';
-  const t=norm(title+' '+category);
-  if(/\.pdf\b|pdf/.test(t))return '📕';
-  if(/\.xlsx?\b|planilha|excel|csv/.test(t))return '📊';
-  if(/\.pptx?\b|powerpoint|apresenta/.test(t))return '📽️';
-  if(/\.(png|jpe?g|webp|gif)\b|foto|imagem/.test(t))return '🖼️';
-  if(/\.docx?\b|word|artigo|resumo|tese|projeto/.test(t))return '📄';
-  return '📎';
-}
-function pendingFor(card){
-  const t=norm(card?.innerText||'');
-  if(card?.querySelector('.review-action')||/sua acao|agora com|corrigir agora|devolver correcao/.test(t))return {key:'acao',label:'Sua ação',cls:'hot'};
-  if(/correcao|corrigir|revisao|revisar/.test(t))return {key:'correcao',label:'Correções',cls:'review'};
-  if(/aguardando|proxima acao|prazo|pendente/.test(t))return {key:'aguardando',label:'Aguardando',cls:'wait'};
-  return {key:'ok',label:'Sem pendência',cls:'ok'};
-}
-function itemFromPub(card,i){
-  const title=$('.pub-t',card)?.textContent?.trim()||`Arquivo ${i+1}`;
-  const person=$('.pub-author',card)?.textContent?.trim()||'Sem responsável';
-  const category=$('.pub-cat-tag',card)?.textContent?.trim()||'Publicação';
-  const raw=latestPublication(title,person);const stamp=ms(raw?.ts||raw?.updatedAt||raw?.editedAt);
-  const pending=pendingFor(card);
-  return {id:'pub:'+(raw?.id||i+':'+norm(title)),type:'pub',card,title,person,category,stamp,dateText:$('.pub-date',card)?.textContent?.trim()||'',pending,icon:iconFor(title,category,'pub')};
-}
-function itemFromPackage(card,i){
-  const title=$('.repo-package-title',card)?.textContent?.trim()||`Pasta ${i+1}`;
-  const meta=$('.repo-package-meta',card)?.textContent?.replace(/\s+/g,' ')?.trim()||'';
-  const s=appState();let raw=null;
-  if(s?.repositoryPackages){raw=[...s.repositoryPackages].filter(p=>norm(p.title||'')===norm(title)).sort((a,b)=>ms(b.ts||b.updatedAt)-ms(a.ts||a.updatedAt))[0]||null}
-  const person=raw?.ownerName||memberName(raw?.ownerMemberId)||meta.split('·')[1]?.trim()||'Sem responsável';
-  const category=meta.split('·')[0]?.trim()||'Pasta';
-  const stamp=ms(raw?.ts||raw?.updatedAt);const pending=pendingFor(card);
-  return {id:'package:'+(raw?.id||i+':'+norm(title)),type:'package',card,title,person,category,stamp,dateText:'',pending,icon:'📦'};
-}
-function collectItems(){
-  const pubs=$$('#pubList > .pub-row').map(itemFromPub);
-  const packages=$$('#repoPackageList > .repo-package-card').map(itemFromPackage);
-  return [...packages,...pubs];
-}
-function dateFolder(stamp){
-  if(!stamp)return {key:'date:none',label:'Sem data',sort:0,sub:'Itens sem data registrada'};
-  const d=new Date(stamp),now=new Date();
-  if(sameDay(d,now))return {key:'date:today',label:'Hoje',sort:9999999999999,sub:'Atualizados hoje'};
-  const diff=(now-d)/86400000;
-  if(diff>=0&&diff<7)return {key:'date:week',label:'Últimos 7 dias',sort:9999999999000,sub:'Movimentação recente'};
-  const mk=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
-  return {key:'date:'+mk,label:ptMonth(d),sort:new Date(d.getFullYear(),d.getMonth(),1).getTime(),sub:'Arquivos deste período'};
-}
-function groupsFor(items){
-  const map=new Map();
-  items.forEach(item=>{
-    let g;
-    if(mode==='az')g={key:'person:'+norm(item.person),label:item.person,sort:norm(item.person),sub:'Arquivo pessoal',letter:(item.person.trim()[0]||'#').toUpperCase()};
-    else if(mode==='date')g=dateFolder(item.stamp);
-    else g={key:'pending:'+item.pending.key,label:item.pending.label,sort:item.pending.key==='acao'?4:item.pending.key==='correcao'?3:item.pending.key==='aguardando'?2:1,sub:item.pending.key==='ok'?'Itens sem ação pendente':'Itens que merecem atenção'};
-    if(!map.has(g.key))map.set(g.key,{...g,items:[]});map.get(g.key).items.push(item);
-  });
-  let groups=[...map.values()];
-  if(mode==='az')groups.sort((a,b)=>String(a.sort).localeCompare(String(b.sort),'pt-BR'));
-  else groups.sort((a,b)=>Number(b.sort)-Number(a.sort));
-  return groups;
-}
-function visibleItems(){
-  const nq=norm(query);let items=collectItems();
-  if(nq)items=items.filter(x=>norm([x.title,x.person,x.category,x.pending.label].join(' ')).includes(nq));
-  return items;
-}
-function currentGroup(){return groupsFor(visibleItems()).find(g=>g.key===selectedFolder)||null}
-function sig(items){return JSON.stringify([mode,selectedFolder,selectedLetter,query,$('#pubCategoria')?.value||'',$('#pubPessoa')?.value||'',$('#pubMine')?.checked||false,items.map(x=>[x.id,x.title,x.person,x.category,x.stamp,x.pending.key])])}
-function folderCard(g){
-  const pending=g.items.filter(x=>x.pending.key!=='ok').length;
-  const last=Math.max(0,...g.items.map(x=>x.stamp||0));
-  const lastLabel=last?new Date(last).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'}):'—';
-  return `<button type="button" class="p88-folder" data-p88-folder="${esc(g.key)}">
-    <span class="p88-folder-tab"></span><span class="p88-folder-icon">📁</span>
-    <span class="p88-folder-main"><b>${esc(g.label)}</b><small>${esc(g.sub||'')} · ${g.items.length} item${g.items.length===1?'':'s'}</small></span>
-    <span class="p88-folder-meta">${pending?`<em>${pending} pend.</em>`:'<em class="ok">em ordem</em>'}<small>${esc(lastLabel)}</small></span>
-  </button>`;
-}
-function itemCard(item){
-  const d=item.stamp?new Date(item.stamp).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}):(item.dateText||'Sem data');
-  return `<button type="button" class="p88-file" data-p88-item="${esc(item.id)}">
-    <span class="p88-file-icon">${item.icon}</span>
-    <span class="p88-file-main"><b>${esc(item.title)}</b><small>${esc(item.category)} · ${esc(item.person)} · ${esc(d)}</small></span>
-    <span class="p88-status ${esc(item.pending.cls)}">${esc(item.pending.label)}</span><span class="p88-open">Abrir ›</span>
-  </button>`;
-}
-function alphaHtml(groups){
-  if(mode!=='az'||selectedFolder)return '';
-  const letters=[...new Set(groups.map(g=>g.letter).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
-  return `<div class="p88-alpha"><button data-p88-letter="*" class="${selectedLetter==='*'?'on':''}">Todos</button>${letters.map(l=>`<button data-p88-letter="${esc(l)}" class="${selectedLetter===l?'on':''}">${esc(l)}</button>`).join('')}</div>`;
-}
-function render(force=false){
-  const root=$('#p88Archive');if(!root)return;
-  const items=visibleItems();const signature=sig(items);if(!force&&signature===lastSig)return;lastSig=signature;
-  const groups=groupsFor(items);const group=currentGroup();
-  const alpha=$('#p88Alpha',root),body=$('#p88Body',root),crumb=$('#p88Crumb',root);
-  alpha.innerHTML=alphaHtml(groups);
-  $$('.p88-mode',root).forEach(b=>b.classList.toggle('on',b.dataset.p88Mode===mode));
-  if(group){
-    crumb.innerHTML=`<button type="button" data-p88-back>← Voltar às pastas</button><div><b>${esc(group.label)}</b><small>${group.items.length} item${group.items.length===1?'':'s'}</small></div>`;
-    body.className='p88-files';body.innerHTML=group.items.sort((a,b)=>(b.stamp||0)-(a.stamp||0)).map(itemCard).join('')||'<div class="p88-empty">Nada nesta pasta.</div>';
-  }else{
-    crumb.innerHTML='<div><b>Folhear o arquivo</b><small>Escolha uma pasta para abrir</small></div>';
-    let show=groups;if(mode==='az'&&selectedLetter!=='*')show=groups.filter(g=>g.letter===selectedLetter);
-    body.className='p88-folders';body.innerHTML=show.map(folderCard).join('')||'<div class="p88-empty">Nenhum item encontrado com esses filtros.</div>';
-  }
-}
-function buildUI(){
-  const panel=$('#repoGeneralPanel');if(!panel||$('#p88Archive'))return;
-  panel.classList.add('p88-active');
-  const filters=$('.crono-filters',panel);
-  const root=document.createElement('section');root.id='p88Archive';root.innerHTML=`
-    <div class="p88-head"><div><span class="p88-kicker">🗂 ARQUIVO VIVO</span><h3>Folheie o Repositório</h3><p>A mesma produção da Rede, organizada para encontrar rápido.</p></div><label class="p88-search">⌕<input id="p88Search" type="search" placeholder="Pesquisar nome, arquivo ou categoria…" autocomplete="off"></label></div>
-    <div class="p88-modes"><button class="p88-mode" data-p88-mode="az">A–Z · Pessoas</button><button class="p88-mode" data-p88-mode="date">Data</button><button class="p88-mode" data-p88-mode="pending">Pendências</button></div>
-    <div id="p88Alpha"></div><div class="p88-crumb" id="p88Crumb"></div><div id="p88Body"></div>`;
-  if(filters)filters.insertAdjacentElement('afterend',root);else panel.prepend(root);
-  root.addEventListener('click',e=>{
-    const m=e.target.closest('[data-p88-mode]');if(m){mode=m.dataset.p88Mode;localStorage.setItem('carbonautas_repo_archive_mode',mode);selectedFolder='';selectedLetter='*';lastSig='';render(true);return}
-    const l=e.target.closest('[data-p88-letter]');if(l){selectedLetter=l.dataset.p88Letter;lastSig='';render(true);return}
-    if(e.target.closest('[data-p88-back]')){selectedFolder='';lastSig='';render(true);return}
-    const f=e.target.closest('[data-p88-folder]');if(f){selectedFolder=f.dataset.p88Folder;lastSig='';render(true);requestAnimationFrame(()=>root.scrollIntoView({block:'start',behavior:'smooth'}));return}
-    const b=e.target.closest('[data-p88-item]');if(b){const item=visibleItems().find(x=>x.id===b.dataset.p88Item);if(item)openFloat(item)}
-  });
-  $('#p88Search',root).addEventListener('input',e=>{query=e.target.value||'';selectedFolder='';lastSig='';render(true)});
-  ['pubCategoria','pubPessoa','pubMine'].forEach(id=>$('#'+id)?.addEventListener('change',()=>setTimeout(()=>{selectedFolder='';lastSig='';render(true)},80)));
-  ensureOverlay();render(true);
-}
-function ensureOverlay(){
-  if($('#p88Float'))return;
-  const ov=document.createElement('div');ov.id='p88Float';ov.hidden=true;ov.innerHTML=`<div class="p88-float-backdrop" data-p88-close></div><section class="p88-float-card"><header><button type="button" data-p88-close>← Voltar</button><div><span>ARQUIVO DO REPOSITÓRIO</span><b id="p88FloatTitle">Documento</b></div><button type="button" class="p88-x" data-p88-close>×</button></header><div id="p88FloatStage"></div></section>`;
-  document.body.appendChild(ov);ov.addEventListener('click',e=>{if(e.target.closest('[data-p88-close]'))closeFloat()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!ov.hidden)closeFloat()});
-}
-function openFloat(item){
-  ensureOverlay();if(openCtx)closeFloat();
-  const card=item.card;if(!card?.isConnected)return;
-  const placeholder=document.createComment('p88-return');const parent=card.parentNode;parent.insertBefore(placeholder,card);
-  openCtx={card,parent,placeholder,item};
-  $('#p88FloatTitle').textContent=item.title;$('#p88FloatStage').appendChild(card);card.classList.add('p88-live-card');
-  $('#p88Float').hidden=false;document.documentElement.classList.add('p88-modal-open');
-}
-function closeFloat(){
-  const ov=$('#p88Float');if(!ov||ov.hidden)return;
-  if(openCtx){const {card,parent,placeholder}=openCtx;card.classList.remove('p88-live-card');if(placeholder?.parentNode)placeholder.replaceWith(card);else if(parent?.isConnected)parent.appendChild(card);openCtx=null}
-  ov.hidden=true;document.documentElement.classList.remove('p88-modal-open');lastSig='';setTimeout(()=>render(true),30);
-}
-function injectCss(){if($('#p88Style'))return;const st=document.createElement('style');st.id='p88Style';st.textContent=`
-#repoGeneralPanel.p88-active>#pubList,#repoGeneralPanel.p88-active>#repoPackageList{display:none!important}
-#p88Archive{margin:14px 0 24px;border:1px solid #cfe0e5;border-radius:24px;background:linear-gradient(180deg,#fbfeff,#f3f8f9);box-shadow:0 18px 50px rgba(12,39,51,.08);overflow:hidden}
-.p88-head{display:flex;gap:18px;align-items:center;justify-content:space-between;padding:20px 22px 16px;background:linear-gradient(135deg,#faffff,#f2f7ff)}.p88-head h3{font-family:'Fraunces',serif;font-size:25px;margin:3px 0 2px}.p88-head p{margin:0;color:#6b7f87;font-size:12px}.p88-kicker{font-size:10px;font-weight:900;letter-spacing:.12em;color:#0e7681}.p88-search{width:min(420px,45%);display:flex;align-items:center;gap:9px;border:1px solid #bed3d9;border-radius:14px;background:#fff;padding:10px 13px;font-size:20px;color:#6a8189}.p88-search input{width:100%;border:0!important;box-shadow:none!important;outline:0;background:transparent;font-size:13px;color:#18343e}
-.p88-modes{display:flex;gap:8px;padding:12px 22px 0}.p88-mode{border:1px solid #ccdadf;background:#fff;color:#35515c;border-radius:999px;padding:9px 14px;font-weight:850;font-size:12px}.p88-mode.on{background:#0b7883;border-color:#0b7883;color:#fff;box-shadow:0 5px 18px rgba(11,120,131,.18)}
-.p88-alpha{display:flex;gap:5px;overflow-x:auto;padding:11px 22px 2px}.p88-alpha button{min-width:34px;height:32px;border:1px solid #d3e0e4;background:#fff;border-radius:10px;font-weight:800;color:#50666e}.p88-alpha button.on{background:#172f3a;color:#fff;border-color:#172f3a}.p88-crumb{display:flex;align-items:center;gap:13px;padding:14px 22px 9px}.p88-crumb button{border:0;background:#e9f3f4;color:#0d6972;border-radius:11px;padding:9px 12px;font-weight:850}.p88-crumb b{display:block;font-size:14px}.p88-crumb small{color:#7a8c92;font-size:10.5px}
-.p88-folders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;padding:9px 22px 22px}.p88-folder{position:relative;min-height:118px;text-align:left;border:1px solid #d0dde1;border-radius:18px;background:linear-gradient(145deg,#fff,#f6fafb);padding:20px 14px 14px;display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:11px;align-items:center;box-shadow:0 8px 24px rgba(20,48,60,.05);transition:.16s;overflow:visible}.p88-folder:hover{transform:translateY(-3px);border-color:#94c2c8;box-shadow:0 16px 34px rgba(20,48,60,.10)}.p88-folder-tab{position:absolute;top:-10px;left:18px;width:88px;height:18px;border:1px solid #d0dde1;border-bottom:0;border-radius:12px 12px 0 0;background:#f1f7f8}.p88-folder-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:#eff6df;font-size:24px}.p88-folder-main{min-width:0}.p88-folder-main b{display:block;color:#17333e;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p88-folder-main small{display:block;color:#74868c;font-size:10.5px;margin-top:5px;line-height:1.35}.p88-folder-meta{text-align:right;align-self:center}.p88-folder-meta em{display:block;font-style:normal;font-size:9.5px;font-weight:900;color:#9b5c00;background:#fff1d8;border-radius:999px;padding:4px 7px}.p88-folder-meta em.ok{color:#17734b;background:#e9f8ef}.p88-folder-meta small{display:block;font-size:9.5px;color:#93a0a4;margin-top:7px}
-.p88-files{display:grid;gap:9px;padding:9px 22px 22px}.p88-file{display:grid;grid-template-columns:44px minmax(0,1fr) auto auto;gap:12px;align-items:center;text-align:left;border:1px solid #d5e1e5;background:#fff;border-radius:15px;padding:12px 14px;transition:.14s}.p88-file:hover{border-color:#8fbfc5;box-shadow:0 9px 24px rgba(18,54,67,.08);transform:translateX(3px)}.p88-file-icon{width:42px;height:42px;border-radius:12px;background:#eff5f7;display:grid;place-items:center;font-size:22px}.p88-file-main{min-width:0}.p88-file-main b{display:block;font-size:13px;color:#18343e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p88-file-main small{display:block;color:#74868d;font-size:10px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p88-status{font-size:9px;font-weight:900;border-radius:999px;padding:5px 8px;white-space:nowrap;background:#edf3f5;color:#5d737b}.p88-status.hot{background:#ffe4e7;color:#a82d42}.p88-status.review{background:#eee9ff;color:#5a48a4}.p88-status.wait{background:#fff1d5;color:#875900}.p88-status.ok{background:#e7f7ed;color:#1b7049}.p88-open{font-size:11px;font-weight:850;color:#0b7883}.p88-empty{grid-column:1/-1;padding:36px;text-align:center;color:#809198;border:1px dashed #cadadd;border-radius:16px;background:#fff}
-#p88Float[hidden]{display:none!important}#p88Float{position:fixed;inset:0;z-index:99990;display:grid;place-items:center;padding:28px}.p88-float-backdrop{position:absolute;inset:0;background:rgba(5,22,31,.58);backdrop-filter:blur(8px)}.p88-float-card{position:relative;width:min(1100px,94vw);max-height:90vh;display:flex;flex-direction:column;background:#f9fcfd;border:1px solid rgba(255,255,255,.7);border-radius:26px;box-shadow:0 34px 90px rgba(4,20,30,.34);overflow:hidden;animation:p88pop .18s ease-out}.p88-float-card>header{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 16px;background:#fff;border-bottom:1px solid #dce7e9}.p88-float-card>header button{border:1px solid #d4e0e3;background:#fff;border-radius:11px;padding:9px 12px;font-weight:850;color:#25434e}.p88-float-card>header .p88-x{width:42px;height:42px;padding:0;font-size:23px}.p88-float-card>header span{display:block;font-size:8.5px;letter-spacing:.12em;font-weight:900;color:#779097}.p88-float-card>header b{display:block;margin-top:2px;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p88-float-card #p88FloatStage{padding:18px;overflow:auto;min-height:0}.p88-live-card{margin:0!important;width:100%!important;max-width:none!important;box-shadow:0 12px 34px rgba(11,38,51,.09)!important;border-radius:18px!important}.p88-live-card .pub-body{min-width:0}.p88-modal-open{overflow:hidden!important}@keyframes p88pop{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
-@media(max-width:900px){.p88-folders{grid-template-columns:repeat(2,minmax(0,1fr))}.p88-head{align-items:flex-start;flex-direction:column}.p88-search{width:100%;max-width:none}.p88-file{grid-template-columns:42px minmax(0,1fr) auto}.p88-open{display:none}.p88-status{grid-column:3}}
-@media(max-width:620px){#p88Archive{margin:10px 0 18px;border-radius:20px}.p88-head{padding:16px 14px 13px}.p88-head h3{font-size:22px}.p88-modes{padding:10px 14px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.p88-mode{padding:9px 5px;font-size:10px}.p88-alpha{padding:9px 14px 0}.p88-crumb{padding:13px 14px 8px}.p88-folders{grid-template-columns:1fr;padding:10px 14px 18px}.p88-folder{min-height:102px}.p88-files{padding:8px 14px 18px}.p88-file{grid-template-columns:40px minmax(0,1fr);gap:9px;padding:11px}.p88-file-main b{white-space:normal;line-height:1.3}.p88-file-main small{white-space:normal;line-height:1.35}.p88-status{grid-column:2;justify-self:start}.p88-open{display:none}#p88Float{padding:0;place-items:stretch}.p88-float-card{width:100vw;max-height:none;height:100dvh;border-radius:0;border:0}.p88-float-card>header{padding:10px 11px;position:sticky;top:0;z-index:3}.p88-float-card>header b{font-size:12px}.p88-float-card #p88FloatStage{padding:10px}.p88-live-card{border-radius:15px!important}.p88-live-card .pub-act,.p88-live-card .repo-package-actions{padding-left:0!important;width:100%!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}.p88-live-card .pub-act button,.p88-live-card .pub-act a,.p88-live-card .repo-package-actions button{width:100%!important;min-width:0!important;justify-content:center!important}}
-`;document.head.appendChild(st)}
-function boot(){injectCss();const timer=setInterval(()=>{const panel=$('#repoGeneralPanel');if(panel){buildUI();const items=visibleItems();const s=sig(items);if(!openCtx&&s!==lastSig)render(true)}},900);setTimeout(()=>clearInterval(timer),86400000);console.info('Carbonautas',BUILD,'Arquivo Vivo carregado')}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-})();
-
-</script>
-<script data-src="repository-card-table-p90.js">
-/* Carbonautas P90 · Cartas do Arquivo Vivo: mesa fixa, troca sem piscada */
-(function(){
-'use strict';
-const BUILD='P90';
-const $=(s,r=document)=>r.querySelector(s);
-const $$=(s,r=document)=>[...r.querySelectorAll(s)];
-let currentIndex=-1;
-let currentButtons=[];
-let touchStart=null;
-let animating=false;
-
-function injectCss(){
-  if($('#p90DeckStyle')) return;
-  const st=document.createElement('style');
-  st.id='p90DeckStyle';
-  st.textContent=`
-  #p90Deck[hidden]{display:none!important}
-  #p90Deck{position:fixed;inset:0;z-index:100120;display:grid;place-items:center;padding:24px;isolation:isolate}
-  #p90Deck .p90-backdrop{position:absolute;inset:0;background:rgba(4,18,28,.66);backdrop-filter:blur(11px);animation:p90fade .18s ease both}
-  #p90Deck .p90-table{position:relative;width:min(900px,94vw);max-height:min(88dvh,920px);display:flex;flex-direction:column;background:linear-gradient(155deg,#f9fcfc,#eef6f6);border:1px solid rgba(255,255,255,.8);border-radius:30px;box-shadow:0 34px 100px rgba(0,12,22,.42);overflow:visible;animation:p90table .22s ease-out both}
-  #p90Deck .p90-table:before,#p90Deck .p90-table:after{content:"";position:absolute;inset:18px 26px -16px;border-radius:28px;background:#d7e5e6;z-index:-2;transform:rotate(-1.2deg);box-shadow:0 24px 50px rgba(0,25,35,.12)}
-  #p90Deck .p90-table:after{inset:10px 14px -8px;background:#edf5f5;z-index:-1;transform:rotate(.65deg)}
-  #p90Deck .p90-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center;padding:14px 16px;border-bottom:1px solid #dce8e9;background:rgba(255,255,255,.92);border-radius:30px 30px 0 0}
-  #p90Deck .p90-back,#p90Deck .p90-x{border:1px solid #d2dfe1;background:#fff;color:#24424c;border-radius:14px;height:44px;padding:0 14px;font-weight:900;font-size:13px}
-  #p90Deck .p90-x{width:44px;padding:0;font-size:25px}
-  #p90Deck .p90-title{min-width:0}.p90-title span{display:block;font-size:9px;letter-spacing:.14em;font-weight:950;color:#728990}.p90-title b{display:block;margin-top:2px;color:#132f39;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #p90Deck .p90-stage-wrap{position:relative;min-height:260px;overflow:auto;padding:22px 22px 14px;overscroll-behavior:contain}
-  #p90Deck .p90-stage{position:relative;min-height:190px;display:grid;align-items:start}
-  #p90Deck .p90-card-shell{grid-area:1/1;width:100%;transform-origin:50% 0%;will-change:transform,opacity,filter}
-  #p90Deck .p90-card-shell.drop{animation:p90drop .42s cubic-bezier(.16,.88,.3,1.18) both}
-  #p90Deck .p90-card-shell.next-out{animation:p90outLeft .20s ease-in both}
-  #p90Deck .p90-card-shell.prev-out{animation:p90outRight .20s ease-in both}
-  #p90Deck .p90-card-shell .pub-row,#p90Deck .p90-card-shell .repo-package-card{display:block!important;opacity:1!important;visibility:visible!important;margin:0!important;width:100%!important;max-width:none!important;border-radius:22px!important;box-shadow:0 20px 48px rgba(10,40,52,.16)!important;background:#fff!important}
-  #p90Deck .p90-card-shell .pub-act,#p90Deck .p90-card-shell .repo-package-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
-  #p90Deck .p90-nav{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:12px 16px 16px;border-top:1px solid #dce8e9;background:rgba(255,255,255,.9);border-radius:0 0 30px 30px}
-  #p90Deck .p90-nav button{height:48px;border:1px solid #cadadd;border-radius:15px;background:#fff;color:#18343e;font-weight:950;font-size:13px;padding:0 16px;display:flex;align-items:center;justify-content:center;gap:8px}
-  #p90Deck .p90-nav .next{justify-self:end;background:#0d8896;color:#fff;border-color:#0d8896}.p90-nav .prev{justify-self:start}
-  #p90Deck .p90-nav button:disabled{opacity:.28;box-shadow:none}
-  #p90Deck .p90-count{text-align:center;min-width:110px;line-height:1.1}.p90-count small{display:block;font-size:9px;font-weight:950;letter-spacing:.09em;text-transform:uppercase;color:#789096}.p90-count b{display:block;margin-top:4px;font-size:14px;color:#17343e}
-  @keyframes p90fade{from{opacity:0}to{opacity:1}}
-  @keyframes p90table{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
-  @keyframes p90drop{0%{opacity:0;transform:translateY(-78px) rotate(-2.8deg) scale(.93);filter:blur(2px)}58%{opacity:1;transform:translateY(8px) rotate(.65deg) scale(1.008);filter:none}78%{transform:translateY(-3px) rotate(-.25deg)}100%{opacity:1;transform:none;filter:none}}
-  @keyframes p90outLeft{to{opacity:0;transform:translateX(-62px) rotate(-3deg) scale(.96)}}
-  @keyframes p90outRight{to{opacity:0;transform:translateX(62px) rotate(3deg) scale(.96)}}
-  @media(max-width:680px){
-    #p90Deck{padding:12px 10px calc(14px + env(safe-area-inset-bottom));place-items:center}
-    #p90Deck .p90-table{width:100%;max-height:calc(100dvh - 28px);border-radius:24px}
-    #p90Deck .p90-table:before{inset:12px 14px -10px;border-radius:22px}#p90Deck .p90-table:after{inset:7px 8px -5px;border-radius:22px}
-    #p90Deck .p90-head{padding:10px 11px;border-radius:24px 24px 0 0;gap:9px}.p90-title b{font-size:13px!important}.p90-title span{font-size:8px!important}
-    #p90Deck .p90-back{height:42px;padding:0 12px}.p90-x{height:42px!important;width:42px!important}
-    #p90Deck .p90-stage-wrap{padding:14px 10px 10px;min-height:220px;max-height:calc(100dvh - 190px)}
-    #p90Deck .p90-stage{min-height:180px}
-    #p90Deck .p90-card-shell .pub-act,#p90Deck .p90-card-shell .repo-package-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%!important;padding-left:0!important}
-    #p90Deck .p90-card-shell .pub-act button,#p90Deck .p90-card-shell .pub-act a,#p90Deck .p90-card-shell .repo-package-actions button{width:100%!important;min-width:0!important;justify-content:center!important}
-    #p90Deck .p90-nav{padding:9px 10px calc(10px + env(safe-area-inset-bottom));gap:7px;border-radius:0 0 24px 24px}.p90-nav button{height:44px;padding:0 10px;font-size:12px}.p90-count{min-width:68px}.p90-count small{font-size:7.5px}.p90-count b{font-size:12px}
-  }
-  @media(prefers-reduced-motion:reduce){#p90Deck .p90-backdrop,#p90Deck .p90-table,#p90Deck .p90-card-shell.drop,#p90Deck .p90-card-shell.next-out,#p90Deck .p90-card-shell.prev-out{animation:none!important}}
-  `;
-  document.head.appendChild(st);
-}
-
-function norm(v=''){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim()}
-function fileButtons(){return $$('#p88Body .p88-file[data-p88-item]')}
-function buttonTitle(btn){return $('.p88-file-main b',btn)?.textContent?.trim()||'Documento'}
-function buttonMeta(btn){return $('.p88-file-main small',btn)?.textContent?.trim()||''}
-function originalCardFor(btn){
-  const title=norm(buttonTitle(btn));
-  const meta=norm(buttonMeta(btn));
-  const pubs=$$('#pubList > .pub-row');
-  let hit=pubs.find(c=>norm($('.pub-t',c)?.textContent)===title && (!meta || meta.includes(norm($('.pub-author',c)?.textContent||''))));
-  if(!hit) hit=pubs.find(c=>norm($('.pub-t',c)?.textContent)===title);
-  if(hit) return hit;
-  const packs=$$('#repoPackageList > .repo-package-card');
-  hit=packs.find(c=>norm($('.repo-package-title',c)?.textContent)===title);
-  return hit||null;
-}
-function cloneCard(original){
-  const clone=original.cloneNode(true);
-  clone.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
-  clone.removeAttribute('id');
-  const origActions=$$('button,a,[role="button"]',original);
-  const cloneActions=$$('button,a,[role="button"]',clone);
-  cloneActions.forEach((el,i)=>{el.dataset.p90Proxy=String(i)});
-  clone.addEventListener('click',e=>{
-    const el=e.target.closest('[data-p90-proxy]');if(!el)return;
-    const idx=Number(el.dataset.p90Proxy);const orig=origActions[idx];if(!orig)return;
-    const hasInline=!!el.getAttribute('onclick');
-    const link=el.tagName==='A'&&el.getAttribute('href');
-    if(hasInline||link)return;
-    e.preventDefault();e.stopPropagation();orig.click();
-  });
-  return clone;
-}
-function ensureOverlay(){
-  if($('#p90Deck')) return;
-  const ov=document.createElement('div');ov.id='p90Deck';ov.hidden=true;ov.innerHTML=`
-    <div class="p90-backdrop" data-p90-close></div>
-    <section class="p90-table" role="dialog" aria-modal="true" aria-label="Arquivo Vivo">
-      <header class="p90-head"><button type="button" class="p90-back" data-p90-close>← Voltar</button><div class="p90-title"><span>ARQUIVO VIVO</span><b id="p90Title">Documento</b></div><button type="button" class="p90-x" data-p90-close>×</button></header>
-      <div class="p90-stage-wrap"><div class="p90-stage" id="p90Stage"></div></div>
-      <div class="p90-nav"><button type="button" class="prev">← Anterior</button><div class="p90-count"><small id="p90Folder">Pasta</small><b id="p90Count">1 de 1</b></div><button type="button" class="next">Próximo →</button></div>
-    </section>`;
-  document.body.appendChild(ov);
-  ov.addEventListener('click',e=>{if(e.target.closest('[data-p90-close]'))closeDeck()});
-  $('.p90-nav .prev',ov).addEventListener('click',()=>navigate(-1));
-  $('.p90-nav .next',ov).addEventListener('click',()=>navigate(1));
-  const stage=$('#p90Stage',ov);
-  stage.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;touchStart={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now()}},{passive:true});
-  stage.addEventListener('touchend',e=>{if(!touchStart)return;const t=e.changedTouches[0];const dx=t.clientX-touchStart.x,dy=t.clientY-touchStart.y,dt=Date.now()-touchStart.t;touchStart=null;if(dt<700&&Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.2)navigate(dx<0?1:-1)},{passive:true});
-}
-function folderLabel(){return $('#p88Crumb b')?.textContent?.trim()||'Arquivo Vivo'}
-function updateNav(){
-  const ov=$('#p90Deck');if(!ov)return;
-  $('#p90Folder',ov).textContent=folderLabel();
-  $('#p90Count',ov).textContent=`${currentIndex+1} de ${Math.max(1,currentButtons.length)}`;
-  $('.p90-nav .prev',ov).disabled=currentIndex<=0;
-  $('.p90-nav .next',ov).disabled=currentIndex<0||currentIndex>=currentButtons.length-1;
-}
-function renderCurrent(direction=0,first=false){
-  const btn=currentButtons[currentIndex];if(!btn)return false;
-  const original=originalCardFor(btn);if(!original)return false;
-  const stage=$('#p90Stage');if(!stage)return false;
-  const old=$('.p90-card-shell',stage);
-  const put=()=>{
-    stage.innerHTML='';
-    const shell=document.createElement('div');shell.className='p90-card-shell';
-    shell.appendChild(cloneCard(original));stage.appendChild(shell);
-    $('#p90Title').textContent=buttonTitle(btn);
-    updateNav();
-    requestAnimationFrame(()=>{shell.classList.add('drop')});
-    $('.p90-stage-wrap')?.scrollTo({top:0,behavior:'instant'});
-  };
-  if(!old||first){put();return true}
-  animating=true;
-  old.classList.remove('drop');old.classList.add(direction>=0?'next-out':'prev-out');
-  setTimeout(()=>{put();animating=false},185);
-  return true;
-}
-function openDeck(btn){
-  ensureOverlay();
-  currentButtons=fileButtons();
-  currentIndex=currentButtons.indexOf(btn);
-  if(currentIndex<0)return;
-  const ov=$('#p90Deck');ov.hidden=false;document.documentElement.style.overflow='hidden';
-  renderCurrent(0,true);
-}
-function closeDeck(){
-  const ov=$('#p90Deck');if(!ov||ov.hidden)return;
-  ov.hidden=true;$('#p90Stage').innerHTML='';currentIndex=-1;currentButtons=[];animating=false;document.documentElement.style.overflow='';
-}
-function navigate(delta){
-  if(animating)return;
-  const ni=currentIndex+delta;if(ni<0||ni>=currentButtons.length)return;
-  currentIndex=ni;renderCurrent(delta,false);
-}
-function autoOpenAfterFolder(){
-  setTimeout(()=>{const first=$('#p88Body .p88-file[data-p88-item]');if(first)openDeck(first)},170);
-}
-function bind(){
-  document.addEventListener('click',e=>{
-    const btn=e.target.closest('#p88Body .p88-file[data-p88-item]');
-    if(btn){e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();openDeck(btn);return}
-  },true);
-  document.addEventListener('click',e=>{if(e.target.closest('#p88Body .p88-folder[data-p88-folder]'))autoOpenAfterFolder()});
-  document.addEventListener('keydown',e=>{
-    const ov=$('#p90Deck');if(!ov||ov.hidden)return;
-    if(e.key==='Escape'){e.preventDefault();closeDeck()}else if(e.key==='ArrowRight'){e.preventDefault();navigate(1)}else if(e.key==='ArrowLeft'){e.preventDefault();navigate(-1)}
-  });
-}
-function boot(){
-  injectCss();ensureOverlay();bind();
-  try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
-  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;
-  console.info('Carbonautas P90 cartas flutuantes carregado');
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-})();
-
-</script>
-<script data-src="repository-card-mobile-p91.js">
-/* Carbonautas P113 · Ajuste mobile + tema + pastas/baralho + conversas estáveis + privadas compactas + voltar mobile + ZAP + agenda funcional */
-(function(){
-'use strict';
-const BUILD='P113';
-function inject(){
-  if(document.getElementById('p91MobileDeckStyle'))return;
-  const st=document.createElement('style');
-  st.id='p91MobileDeckStyle';
-  st.textContent=`
-  @media(max-width:680px){
-    #p90Deck{padding:6px 6px calc(6px + env(safe-area-inset-bottom))!important;place-items:stretch!important;align-items:stretch!important;overflow:hidden!important}
-    #p90Deck .p90-table{width:calc(100vw - 12px)!important;max-width:calc(100vw - 12px)!important;height:calc(100dvh - 12px - env(safe-area-inset-bottom))!important;max-height:none!important;margin:0!important;border-radius:22px!important;overflow:hidden!important;display:flex!important;flex-direction:column!important}
-    #p90Deck .p90-head{flex:0 0 auto!important;position:relative!important;z-index:5!important;grid-template-columns:auto minmax(0,1fr) auto!important;padding:9px 9px!important;gap:8px!important;border-radius:22px 22px 0 0!important}
-    #p90Deck .p90-title{min-width:0!important;overflow:hidden!important}
-    #p90Deck .p90-title b{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-width:100%!important}
-    #p90Deck .p90-stage-wrap{flex:1 1 auto!important;min-height:0!important;max-height:none!important;height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;padding:12px 8px 14px!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important}
-    #p90Deck .p90-stage{width:100%!important;min-width:0!important;min-height:0!important;display:block!important}
-    #p90Deck .p90-card-shell{width:100%!important;min-width:0!important;max-width:100%!important;overflow:hidden!important;box-sizing:border-box!important}
-    #p90Deck .p90-card-shell>.pub-row,#p90Deck .p90-card-shell>.repo-package-card{width:100%!important;min-width:0!important;max-width:100%!important;box-sizing:border-box!important;overflow:hidden!important;border-radius:18px!important}
-    #p90Deck .p90-card-shell .pub-body,#p90Deck .p90-card-shell .pub-main,#p90Deck .p90-card-shell .pub-info,#p90Deck .p90-card-shell .repo-package-body,#p90Deck .p90-card-shell [class*="history"],#p90Deck .p90-card-shell [class*="History"]{min-width:0!important;max-width:100%!important;width:100%!important;box-sizing:border-box!important;overflow-x:hidden!important}
-    #p90Deck .p90-card-shell .pub-t,#p90Deck .p90-card-shell .repo-package-title,#p90Deck .p90-card-shell h1,#p90Deck .p90-card-shell h2,#p90Deck .p90-card-shell h3,#p90Deck .p90-card-shell p,#p90Deck .p90-card-shell small{max-width:100%!important;overflow-wrap:anywhere!important;word-break:normal!important;white-space:normal!important}
-    #p90Deck .p90-card-shell .pub-act,#p90Deck .p90-card-shell .repo-package-actions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;width:100%!important;max-width:100%!important;padding-left:0!important;padding-right:0!important;box-sizing:border-box!important}
-    #p90Deck .p90-card-shell .pub-act>* ,#p90Deck .p90-card-shell .repo-package-actions>*{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;justify-content:center!important;white-space:normal!important}
-    #p90Deck .p90-card-shell table{width:100%!important;max-width:100%!important;table-layout:fixed!important}
-    #p90Deck .p90-card-shell img,#p90Deck .p90-card-shell video,#p90Deck .p90-card-shell canvas{max-width:100%!important;height:auto!important}
-    #p90Deck .p90-nav{flex:0 0 auto!important;position:relative!important;z-index:6!important;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr)!important;gap:6px!important;padding:8px 8px calc(8px + env(safe-area-inset-bottom))!important;border-radius:0 0 22px 22px!important;background:rgba(255,255,255,.98)!important;box-shadow:0 -8px 24px rgba(15,49,60,.06)!important}
-    #p90Deck .p90-nav button{width:100%!important;min-width:0!important;height:44px!important;padding:0 8px!important;font-size:11px!important;white-space:nowrap!important}
-    #p90Deck .p90-count{min-width:64px!important;max-width:76px!important}
-    #p90Deck .p90-count small{font-size:7px!important;max-width:76px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-    #p90Deck .p90-count b{font-size:12px!important}
-    #p90Deck .p90-table:before{inset:9px 12px -8px!important}#p90Deck .p90-table:after{inset:5px 7px -4px!important}
-  }
-  `;
-  document.head.appendChild(st);
-}
-function loadSoftStyle(){
-  if(document.querySelector('script[data-carbonautas-p92]')||document.getElementById('p92SoftStyle'))return;
-  const s=document.createElement('script');s.src='./repository-soft-style-p92.js?v=P92-20260918';s.async=false;s.dataset.carbonautasP92='1';document.head.appendChild(s);
-}
-function loadGlobalTheme(){
-  if(document.querySelector('script[data-carbonautas-p97-theme]')||document.body?.classList.contains('carbonautas-p96-names'))return;
-  const s=document.createElement('script');s.src='./carbonautas-soft-theme-p93.js?v=P97-20260918';s.async=false;s.dataset.carbonautasP97Theme='1';document.head.appendChild(s);
-}
-function loadTrackingDeck(){
-  if(document.querySelector('script[data-carbonautas-p97-track]')||document.getElementById('p97Style'))return;
-  const s=document.createElement('script');s.src='./tracking-folders-p97.js?v=P97-20260918';s.async=false;s.dataset.carbonautasP97Track='1';document.head.appendChild(s);
-}
-function loadChatStability(){
-  if(document.querySelector('script[data-carbonautas-p98-chat]')||document.getElementById('p98ChatStableStyle'))return;
-  const s=document.createElement('script');s.src='./chat-stability-p98.js?v=P98-20260918';s.async=false;s.dataset.carbonautasP98Chat='1';document.head.appendChild(s);
-}
-function loadPrivateCompact(){
-  if(document.querySelector('script[data-carbonautas-p99-private]')||document.getElementById('p99PrivateCompactStyle'))return;
-  const s=document.createElement('script');s.src='./private-empty-compact-p99.js?v=P99-20260918';s.async=false;s.dataset.carbonautasP99Private='1';document.head.appendChild(s);
-}
-function loadMobileBack(){
-  if(document.querySelector('script[data-carbonautas-p100-back]')||document.getElementById('p100ChatBackStyle'))return;
-  const s=document.createElement('script');s.src='./chat-mobile-back-p100.js?v=P100-20260918';s.async=false;s.dataset.carbonautasP100Back='1';document.head.appendChild(s);
-}
-function loadZapDelight(){
-  if(document.querySelector('script[data-carbonautas-p101-zap]')||document.getElementById('p101ZapStyle'))return;
-  const s=document.createElement('script');s.src='./chat-zap-delight-p101.js?v=P101-20260918';s.async=false;s.dataset.carbonautasP101Zap='1';document.head.appendChild(s);
-}
-function loadComposerP102(){
-  if(document.querySelector('script[data-carbonautas-p102-composer]')||document.getElementById('p102ComposerFix'))return;
-  const s=document.createElement('script');s.src='./chat-composer-p102.js?v=P102-20260918';s.async=false;s.dataset.carbonautasP102Composer='1';document.head.appendChild(s);
-}
-function loadAgendaDeckP109(){
-  if(document.getElementById('agendaDeckP109'))return;
-  const l=document.createElement('link');
-  l.id='agendaDeckP109';l.rel='stylesheet';l.href='./agenda-deck-p109.css?v=P109-20260918';
-  document.head.appendChild(l);
-}
-function loadAgendaDeckP110(){
-  if(document.querySelector('script[data-carbonautas-p110-agenda]')||window.CARBONAUTAS_AGENDA_DECK_BUILD==='P110')return;
-  const s=document.createElement('script');s.src='./agenda-deck-p110.js?v=P110-20260918';s.async=false;s.dataset.carbonautasP110Agenda='1';document.head.appendChild(s);
-}
-function loadAgendaSwipeP113(){
-  if(document.querySelector('script[data-carbonautas-p113-swipe]')||window.CARBONAUTAS_AGENDA_SWIPE_BUILD==='P113')return;
-  const s=document.createElement('script');s.src='./agenda-swipe-p113.js?v=P113-20260918';s.async=false;s.dataset.carbonautasP113Swipe='1';document.head.appendChild(s);
-}
-function boot(){
-  inject();loadSoftStyle();loadGlobalTheme();loadTrackingDeck();loadChatStability();loadPrivateCompact();loadMobileBack();loadZapDelight();loadComposerP102();loadAgendaDeckP109();loadAgendaDeckP110();loadAgendaSwipeP113();
-  try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
-  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P113 controlador único de swipe da agenda carregado');
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-})();
-</script>
 <script data-src="chat-notifications-reactions-p116.js" id="carbonautasP116Script">
 /* Carbonautas P124 · chats + notificações sem travamento.
    Corrige o loop de MutationObserver da P116 ao abrir o painel de notificações. */
@@ -13276,86 +12105,6 @@ function boot(){
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 
-</script>
-<script data-src="repository-soft-style-p92.js" data-carbonautas-p92="1">
-/* Carbonautas P92 · Arquivo Vivo soft, elegante e jovial */
-(function(){
-'use strict';
-const BUILD='P92';
-const $=(s,r=document)=>r.querySelector(s);
-function injectCss(){
-  if($('#p92SoftStyle')) return;
-  const st=document.createElement('style');
-  st.id='p92SoftStyle';
-  st.textContent=`
-  /* Arquivo Vivo: base mais leve */
-  #p88Archive{background:linear-gradient(160deg,#fcfefe 0%,#f6fbfa 54%,#f8f7fd 100%)!important;border:1px solid #dce9ea!important;box-shadow:0 18px 54px rgba(24,65,77,.07)!important}
-  #p88Archive .p88-head{background:linear-gradient(135deg,#fbfefe,#f5fafb 62%,#f8f6fc)!important}
-  #p88Archive .p88-search{border-color:#d2e1e4!important;box-shadow:0 7px 22px rgba(31,77,89,.05)!important;background:rgba(255,255,255,.94)!important}
-  #p88Archive .p88-mode{background:rgba(255,255,255,.9)!important;border-color:#d6e3e5!important;box-shadow:0 4px 12px rgba(29,67,78,.03)!important}
-  #p88Archive .p88-mode.on{background:#178c95!important;border-color:#178c95!important;color:#fff!important;box-shadow:0 8px 22px rgba(23,140,149,.17)!important}
-  #p88Archive .p88-folder{background:linear-gradient(150deg,#fff,#f8fbfb)!important;border-color:#d7e4e6!important;box-shadow:0 11px 28px rgba(18,57,69,.055)!important}
-  #p88Archive .p88-folder:nth-child(5n+1) .p88-folder-icon{background:#e9f5ff!important}
-  #p88Archive .p88-folder:nth-child(5n+2) .p88-folder-icon{background:#edf7ee!important}
-  #p88Archive .p88-folder:nth-child(5n+3) .p88-folder-icon{background:#f2edfb!important}
-  #p88Archive .p88-folder:nth-child(5n+4) .p88-folder-icon{background:#fff0e8!important}
-  #p88Archive .p88-folder:nth-child(5n) .p88-folder-icon{background:#faf4df!important}
-
-  /* Deck: cores mudam suavemente a cada carta */
-  #p90Deck .p90-table{--p92-accent:#72b9db;--p92-wash:#f4fbff;--p92-back1:#dcefff;--p92-back2:#eaf6ee;transition:background .22s ease,box-shadow .22s ease,border-color .22s ease!important;background:linear-gradient(155deg,#ffffff 0%,var(--p92-wash) 100%)!important;border-color:rgba(255,255,255,.92)!important;box-shadow:0 36px 100px rgba(15,49,61,.30)!important}
-  #p90Deck .p90-table[data-p92-tone="0"]{--p92-accent:#72b9db;--p92-wash:#f3faff;--p92-back1:#dcefff;--p92-back2:#e8f6ee}
-  #p90Deck .p90-table[data-p92-tone="1"]{--p92-accent:#75b99a;--p92-wash:#f4fbf6;--p92-back1:#dff2e6;--p92-back2:#e8ecff}
-  #p90Deck .p90-table[data-p92-tone="2"]{--p92-accent:#9c8bd2;--p92-wash:#f8f6fd;--p92-back1:#e8e2f8;--p92-back2:#faeadf}
-  #p90Deck .p90-table[data-p92-tone="3"]{--p92-accent:#d79b7d;--p92-wash:#fff8f4;--p92-back1:#f9e6dc;--p92-back2:#e5f2fb}
-  #p90Deck .p90-table[data-p92-tone="4"]{--p92-accent:#c4aa62;--p92-wash:#fffbf2;--p92-back1:#f5edcf;--p92-back2:#e9e4f6}
-  #p90Deck .p90-table:before{background:var(--p92-back1)!important;transition:background .22s ease!important}
-  #p90Deck .p90-table:after{background:var(--p92-back2)!important;transition:background .22s ease!important}
-  #p90Deck .p90-head{background:rgba(255,255,255,.94)!important}
-  #p90Deck .p90-stage-wrap{background:linear-gradient(180deg,color-mix(in srgb,var(--p92-wash) 82%,white),rgba(255,255,255,.7))!important}
-  #p90Deck .p90-card-shell>.pub-row,#p90Deck .p90-card-shell>.repo-package-card{background:linear-gradient(180deg,#fff 0%,var(--p92-wash) 100%)!important;border:1px solid color-mix(in srgb,var(--p92-accent) 35%,#dfe9eb)!important;border-left:5px solid var(--p92-accent)!important;box-shadow:0 20px 52px color-mix(in srgb,var(--p92-accent) 12%,rgba(17,52,64,.12))!important;transition:border-color .22s ease,background .22s ease,box-shadow .22s ease!important}
-  #p90Deck .p90-card-shell .pub-categoria,#p90Deck .p90-card-shell .chip,#p90Deck .p90-card-shell .badge{border-color:color-mix(in srgb,var(--p92-accent) 32%,#d9e4e6)!important}
-  #p90Deck .p90-nav .next{background:#178c95!important;border-color:#178c95!important;box-shadow:0 7px 18px rgba(23,140,149,.16)!important}
-  #p90Deck .p90-count b{color:#183842!important}
-
-  @media(max-width:680px){
-    #p90Deck{background:radial-gradient(circle at 50% 18%,rgba(205,237,241,.20),transparent 46%)!important}
-    #p90Deck .p90-table{border-radius:24px!important}
-    #p90Deck .p90-table:before{transform:translateY(2px) rotate(-.8deg)!important;opacity:.94!important}
-    #p90Deck .p90-table:after{transform:translateY(1px) rotate(.45deg)!important;opacity:.96!important}
-    #p90Deck .p90-card-shell>.pub-row,#p90Deck .p90-card-shell>.repo-package-card{border-radius:20px!important}
-    #p90Deck .p90-head,#p90Deck .p90-nav{backdrop-filter:blur(10px)!important}
-  }
-  `;
-  document.head.appendChild(st);
-}
-function toneFromCount(){
-  const txt=$('#p90Count')?.textContent||'';
-  const n=parseInt(txt,10)||1;
-  return String((Math.max(1,n)-1)%5);
-}
-function applyTone(){
-  const table=$('#p90Deck .p90-table');
-  if(!table)return;
-  const tone=toneFromCount();
-  if(table.dataset.p92Tone!==tone)table.dataset.p92Tone=tone;
-}
-function watchDeck(){
-  const deck=$('#p90Deck');
-  if(!deck){setTimeout(watchDeck,350);return}
-  applyTone();
-  const count=$('#p90Count',deck),stage=$('#p90Stage',deck);
-  const obs=new MutationObserver(()=>requestAnimationFrame(applyTone));
-  if(count)obs.observe(count,{childList:true,subtree:true,characterData:true});
-  if(stage)obs.observe(stage,{childList:true});
-}
-function boot(){
-  injectCss();watchDeck();
-  try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
-  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;
-  console.info('Carbonautas P92 visual soft do Arquivo Vivo carregado');
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-})();
 </script>
 <script data-src="carbonautas-soft-theme-p93.js" data-carbonautas-p97-theme="1">
 /* Carbonautas P96 · identidade soft/regenerativa + entrada + nomes da rede */
@@ -16106,13 +14855,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script>
 <script src="./modules/agenda-core-p213.js?v=P213-20260921"></script>
 <script src="./modules/agenda-integration-p213.js?v=P213-20260921"></script>
-<script src="./modules/file-handoff-p214.js?v=P214-20260922"></script>
-<script src="./modules/repository-ui-p215.js?v=P215-20260922"></script>
-<script src="./modules/repository-ui-p216.js?v=P216-20260922"></script>
-<script src="./modules/repository-ui-p217.js?v=P217-20260922"></script>
-<script src="./modules/repository-ui-p218.js?v=P218-20260922"></script>
-<script src="./modules/repository-ui-p219.js?v=P2191-20260922"></script>
-<script src="./modules/repository-ui-p219.js?v=P219-20260922"></script>
-<script src="./modules/repository-ui-p220.js?v=P220-20260922"></script>
+<script src="./modules/file-handoff.js?v=handoff-20260922"></script>
+<script src="./modules/repository.js?v=handoff-20260922"></script>
 </body>
 </html>
