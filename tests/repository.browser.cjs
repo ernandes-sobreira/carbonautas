@@ -53,6 +53,13 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  assert.equal(await page.locator('#repositoryRecipient').evaluate(e=>e.matches(':modal')),true);
  await page.locator('#repositoryRecipient button[value="cancel"]').click();
  assert.equal(await page.evaluate(()=>calls.messages),1);
+ // On-demand folder cards need their receipt immediately, without reopening the folder.
+ await page.evaluate(()=>{const p=CarbonautasApp.state.publicacoes[0];p.id='package:pkg:a';CarbonautasFiles.downloadPublication=async()=>{calls.downloads++;p.onlineEditHistory.push({action:'download',version:2,byName:'Aluno',savedAt:'2026-09-22T12:00:00Z'})};renderPubs()});
+ const folderCard=page.locator('[data-file-id="package:pkg:a"]');
+ const before=await folderCard.locator('li').count();
+ await folderCard.locator('[data-file-action="download"]').click();
+ await page.waitForFunction(()=>document.querySelector('[data-file-id="package:pkg:a"] ol')?.textContent.includes('Aluno'));
+ assert.equal(await folderCard.locator('li').count(),before+1);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);assert.deepEqual(errors,[]);
  console.log(`PASS Chromium ${width}px: four controls, history, navigation, single download, modal order, return form, conversation/context/focus, repeated open/close, no horizontal overflow.`);
  await page.close();

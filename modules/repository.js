@@ -60,6 +60,21 @@ async function openMessage(id){
  root.repositoryMessageContext={id,threadId:tid,version:files().currentVersion(p),targetId:target};
  const input=$('#privateInput');if(input){const context=`Sobre o arquivo “${files().publicationTitle(p)}” que me enviou`;input.value=input.value?input.value+'\n'+context:context;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();}
 }
+async function download(id){
+ await files().downloadPublication(id);
+ // Folder files are loaded on demand, unlike the publication subscription.
+ // Refresh only this card after a receipt; do not reopen or rebuild the folder.
+ if(!id.startsWith('package:'))return;
+ try{
+  const p=await files().getPublication(id,true);if(!p)return;
+  for(const card of document.querySelectorAll('[data-file-id]')){
+   if(card.dataset.fileId!==id)continue;
+   const wasOpen=card.querySelector('details')?.open,scroll=card.querySelector('ol')?.scrollTop||0;
+   const template=document.createElement('template');template.innerHTML=cardHTML(p);const replacement=template.content.firstElementChild;
+   replacement.querySelector('details').open=wasOpen;card.replaceWith(replacement);replacement.querySelector('ol').scrollTop=scroll;
+  }
+ }catch(err){console.warn('Atualização do histórico',err);root.toast('Arquivo baixado. Reabra a pasta para atualizar o histórico.')}
+}
 async function preview(id){
  const p=await files().getPublication(id,true);if(!p?.url)throw Error('Arquivo indisponível.');
  const host=$('#repositoryPreview'),overlay=$('#filePreviewOverlay');if(!overlay)throw Error('Visualizador indisponível.');
@@ -67,7 +82,7 @@ async function preview(id){
  if(!host.open)host.showModal();
  // Existing viewer is read-only. Use the Storage URL directly: no OnlyOffice ticket dependency.
  const loading=root.openFilePreview(p.url,files().publicationTitle(p));
- const download=$('#filePreviewDownload');if(download){download.removeAttribute('href');download.onclick=async e=>{e.preventDefault();try{await files().downloadPublication(id)}catch(err){root.toast(err.message)}}}
+ const link=$('#filePreviewDownload');if(link){link.removeAttribute('href');link.onclick=async e=>{e.preventDefault();try{await download(id)}catch(err){root.toast(err.message)}}}
  await loading;
 }
 async function openReturn(id){
@@ -82,7 +97,7 @@ async function submitReturn(e){
 async function onAction(e){
  const button=e.target.closest('[data-file-action]');if(!button)return;const id=button.closest('[data-file-id]')?.dataset.fileId,action=button.dataset.fileAction,key=id+':'+action;if(!id||locks.has(key))return;
  e.preventDefault();locks.add(key);button.disabled=true;
- try{if(action==='download')await files().downloadPublication(id);else if(action==='preview')await preview(id);else if(action==='message')await openMessage(id);else if(action==='return')await openReturn(id)}catch(err){console.error('Repository',err);root.toast(err.message||'Não foi possível concluir.')}finally{locks.delete(key);button.disabled=false}
+ try{if(action==='download')await download(id);else if(action==='preview')await preview(id);else if(action==='message')await openMessage(id);else if(action==='return')await openReturn(id)}catch(err){console.error('Repository',err);root.toast(err.message||'Não foi possível concluir.')}finally{locks.delete(key);button.disabled=false}
 }
 function boot(){
  dialog('repositoryDeck','<header><b>Arquivo Vivo</b><button type="button" data-deck-close aria-label="Fechar">×</button></header><div id="repositoryStage"></div><nav><button type="button" data-deck-prev>← Anterior</button><span id="repositoryCount"></span><button type="button" data-deck-next>Próximo →</button></nav>');

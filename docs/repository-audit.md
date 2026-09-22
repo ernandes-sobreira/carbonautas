@@ -69,3 +69,5 @@ Não há ação de VPS nesta alteração. Não afirmar conclusão da auditoria c
 - Testes adicionais: filtros/carrossel, escolha e cancelamento de destinatário em quatro larguras, reabertura do visualizador por outra tela, destinatário perdendo acesso durante upload e retorno ao proprietário não duplicado na ACL.
 - Auditoria encontrou uma desativação explícita de Panelinhas no estilo `p210-panelinhas-off`. Ela foi preservada; não foi tratada como erro acidental nem removida. A implementação inativa ainda contém polling e seleção de participantes que se perde ao filtrar; exige revisão antes de eventual reativação.
 - Estes testes continuam usando Firebase simulado ou emulado. Não comprovam a operação na produção ou em PWA instalada.
+
+- Arquivos de pastas não têm subscription própria: recibos de download agora atualizam imediatamente apenas o cartão correspondente, preservando abertura e rolagem do histórico, sem reabrir a pasta. Teste de navegador cobre a regressão.
