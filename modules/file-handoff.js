@@ -1,4 +1,4 @@
-/* Carbonautas P214 · troca simples de arquivos
+/* Carbonautas · troca simples de arquivos
    O arquivo sai do Carbonautas para ser corrigido no app preferido de cada pessoa
    e volta como uma nova versão. Sem ONLYOFFICE no fluxo do Repositório. */
 (function(root,factory){
@@ -10,17 +10,10 @@
 
 
 const COORD_FALLBACK='seed-ernandes-sobreira-oliveira-junior';
-const hasDocument=()=>typeof document!=='undefined';
-const $=(s,r)=>hasDocument()?(r||document).querySelector(s):null;
-const $$=(s,r)=>hasDocument()?Array.from((r||document).querySelectorAll(s)):[];
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
-
 function appState(){try{return root?.CarbonautasApp?.state||root?.state||{}}catch(_e){return{}}}
 function F(){try{return typeof root?.FB==='function'?root.FB():(root?.fbFns||{})}catch(_e){return root?.fbFns||{}}}
 function db(){return root?.db||null}
 function auth(){return root?.auth||null}
-function toast(msg){try{if(typeof root?.toast==='function')root.toast(msg);else console.log('[Carbonautas]',msg)}catch(_e){}}
 function memberById(id){
   try{if(typeof root?.memberById==='function')return root.memberById(id)}catch(_e){}
   return (appState().members||[]).find(m=>String(m?.id)===String(id))||null;
@@ -41,7 +34,7 @@ function formatWhen(v){
   const d=new Date(n);
   return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
 }
-function currentVersion(p){return Math.max(1,Number(p?.onlineEditVersion||p?.reviewVersion||1)||1)}
+function currentVersion(p){return Math.max(1,Number(p?.onlineEditVersion)||1,Number(p?.reviewVersion)||1)}
 function publicationTitle(p){return p?.fileName||p?.reviewBaseTitle||p?.titulo||p?.title||'Arquivo'}
 function isFilePublication(p){return !!p&&(p.tipo==='arquivo'||!!p.fileName||!!p.url)}
 
@@ -72,6 +65,20 @@ function nextRecipientId(p,actorId,s=appState()){
   if(coord&&coord!==actorId)return coord;
   return'';
 }
+// Explicit choices are only available to the package owner; every choice is revalidated.
+function recipientIds(p,actorId,s=appState()){
+  if(!p||!actorId)return [];
+  if(p.packageId&&String(p.memberId)===String(actorId)){
+    const ids=p.packageAccess==='group'?(s.members||[]).filter(m=>m.status!=='inativo').map(m=>m.id):(p.collaboratorMemberIds||[]);
+    return [...new Set(ids.map(String))].filter(id=>id&&id!==String(actorId));
+  }
+  const id=nextRecipientId(p,actorId,s);return id?[id]:[];
+}
+function resolveRecipient(p,actorId,selected){
+  const ids=recipientIds(p,actorId),target=selected||nextRecipientId(p,actorId);
+  if(!target||!ids.includes(target))throw new Error('Escolha uma pessoa com acesso ao arquivo.');
+  return target;
+}
 function canExchange(p,actor){
   const id=String(actor?.memberId||'');if(!p||!id)return false;
   if(actor?.coordinator&&(!p.packageId||p.packageAccess==='group'||(p.collaboratorMemberIds||[]).includes(id)))return true;
@@ -79,29 +86,6 @@ function canExchange(p,actor){
   if(Array.isArray(p.collaboratorMemberIds)&&p.collaboratorMemberIds.map(String).includes(id))return true;
   if(p.reviewFlow&&[p.reviewReviewerId,p.reviewReturnToId,p.reviewNextRecipientId].filter(Boolean).map(String).includes(id))return true;
   return false;
-}
-function isLegacyOnlineAction(el){
-  if(!el)return false;
-  const text=norm(el.textContent),title=norm(el.getAttribute?.('title')||''),oc=norm(el.getAttribute?.('onclick')||''),cls=String(el.className||'');
-  if(/office-edit-btn|p5[345]-edit|p55-return|review-action/.test(cls))return true;
-  if(/onlyoffice|openonlyoffice|openpackageonlineedit|openonlineedit/.test(oc+' '+title+' '+text))return true;
-  if(/corrigir online|editar online/.test(text+' '+title))return true;
-  if(/openfilepreview/.test(oc))return true;
-  if(/p5[345]-view/.test(cls))return true;
-  if(text==='visualizar'||text==='👁 visualizar'||title.includes('visualizar'))return true;
-  return false;
-}
-function publicationIdFromRow(row){
-  if(!row)return'';
-  if(row.dataset?.p214PubId)return row.dataset.p214PubId;
-  const all=[...row.querySelectorAll('button[onclick],a[onclick]')];
-  for(const el of all){
-    const src=String(el.getAttribute('onclick')||'');
-    const m=src.match(/(?:messagePublicationOwner|openRepoFileConversationPublication|openReviewConversation|deletePublicacao|openFilePreview|openOnlineEdit|openOnlyOffice)\(\s*['"]([^'"]+)['"]/);
-    if(m)return m[1];
-    const idm=src.match(/\bid\s*:\s*['"]([^'"]+)['"]/);if(idm)return idm[1];
-  }
-  return'';
 }
 function historyEvents(p,s=appState()){
   if(!p)return [];
@@ -122,7 +106,7 @@ function actionText(evt){
 function appendBaselineIfNeeded(p,history){
   const h=Array.isArray(history)?[...history]:[];
   if(p?.url&&!h.some(x=>x.action!=='download'&&x.action!=='message'&&String(x?.url||'')===String(p.url))){
-    h.push({action:'upload',source:'p214-baseline',version:currentVersion(p),byUid:String(p.ownerUid||''),byMemberId:String(p.reviewSenderMemberId||p.reviewSenderId||p.memberId||''),byName:p.reviewSenderName||p.memberNome||memberName(p.memberId,'Aluno'),savedAt:p.editedAt||p.ts||new Date().toISOString(),fileName:p.fileName||publicationTitle(p),url:p.url||'',storagePath:p.storagePath||''});
+    h.push({action:'upload',source:'handoff-baseline',version:currentVersion(p),byUid:String(p.ownerUid||''),byMemberId:String(p.reviewSenderMemberId||p.reviewSenderId||p.memberId||''),byName:p.reviewSenderName||p.memberNome||memberName(p.memberId,'Aluno'),savedAt:p.editedAt||p.ts||new Date().toISOString(),fileName:p.fileName||publicationTitle(p),url:p.url||'',storagePath:p.storagePath||''});
   }
   return h;
 }
@@ -177,7 +161,6 @@ async function ensurePrivateThread(actor,targetId){
   return {tid,ref,targetUid,data};
 }
 function notificationPayload(actor,targetId,tid,title){return {recipientId:String(targetId),senderId:actor.memberId,senderUid:actor.uid,senderName:actor.name||'Carbonauta',kind:'private_message',title:String(title||'🔐 Nova mensagem privada').slice(0,200),message:'Você recebeu uma nova mensagem privada.',sourceType:'private_chat',sourceId:tid,threadId:tid,read:false}}
-async function notifyPrivate(actor,targetId,tid,title){try{const f=F(),payload=notificationPayload(actor,targetId,tid,title);await f.addDoc(f.collection(db(),'rede_notifications'),{...payload,ts:f.serverTimestamp()})}catch(e){console.warn('P214 notificação privada',e)}}
 async function fileToDataUrl(file){
   if(typeof root?.fileToDataUrl==='function')return root.fileToDataUrl(file);
   return await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error||new Error('Falha ao ler o arquivo.'));r.readAsDataURL(file)});
@@ -186,15 +169,15 @@ async function uploadStorage(pubId,file){
   if(typeof root?.fbUploadFile!=='function')throw new Error('O módulo de upload do Carbonautas ainda não terminou de carregar.');
   const dataUrl=await fileToDataUrl(file);return root.fbUploadFile('handoff_'+pubId,dataUrl,file.name);
 }
-async function cleanupUploaded(up){if(!up)return;try{if(typeof root?.deleteStorageArtifacts==='function')await root.deleteStorageArtifacts({storagePath:up.path,url:up.url},{allowUrlFallback:false})}catch(e){console.warn('P214 limpeza de upload órfão',e)}}
+async function cleanupUploaded(up){if(!up)return;try{if(typeof root?.deleteStorageArtifacts==='function')await root.deleteStorageArtifacts({storagePath:up.path,url:up.url},{allowUrlFallback:false})}catch(e){console.warn('Limpeza de upload órfão',e)}}
 
-async function commitUploadAndMessage(pubId,file,typedMessage){
+async function commitUploadAndMessage(pubId,file,typedMessage,selectedRecipient){
   if(!file||!file.name||!file.size)throw new Error('Escolha um arquivo não vazio.');
   if(file.size>15*1024*1024)throw new Error('O limite por arquivo é 15 MB.');
   const actor=await actorProfile(true);if(!actor?.memberId)throw new Error('Seu perfil ainda não está vinculado à Rede.');
   let pub=await getPublication(pubId,true);if(!pub||!isFilePublication(pub))throw new Error('Arquivo não encontrado.');
   if(!canExchange(pub,actor))throw new Error('Você não tem permissão para enviar uma versão deste arquivo.');
-  const targetId=nextRecipientId(pub,actor.memberId);if(!targetId)throw new Error('Não consegui identificar quem deve receber a próxima versão.');
+  const targetId=resolveRecipient(pub,actor.memberId,selectedRecipient);
   const msg=String(typedMessage||'').trim();if(!msg)throw new Error('Escreva uma mensagem junto com o arquivo.');
   if(msg.length>4400)throw new Error('A mensagem está muito longa. Reduza para até 4.400 caracteres.');
   const thread=await ensurePrivateThread(actor,targetId);
@@ -207,10 +190,10 @@ async function commitUploadAndMessage(pubId,file,typedMessage){
       if(!pSnap.exists())throw new Error('O arquivo foi removido antes do envio.');
       if(!tSnap.exists())throw new Error('A conversa privada não está mais disponível.');
       let live={...pSnap.data(),id:pubId};
-      if(pub.packageId){const parent=await tx.get(f.doc(db(),'rede_repository_packages',pub.packageId));if(!parent.exists())throw new Error('Pasta removida.');live=normalizePackage({...parent.data(),id:parent.id},{...pSnap.data(),id:pSnap.id});if(live.packageAccess!=='group'&&!(live.collaboratorMemberIds||[]).includes(targetId))throw new Error('O destinatário não tem acesso a esta pasta.');}
+      if(pub.packageId){const parent=await tx.get(f.doc(db(),'rede_repository_packages',pub.packageId));if(!parent.exists())throw new Error('Pasta removida.');live=normalizePackage({...parent.data(),id:parent.id},{...pSnap.data(),id:pSnap.id});if(live.packageAccess!=='group'&&targetId!==live.memberId&&!(live.collaboratorMemberIds||[]).includes(targetId))throw new Error('O destinatário não tem acesso a esta pasta.');}
       const t=tSnap.data()||{};
       if(!canExchange(live,actor))throw new Error('Sua permissão para este arquivo mudou.');
-      const liveTarget=nextRecipientId(live,actor.memberId);if(String(liveTarget)!==String(targetId))throw new Error('A vez deste arquivo mudou. Reabra o cartão e tente novamente.');
+      const liveTarget=resolveRecipient(live,actor.memberId,selectedRecipient);if(String(liveTarget)!==String(targetId))throw new Error('A vez deste arquivo mudou. Reabra o cartão e tente novamente.');
       if(currentVersion(live)!==currentVersion(pub)||live.url!==pub.url)throw new Error('Outra versão foi enviada. Reabra o arquivo antes de devolver.');
       const oldVersion=currentVersion(live);nextVersion=oldVersion+1;finalTitle=publicationTitle(live);
       const text=`📎 ${finalTitle} · v${nextVersion}\n${msg}\n\nAgora é sua vez.`.slice(0,5000);
@@ -260,6 +243,6 @@ async function addMessageReceipt(batch,context,threadId){
   const event={action:'message',source:'handoff',version:context.version,byUid:actor.uid,byMemberId:actor.memberId,byName:actor.name,toMemberId:context.targetId,toName:memberName(context.targetId,'participante'),savedAt:new Date().toISOString()};
   batch.update(publicationRef(context.id),{onlineEditHistory:F().arrayUnion(event)});
 }
-const api={privateThreadId,currentVersion,coordinatorId,nextRecipientId,canExchange,isLegacyOnlineAction,historyEvents,actionText,appendBaselineIfNeeded,formatWhen,publicationIdFromRow,commitUploadAndMessage,logDownload,downloadPublication,actorProfile,getPublication,publicationTitle,ensurePrivateThread,normalizePackage,addMessageReceipt};
+const api={privateThreadId,currentVersion,coordinatorId,nextRecipientId,recipientIds,resolveRecipient,canExchange,historyEvents,actionText,appendBaselineIfNeeded,formatWhen,commitUploadAndMessage,logDownload,downloadPublication,actorProfile,getPublication,publicationTitle,ensurePrivateThread,normalizePackage,addMessageReceipt};
 return api;
 });

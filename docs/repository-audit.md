@@ -33,11 +33,11 @@ Refatoração em branch, **não homologada em produção**. Base auditada: `4437
 
 **Remover:** P214 (substituído pelo serviço), módulos P215–P220, scripts inline P52/P54/P55/P58/P63/P65/P88/P90/P91/P92 e `.github/workflows/p219-inject.yml`. Recuperação pelo histórico Git; nenhum histórico de dados foi removido.
 
-O carrossel agora é aberto por “Folhear arquivos”, conserva Anterior/Próximo e renderiza pelos IDs. A organização A–Z/data/pendências específica de P88 não foi mantida; continuam os filtros gerais já existentes. Isto é uma mudança de interface que requer avaliação na homologação.
+O carrossel agora é aberto por “Folhear arquivos”, conserva Anterior/Próximo e renderiza pelos IDs. Organização por pessoa (A–Z), mês e pendência e pesquisa foram recuperadas no mesmo componente. Os filtros reorganizam os cartões existentes e alimentam o carrossel sem clonar o DOM. As pastas continuam no navegador de pastas existente; a antiga apresentação de pastas virtuais de P88 não foi recriada.
 
 ## Testes e alcance real
 
-- `npm test`: 42 testes, incluindo sintaxe de todos os scripts inline/módulos; backup; CSV; agenda; história/versões; sequências v1/v2/v3 para DOCX/XLSX/PPTX/PDF/CSV/PNG/ZIP; mensagem obrigatória; rejeição de conflito; rollback/limpeza; download com erro HTTP; versão recebida durante corrida; service worker.
+- `npm test`: 45 testes, incluindo sintaxe de todos os scripts inline/módulos; backup; CSV; agenda; história/versões; sequências v1/v2/v3 para DOCX/XLSX/PPTX/PDF/CSV/PNG/ZIP; mensagem obrigatória; rejeição de conflito; rollback/limpeza; download com erro HTTP; versão recebida durante corrida; service worker.
 - `npm run test:rules`: Firestore real **no emulador**, com perfis fictícios. Transações v1/v2/v3, recibos, mensagens, notificações e pastas privadas. Leitura de conversas/arquivos privados por terceiro negada; alteração de participantes e adulteração de histórico negadas. Os documentos v1 são semeados no teste; isto não valida upload inicial de um usuário real.
 - `npm run test:browser`: Chromium headless em 1440, 390, 360 e 430 px. Componente real, Firebase e conteúdo da prévia simulados. Navegação repetida, histórico único, uma ação por clique, formulário, visualizador no topo, fechar/retornar, conversa correta/contexto/foco e ausência de overflow horizontal.
 - Smoke adicional do HTML completo, com serviços externos bloqueados e estado fictício: cartão renderizado e nenhum pageerror na janela observada. Não equivale a validar login e todas as telas.
@@ -51,7 +51,7 @@ O carrossel agora é aberto por “Folhear arquivos”, conserva Anterior/Próxi
 4. Agenda, Acompanhamento e notificações gerais não tiveram todos os botões auditados ponta a ponta. `docs/runtime-observers.md` enumera watchers/timers remanescentes. Não declarar que toda a plataforma está livre de polling/flicker.
 5. Código interno do editor online ainda existe no monólito para compatibilidade com chamadas antigas; removido do novo fluxo de arquivos, não eliminado integralmente. Os módulos remanescentes precisam de auditoria própria antes de exclusão segura.
 6. Histórico continua no array existente: documentos com grande quantidade de eventos podem atingir o limite de documento do Firestore. Não foi feita migração destrutiva ou silenciosa.
-7. Pastas com múltiplos colaboradores sem destinatário inequívoco precisam de seleção explícita futura; a implementação não escolhe uma pessoa aleatória nem amplia a ACL privada para o coordenador.
+7. Pastas com múltiplos colaboradores agora têm seleção explícita de destinatário no envio e na conversa. A ACL é revalidada na transação; perda de acesso interrompe o envio e limpa o objeto recém-enviado. Não amplia acesso privado para o coordenador.
 8. GitHub Pages de produção só pode ser validado para esta entrega após publicar as regras, homologar e fazer merge. Branch/PR não são deploy de produção.
 
 ## Execução final necessária
@@ -61,3 +61,11 @@ O carrossel agora é aberto por “Folhear arquivos”, conserva Anterior/Próxi
 - Executar CI, revisar diff, então merge e verificar Pages e atualização da PWA.
 
 Não há ação de VPS nesta alteração. Não afirmar conclusão da auditoria completa enquanto as pendências acima permanecerem.
+
+## Segunda revisão — 22/09/2026
+
+- Correção de ciclo de vida: ao fechar, o visualizador compartilhado sai do diálogo do Repositório e volta ao seu contêiner original. Outras telas podem reabri-lo. Download registrado fica disponível durante o carregamento da prévia.
+- Contadores divergentes de versões legadas conservam o maior valor. Removidos helpers de reconhecimento/decoração de DOM que ficaram sem consumidores após a consolidação.
+- Testes adicionais: filtros/carrossel, escolha e cancelamento de destinatário em quatro larguras, reabertura do visualizador por outra tela, destinatário perdendo acesso durante upload e retorno ao proprietário não duplicado na ACL.
+- Auditoria encontrou uma desativação explícita de Panelinhas no estilo `p210-panelinhas-off`. Ela foi preservada; não foi tratada como erro acidental nem removida. A implementação inativa ainda contém polling e seleção de participantes que se perde ao filtrar; exige revisão antes de eventual reativação.
+- Estes testes continuam usando Firebase simulado ou emulado. Não comprovam a operação na produção ou em PWA instalada.

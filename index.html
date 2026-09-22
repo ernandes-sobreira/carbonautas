@@ -1697,7 +1697,7 @@
 #p46GroupOverlay,
 #p48GroupOverlay{display:none!important;visibility:hidden!important;pointer-events:none!important}
 </style>
-<link rel="stylesheet" href="./modules/repository.css?v=handoff-20260922">
+<link rel="stylesheet" href="./modules/repository.css?v=handoff-20260922b">
 </head>
 <body data-view="painel">
 
@@ -7471,11 +7471,11 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='handoff-20260922';
+window.CARBONAUTAS_BUILD='handoff-20260922b';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=handoff-20260922',{updateViaCache:'none'});
+      const reg=await navigator.serviceWorker.register('./sw.js?v=handoff-20260922b',{updateViaCache:'none'});
       await reg.update();
     }catch(e){console.warn('SW update',e)}
   });
@@ -14855,7 +14855,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </script>
 <script src="./modules/agenda-core-p213.js?v=P213-20260921"></script>
 <script src="./modules/agenda-integration-p213.js?v=P213-20260921"></script>
-<script src="./modules/file-handoff.js?v=handoff-20260922"></script>
-<script src="./modules/repository.js?v=handoff-20260922"></script>
+<script src="./modules/file-handoff.js?v=handoff-20260922b"></script>
+<script src="./modules/repository.js?v=handoff-20260922b"></script>
 </body>
 </html>

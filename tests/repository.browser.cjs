@@ -30,6 +30,29 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  await page.locator('#repositoryStage [data-file-action="message"]').click();assert.equal(await page.locator('#repositoryDeck').evaluate(e=>e.open),false);assert.equal(await page.evaluate(()=>openedThread),'alu__prof');assert.match(await page.locator('#privateInput').inputValue(),/Sobre o arquivo/);assert.equal(await page.locator('#privateInput').evaluate(e=>document.activeElement===e),true);
  for(let i=0;i<6;i++){await page.getByRole('button',{name:'▣ Folhear arquivos'}).click();await page.locator('[data-deck-close]').click()}
  assert.equal(await page.locator('#repositoryDeck').count(),1);assert.equal(await page.locator('#pubList .repository-actions button').count(),12);
+ // Search and pending filters feed the same carousel without DOM cloning.
+ await page.locator('#repositorySearch').fill('Documento 2');
+ assert.equal(await page.locator('#pubList > [data-file-id]:visible').count(),1);
+ await page.getByRole('button',{name:'▣ Folhear arquivos'}).click();
+ assert.equal(await page.locator('#repositoryCount').textContent(),'1 de 1');
+ assert.equal(await page.locator('#repositoryStage > article').getAttribute('data-file-id'),'f2');
+ await page.locator('[data-deck-close]').click();await page.locator('#repositorySearch').fill('');
+ await page.locator('#repositoryMode').selectOption('pending');await page.locator('#repositoryGroup').selectOption('Agora é sua vez');
+ assert.equal(await page.locator('#pubList > [data-file-id]:visible').count(),3);
+ // The shared preview must return home so another screen can reopen it.
+ assert.equal(await page.locator('#filePreviewOverlay').evaluate(e=>e.parentElement.tagName),'BODY');
+ await page.evaluate(()=>openFilePreview('https://example.org/other','Outro.pdf'));
+ assert.equal(await page.locator('#filePreviewOverlay').isVisible(),true);await page.locator('#closePreview').click();
+ // A shared folder with two recipients must expose an explicit choice.
+ await page.evaluate(()=>{const p=CarbonautasApp.state.publicacoes[0];Object.assign(p,{packageId:'pkg',packageAccess:'selected',collaboratorMemberIds:['prof','peer']});CarbonautasApp.memberId='alu';CarbonautasApp.state.members.push({id:'peer',nome:'Colega'});CarbonautasFiles.actorProfile=async()=>({memberId:'alu',uid:'alu'});renderPubs()});
+ await page.locator('#repositoryGroup').selectOption('');
+ await page.locator('[data-file-id="f0"] [data-file-action="return"]').click();
+ assert.equal(await page.locator('#returnRecipient option').count(),2);await page.locator('#returnRecipient').selectOption('peer');
+ await page.locator('#repositoryReturn [data-return-close]').first().click();
+ await page.locator('[data-file-id="f0"] [data-file-action="message"]').click();
+ assert.equal(await page.locator('#repositoryRecipient').evaluate(e=>e.matches(':modal')),true);
+ await page.locator('#repositoryRecipient button[value="cancel"]').click();
+ assert.equal(await page.evaluate(()=>calls.messages),1);
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);assert.deepEqual(errors,[]);
  console.log(`PASS Chromium ${width}px: four controls, history, navigation, single download, modal order, return form, conversation/context/focus, repeated open/close, no horizontal overflow.`);
  await page.close();

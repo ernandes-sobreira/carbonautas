@@ -27,3 +27,17 @@ test('failed transaction rolls back file/message/notification and cleans uploade
 test('concurrent version refuses stale return',async()=>{const h=harness();h.setRace(()=>h.records.get('rede_publicacoes/file').onlineEditVersion=2);await assert.rejects(h.api.commitUploadAndMessage('file',{name:'x',size:10},'oi'),/Outra versão/);assert.equal(h.cleaned(),1)});
 test('HTTP download failure does not create a receipt or trigger an anchor',async()=>{const h=harness();h.context.fetch=async()=>({ok:false,status:403});await assert.rejects(h.api.downloadPublication('file'),/403/);assert.equal(h.downloads(),0);assert.equal(h.records.get('rede_publicacoes/file').onlineEditHistory,undefined)});
 test('download records fetched version when a newer upload races',async()=>{const h=harness();h.setRace(()=>{const p=h.records.get('rede_publicacoes/file');p.onlineEditVersion=2;p.url='https://storage/v2'});await h.api.downloadPublication('file');assert.equal(h.records.get('rede_publicacoes/file').onlineEditHistory[0].version,1)});
+test('shared package owner chooses peer; peer returns to owner absent from ACL list',async()=>{
+ const h=harness();h.setActor('alu');h.records.set('rede_repository_packages/pkg',{ownerMemberId:'alu',accessMode:'selected',allowedMemberIds:['prof','peer']});
+ h.records.set('rede_repository_packages/pkg/files/a',{fileName:'a.docx',url:'https://storage/v1',onlineEditVersion:1});
+ await h.api.commitUploadAndMessage('package:pkg:a',{name:'v2.docx',size:10},'Para revisar','prof');
+ h.setActor('prof');await h.api.commitUploadAndMessage('package:pkg:a',{name:'v3.docx',size:10},'Revisado');
+ assert.equal(h.records.get('rede_repository_packages/pkg/files/a').onlineEditVersion,3);
+});
+test('package recipient losing access while uploading aborts and cleans upload',async()=>{
+ const h=harness();h.setActor('alu');const pkg={ownerMemberId:'alu',accessMode:'selected',allowedMemberIds:['prof','peer']};h.records.set('rede_repository_packages/pkg',pkg);
+ h.records.set('rede_repository_packages/pkg/files/a',{fileName:'a.docx',url:'https://storage/v1',onlineEditVersion:1});
+ h.setRace(()=>pkg.allowedMemberIds=['peer']);
+ await assert.rejects(h.api.commitUploadAndMessage('package:pkg:a',{name:'v2.docx',size:10},'Para revisar','prof'),/acesso/);
+ assert.equal(h.cleaned(),1);assert.equal(h.records.get('rede_repository_packages/pkg/files/a').onlineEditVersion,1);
+});
