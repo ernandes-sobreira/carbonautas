@@ -1,0 +1,57 @@
+name: P215 repository cleanup
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  validate-and-inject:
+    if: "${{ !contains(github.event.head_commit.message, '[p215-injected]') }}"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validar modulo P215
+        run: node --check modules/repository-ui-p215.js
+      - name: Inserir carregador P215 no body real
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp index.html /tmp/index.before-p215.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          tag='<script src="./modules/repository-ui-p215.js?v=P215-20260922"></script>'
+          if tag not in s:
+              pos=s.rfind('</body>')
+              if pos < 0:
+                  raise SystemExit('index sem </body> real')
+              s=s[:pos]+tag+'\n'+s[pos:]
+          if s.count(tag)!=1:
+              raise SystemExit('tag P215 duplicada')
+          p.write_text(s,encoding='utf-8')
+          PY
+          python3 - <<'PY'
+          from pathlib import Path
+          before=Path('/tmp/index.before-p215.html').read_text(encoding='utf-8')
+          after=Path('index.html').read_text(encoding='utf-8')
+          tag='<script src="./modules/repository-ui-p215.js?v=P215-20260922"></script>\n'
+          assert after.replace(tag,'')==before, 'P215 alterou o index além da linha de carregamento'
+          assert after.rfind(tag)<after.rfind('</body>'), 'P215 não ficou no body real'
+          print('index preservado; somente o carregador P215 foi acrescentado')
+          PY
+      - name: Publicar P215
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "P215: ativar repositorio sem duplicacao [p215-injected]"
+          git push
