@@ -147,9 +147,10 @@ async function actorProfile(force=false){
   })();
   try{return await actorPromise}finally{actorPromise=null}
 }
-async function getPublication(id){
+async function getPublication(id,fresh=false){
   if(!id)return null;
   const local=(appState().publicacoes||[]).find(x=>String(x?.id)===String(id));
+  if(local&&!fresh)return local;
   try{const f=F(),snap=await f.getDoc(f.doc(db(),'rede_publicacoes',id));if(snap.exists())return {...snap.data(),id:snap.id}}catch(_e){}
   return local||null;
 }
@@ -236,7 +237,7 @@ function downloadUrl(url,name='arquivo'){
   if(!hasDocument()||!url)return false;const a=document.createElement('a');a.href=url;a.download=name||'arquivo';a.target='_blank';a.rel='noopener';a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>a.remove(),500);return true;
 }
 async function downloadPublication(pubId){
-  const p=await getPublication(pubId);if(!p?.url)throw new Error('Este arquivo não tem uma versão disponível para baixar.');
+  const p=await getPublication(pubId,true);if(!p?.url)throw new Error('Este arquivo não tem uma versão disponível para baixar.');
   const logged=await logDownload(pubId);if(!logged)toast('O arquivo será aberto, mas não consegui registrar o horário do download.');downloadUrl(p.url,p.fileName||publicationTitle(p));return true;
 }
 
