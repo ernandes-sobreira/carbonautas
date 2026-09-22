@@ -16,6 +16,37 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Tornar decoração local e barata
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('modules/file-handoff-p214.js')
+          s=p.read_text(encoding='utf-8')
+          old="""async function getPublication(id){
+            if(!id)return null;
+            const local=(appState().publicacoes||[]).find(x=>String(x?.id)===String(id));
+            try{const f=F(),snap=await f.getDoc(f.doc(db(),'rede_publicacoes',id));if(snap.exists())return {...snap.data(),id:snap.id}}catch(_e){}
+            return local||null;
+          }"""
+          new="""async function getPublication(id,fresh=false){
+            if(!id)return null;
+            const local=(appState().publicacoes||[]).find(x=>String(x?.id)===String(id));
+            if(local&&!fresh)return local;
+            try{const f=F(),snap=await f.getDoc(f.doc(db(),'rede_publicacoes',id));if(snap.exists())return {...snap.data(),id:snap.id}}catch(_e){}
+            return local||null;
+          }"""
+          # A fonte está compactada com dois espaços; faça substituição tolerante.
+          if old not in s:
+              old=old.replace('          ','')
+              new=new.replace('          ','')
+          if old not in s:
+              raise SystemExit('função getPublication não encontrada')
+          s=s.replace(old,new,1)
+          s=s.replace("const p=await getPublication(pubId);if(!p?.url)throw new Error('Este arquivo não tem uma versão disponível para baixar.');","const p=await getPublication(pubId,true);if(!p?.url)throw new Error('Este arquivo não tem uma versão disponível para baixar.');",1)
+          p.write_text(s,encoding='utf-8')
+          PY
       - name: Instalar dependências
         run: npm ci
       - name: Testes existentes do Carbonautas
@@ -52,14 +83,14 @@ jobs:
           assert after.rfind(tag) < after.rfind('</body>'), 'P214 não ficou no body real'
           print('index preservado: somente o carregador P214 foi acrescentado')
           PY
-      - name: Publicar carregador P214
+      - name: Publicar P214 validado
         shell: bash
         run: |
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
+          git add index.html modules/file-handoff-p214.js
           if git diff --cached --quiet; then exit 0; fi
           git commit -m "P214: ativar troca simples de arquivos [p214-injected]"
           git push
-# trigger 2026-09-22
+# trigger 2026-09-22b
