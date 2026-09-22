@@ -85,7 +85,7 @@ function closeFileLayers(){
   if(deck&&!deck.hidden){
     const close=deck.querySelector('[data-p90-close]');
     try{close?.click()}catch(_e){}
-    deck.hidden=true;deck.style.setProperty('display','none','important');
+    deck.hidden=true;deck.style.removeProperty('display');
     const stage=$('#p90Stage',deck);if(stage)stage.innerHTML='';
   }
   const ov=$('#repoOverlay');if(ov?.classList.contains('open')){try{root.closeOverlay?.('repoOverlay')}catch(_e){ov.classList.remove('open')}}
