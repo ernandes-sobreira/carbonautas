@@ -3,7 +3,7 @@
   "private": true,
   "version": "203.0.0",
   "scripts": {
-    "test": "node --test tests/client.cjs tests/backup.cjs tests/file-handoff.cjs tests/handoff-integration.cjs tests/runtime-integrity.cjs tests/service-worker.cjs",
+    "test": "node --test tests/client.cjs tests/backup.cjs tests/file-handoff.cjs tests/handoff-integration.cjs tests/runtime-integrity.cjs tests/agenda-core.cjs tests/service-worker.cjs",
     "test:rules": "firebase emulators:exec --only firestore --project demo-carbonautas --config firebase.test.json \"node tests/firestore.integration.cjs\"",
     "test:browser": "node tests/repository.browser.cjs"
   },
