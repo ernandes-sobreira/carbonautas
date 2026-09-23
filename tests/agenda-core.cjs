@@ -1,5 +1,7 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const pathMod=require('node:path');
 
 function loadAgenda(app){
   const path=require.resolve('../modules/agenda-core-p213.js');
@@ -43,6 +45,15 @@ test('Agenda respeita participante usando memberId do CarbonautasApp',()=>{
   };
   const agenda=loadAgenda(app);
   assert.deepEqual(agenda.itemsForDate('2026-09-24').map(x=>x.id),['meu']);
+});
+
+test('P213 não monta segunda Agenda nem esconde o carrossel P110',()=>{
+  const core=fs.readFileSync(pathMod.join(__dirname,'../modules/agenda-core-p213.js'),'utf8');
+  const integration=fs.readFileSync(pathMod.join(__dirname,'../modules/agenda-integration-p213.js'),'utf8');
+  assert.doesNotMatch(core,/insertAdjacentElement\(['"]afterend['"]\s*,\s*day\)/);
+  assert.doesNotMatch(core,/ag-daylist\s*\{\s*display\s*:\s*none/i);
+  assert.doesNotMatch(integration,/p110-count[^\n]*display\s*:\s*none/i);
+  assert.doesNotMatch(integration,/ag-dots[^\n]*display\s*:\s*none/i);
 });
 
 test.after(()=>{
