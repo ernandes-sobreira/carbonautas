@@ -7,6 +7,23 @@ const f=require('firebase/firestore'),fs=require('node:fs'),vm=require('node:vm'
  await env.withSecurityRulesDisabled(async c=>{const db=c.firestore();for(const id of ['prof','alu','third']){await f.setDoc(f.doc(db,'rede_users',id),{memberId:id,nome:id,role:id==='prof'?'coordinator':'student'});await f.setDoc(f.doc(db,'rede_members',id),{nome:id,status:'ativo'});await f.setDoc(f.doc(db,'rede_private_directory',id),{uid:id,memberId:id})}await f.setDoc(f.doc(db,'rede_publicacoes','file'),{tipo:'arquivo',memberId:'alu',ownerUid:'alu',fileName:'a.docx',url:'https://storage/v1',storagePath:'v1',reviewFlow:true,reviewThreadId:'file',reviewVersion:1,reviewReviewerId:'prof',reviewReturnToId:'alu',onlineEditVersion:1,ts:new Date()})});
  const make=id=>{const db=env.authenticatedContext(id).firestore(),context={module:{exports:{}},console,db,FB:()=>f,auth:{currentUser:{uid:id}},CarbonautasApp:{state:{members:[{id:'prof',nivel:'coord',nome:'Professor'},{id:'alu',nome:'Aluno'}]}},fbUploadFile:async()=>({url:'https://storage/v2',path:'v2'}),fileToDataUrl:async()=>''};new Function('module','globalThis',fs.readFileSync('modules/file-handoff.js','utf8'))(context.module,context);return{api:context.module.exports,db}};
  const prof=make('prof'),alu=make('alu'),third=make('third');
+
+ // Activity persistence contract: the same transaction shape used by saveActivity
+ // creates the activity, survives a fresh read, can be edited by its owner,
+ // and cannot be hijacked by another student.
+ const activityRef=f.doc(alu.db,'rede_activities','activity-persistence');
+ await assertSucceeds(f.runTransaction(alu.db,async tx=>{
+  const snap=await tx.get(activityRef);assert.equal(snap.exists(),false);
+  tx.set(activityRef,{ownerId:'alu',ownerUid:'alu',ownerName:'Aluno',type:'agenda',status:'andamento',title:'TESTE MONA 01',description:'persistência',startDate:'2026-09-24',dueDate:'2026-09-25',progress:10,createdAt:f.serverTimestamp(),updatedAt:f.serverTimestamp()},{merge:true});
+ }));
+ let activitySnap=await f.getDoc(activityRef);assert.equal(activitySnap.exists(),true);assert.equal(activitySnap.data().title,'TESTE MONA 01');assert.equal(activitySnap.data().ownerId,'alu');
+ await assertSucceeds(f.updateDoc(activityRef,{progress:55,status:'revisando',updatedAt:f.serverTimestamp()}));
+ activitySnap=await f.getDoc(activityRef);assert.equal(activitySnap.data().progress,55);assert.equal(activitySnap.data().status,'revisando');
+ await assertFails(f.updateDoc(f.doc(third.db,'rede_activities','activity-persistence'),{title:'Tomado por terceiro'}));
+ await assertSucceeds(f.updateDoc(f.doc(prof.db,'rede_activities','activity-persistence'),{status:'aprovado',progress:100,updatedAt:f.serverTimestamp()}));
+ activitySnap=await f.getDoc(activityRef);assert.equal(activitySnap.data().status,'aprovado');assert.equal(activitySnap.data().progress,100);
+ console.log('PASS: nova atividade persiste, reabre, edita pelo dono, bloqueia terceiro e aceita decisão da coordenação.');
+
  await assertSucceeds(prof.api.logDownload('file'));
  await assertSucceeds(prof.api.commitUploadAndMessage('file',{name:'corrigido.docx',size:100},'Revisado'));
  let snap=await f.getDoc(f.doc(alu.db,'rede_publicacoes','file'));assert.equal(snap.data().onlineEditVersion,2);
