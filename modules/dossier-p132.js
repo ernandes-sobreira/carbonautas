@@ -75,6 +75,7 @@ function route(){
 }
 function startPostAuth(){if(!appReady())return false;if(!postAuthStarted){postAuthStarted=true;ensureIntegrity();ensureCheckin()}route();return true}
 function boot(){
+ load('./modules/mona-p216.js?v=P216-20260923','carbonautas-mona-p216').catch(e=>console.error('Carbonautas Mona',e));
  const mo=new MutationObserver(ms=>{if(appReady())startPostAuth();if(ms.some(m=>m.attributeName==='data-view')){route();if(currentView()==='track')setTimeout(wireMacroShortcut,900)}});mo.observe(document.body,{attributes:true,attributeFilter:['data-view','class','style']});
  document.addEventListener('click',e=>{
   if(!appReady())return;
