@@ -3,7 +3,11 @@
    - writes only self-edit fields allowed by Firestore rules
    - retries Acompanhamento actions after the lazy modules are actually ready
    - closes stacked Acompanhamento/Repository UI before opening private chat
-   - no polling, no data migration, no VPS changes
+   - links the signed-in name to the member profile
+   - keeps direct private chat from being blocked by stale directory state
+   - freezes the network graph after layout calculation
+   - removes unreliable in-app Repository previews; download remains canonical
+   - no data migration, no VPS changes
 */
 (function(root){
 'use strict';
@@ -11,17 +15,18 @@ if(root.__CARBONAUTAS_RUNTIME_INTEGRITY)return;
 root.__CARBONAUTAS_RUNTIME_INTEGRITY=true;
 
 const $=(s,r=document)=>r.querySelector(s);
-let profileBusy=false,messageBusy=false;
+let profileBusy=false,messageBusy=false,graphInstalled=false;
 
 function app(){return root.CarbonautasApp||{state:{},memberId:'',isAdmin:false}}
 function toastSafe(msg){try{if(typeof toast==='function')return toast(msg)}catch(_e){};root.toast?.(msg)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function currentEditingId(){try{return editingId||null}catch(_e){return null}}
 function currentFormPhoto(){try{return formFoto||''}catch(_e){return $('#mFoto')?.value?.trim()||''}}
 function currentLines(){try{return [...formLinhas]}catch(_e){return[]}}
 function currentResults(){try{return (formResultados||[]).filter(r=>r?.titulo||r?.url)}catch(_e){return[]}}
 function currentDeadlines(){try{return (formPrazos||[]).filter(p=>p?.titulo)}catch(_e){return[]}}
 function currentLinks(){try{return (formVinculos||[]).filter(v=>v?.id)}catch(_e){return[]}}
-function memberByIdSafe(id){return (app().state.members||[]).find(m=>m.id===id)||null}
+function memberByIdSafe(id){return (app().state.members||[]).find(m=>String(m?.id)===String(id))||null}
 function canEdit(id){try{return typeof canEditMember==='function'?!!canEditMember(id):(app().isAdmin||app().memberId===id)}catch(_e){return app().isAdmin||app().memberId===id}}
 function closeMember(){try{if(typeof closeOverlay==='function')closeOverlay('memberOverlay');else root.closeOverlay?.('memberOverlay')}catch(_e){}}
 function serverTimestamp(){return root.fbFns?.serverTimestamp?.()||new Date()}
@@ -80,6 +85,12 @@ async function saveMemberRobust(){
  }
 }
 
+function openOwnProfile(){
+ const id=String(app().memberId||'');
+ if(!id||typeof root.openMember!=='function')return false;
+ root.openMember(id);return true;
+}
+
 const actions={
  activity:{fn:'openActivity',args:(el,mid)=>[null,mid]},
  dossier:{fn:'openDossier',args:(el,mid)=>[mid],needsDossier:true},
@@ -129,10 +140,79 @@ async function routeRepositoryMessage(button){
  }catch(e){console.error('Mensagem do Repositório',e);toastSafe(e?.message||'Não foi possível abrir a conversa privada.')}finally{messageBusy=false;button.disabled=false}
 }
 
+function privateStarter(){
+ try{if(typeof startPrivateConversation==='function')return startPrivateConversation}catch(_e){}
+ return typeof root.startPrivateConversation==='function'?root.startPrivateConversation:null;
+}
+function privateAvatar(m){
+ if(m?.foto)return `<span class="private-av"><img src="${esc(m.foto)}" alt=""></span>`;
+ const ini=String(m?.nome||'?').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'?';
+ return `<span class="private-av">${esc(ini)}</span>`;
+}
+function renderPrivatePeopleRobust(){
+ const box=$('#privatePeopleList');if(!box)return;
+ const term=String($('#privatePersonSearch')?.value||'').trim().toLowerCase(),me=String(app().memberId||'');
+ const rows=(app().state.members||[]).filter(m=>String(m?.id)!==me&&m?.status!=='inativo'&&(!term||String(m?.nome||'').toLowerCase().includes(term))).sort((a,b)=>String(a?.nome||'').localeCompare(String(b?.nome||''),'pt-BR'));
+ if(!rows.length){box.innerHTML='<div class="private-empty-list" style="color:#657582">Nenhuma pessoa encontrada.</div>';return}
+ box.innerHTML=rows.map(m=>`<div class="private-person-row">${privateAvatar(m)}<div class="private-person-main"><b>${esc(m.nome||'Carbonauta')}</b><small>A conta será verificada ao abrir a conversa</small></div><button type="button" data-runtime-private-person="${esc(m.id)}">Conversar</button></div>`).join('');
+ box.querySelectorAll('[data-runtime-private-person]').forEach(button=>button.onclick=async()=>{
+  const start=privateStarter();if(!start)return toastSafe('O chat privado ainda não terminou de carregar.');
+  const old=button.textContent;button.disabled=true;button.textContent='Abrindo…';
+  try{await start(button.dataset.runtimePrivatePerson)}catch(e){console.error('Nova conversa',e);toastSafe(e?.message||'Não foi possível abrir a conversa.')}finally{button.disabled=false;button.textContent=old}
+ });
+}
+function openPrivateNewRobust(){
+ const original=root.openPrivateNew;
+ if(typeof original!=='function')return toastSafe('O chat privado ainda não terminou de carregar.');
+ original();renderPrivatePeopleRobust();
+ const search=$('#privatePersonSearch');if(search)search.oninput=renderPrivatePeopleRobust;
+}
+function installPrivateAccess(){
+ const button=$('#privateNewBtn'),search=$('#privatePersonSearch');
+ if(button)button.onclick=openPrivateNewRobust;
+ if(search)search.oninput=renderPrivatePeopleRobust;
+}
+
+function graphSimulation(){try{return typeof simulation!=='undefined'?simulation:null}catch(_e){return null}}
+function unpinGraphMembers(){for(const m of app().state.members||[]){if(!m)continue;m.fx=null;m.fy=null}}
+function settleGraph(){
+ const sim=graphSimulation();if(!sim)return false;
+ try{
+  sim.alphaTarget?.(0);sim.alpha?.(1);sim.tick?.(220);
+  const tick=sim.on?.('tick');if(typeof tick==='function')tick();
+  for(const n of sim.nodes?.()||[]){if(Number.isFinite(n?.x)&&Number.isFinite(n?.y)){n.fx=n.x;n.fy=n.y}}
+  sim.stop?.();return true;
+ }catch(e){console.warn('Estabilização do grafo',e);return false}
+}
+function installGraphFreeze(){
+ if(graphInstalled)return;
+ let original=null;try{original=root.renderGraph||renderGraph}catch(_e){}
+ if(typeof original!=='function')return;
+ if(original.__runtimeFrozen){graphInstalled=true;settleGraph();return}
+ const frozen=function(){unpinGraphMembers();const result=original.apply(this,arguments);settleGraph();return result};
+ frozen.__runtimeFrozen=true;frozen.__runtimeOriginal=original;
+ try{renderGraph=frozen}catch(_e){}root.renderGraph=frozen;graphInstalled=true;settleGraph();
+ root.addEventListener?.('resize',()=>setTimeout(settleGraph,0));
+}
+
+function removeRepositoryPreview(){
+ let style=$('#runtimeNoRepositoryPreview');
+ if(!style){style=document.createElement('style');style.id='runtimeNoRepositoryPreview';style.textContent='[data-file-action="preview"]{display:none!important}';document.head.append(style)}
+ try{root.closeOverlay?.('filePreviewOverlay')}catch(_e){}
+ const dialog=$('#repositoryPreview');try{if(dialog?.open)dialog.close()}catch(_e){}
+ return true;
+}
+
 function boot(){
+ installPrivateAccess();installGraphFreeze();removeRepositoryPreview();
+ document.addEventListener('carbonautas:repository-rendered',removeRepositoryPreview);
  document.addEventListener('click',e=>{
+  const identity=e.target.closest?.('#idChip');
+  if(identity&&app().memberId&&typeof root.openMember==='function'){e.preventDefault();e.stopImmediatePropagation();openOwnProfile();return}
   const save=e.target.closest?.('#saveMember');
   if(save){e.preventDefault();e.stopImmediatePropagation();saveMemberRobust();return}
+  const preview=e.target.closest?.('[data-file-action="preview"]');
+  if(preview){e.preventDefault();e.stopImmediatePropagation();toastSafe('A prévia dentro do Carbonautas foi removida. Use Baixar para abrir o arquivo no aplicativo adequado.');return}
   const message=e.target.closest?.('[data-file-action="message"]');
   if(message){e.preventDefault();e.stopImmediatePropagation();routeRepositoryMessage(message);return}
   const action=e.target.closest?.('#p97Deck [data-p97-action]');
@@ -142,6 +222,6 @@ function boot(){
  },true);
 }
 
-root.CarbonautasRuntimeIntegrity={saveMember:saveMemberRobust,rescueTrackAction,routeRepositoryMessage,closeTrackingDeck};
+root.CarbonautasRuntimeIntegrity={saveMember:saveMemberRobust,rescueTrackAction,routeRepositoryMessage,closeTrackingDeck,openOwnProfile,renderPrivatePeople:renderPrivatePeopleRobust,settleGraph,removeRepositoryPreview};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })(globalThis);
