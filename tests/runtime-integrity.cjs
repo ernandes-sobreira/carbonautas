@@ -15,7 +15,7 @@ function formHtml(){return `<body>
 function makeDom({admin=false,setDoc}={}){
  const dom=new JSDOM(formHtml(),{runScripts:'outside-only',pretendToBeVisual:true,url:'https://example.test'}),w=dom.window;
  w.CarbonautasApp={state:{members:[{id:'m1',nome:'Aluno Teste',foto:'https://old/photo.jpg'}]},memberId:'m1',isAdmin:admin};
- w.db={};w.fbFns={doc:(_db,col,id)=>({col,id}),setDoc:setDoc||async()=>{},serverTimestamp:()=>({server:true})};
+ w.db={};w.fbFns={doc:(_db,col,id)=>({col,id}),setDoc:(setDoc||async()=>{}),serverTimestamp:()=>({server:true})};
  const prelude=`
  let editingId='m1',formFoto='data:image/png;base64,broken',formLinhas=new Set(['Linha']),formResultados=[{titulo:'R',url:''}],formPrazos=[{titulo:'P',data:'2026-09-30'}],formVinculos=[{id:'m2'}];
  function canEditMember(){return true}
