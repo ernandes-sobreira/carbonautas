@@ -24,3 +24,15 @@
 .repository-file[hidden]{display:none!important}
 #repositoryOrganizer{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0}#repositoryOrganizer label{display:grid;gap:6px;min-width:0;font-size:12px;flex:1 1 160px}
 #repositoryOrganizer input,#repositoryOrganizer select,.repository-dialog select{box-sizing:border-box;width:100%;min-height:44px;padding:10px;border:1px solid #cbdde0;border-radius:10px;background:white;color:#173d4c;font:inherit}
+
+/* Entrada estática: evita o ícone pulsando/piscando antes do login. */
+.loading .mark,
+.loading .logo-img,
+.auth-gate .logo-mark,
+.auth-gate .logo-mark::before,
+.auth-gate .logo-mark::after,
+.auth-gate .logo-mark .logo-img{
+  animation:none!important;
+  transform:none!important;
+  filter:none!important;
+}
