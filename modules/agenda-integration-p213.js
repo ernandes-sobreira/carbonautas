@@ -1,7 +1,6 @@
-/* Carbonautas P213 · integração segura da Agenda
-   - mantém a data selecionada ao criar atividade/reunião
-   - detecta apenas remontagens reais do calendário e pede novo render ao núcleo
-   - não observa a página inteira e não interfere em login/auth
+/* Carbonautas P215 · integração leve da Agenda
+   Mantém apenas o preenchimento da data selecionada ao criar atividade/reunião.
+   Não cria segunda Agenda, não esconde o P110 e não altera contadores do carrossel.
 */
 (function(root,factory){
   const api=factory(root);
@@ -11,9 +10,8 @@
 'use strict';
 const hasDocument=()=>typeof document!=='undefined';
 const $=(s,r)=>hasDocument()?(r||document).querySelector(s):null;
-const normalize=v=>{
-  const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[1]}-${m[2]}-${m[3]}`:'';
-};
+const normalize=v=>{const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?`${m[1]}-${m[2]}-${m[3]}`:''};
+
 function selectedDate(){
   if(!hasDocument())return'';
   const sel=$('#viewCrono .ag-day.sel[data-iso]');
@@ -41,85 +39,18 @@ function applyEventDate(date=selectedDate(),forceNew=false){
   if(!forceNew&&editingEvent())return false;
   input.value=iso;return true;
 }
-function coreRender(){try{root?.CARBONAUTAS_AGENDA_P213?.scheduleRender?.()}catch(_e){}}
-function calendarMutation(ms){
-  for(const m of ms||[]){
-    if(m.type!=='childList')continue;
-    const nodes=[...m.addedNodes,...m.removedNodes].filter(n=>n&&n.nodeType===1);
-    for(const n of nodes){
-      if(n.id==='p213AgendaDay'||n.id==='p213AgendaNav'||n.classList?.contains('p213-day-count'))continue;
-      if(n.matches?.('.ag-month,.ag-day[data-iso]')||n.querySelector?.('.ag-month,.ag-day[data-iso]'))return true;
-    }
-  }
-  return false;
-}
-function css(){
-  if(!hasDocument()||$('#p213IntegrationStyle'))return;
-  const st=document.createElement('style');st.id='p213IntegrationStyle';st.textContent=`
-    /* O P213 é a fonte única da contagem. Esconde contadores/dots antigos para não duplicar informação. */
-    #viewCrono .ag-day .p110-count,#viewCrono .ag-day .ag-dots{display:none!important}
-    @media(min-width:901px){
-      #viewCrono .ag-month::-webkit-scrollbar{display:block!important;height:10px!important}
-      #viewCrono .ag-month::-webkit-scrollbar-track{background:#edf5f3!important;border-radius:999px!important}
-      #viewCrono .ag-month::-webkit-scrollbar-thumb{background:#a8cac4!important;border-radius:999px!important}
-    }
-  `;document.head.appendChild(st);
-}
-let pendingEventDate='';
-let pendingUntil=0;
-function bindOverlayObservers(){
-  const act=$('#p174TaskOverlay');
-  if(act&&act.dataset.p213DateObserver!=='1'){
-    act.dataset.p213DateObserver='1';
-    new MutationObserver(()=>{if(act.classList.contains('open'))setTimeout(()=>applyActivityDate(),0)}).observe(act,{attributes:true,attributeFilter:['class']});
-  }
-  const ev=$('#eventOverlay');
-  if(ev&&ev.dataset.p213DateObserver!=='1'){
-    ev.dataset.p213DateObserver='1';
-    new MutationObserver(()=>{
-      if(!ev.classList.contains('open'))return;
-      const date=(Date.now()<pendingUntil?pendingEventDate:'')||selectedDate();
-      setTimeout(()=>{applyEventDate(date,false);pendingEventDate='';pendingUntil=0},25);
-    }).observe(ev,{attributes:true,attributeFilter:['class']});
-  }
-}
-function bindCalendarObserver(){
-  const view=$('#viewCrono');if(!view||view.dataset.p213CalendarObserver==='1')return;
-  view.dataset.p213CalendarObserver='1';
-  new MutationObserver(ms=>{if(calendarMutation(ms))setTimeout(coreRender,0)}).observe(view,{subtree:true,childList:true});
-}
-function scheduleActivityPrefill(date){
-  [0,30,90,180].forEach(ms=>setTimeout(()=>{bindOverlayObservers();applyActivityDate(date)},ms));
-}
-function scheduleEventPrefill(date){
-  [0,40,120,260,500].forEach(ms=>setTimeout(()=>{bindOverlayObservers();applyEventDate(date,false)},ms));
-}
+function calendarMutation(){return false}
+function scheduleActivityPrefill(date){[0,30,90,180].forEach(ms=>setTimeout(()=>applyActivityDate(date),ms))}
+function scheduleEventPrefill(date){[0,40,120,260,500].forEach(ms=>setTimeout(()=>applyEventDate(date,false),ms))}
 function boot(){
   if(!hasDocument())return;
-  css();
+  document.getElementById('p213IntegrationStyle')?.remove();
   document.addEventListener('click',e=>{
     const day=e.target.closest?.('#viewCrono .ag-day[data-iso]');if(day)rememberDate(day.dataset.iso);
-    if(e.target.closest?.('[data-p174-new],[data-p174-new-ag],[data-p174-menu]')){
-      scheduleActivityPrefill(selectedDate());
-    }
-    if(e.target.closest?.('#agNewBtn,#newEventBtn')){
-      pendingEventDate=selectedDate();pendingUntil=Date.now()+15000;bindOverlayObservers();
-    }
-    // Depois do botão +, o usuário ainda escolhe o tipo no menu. Ao escolher,
-    // reaplica a data selecionada sem depender da velocidade do clique.
-    if(Date.now()<pendingUntil&&e.target.closest?.('#agNewMenu button,#agNewMenu [role="button"],#agNewMenu .btn')){
-      scheduleEventPrefill(pendingEventDate||selectedDate());
-    }
+    if(e.target.closest?.('[data-p174-new],[data-p174-new-ag],[data-p174-menu]'))scheduleActivityPrefill(selectedDate());
+    if(e.target.closest?.('#agNewBtn,#newEventBtn'))scheduleEventPrefill(selectedDate());
+    if(e.target.closest?.('#agNewMenu button,#agNewMenu [role="button"],#agNewMenu .btn'))scheduleEventPrefill(selectedDate());
   },true);
-  const install=()=>{bindOverlayObservers();bindCalendarObserver()};
-  install();
-  // Os overlays podem ser criados sob demanda; checagens finitas, sem loop permanente.
-  [150,500,1200,2500].forEach(ms=>setTimeout(install,ms));
-  new MutationObserver(ms=>{
-    if(ms.some(m=>m.attributeName==='data-view')&&document.body.dataset.view==='crono'){
-      setTimeout(()=>{bindCalendarObserver();bindOverlayObservers();coreRender()},0);
-    }
-  }).observe(document.body,{attributes:true,attributeFilter:['data-view']});
 }
 const api={selectedDate,rememberDate,editingEvent,activityIsNew,applyActivityDate,applyEventDate,calendarMutation,scheduleActivityPrefill,scheduleEventPrefill};
 if(hasDocument()){
