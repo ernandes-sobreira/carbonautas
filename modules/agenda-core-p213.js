@@ -16,16 +16,31 @@ const BUILD='P213';
 const hasDocument=()=>typeof document!=='undefined';
 const $=(s,r)=>hasDocument()?(r||document).querySelector(s):null;
 const $$=(s,r)=>hasDocument()?Array.from((r||document).querySelectorAll(s)):[];
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
 
+function app(){
+  try{return root?.CarbonautasApp||((typeof globalThis!=='undefined'&&globalThis.CarbonautasApp)||null)}catch(_e){return null}
+}
 function state(){
-  try{return root?.state||((typeof globalThis!=='undefined'&&globalThis.state)||{})||{}}catch(_e){return{}}
+  try{
+    const a=app();
+    if(a?.state)return a.state;
+    return root?.state||((typeof globalThis!=='undefined'&&globalThis.state)||{})||{};
+  }catch(_e){return{}}
 }
 function myId(){
-  try{return String(root?.myId??globalThis.myId??'')}catch(_e){return''}
+  try{
+    const a=app(),id=a?.memberId??a?.myId;
+    if(id!==undefined&&id!==null&&String(id)!=='')return String(id);
+    return String(root?.myId??globalThis.myId??'');
+  }catch(_e){return''}
 }
 function isAdmin(){
-  try{return !!(root?.isAdmin??globalThis.isAdmin)}catch(_e){return false}
+  try{
+    const a=app();
+    if(a&&a.isAdmin!==undefined)return !!a.isAdmin;
+    return !!(root?.isAdmin??globalThis.isAdmin);
+  }catch(_e){return false}
 }
 function memberById(id,s=state()){
   return (s.members||[]).find(m=>String(m?.id)===String(id))||null;
@@ -114,8 +129,8 @@ let pending=false;
 function css(){
   if(!hasDocument()||$('#p213AgendaStyle'))return;
   const st=document.createElement('style');st.id='p213AgendaStyle';st.textContent=`
-  #viewCrono .ag-daylist{display:none!important}
-  #viewCrono .p110-subtitle,#viewCrono .p110-event-nav{display:none!important}
+  html body #viewCrono .ag-daylist{display:none!important}
+  html body #viewCrono .p110-subtitle,html body #viewCrono .p110-event-nav{display:none!important}
   #p213AgendaDay{margin:18px 0 34px;border:1px solid #d9e7e4;border-radius:24px;background:#fff;box-shadow:0 12px 32px rgba(24,66,70,.07);overflow:hidden}
   .p213-head{display:flex;align-items:center;gap:12px;padding:17px 19px;border-bottom:1px solid #e3ecea;background:linear-gradient(145deg,#fbfefd,#f3faf8)}
   .p213-head-main{flex:1;min-width:0}.p213-kicker{font-size:10px;font-weight:950;letter-spacing:.11em;text-transform:uppercase;color:#168f94}.p213-title{font-family:'Fraunces',serif;font-size:25px;line-height:1.08;color:#173d47;margin-top:3px;text-transform:capitalize}.p213-total{font-size:11px;font-weight:900;color:#688087;white-space:nowrap}
