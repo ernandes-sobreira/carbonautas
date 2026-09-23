@@ -1,8 +1,9 @@
-/* Carbonautas P187 · carregador sob demanda pós-login
+/* Carbonautas P188 · carregador sob demanda pós-login
    - reconhece o app aberto pelo shell visível ou Firebase Auth, sem confundir DOM antigo de login
    - restaura Olha rapidão/Ver mural mesmo se o botão de login continuar no DOM
    - carrega salvamento robusto, imagens, compartilhamento e gestão do Mural
    - mantém Rede, Agenda, Mural e Acompanhamento sob demanda
+   - carrega visão completa do Repositório para a coordenação
    - não altera Firebase, regras ou VPS
 */
 (function(){
@@ -11,7 +12,7 @@ if(window.__CARBONAUTAS_P135_LOADER)return;
 window.__CARBONAUTAS_P135_LOADER=true;
 
 const $=(s,r=document)=>r.querySelector(s);
-let integrityPromise=null,redePromise=null,peoplePromise=null,dossierPromise=null,projectsPromise=null,agendaPromise=null,agendaFocusPromise=null,agendaDetailPromise=null,homePolishPromise=null,muralVisualPromise=null,muralPolishPromise=null,muralSavePromise=null,muralUnifiedPromise=null,muralCardsPromise=null,muralImagePromise=null,highlightsPromise=null,checkinPromise=null,postAuthStarted=false;
+let integrityPromise=null,redePromise=null,peoplePromise=null,dossierPromise=null,projectsPromise=null,repositoryCoordinatorPromise=null,agendaPromise=null,agendaFocusPromise=null,agendaDetailPromise=null,homePolishPromise=null,muralVisualPromise=null,muralPolishPromise=null,muralSavePromise=null,muralUnifiedPromise=null,muralCardsPromise=null,muralImagePromise=null,highlightsPromise=null,checkinPromise=null,postAuthStarted=false;
 
 const scriptLoads=new Map();
 function load(src,id){
@@ -49,6 +50,7 @@ function ensureMuralCards(){if(muralCardsPromise)return muralCardsPromise;return
 function ensureMuralImage(){if(muralImagePromise)return muralImagePromise;return muralImagePromise=load('./modules/mural-imagem-p186.js?v=P187-20260920','carbonautas-mural-imagem-p186').catch(e=>{muralImagePromise=null;console.error('Carbonautas imagens/gestão do Mural',e)})}
 function ensureHighlights(){if(highlightsPromise)return highlightsPromise;return highlightsPromise=load('./modules/destaques-ui-p173.js?v=P173-20260920','carbonautas-destaques-ui-p173').catch(e=>{highlightsPromise=null;console.error('Carbonautas destaques',e)})}
 function ensureProjects(){if(projectsPromise)return projectsPromise;projectsPromise=(async()=>{try{await load('./modules/projetos-hierarquia-p169.js?v=P169-20260920','carbonautas-projetos-hierarquia-p169');await load('./modules/projetos-repositorio-p170.js?v=P170-20260920','carbonautas-projetos-repositorio-p170')}catch(e){projectsPromise=null;console.error('Carbonautas projetos',e);throw e}})();return projectsPromise}
+function ensureRepositoryCoordinator(){if(repositoryCoordinatorPromise)return repositoryCoordinatorPromise;repositoryCoordinatorPromise=load('./modules/repository-coordinator-p168.js?v=P168-20260923','carbonautas-repository-coordinator-p168').catch(e=>{repositoryCoordinatorPromise=null;console.error('Carbonautas Repositório coordenação',e);throw e});return repositoryCoordinatorPromise}
 function wireMacroShortcut(){const actions=$('#p166TrackAdmin .p166-admin-actions');if(!actions||!window.openMacroProjectsRepository)return;let b=actions.querySelector('[data-p170-admin]')||actions.querySelector('[data-p169-admin]');if(!b){b=document.createElement('button');b.type='button';const types=actions.querySelector('[data-p166="types"]');types?actions.insertBefore(b,types):actions.appendChild(b)}b.removeAttribute('data-p169-admin');b.dataset.p170Admin='1';b.textContent='Projetos macro';b.onclick=window.openMacroProjectsRepository}
 function ensurePeople(){
  if(peoplePromise)return peoplePromise;
@@ -62,13 +64,13 @@ function ensurePeople(){
 }
 function ensureRede(){if(redePromise)return redePromise;redePromise=(async()=>{try{await load('./p135-rede-acompanhamento.js?v=P165-20260919','carbonautas-p135-rede-acompanhamento');await load('./modules/rede-orientacao-p150.js?v=P165B-20260919','carbonautas-rede-orientacao-p150');await load('./modules/rede-ui-p155.js?v=P157-20260919','carbonautas-rede-ui-p155');await load('./modules/rede-legenda-p158.js?v=P158-20260919','carbonautas-rede-legenda-p158');await load('./modules/rede-controles-p161.js?v=P165-20260919','carbonautas-rede-controles-p161');await load('./modules/rede-estabilidade-p163.js?v=P165-20260919','carbonautas-rede-estabilidade-p163');await ensurePeople()}catch(e){redePromise=null;console.error('Carbonautas Rede',e);throw e}})();return redePromise}
 async function whenTrackReady(){await ensureIntegrity();await ensureRede();await ensurePeople()}
-window.CarbonautasLoader={ensureIntegrity,ensureRede,ensurePeople,ensureDossier,ensureProjects,whenTrackReady};
+window.CarbonautasLoader={ensureIntegrity,ensureRede,ensurePeople,ensureDossier,ensureProjects,ensureRepositoryCoordinator,whenTrackReady};
 
 function route(){
  if(!appReady())return;ensureIntegrity();ensureCheckin();
  const v=currentView(),home=v==='painel'||(!v&&appShellVisible());
  if(v==='rede'||v==='track')ensureRede();
- if(v==='pubs')ensureProjects();
+ if(v==='pubs'){ensureProjects();ensureRepositoryCoordinator()}
  if(v==='crono'||v==='agenda'){ensureAgenda();ensureAgendaFocus();ensureAgendaDetail()}
  if(home){ensureAgendaFocus();ensureHomePolish().then(()=>{window.refreshHomeAgendaMural?.()});ensureHighlights()}
  if(v==='mural'||v==='feed'){ensureHomePolish();ensureMuralVisual();ensureMuralPolish();ensureMuralSave();ensureMuralUnified();ensureMuralCards();ensureMuralImage()}
