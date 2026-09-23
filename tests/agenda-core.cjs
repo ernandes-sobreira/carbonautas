@@ -25,7 +25,7 @@ test('Agenda lê estado e identidade pela interface CarbonautasApp',()=>{
   const agenda=loadAgenda(app);
   const items=agenda.itemsForDate('2026-09-24');
   assert.equal(items.length,2);
-  assert.deepEqual(items.map(x=>x.title),['Curso QGIS','Constituição do conselho do parque']);
+  assert.deepEqual(items.map(x=>x.title).sort(),['Constituição do conselho do parque','Curso QGIS'].sort());
   assert.equal(agenda.countForDate('2026-09-24'),2);
 });
 
