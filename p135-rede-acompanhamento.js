@@ -10,7 +10,7 @@
 if(window.__CARBONAUTAS_P135_REDE_ACOMP)return;
 window.__CARBONAUTAS_P135_REDE_ACOMP=true;
 
-const BUILD='P165-PERF-20260919';
+const BUILD='P166-GRAPH-FREEZE-20260923';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -19,6 +19,9 @@ let relationMode='all';
 let baseBuildLinks=null;
 let redeReady=false;
 let trackTimer=0;
+let graphFreezeObserver=null;
+let graphFreezing=false;
+let graphPointerDown=false;
 window.__p135NetworkMode=window.__p135NetworkMode||'all';
 
 function stateRef(){try{return state}catch(_e){return null}}
@@ -63,14 +66,62 @@ function decorateTrack(){
 }
 function scheduleTrack(){clearTimeout(trackTimer);trackTimer=setTimeout(decorateTrack,30)}
 
+function paintGraphPositions(){
+  if(!window.d3)return;
+  try{
+    const root=window.d3.select('#graph');
+    root.selectAll('line.link')
+      .attr('x1',d=>d.source?.x??0).attr('y1',d=>d.source?.y??0)
+      .attr('x2',d=>d.target?.x??0).attr('y2',d=>d.target?.y??0);
+    root.selectAll('g.node').attr('transform',d=>`translate(${d.x??0},${d.y??0})`);
+  }catch(_e){}
+}
+function freezeGraphNow(settle=true){
+  if(graphPointerDown||graphFreezing)return;
+  graphFreezing=true;
+  try{
+    if(typeof simulation!=='undefined'&&simulation){
+      simulation.alphaTarget(0);
+      simulation.stop();
+      if(settle){
+        simulation.alpha(Math.max(.35,Number(simulation.alpha?.()||0)));
+        for(let i=0;i<120;i++)simulation.tick();
+      }
+      simulation.alpha(0);
+      simulation.stop();
+      paintGraphPositions();
+    }
+  }catch(_e){}
+  finally{graphFreezing=false}
+}
+function installGraphFreezeObserver(){
+  const graph=$('#graph');if(!graph)return false;
+  if(!graphFreezeObserver){
+    graphFreezeObserver=new MutationObserver(()=>{
+      if(graphPointerDown||graphFreezing)return;
+      queueMicrotask(()=>freezeGraphNow(true));
+    });
+    graphFreezeObserver.observe(graph,{subtree:true,attributes:true,attributeFilter:['transform','x1','y1','x2','y2']});
+    graph.addEventListener('pointerdown',()=>{graphPointerDown=true},{passive:true});
+    window.addEventListener('pointerup',()=>{if(!graphPointerDown)return;graphPointerDown=false;setTimeout(()=>freezeGraphNow(false),0)},{passive:true});
+    window.addEventListener('pointercancel',()=>{graphPointerDown=false;setTimeout(()=>freezeGraphNow(false),0)},{passive:true});
+  }
+  return true;
+}
 function installGraphFix(){
   let current=null;try{current=window.renderGraph||renderGraph}catch(_e){}
   if(typeof current!=='function')return false;
-  if(current.__p135Fixed)return true;
+  if(current.__p135Fixed){installGraphFreezeObserver();return true}
   let original=current,guard=0;
   while(guard++<6){const next=original.__p97Original||original.__p135Original;if(typeof next!=='function'||next===original)break;original=next}
-  const fixed=function(){const r=original.apply(this,arguments);setTimeout(()=>{try{if(simulation){simulation.alphaTarget(0);simulation.stop()}}catch(_e){}},650);return r};
-  fixed.__p135Fixed=true;fixed.__p135Original=original;try{renderGraph=fixed}catch(_e){}window.renderGraph=fixed;return true;
+  const fixed=function(){
+    const r=original.apply(this,arguments);
+    freezeGraphNow(true);
+    return r;
+  };
+  fixed.__p135Fixed=true;fixed.__p135Original=original;try{renderGraph=fixed}catch(_e){}window.renderGraph=fixed;
+  installGraphFreezeObserver();
+  return true;
 }
 function relationKinds(link){const txt=norm((link.reasons||[]).map(r=>r.label||'').join(' ')),types=new Set((link.reasons||[]).map(r=>r.type));const kinds=new Set();if(/orient|orientador|orientand/.test(txt))kinds.add('orientation');if(/projeto|pesquisa em conjunto|campo em conjunto|experimento em conjunto/.test(txt))kinds.add('projects');if(types.has('producao')||/artigo|publica|produc|resumo|manuscrito|capitulo|coautor|dados em conjunto|escrev/.test(txt))kinds.add('production');return kinds}
 function productionLinks(members,links){const s=stateRef(),ids=new Set(members.map(m=>m.id)),seen=new Set(links.map(l=>[String(l.source?.id||l.source),String(l.target?.id||l.target)].sort().join('|'))),out=[];(s?.publicacoes||[]).forEach(p=>{const people=[p.memberId,...(Array.isArray(p.collaboratorMemberIds)?p.collaboratorMemberIds:[])].filter((v,i,a)=>v&&ids.has(v)&&a.indexOf(v)===i);for(let i=0;i<people.length;i++)for(let j=i+1;j<people.length;j++){const key=[people[i],people[j]].sort().join('|');if(seen.has(key))continue;seen.add(key);out.push({source:people[i],target:people[j],reasons:[{type:'producao',label:`Produção compartilhada${p.title?' · '+p.title:''}`}],w:1,aux:true})}});return out}
@@ -81,7 +132,7 @@ function setMode(mode){relationMode=mode;window.__p135NetworkMode=mode||'all';$$
 
 function setupRede(force=false){
   const view=$('#viewRede'),main=view?.querySelector('.main');if(!view||!main)return false;
-  installGraphFix();installBuildLinks();let changed=false;
+  installGraphFix();installGraphFreezeObserver();installBuildLinks();let changed=false;
   if(!$('#p135RedeToolbar')){const bar=document.createElement('div');bar.id='p135RedeToolbar';bar.className='p135-rede-toolbar';bar.innerHTML=`<div class="p135-rede-title"><b>Rede</b><small>Pessoas e relações</small></div><button type="button" id="p135RedeSettingsBtn" class="p135-settings-btn">⚙ Ajustes</button><label class="p135-search"><span>⌕</span><input id="p135RedeSearch" type="search" placeholder="Buscar pessoa"></label><div class="p135-modes"><button class="on" data-p135-mode="all">Todos</button><button data-p135-mode="orientation">Orientação</button><button data-p135-mode="projects">Projetos</button><button data-p135-mode="production">Produção</button></div><div class="p135-insight" id="p135RedeInsight">Carregando rede…</div>`;view.insertBefore(bar,main);const inp=$('#p135RedeSearch'),real=$('#search');if(inp&&real){inp.value=real.value||'';inp.addEventListener('input',()=>{real.value=inp.value;real.dispatchEvent(new Event('input',{bubbles:true}))})}$$('[data-p135-mode]',bar).forEach(b=>b.onclick=()=>setMode(b.dataset.p135Mode));changed=true}
   if(!$('#p135RedeSettings')){const overlay=document.createElement('div');overlay.id='p135RedeSettings';overlay.hidden=true;overlay.innerHTML='<div class="p135-sheet"><div class="p135-sheet-head"><b>Ajustes da Rede</b><button type="button" aria-label="Fechar">×</button></div><div class="p135-sheet-body"></div></div>';document.body.appendChild(overlay);const body=$('.p135-sheet-body',overlay),side=view.querySelector('.side'),controls=view.querySelector('.graph-controls');if(side)body.appendChild(side);if(controls)body.appendChild(controls);const close=()=>overlay.hidden=true;$('#p135RedeSettingsBtn').onclick=()=>overlay.hidden=false;$('.p135-sheet-head button',overlay).onclick=close;overlay.onclick=e=>{if(e.target===overlay)close()};changed=true}
   if((!redeReady||changed||force)&&(activeView()==='rede'||view.classList.contains('on'))){redeReady=true;requestAnimationFrame(redraw)}
@@ -100,13 +151,13 @@ function handleView(){
   if(v==='track'){installHealthFix();bindTrackObservers();scheduleTrack()}
 }
 function boot(){
-  injectCss();installHealthFix();installGraphFix();installBuildLinks();
+  injectCss();installHealthFix();installGraphFix();installGraphFreezeObserver();installBuildLinks();
   if(activeView()==='rede'||$('#viewRede')?.classList.contains('on'))setupRede(true);
   if(activeView()==='track'||$('#viewTrack')?.classList.contains('on')){bindTrackObservers();decorateTrack()}
   const viewObserver=new MutationObserver(handleView);viewObserver.observe(document.body,{attributes:true,attributeFilter:['data-view']});
   document.addEventListener('click',e=>{if(activeView()==='track'&&e.target.closest?.('[data-p97-member],#p97Deck button'))scheduleTrack()},true);
-  setTimeout(()=>{installHealthFix();installGraphFix();installBuildLinks();handleView()},220);
-  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P165 · desempenho Rede/Acompanhamento')
+  setTimeout(()=>{installHealthFix();installGraphFix();installGraphFreezeObserver();installBuildLinks();handleView();freezeGraphNow(true)},220);
+  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P166 · grafo estático + Rede/Acompanhamento')
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
