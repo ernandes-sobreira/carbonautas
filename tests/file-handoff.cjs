@@ -1,6 +1,6 @@
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const api=require('../modules/file-handoff-p214.js');
+const api=require('../modules/file-handoff.js');
 
 test('private thread id is stable',()=>{
   assert.equal(api.privateThreadId('b','a'),api.privateThreadId('a','b'));
@@ -28,14 +28,6 @@ test('exchange permission covers owner coordinator collaborator and review parti
   assert.equal(api.canExchange(p,{memberId:'x'}),false);
 });
 
-test('OnlyOffice actions are recognized but download/message are not',()=>{
-  const fake=(text='',title='',onclick='',className='')=>({textContent:text,className,getAttribute:k=>k==='title'?title:k==='onclick'?onclick:''});
-  assert.equal(api.isLegacyOnlineAction(fake('Corrigir online')),true);
-  assert.equal(api.isLegacyOnlineAction(fake('Visualizar','','openFilePreview(\'x\')')),true);
-  assert.equal(api.isLegacyOnlineAction(fake('Baixar')),false);
-  assert.equal(api.isLegacyOnlineAction(fake('Mensagem')),false);
-});
-
 test('timeline translates upload and download',()=>{
   assert.equal(api.actionText({action:'download'}),'baixou o arquivo');
   assert.equal(api.actionText({action:'upload',source:'p214'}),'enviou uma nova versão');
@@ -61,4 +53,14 @@ test('review-flow history merges versions and professor download in chronologica
   const e=api.historyEvents(p2,{publicacoes:[p1,p2]});
   assert.deepEqual(e.map(x=>x.action),['initial','download','upload']);
   assert.deepEqual(e.map(x=>x.version),[1,1,2]);
+});
+test('versions preserve the highest legacy counter',()=>{
+ assert.equal(api.currentVersion({reviewVersion:8,onlineEditVersion:2}),8);
+});
+test('package recipient choices include only allowed peers and exclude the owner',()=>{
+ const p={packageId:'p',memberId:'alu',packageAccess:'selected',collaboratorMemberIds:['alu','a','b','a']};
+ assert.deepEqual(api.recipientIds(p,'alu',{}),['a','b']);
+ assert.equal(api.resolveRecipient(p,'alu','b'),'b');
+ assert.throws(()=>api.resolveRecipient(p,'alu','outsider'),/acesso/);
+ assert.deepEqual(api.recipientIds(p,'a',{}),['alu']);
 });

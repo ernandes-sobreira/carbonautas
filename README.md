@@ -2,6 +2,14 @@
 
 Plataforma da Rede Carbonautas (LIPAN/LEFA/CELBE, UNEMAT). Arquivo unico `index.html` publicado no GitHub Pages, Firestore e Storage no projeto `brasa-pantanal`, bridge ONLYOFFICE e Laboratorio de Dados no VPS.
 
+## Refatoração do Repositório (em homologação)
+
+O novo fluxo de troca está em `modules/file-handoff.js`, `modules/repository.js` e `modules/repository.css`. Não adicionar patches numerados. O componente é compartilhado entre lista, pastas e carrossel; o histórico utiliza os dados existentes.
+
+Leia [auditoria e limites da validação](docs/repository-audit.md) antes do merge. Esta branch exige publicação coordenada das regras Firestore e homologação com contas reais. Não altera Lab.as.
+
+Testes: `npm ci`, `npm test`, `npm run test:rules` (Java 21 recomendado), `npx playwright install chromium` e `npm run test:browser`.
+
 ## Estrutura do repositorio
 
 | Caminho | Uso |
