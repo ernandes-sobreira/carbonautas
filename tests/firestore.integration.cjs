@@ -20,6 +20,25 @@ const f=require('firebase/firestore'),fs=require('node:fs'),vm=require('node:vm'
  await assertSucceeds(third.api.logDownload('file'));
  await assertFails(f.updateDoc(f.doc(third.db,'rede_publicacoes','file'),{onlineEditHistory:[]}));
  await assertFails(f.updateDoc(f.doc(third.db,'rede_publicacoes','file'),{url:'https://bad'}));
+
+ // Privacy contract: coordinator role alone grants ZERO access to a private folder.
+ // The coordinator gains access only after the owner explicitly includes that memberId.
+ await env.withSecurityRulesDisabled(async c=>{
+  const db=c.firestore();
+  await f.setDoc(f.doc(db,'rede_repository_packages','privacy'),{ownerMemberId:'alu',ownerName:'Aluno',createdByUid:'alu',createdByMemberId:'alu',accessMode:'private',allowedMemberIds:['alu']});
+  await f.setDoc(f.doc(db,'rede_repository_packages','privacy','files','a'),{fileName:'only-owner.docx',url:'https://storage/private',onlineEditVersion:1,createdByUid:'alu',ts:new Date()});
+ });
+ await assertSucceeds(f.getDoc(f.doc(alu.db,'rede_repository_packages','privacy')));
+ await assertSucceeds(f.getDoc(f.doc(alu.db,'rede_repository_packages','privacy','files','a')));
+ await assertFails(f.getDoc(f.doc(prof.db,'rede_repository_packages','privacy')));
+ await assertFails(f.getDoc(f.doc(prof.db,'rede_repository_packages','privacy','files','a')));
+ await assertFails(f.getDoc(f.doc(third.db,'rede_repository_packages','privacy','files','a')));
+ await assertSucceeds(f.updateDoc(f.doc(alu.db,'rede_repository_packages','privacy'),{accessMode:'selected',allowedMemberIds:['alu','prof']}));
+ await assertSucceeds(f.getDoc(f.doc(prof.db,'rede_repository_packages','privacy')));
+ await assertSucceeds(f.getDoc(f.doc(prof.db,'rede_repository_packages','privacy','files','a')));
+ await assertFails(f.getDoc(f.doc(third.db,'rede_repository_packages','privacy','files','a')));
+ console.log('PASS: coordinator cannot read private package; explicit owner selection grants access only to the chosen coordinator.');
+
  await env.withSecurityRulesDisabled(async c=>{const db=c.firestore();await f.setDoc(f.doc(db,'rede_repository_packages','pkg'),{ownerMemberId:'alu',ownerName:'Aluno',createdByUid:'alu',createdByMemberId:'alu',accessMode:'selected',allowedMemberIds:['alu','prof']});await f.setDoc(f.doc(db,'rede_repository_packages','pkg','files','a'),{fileName:'private.docx',url:'https://storage/p1',onlineEditVersion:1,createdByUid:'alu',ts:new Date()})});
  await assertSucceeds(prof.api.logDownload('package:pkg:a'));
  await assertSucceeds(prof.api.commitUploadAndMessage('package:pkg:a',{name:'private-v2.docx',size:100},'Corrigi'));
@@ -27,7 +46,7 @@ const f=require('firebase/firestore'),fs=require('node:fs'),vm=require('node:vm'
  const privateFile=await f.getDoc(f.doc(alu.db,'rede_repository_packages','pkg','files','a'));assert.equal(privateFile.data().onlineEditVersion,3);
  await assertFails(f.getDoc(f.doc(third.db,'rede_repository_packages','pkg','files','a')));
  const batch=f.writeBatch(alu.db);await alu.api.addMessageReceipt(batch,{id:'package:pkg:a',threadId:tid,targetId:'prof',version:3},tid);await assertSucceeds(batch.commit());
- console.log('PASS: private package v1 → v2 → v3 and contextual message receipt; third-party file read denied.');
+ console.log('PASS: selected package v1 → v2 → v3 and contextual message receipt; third-party file read denied.');
  console.log('PASS: real Firestore transactions v1 → v2 → v3, receipts, messages, notifications, third-party isolation, history tampering rejection.');
  }finally{await env.cleanup()}
 })().catch(e=>{console.error(e);process.exitCode=1});
