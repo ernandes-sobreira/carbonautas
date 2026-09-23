@@ -2,6 +2,7 @@
    - preserves existing profile data/photo when a new photo upload fails
    - writes only self-edit fields allowed by Firestore rules
    - retries Acompanhamento actions after the lazy modules are actually ready
+   - closes stacked Acompanhamento/Repository UI before opening private chat
    - no polling, no data migration, no VPS changes
 */
 (function(root){
@@ -10,7 +11,7 @@ if(root.__CARBONAUTAS_RUNTIME_INTEGRITY)return;
 root.__CARBONAUTAS_RUNTIME_INTEGRITY=true;
 
 const $=(s,r=document)=>r.querySelector(s);
-let profileBusy=false;
+let profileBusy=false,messageBusy=false;
 
 function app(){return root.CarbonautasApp||{state:{},memberId:'',isAdmin:false}}
 function toastSafe(msg){try{if(typeof toast==='function')return toast(msg)}catch(_e){};root.toast?.(msg)}
@@ -108,10 +109,32 @@ async function rescueTrackAction(el){
  fn(...spec.args(el,mid));return true;
 }
 
+function closeTrackingDeck(){
+ const deck=$('#p97Deck');if(!deck||deck.hidden)return;
+ const close=deck.querySelector('[data-p97-close]');
+ if(close){close.click();return}
+ deck.hidden=true;const stage=$('#p97Stage');if(stage)stage.innerHTML='';document.documentElement.style.overflow='';
+}
+async function routeRepositoryMessage(button){
+ if(messageBusy)return;
+ const card=button.closest('[data-file-id]'),id=card?.dataset.fileId;if(!id)return;
+ const repo=root.CarbonautasRepository;if(!repo?.openMessage)return toastSafe('O Repositório ainda não terminou de carregar.');
+ messageBusy=true;button.disabled=true;
+ try{
+  closeTrackingDeck();
+  await repo.openMessage(id);
+  const input=$('#privateInput');
+  if(document.body?.dataset?.view!=='conversas')root.switchView?.('conversas');
+  requestAnimationFrame(()=>{input?.focus?.();input?.scrollIntoView?.({block:'nearest'})});
+ }catch(e){console.error('Mensagem do Repositório',e);toastSafe(e?.message||'Não foi possível abrir a conversa privada.')}finally{messageBusy=false;button.disabled=false}
+}
+
 function boot(){
  document.addEventListener('click',e=>{
   const save=e.target.closest?.('#saveMember');
   if(save){e.preventDefault();e.stopImmediatePropagation();saveMemberRobust();return}
+  const message=e.target.closest?.('[data-file-action="message"]');
+  if(message){e.preventDefault();e.stopImmediatePropagation();routeRepositoryMessage(message);return}
   const action=e.target.closest?.('#p97Deck [data-p97-action]');
   if(!action)return;
   const spec=actions[action.dataset.p97Action];if(!spec||typeof root[spec.fn]==='function')return;
@@ -119,6 +142,6 @@ function boot(){
  },true);
 }
 
-root.CarbonautasRuntimeIntegrity={saveMember:saveMemberRobust,rescueTrackAction};
+root.CarbonautasRuntimeIntegrity={saveMember:saveMemberRobust,rescueTrackAction,routeRepositoryMessage,closeTrackingDeck};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })(globalThis);
