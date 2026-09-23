@@ -51,7 +51,7 @@ test('falha no upload da foto preserva a foto anterior e self-save só envia cam
 });
 
 test('falha do Firestore não fecha o perfil nem finge sucesso',async()=>{
- const err=Object.assign(new Error('denied'),{code:'permission-denied'});const dom=makeDom({setDoc:async()=>{throw err}}),w=dom.window;
+ const err=Object.assign(new Error('denied'),{code:'permission-denied'});const dom=makeDom({setDoc:async()=>{throw err}}),w=dom.window;w.__closed=undefined;
  await w.CarbonautasRuntimeIntegrity.saveMember();
  assert.equal(w.__closed,undefined);
  assert.match(w.__toast,/dados anteriores foram preservados/i);
