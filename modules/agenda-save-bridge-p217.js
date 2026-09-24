@@ -12,7 +12,7 @@
 const hasDocument=()=>typeof document!=='undefined';
 const $=(s,r)=>hasDocument()?(r||document).querySelector(s):null;
 const $$=(s,r)=>hasDocument()?Array.from((r||document).querySelectorAll(s)):[];
-let observer=null,renderLock=false,pendingToken=0;
+let renderLock=false,pendingToken=0;
 
 function state(){try{return root?.CarbonautasApp?.state||root?.state||{}}catch(_e){return{}}}
 function memberId(){try{return String(root?.CarbonautasApp?.memberId||root?.myId||'')}catch(_e){return''}}
@@ -74,9 +74,9 @@ function refreshAgenda(date=''){
   },ms));
 }
 function matchingActivity(ctx){
-  const list=(state().activities||[]).filter(a=>String(a.title||'')===ctx.title&&String(a.dueDate||'')===ctx.date&&String(a.ownerId||'')===memberId());
+  const list=(state().activities||[]).filter(a=>String(a.title||'')===ctx.title&&String(a.dueDate||'')===ctx.date);
   if(ctx.editId)return list.find(a=>String(a.id)===ctx.editId)||null;
-  return list.find(a=>!ctx.before.has(String(a.id)))||null;
+  const me=memberId();return list.find(a=>!ctx.before.has(String(a.id))&&(String(a.ownerId||'')===me||isAdmin()))||null;
 }
 async function watchSave(ctx){
   const token=++pendingToken;
@@ -102,13 +102,17 @@ function captureSave(){
   const status=$('#p183Status');if(status){status.textContent='Salvando atividade…';status.className='p183-status on'}
   watchSave(ctx);
 }
+function scheduleAugment(){[0,50,140,320].forEach(ms=>setTimeout(augment,ms))}
 function boot(){
   if(!hasDocument())return;
-  document.addEventListener('click',e=>{if(e.target.closest?.('#p174Save'))captureSave();if(e.target.closest?.('#viewCrono .ag-day'))setTimeout(augment,40)},true);
-  const body=$('#agBody');if(body){observer=new MutationObserver(()=>{if(!renderLock)queueMicrotask(augment)});observer.observe(body,{childList:true,subtree:true})}
-  new MutationObserver(ms=>{if(ms.some(m=>m.attributeName==='data-view')&&(document.body?.dataset?.view==='crono'||document.body?.dataset?.view==='agenda'))setTimeout(augment,80)}).observe(document.body,{attributes:true,attributeFilter:['data-view']});
-  root.addEventListener?.('pageshow',()=>setTimeout(augment,120),{passive:true});
-  setTimeout(augment,120);
+  document.addEventListener('click',e=>{
+    if(e.target.closest?.('#p174Save'))captureSave();
+    if(e.target.closest?.('#viewCrono .ag-day,#agPrev,#agNext,#agModes button,#viewCrono .ag-mini'))scheduleAugment();
+  },true);
+  new MutationObserver(ms=>{if(ms.some(m=>m.attributeName==='data-view')&&(document.body?.dataset?.view==='crono'||document.body?.dataset?.view==='agenda'))scheduleAugment()}).observe(document.body,{attributes:true,attributeFilter:['data-view']});
+  root.addEventListener?.('carbonautas:agenda-activity-saved',scheduleAugment);
+  root.addEventListener?.('pageshow',scheduleAugment,{passive:true});
+  scheduleAugment();
 }
 const api={state,memberId,isAdmin,visibleActivity,activitiesForDate,selectedDate,activityCard,augment,refreshAgenda,matchingActivity,watchSave,captureSave};
 if(hasDocument()){if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot()}
