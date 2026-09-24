@@ -16,3 +16,11 @@ test('P218 encontra o dia selecionado e limita anterior/proximo',()=>{
   assert.equal(nav.clampIndex(5,3),2);
   assert.equal(nav.clampIndex(1,3),1);
 });
+
+test('P218B distingue clique de arraste no PC',()=>{
+  assert.equal(nav.pointerClickIntent(0,0),true);
+  assert.equal(nav.pointerClickIntent(5,4),true);
+  assert.equal(nav.pointerClickIntent(9,9),true);
+  assert.equal(nav.pointerClickIntent(10,2),false);
+  assert.equal(nav.pointerClickIntent(25,1),false);
+});
