@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Locate mural shortcut markup and styles
+      - name: Inspect exact mural shortcut CSS
         shell: bash
         run: |
-          echo '--- MARKUP MATCHES ---'
-          grep -RIn -C 12 -E 'O que você precisa|PRECISO DE AJUDA|Mostrar atalhos|ANÁLISE DE DADOS|ANALISE DE DADOS' . --exclude-dir=.git --exclude='package-lock.json' || true
-          echo '--- COLOR WHITE RULES NEAR MURAL/ATALHO ---'
-          grep -RIn -C 5 -E 'color:[[:space:]]*(#fff|white|rgba\(255,[[:space:]]*255,[[:space:]]*255)|mural|atalho|shortcut' index.html modules --exclude='package-lock.json' || true
+          echo '--- pubNeed selectors with context ---'
+          grep -n -C 12 -E 'pubNeedCard|pubNeedBox|pubNeedToggle|pubNeedGrid' index.html || true
+          echo '--- rules forcing white text in publicacoes ---'
+          grep -n -C 8 -E 'view-publicacoes.*color|color:[[:space:]]*#fff[[:space:]]*!important|color:[[:space:]]*white[[:space:]]*!important' index.html || true
