@@ -1,25 +1,132 @@
-name: P223 Flicker diagnostic
+name: P223 Fix entry flicker
 
 on:
   push:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  inspect-flicker:
+  fix-entry-flicker:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect exact boot transitions
+        with:
+          fetch-depth: 0
+      - name: Apply atomic boot transition
         shell: bash
         run: |
-          echo '=== BOOTSTRAP FUNCTION ==='
-          grep -n -A 140 -B 8 -E '^async function bootstrap\(' index.html || true
-          echo '=== ALL AUTH/LOADING CLASS TOGGLES ==='
-          grep -n -C 6 -E "authGate.*classList|loading.*classList|classList.*authGate|classList.*loading|#authGate|#loading" index.html || true
-          echo '=== DYNAMIC FAVICON FULL BLOCK ==='
-          grep -n -A 80 -B 4 -E 'carbonautas-dynamic-favicon' index.html || true
-          echo '=== P95/P96 ENTRY RUNTIME ==='
-          grep -n -A 100 -B 8 -E 'carbonautasEntryP95|P96 nomes|function decorateEntry\(' index.html || true
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('index.html')
+          text=p.read_text(encoding='utf-8')
+
+          # 1) Critical entry appearance is available before the first body paint.
+          critical='''\n<style id="p223-critical-entry-stability">\n/* P223 · primeira pintura estável: splash acima do login e app oculto até o bootstrap terminar */\n.auth-gate{z-index:130!important;background:radial-gradient(circle at 12% 14%,rgba(98,185,138,.16),transparent 28%),radial-gradient(circle at 88% 18%,rgba(110,189,206,.14),transparent 26%),radial-gradient(circle at 78% 88%,rgba(240,235,250,.9),transparent 30%),linear-gradient(155deg,#f8fcfb 0%,#eef8f5 48%,#f5f8fb 100%)!important;padding:24px!important}\n.auth-card{position:relative!important;z-index:1!important;width:min(470px,100%)!important;padding:34px!important;border-radius:30px!important;border:1px solid rgba(201,220,218,.88)!important;background:rgba(255,255,255,.94)!important;backdrop-filter:blur(16px)!important;box-shadow:0 28px 80px rgba(20,65,76,.13)!important}\n.auth-brand{gap:14px!important;margin-bottom:26px!important;align-items:center!important}.auth-brand .mark{width:68px!important;height:68px!important;flex:0 0 68px!important;border-radius:21px!important;padding:6px!important;background:linear-gradient(145deg,#f3fbf8,#eaf6f7)!important;border:1px solid #d4e8e3!important;box-shadow:0 14px 34px rgba(24,116,105,.11)!important;overflow:hidden!important}.auth-brand h2{font-family:'Space Grotesk','Inter',sans-serif!important;font-size:30px!important;line-height:1!important;color:#14364a!important;font-weight:700!important;letter-spacing:-.045em!important}.auth-brand p{margin-top:6px!important;color:#66818a!important;font-size:12.5px!important;line-height:1.35!important;font-weight:600!important}\n.loading{z-index:140!important;background:linear-gradient(155deg,#f8fcfb 0%,#eef8f5 54%,#f5f8fb 100%)!important;color:#14364a!important;transition:none!important}.loading.off{opacity:0!important;visibility:hidden!important;pointer-events:none!important}.loading .mark{width:82px!important;height:82px!important;border-radius:24px!important;padding:7px!important;background:linear-gradient(145deg,#f3fbf8,#eaf6f7)!important;border:1px solid #d5e9e4!important;box-shadow:0 18px 46px rgba(25,96,91,.12)!important}html body .loading .mark{animation:none!important}\nbody:not(.carbonautas-session-ready) .app{visibility:hidden!important}body.carbonautas-session-ready .app{visibility:visible!important}\n@media(max-width:620px){.auth-gate{padding:20px!important}.auth-card{padding:26px 24px!important;border-radius:26px!important;width:min(100%,430px)!important}.auth-brand .mark{width:62px!important;height:62px!important;flex-basis:62px!important}}\n</style>\n'''
+          if 'id="p223-critical-entry-stability"' not in text:
+              if text.count('</head>') != 1:
+                  raise SystemExit('ABORT: </head> não é único')
+              text=text.replace('</head>',critical+'</head>',1)
+
+          # 2) Consolidated P93-P95 styles must not be injected asynchronously a second time.
+          old_css="""function ensureCss(){
+  if(!$('#carbonautasSoftThemeP93')){const l=document.createElement('link');l.id='carbonautasSoftThemeP93';l.rel='stylesheet';l.href='./carbonautas-soft-theme-p93.css?v=P93-20260918';document.head.appendChild(l)}
+  if(!$('#carbonautasIdentityP94')){const l=document.createElement('link');l.id='carbonautasIdentityP94';l.rel='stylesheet';l.href='./carbonautas-identity-p94.css?v=P94-20260918';document.head.appendChild(l)}
+  if(!$('#carbonautasEntryP95')){const l=document.createElement('link');l.id='carbonautasEntryP95';l.rel='stylesheet';l.href='./carbonautas-entry-p95.css?v=P95-20260918';document.head.appendChild(l)}
+}"""
+          new_css="""function ensureCss(){
+  // P223: P93, P94 e P95 já estão consolidados no próprio index.html.
+  // Não reinjetar CSS por rede: isso causava uma segunda pintura visual na entrada.
+}"""
+          if old_css in text:
+              text=text.replace(old_css,new_css,1)
+          elif new_css not in text:
+              raise SystemExit('ABORT: ensureCss P96 não localizado')
+
+          # 3) Stop continuously redrawing the browser tab icon.
+          pattern=r'<script id="carbonautas-dynamic-favicon">.*?</script>'
+          static_favicon='''<script id="carbonautas-dynamic-favicon">\n(()=>{\n  const link=document.getElementById('dynamicFavicon');\n  if(link) link.href='./icon-192.png?v=P223';\n})();\n</script>'''
+          matches=re.findall(pattern,text,flags=re.S)
+          if len(matches)==1:
+              text=re.sub(pattern,static_favicon,text,count=1,flags=re.S)
+          elif static_favicon not in text:
+              raise SystemExit(f'ABORT: favicon dinâmico encontrado {len(matches)} vez(es)')
+
+          # 4) Enter authenticated flow behind the stable splash, never behind the login card.
+          old_auth="authUser=user; $('#loading').classList.remove('off'); $('#loadingMsg').textContent='Validando sua conta…';"
+          new_auth="authUser=user; document.body.classList.remove('carbonautas-session-ready'); $('#authGate').classList.add('off'); $('#loading').classList.remove('off'); $('#loadingMsg').textContent='Validando sua conta…';"
+          if old_auth in text:
+              text=text.replace(old_auth,new_auth,1)
+          elif new_auth not in text:
+              raise SystemExit('ABORT: início do fluxo autenticado não localizado')
+
+          # 5) Reveal the app only after final identity/UI work has painted under the splash.
+          old_success="""    subscribeAll();
+    bootstrapped=true;
+    $('#authGate').classList.add('off');
+    $('#loading').classList.add('off');
+    refreshIdentityUI();"""
+          new_success="""    subscribeAll();
+    bootstrapped=true;
+    refreshIdentityUI();
+    document.body.classList.add('carbonautas-session-ready');
+    $('#authGate').classList.add('off');
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    $('#loading').classList.add('off');"""
+          if old_success in text:
+              text=text.replace(old_success,new_success,1)
+          elif new_success not in text:
+              raise SystemExit('ABORT: final do bootstrap não localizado')
+
+          # 6) Login screen always means the application behind it is hidden.
+          login_marker="function showLogin(message=''){\n"
+          login_repl="function showLogin(message=''){\n  document.body.classList.remove('carbonautas-session-ready');\n"
+          if login_marker in text and login_repl not in text:
+              text=text.replace(login_marker,login_repl,1)
+          elif login_repl not in text:
+              raise SystemExit('ABORT: showLogin não localizado')
+
+          register_marker="function showRegister(){\n"
+          register_repl="function showRegister(){\n  document.body.classList.remove('carbonautas-session-ready');\n"
+          if register_marker in text and register_repl not in text:
+              text=text.replace(register_marker,register_repl,1)
+
+          unlinked_marker="async function showUnlinked(user){\n"
+          unlinked_repl="async function showUnlinked(user){\n  document.body.classList.remove('carbonautas-session-ready');\n"
+          if unlinked_marker in text and unlinked_repl not in text:
+              text=text.replace(unlinked_marker,unlinked_repl,1)
+
+          # 7) Initial unauthenticated reveal waits until DOMContentLoaded + two frames.
+          old_login_hide="$('#authMsg').textContent=message; $('#loading').classList.add('off');"
+          new_login_hide="""$('#authMsg').textContent=message;
+  const revealLogin=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>$('#loading').classList.add('off')));
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',revealLogin,{once:true}); else revealLogin();"""
+          if old_login_hide in text:
+              text=text.replace(old_login_hide,new_login_hide,1)
+          elif new_login_hide not in text:
+              raise SystemExit('ABORT: ocultação do loading em showLogin não localizada')
+
+          p.write_text(text,encoding='utf-8')
+
+          # Structural assertions.
+          assert 'p223-critical-entry-stability' in text
+          assert "document.body.classList.add('carbonautas-session-ready')" in text
+          assert "P93, P94 e P95 já estão consolidados" in text
+          fav=re.search(pattern,text,flags=re.S).group(0)
+          assert 'requestAnimationFrame' not in fav
+          assert "link.href='./icon-192.png?v=P223'" in fav
+          print('P223: transição atômica, CSS consolidado e favicon estático verificados.')
+          PY
+      - name: Commit stable entry
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --check
+          git commit -m "P223: eliminar pisca-pisca na entrada"
+          git push
