@@ -12,10 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Locate exact shortcut source in repository
+      - name: Inspect mural command styles
         shell: bash
         run: |
-          echo '--- pubNeed anywhere ---'
-          grep -RIn -C 10 -E 'pubNeed(Card|Box|Toggle|Grid)|O que você precisa do grupo|PRECISO DE AJUDA PRA CAMPO|Mostrar atalhos' . --exclude-dir=.git --exclude='package-lock.json' || true
-          echo '--- css descendants forcing white ---'
-          grep -RIn -C 7 -E '(pubNeed|view-publicacoes|mural).*(\*|div|button|b|small).*color:[[:space:]]*(#fff|white).*important|color:[[:space:]]*(#fff|white).*important.*(pubNeed|view-publicacoes|mural)' . --exclude-dir=.git --exclude='package-lock.json' || true
+          echo '--- mural command/action CSS ---'
+          grep -n -C 8 -E '\.mural-command|\.mural-action|\.ma-title|\.ma-sub' index.html || true
