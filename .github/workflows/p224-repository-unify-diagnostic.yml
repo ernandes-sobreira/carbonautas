@@ -1,0 +1,23 @@
+name: P224 Repository unify diagnostic
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect repository renderers
+        shell: bash
+        run: |
+          echo '=== renderPubs ==='
+          grep -n -A 220 -B 30 -E '^function renderPubs\(|function renderPubs\(' index.html || true
+          echo '=== repository html ==='
+          grep -n -A 120 -B 40 -E 'id="pubList"|id="pubCategoria"|id="pubPessoa"|id="pubMine"|repoPackage|repositoryOrganizer|Folhear arquivos' index.html || true
+          echo '=== repository module tail ==='
+          grep -n -A 180 -B 20 -E 'function buildOrganizer\(|function boot\(' modules/repository.js || true
