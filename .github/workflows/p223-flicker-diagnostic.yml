@@ -12,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect auth, legacy patches and navigation
+      - name: Inspect exact boot transitions
         shell: bash
         run: |
-          echo '=== AUTH / LOGIN VISIBILITY ==='
-          grep -n -C 14 -E 'onAuthStateChanged|authOverlay|authScreen|auth-card|loginBtn|registerBtn|signInWithEmailAndPassword|signOut\(' index.html || true
-          echo '=== LEGACY P85 P86 P87 ==='
-          grep -n -C 16 -E 'P85|P86|P87|dashboard-panel-cleanup|pwa-mobile-fix|mobile-chat-composer|chat-composer-layout|dashboard-render-stability' index.html || true
-          echo '=== SERVICE WORKER / RELOAD / URL ==='
-          grep -n -C 16 -E 'serviceWorker|controllerchange|SKIP_WAITING|location\.reload|location\.replace|location\.href|history\.(replaceState|pushState)|apprefresh|build=|fresh=|pwa=' index.html || true
-          echo '=== BOOT / BODY / APP VISIBILITY ==='
-          grep -n -C 12 -E '<body|class="app|id="app|DOMContentLoaded|document\.readyState|visibility:[[:space:]]*hidden|opacity:[[:space:]]*0|display:[[:space:]]*none' index.html | head -n 900 || true
+          echo '=== BOOTSTRAP FUNCTION ==='
+          grep -n -A 140 -B 8 -E '^async function bootstrap\(' index.html || true
+          echo '=== ALL AUTH/LOADING CLASS TOGGLES ==='
+          grep -n -C 6 -E "authGate.*classList|loading.*classList|classList.*authGate|classList.*loading|#authGate|#loading" index.html || true
+          echo '=== DYNAMIC FAVICON FULL BLOCK ==='
+          grep -n -A 80 -B 4 -E 'carbonautas-dynamic-favicon' index.html || true
+          echo '=== P95/P96 ENTRY RUNTIME ==='
+          grep -n -A 100 -B 8 -E 'carbonautasEntryP95|P96 nomes|function decorateEntry\(' index.html || true
