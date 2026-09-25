@@ -1,23 +1,170 @@
-name: P224 Repository unify diagnostic
+name: P224 Unify repository browser
 
 on:
   push:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  inspect:
+  unify:
+    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect repository renderers
+        with:
+          fetch-depth: 0
+      - name: Unify packages and publications in one searchable list
         shell: bash
         run: |
-          echo '=== renderPubs ==='
-          grep -n -A 220 -B 30 -E '^function renderPubs\(|function renderPubs\(' index.html || true
-          echo '=== repository html ==='
-          grep -n -A 120 -B 40 -E 'id="pubList"|id="pubCategoria"|id="pubPessoa"|id="pubMine"|repoPackage|repositoryOrganizer|Folhear arquivos' index.html || true
-          echo '=== repository module tail ==='
-          grep -n -A 180 -B 20 -E 'function buildOrganizer\(|function boot\(' modules/repository.js || true
+          python - <<'PY'
+          from pathlib import Path
+
+          index=Path('index.html')
+          text=index.read_text(encoding='utf-8')
+
+          old='<div class="crono-filters">\n          <select class="mini" id="pubCategoria"'
+          new='<div class="crono-filters" id="repositoryLegacyFilters">\n          <select class="mini" id="pubCategoria"'
+          if old in text:
+              text=text.replace(old,new,1)
+          elif 'id="repositoryLegacyFilters"' not in text:
+              raise SystemExit('ABORT: filtros legados do repositório não localizados')
+
+          old='return `<div class="repo-package-card"><div class="repo-package-icon">📦</div>'
+          new='return `<div class="repo-package-card" data-package-id="${esc(p.id)}"><div class="repo-package-icon">📦</div>'
+          if old in text:
+              text=text.replace(old,new,1)
+          elif 'class="repo-package-card" data-package-id=' not in text:
+              raise SystemExit('ABORT: cartão de pasta não localizado')
+
+          old='return `<div class="pub-row"><div class="pub-cat"'
+          new='return `<div class="pub-row" data-publication-id="${esc(p.id)}"><div class="pub-cat"'
+          if old in text:
+              text=text.replace(old,new,1)
+          elif 'class="pub-row" data-publication-id=' not in text:
+              raise SystemExit('ABORT: linha de publicação não localizada')
+
+          old="if(!list.length){ wrap.innerHTML=packageCount?'':'<div class=\"crono-empty\">Nenhuma publicação encontrada com esses filtros.</div>'; return; }"
+          new="if(!list.length){ wrap.innerHTML=packageCount?'':'<div class=\"crono-empty\">Nenhuma publicação encontrada com esses filtros.</div>'; document.dispatchEvent(new CustomEvent('carbonautas:repository-rendered')); return; }"
+          if old in text:
+              text=text.replace(old,new,1)
+          elif "packageCount?'':'<div class=\"crono-empty\">" in text and "repository-rendered')); return;" not in text:
+              raise SystemExit('ABORT: retorno de lista vazia não localizado')
+
+          index.write_text(text,encoding='utf-8')
+
+          mod=Path('modules/repository.js')
+          js=mod.read_text(encoding='utf-8')
+          start=js.index('function repositoryItems(){')
+          end=js.index('function syncAdminPackages',start)
+          browser=r'''const PACKAGE_PURPOSE_LABELS={artigos:'Artigos / manuscritos',resumos:'Resumos / eventos',instrumentos:'Instrumentos de coleta',dados:'Bases de dados',ferramentas:'Ferramentas / materiais',scripts:'Scripts / códigos',aula:'Material de aula',referencias:'Referências / leituras',bolsa:'Inscrição / bolsa',processo:'Processo seletivo / inscrição',prestacao:'Prestação de contas',documentos:'Documentos pessoais/acadêmicos',projeto:'Projeto / pesquisa',revisao:'Material para revisão',outro:'Outro'};
+function packagePurposeLabel(p){return p?.purpose==='outro'?(p.purposeOther||'Outro'):(PACKAGE_PURPOSE_LABELS[p?.purpose]||'Pasta / conjunto')}
+function dayKey(ms){if(!ms)return'';const d=new Date(ms);if(Number.isNaN(+d))return'';return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function setItemMeta(el,meta){
+ el.dataset.repoItem='1';el.dataset.repoKind=meta.kind;el.dataset.personId=meta.personId||'';el.dataset.personName=meta.personName||'';el.dataset.categoryKey=meta.categoryKey||'';el.dataset.categoryLabel=meta.categoryLabel||'';el.dataset.dateMs=String(meta.dateMs||0);el.dataset.dateDay=dayKey(meta.dateMs);el.dataset.pending=meta.pending?'1':'0';el.dataset.title=meta.title||'';el.dataset.repoSearch=normalize(meta.search||'');
+}
+function publicationMeta(p){
+ const personId=String(p.memberId||''),personName=p.memberNome||memberName(personId),categoryKeyValue=categoryKey(p),categoryLabelValue=categoryLabel(p),dateMs=millis(p.ts||p.createdAt||p.editedAt||p.updatedAt),title=p.titulo||files().publicationTitle(p);
+ return {kind:'publication',personId,personName,categoryKey:categoryKeyValue,categoryLabel:categoryLabelValue,dateMs,title,pending:turnId(p)===app().memberId,search:[title,p.fileName,personName,categoryLabelValue,p.reviewNote,p.categoriaOutro].filter(Boolean).join(' ')};
+}
+function packageMeta(p){
+ const personId=String(p.ownerMemberId||p.createdByMemberId||''),personName=p.ownerName||memberName(personId),purpose=packagePurposeLabel(p),dateMs=millis(p.ts||p.createdAt||p.updatedAt),title=p.title||'Pasta / conjunto',categoryKeyValue='package:'+String(p.purpose||'outro');
+ return {kind:'package',personId,personName,categoryKey:categoryKeyValue,categoryLabel:purpose,dateMs,title,pending:false,search:[title,purpose,personName,'pasta conjunto',p.accessMode,`${Number(p.fileCount||0)} arquivos`].filter(Boolean).join(' ')};
+}
+function hideLegacyRepositoryUi(){
+ const legacy=$('#repositoryLegacyFilters')||$('#pubCategoria')?.closest('.crono-filters');if(legacy){legacy.hidden=true;legacy.setAttribute('aria-hidden','true')}
+ const zone=$('#repoPackageList');if(zone)zone.style.display='none';
+}
+function unifyGeneralList(){
+ const list=$('#pubList');if(!list)return;
+ hideLegacyRepositoryUi();
+ const zone=$('#repoPackageList');if(zone){[...zone.querySelectorAll(':scope > .repo-package-card')].forEach(card=>list.append(card));zone.style.display='none'}
+ const pubs=new Map((app().state.publicacoes||[]).map(p=>[String(p.id),p])),packages=new Map((app().state.repositoryPackages||[]).map(p=>[String(p.id),p]));
+ [...list.children].forEach(el=>{
+  const pubId=String(el.dataset.fileId||el.dataset.publicationId||''),packageId=String(el.dataset.packageId||'');
+  if(pubId&&pubs.has(pubId)){setItemMeta(el,publicationMeta(pubs.get(pubId)));return}
+  if(packageId&&packages.has(packageId)){setItemMeta(el,packageMeta(packages.get(packageId)));return}
+  delete el.dataset.repoItem;
+ });
+}
+function repositoryItems(){
+ const list=$('#pubList');if(!list)return[];unifyGeneralList();
+ return [...list.querySelectorAll(':scope > [data-repo-item="1"]')].map(el=>({el,kind:el.dataset.repoKind||'',personId:el.dataset.personId||'',personName:el.dataset.personName||'',categoryKey:el.dataset.categoryKey||'',categoryLabel:el.dataset.categoryLabel||'',dateMs:Number(el.dataset.dateMs||0),dateDay:el.dataset.dateDay||'',pending:el.dataset.pending==='1',title:el.dataset.title||'',search:el.dataset.repoSearch||''}));
+}
+function refreshFilterOptions(items){
+ const people=new Map(),cats=new Map();
+ for(const item of items){if(item.personId)people.set(item.personId,item.personName||memberName(item.personId));if(item.categoryKey)cats.set(item.categoryKey,item.categoryLabel||item.categoryKey)}
+ refillSelect($('#repositoryPerson'),[...people].sort((a,b)=>String(a[1]).localeCompare(String(b[1]),'pt-BR')),'Todas as pessoas');
+ refillSelect($('#repositoryCategory'),[...cats].sort((a,b)=>String(a[1]).localeCompare(String(b[1]),'pt-BR')),'Todas as categorias');
+}
+function organize(){
+ const list=$('#pubList'),toolbar=$('#repositoryOrganizer');if(!list||!toolbar)return;
+ const items=repositoryItems();refreshFilterOptions(items);
+ const person=$('#repositoryPerson')?.value||'',category=$('#repositoryCategory')?.value||'',date=$('#repositoryDate')?.value||'',mode=$('#repositoryMode')?.value||'date',query=normalize($('#repositorySearch')?.value||'');
+ for(const item of items){item.el.hidden=!!((person&&item.personId!==person)||(category&&item.categoryKey!==category)||(date&&item.dateDay!==date)||(mode==='pending'&&!item.pending)||(query&&!item.search.includes(query)))}
+ items.sort((a,b)=>{
+  if(mode==='dateAsc')return (a.dateMs||0)-(b.dateMs||0)||normalize(a.title).localeCompare(normalize(b.title),'pt-BR');
+  if(mode==='person')return normalize(a.personName).localeCompare(normalize(b.personName),'pt-BR')||normalize(a.title).localeCompare(normalize(b.title),'pt-BR');
+  if(mode==='title')return normalize(a.title).localeCompare(normalize(b.title),'pt-BR');
+  if(mode==='pending')return Number(b.pending)-Number(a.pending)||(b.dateMs||0)-(a.dateMs||0);
+  return (b.dateMs||0)-(a.dateMs||0)||normalize(a.title).localeCompare(normalize(b.title),'pt-BR');
+ });
+ for(const item of items)list.append(item.el);
+ const empty=$('#repositoryFilteredEmpty');const visible=items.some(item=>!item.el.hidden);if(!visible&&items.length){if(!empty){const e=document.createElement('div');e.id='repositoryFilteredEmpty';e.className='crono-empty';e.textContent='Nenhum item encontrado com esses filtros.';list.append(e)}}else empty?.remove();
+}
+function refresh(){organize();if($('#repositoryDeck')?.open)showDeck()}
+'''
+          js=js[:start]+browser+js[end:]
+
+          bstart=js.index('function buildOrganizer(list){')
+          bend=js.index('function boot(){',bstart)
+          builder=r'''function buildOrganizer(list){
+ const old=$('#repositoryOrganizer');old?.remove();hideLegacyRepositoryUi();
+ const toolbar=document.createElement('div');toolbar.id='repositoryOrganizer';
+ toolbar.innerHTML='<label>Pessoa<select id="repositoryPerson"><option value="">Todas as pessoas</option></select></label><label>Categoria<select id="repositoryCategory"><option value="">Todas as categorias</option></select></label><label>Data<input id="repositoryDate" type="date" aria-label="Filtrar por data"></label><label>Organizar<select id="repositoryMode"><option value="date">Mais recentes</option><option value="dateAsc">Mais antigos</option><option value="person">A–Z · Pessoas</option><option value="title">A–Z · Títulos</option><option value="pending">Pendentes para mim</option></select></label><label>Pesquisar<input id="repositorySearch" type="search" placeholder="Pessoa, categoria, pasta ou arquivo"></label>';
+ list.before(toolbar);
+ toolbar.addEventListener('change',organize);$('#repositorySearch').addEventListener('input',organize);
+ const legacyCategory=$('#pubCategoria'),legacyPerson=$('#pubPessoa'),legacyMine=$('#pubMine');if(legacyCategory)legacyCategory.value='';if(legacyPerson)legacyPerson.value='';if(legacyMine)legacyMine.checked=false;
+ organize();
+}
+'''
+          js=js[:bstart]+builder+js[bend:]
+          mod.write_text(js,encoding='utf-8')
+
+          css=Path('modules/repository.css')
+          style=css.read_text(encoding='utf-8')
+          extra='''\n/* P224 · um único navegador para pastas, publicações e arquivos. */\n#repositoryLegacyFilters,#repoPackageList{display:none!important}\n#pubList>[data-repo-item="1"][hidden]{display:none!important}\n#pubList>.repo-package-card{width:100%;box-sizing:border-box;margin:0 0 12px}\n#pubList>.repository-file,#pubList>.pub-row{margin-bottom:12px}\n#repositoryOrganizer{align-items:end}\n#repositoryOrganizer label{flex:1 1 170px}\n@media(max-width:720px){#repositoryOrganizer{display:grid;grid-template-columns:1fr 1fr}#repositoryOrganizer label{width:100%}#repositoryOrganizer label:last-child{grid-column:1/-1}}\n@media(max-width:430px){#repositoryOrganizer{grid-template-columns:1fr}}\n'''
+          if 'P224 · um único navegador' not in style:style+=extra
+          css.write_text(style,encoding='utf-8')
+
+          # Keep the integrity sidecar aligned with the shipped HTML.
+          import hashlib
+          digest=hashlib.sha512(index.read_bytes()).hexdigest()
+          Path('index.html.sha512').write_text(digest+'  index.html\n',encoding='utf-8')
+
+          # Static invariants for the regression we are fixing.
+          final=index.read_text(encoding='utf-8');m=mod.read_text(encoding='utf-8')
+          assert 'id="repositoryLegacyFilters"' in final
+          assert 'data-package-id="${esc(p.id)}"' in final
+          assert 'data-publication-id="${esc(p.id)}"' in final
+          assert "repository-rendered')); return;" in final
+          assert 'id="repositoryDate"' in m
+          assert 'unifyGeneralList' in m
+          assert 'data-repo-item="1"' in m
+          print('P224 OK: pastas + publicações usam uma lista, um organizador e filtro por data.')
+          PY
+      - name: Run repository tests
+        shell: bash
+        run: |
+          npm ci
+          npm test
+      - name: Commit unified repository browser
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html index.html.sha512 modules/repository.js modules/repository.css
+          git diff --cached --check
+          git commit -m "P224: unificar navegação do repositório"
+          git push
