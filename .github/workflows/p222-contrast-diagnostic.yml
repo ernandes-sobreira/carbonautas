@@ -1,0 +1,21 @@
+name: P222 Contrast diagnostic
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-contrast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Locate mural shortcut markup and styles
+        shell: bash
+        run: |
+          echo '--- MARKUP MATCHES ---'
+          grep -RIn -C 12 -E 'O que você precisa|PRECISO DE AJUDA|Mostrar atalhos|ANÁLISE DE DADOS|ANALISE DE DADOS' . --exclude-dir=.git --exclude='package-lock.json' || true
+          echo '--- COLOR WHITE RULES NEAR MURAL/ATALHO ---'
+          grep -RIn -C 5 -E 'color:[[:space:]]*(#fff|white|rgba\(255,[[:space:]]*255,[[:space:]]*255)|mural|atalho|shortcut' index.html modules --exclude='package-lock.json' || true
