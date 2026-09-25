@@ -1,0 +1,85 @@
+name: P221 URL stability repair
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  repair-url-writers:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Remove legacy build URL writers from index
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          text = p.read_text(encoding='utf-8')
+          before = text
+
+          # P85/P86/P87/P96/P97 and any sibling using the same legacy canonicalizer.
+          canonical = re.compile(
+              r"try\{\s*const u=new URL\(location\.href\);\s*"
+              r"if\(u\.searchParams\.get\((['\"])build\1\)!==(?P<v>BUILD|VERSION)\)\{\s*"
+              r"u\.searchParams\.set\((['\"])build\3,(?P=v)\);\s*"
+              r"u\.searchParams\.delete\((['\"])pwa\4\);\s*"
+              r"history\.replaceState\(null,(['\"])\5,u\.href\)\s*\}\s*"
+              r"\}catch\(_e\)\{\s*\}"
+          )
+          clean = (
+              "try{const u=new URL(location.href);const beforeUrl=u.href;"
+              "u.searchParams.delete('build');u.searchParams.delete('apprefresh');u.searchParams.delete('pwa');"
+              "if(u.href!==beforeUrl)history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(_e){}"
+          )
+          text, canonical_count = canonical.subn(clean, text)
+
+          # P85 used to force a reload and rewrite build/apprefresh whenever SW controller changed.
+          controller = re.compile(
+              r"navigator\.serviceWorker\.addEventListener\('controllerchange',\(\)=>\{"
+              r"if\(reloading\|\|!hadController\)return;reloading=true;"
+              r"const u=new URL\(location\.href\);"
+              r"u\.searchParams\.set\('build',BUILD\);"
+              r"u\.searchParams\.set\('apprefresh',Date\.now\(\)\.toString\(\)\);"
+              r"location\.replace\(u\.href\)\}\);"
+          )
+          text, controller_count = controller.subn(
+              "navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading||!hadController)return;reloading=true;console.info('Carbonautas: nova versão será usada na próxima abertura')});",
+              text
+          )
+
+          # Safety: there must be no code left that writes these legacy cache/version params.
+          remaining = re.findall(r"searchParams\.set\(\s*['\"](?:build|apprefresh)['\"]", text)
+          if remaining:
+              raise SystemExit(f'ABORT: ainda existem {len(remaining)} escritores build/apprefresh no index.html')
+          if canonical_count < 3:
+              raise SystemExit(f'ABORT: esperava ao menos 3 canonicalizers antigos; encontrei {canonical_count}')
+          if controller_count != 1:
+              raise SystemExit(f'ABORT: esperava 1 reload do P85; encontrei {controller_count}')
+
+          p.write_text(text, encoding='utf-8')
+          print(f'canonicalizers corrigidos: {canonical_count}; reload P85 removido: {controller_count}')
+          print('index alterado:', text != before)
+          PY
+
+      - name: Commit repaired index
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "Nenhuma alteração necessária."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "P221: eliminar disputa P85 P86 P87 na URL"
+          git push
