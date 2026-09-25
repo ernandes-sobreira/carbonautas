@@ -12,10 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Inspect exact mural shortcut CSS
+      - name: Locate exact shortcut source in repository
         shell: bash
         run: |
-          echo '--- pubNeed selectors with context ---'
-          grep -n -C 12 -E 'pubNeedCard|pubNeedBox|pubNeedToggle|pubNeedGrid' index.html || true
-          echo '--- rules forcing white text in publicacoes ---'
-          grep -n -C 8 -E 'view-publicacoes.*color|color:[[:space:]]*#fff[[:space:]]*!important|color:[[:space:]]*white[[:space:]]*!important' index.html || true
+          echo '--- pubNeed anywhere ---'
+          grep -RIn -C 10 -E 'pubNeed(Card|Box|Toggle|Grid)|O que você precisa do grupo|PRECISO DE AJUDA PRA CAMPO|Mostrar atalhos' . --exclude-dir=.git --exclude='package-lock.json' || true
+          echo '--- css descendants forcing white ---'
+          grep -RIn -C 7 -E '(pubNeed|view-publicacoes|mural).*(\*|div|button|b|small).*color:[[:space:]]*(#fff|white).*important|color:[[:space:]]*(#fff|white).*important.*(pubNeed|view-publicacoes|mural)' . --exclude-dir=.git --exclude='package-lock.json' || true
