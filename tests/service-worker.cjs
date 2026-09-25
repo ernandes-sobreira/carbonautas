@@ -56,3 +56,11 @@ test('SW does not cache Firebase or private API requests',()=>{
   for(const request of [{method:'GET',url:'https://firebasestorage.googleapis.com/file'},{method:'POST',url:'https://example.org/api'}])
     h.listeners.fetch({request,respondWith:()=>assert.fail('must bypass cache')});
 });
+
+test('index never writes legacy build or apprefresh parameters into the browser URL',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  assert.doesNotMatch(html,/searchParams\.set\(\s*['"](?:build|apprefresh)['"]/,
+    'legacy patches must not write build/apprefresh into the address bar');
+  assert.match(html,/searchParams\.delete\('build'\)/,
+    'legacy cleanup should remove stale build values if an old bookmarked URL contains one');
+});
