@@ -40,3 +40,13 @@
   transform:none!important;
   filter:none!important;
 }
+
+/* P224 · um único navegador para pastas, publicações e arquivos. */
+#repositoryLegacyFilters,#repoPackageList{display:none!important}
+#pubList>[data-repo-item="1"][hidden]{display:none!important}
+#pubList>.repo-package-card{width:100%;box-sizing:border-box;margin:0 0 12px}
+#pubList>.repository-file,#pubList>.pub-row{margin-bottom:12px}
+#repositoryOrganizer{align-items:end}
+#repositoryOrganizer label{flex:1 1 170px}
+@media(max-width:720px){#repositoryOrganizer{display:grid;grid-template-columns:1fr 1fr}#repositoryOrganizer label{width:100%}#repositoryOrganizer label:last-child{grid-column:1/-1}}
+@media(max-width:430px){#repositoryOrganizer{grid-template-columns:1fr}}

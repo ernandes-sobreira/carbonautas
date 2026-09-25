@@ -43,36 +43,60 @@ function refillSelect(select,rows,placeholder){
  select.innerHTML=option('',placeholder)+rows.map(([v,l])=>option(v,l)).join('');
  select.value=rows.some(([v])=>String(v)===String(selected))?selected:'';
 }
+const PACKAGE_PURPOSE_LABELS={artigos:'Artigos / manuscritos',resumos:'Resumos / eventos',instrumentos:'Instrumentos de coleta',dados:'Bases de dados',ferramentas:'Ferramentas / materiais',scripts:'Scripts / códigos',aula:'Material de aula',referencias:'Referências / leituras',bolsa:'Inscrição / bolsa',processo:'Processo seletivo / inscrição',prestacao:'Prestação de contas',documentos:'Documentos pessoais/acadêmicos',projeto:'Projeto / pesquisa',revisao:'Material para revisão',outro:'Outro'};
+function packagePurposeLabel(p){return p?.purpose==='outro'?(p.purposeOther||'Outro'):(PACKAGE_PURPOSE_LABELS[p?.purpose]||'Pasta / conjunto')}
+function dayKey(ms){if(!ms)return'';const d=new Date(ms);if(Number.isNaN(+d))return'';return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function setItemMeta(el,meta){
+ el.dataset.repoItem='1';el.dataset.repoKind=meta.kind;el.dataset.personId=meta.personId||'';el.dataset.personName=meta.personName||'';el.dataset.categoryKey=meta.categoryKey||'';el.dataset.categoryLabel=meta.categoryLabel||'';el.dataset.dateMs=String(meta.dateMs||0);el.dataset.dateDay=dayKey(meta.dateMs);el.dataset.pending=meta.pending?'1':'0';el.dataset.title=meta.title||'';el.dataset.repoSearch=normalize(meta.search||'');
+}
+function publicationMeta(p){
+ const personId=String(p.memberId||''),personName=p.memberNome||memberName(personId),categoryKeyValue=categoryKey(p),categoryLabelValue=categoryLabel(p),dateMs=millis(p.ts||p.createdAt||p.editedAt||p.updatedAt),title=p.titulo||files().publicationTitle(p);
+ return {kind:'publication',personId,personName,categoryKey:categoryKeyValue,categoryLabel:categoryLabelValue,dateMs,title,pending:turnId(p)===app().memberId,search:[title,p.fileName,personName,categoryLabelValue,p.reviewNote,p.categoriaOutro].filter(Boolean).join(' ')};
+}
+function packageMeta(p){
+ const personId=String(p.ownerMemberId||p.createdByMemberId||''),personName=p.ownerName||memberName(personId),purpose=packagePurposeLabel(p),dateMs=millis(p.ts||p.createdAt||p.updatedAt),title=p.title||'Pasta / conjunto',categoryKeyValue='package:'+String(p.purpose||'outro');
+ return {kind:'package',personId,personName,categoryKey:categoryKeyValue,categoryLabel:purpose,dateMs,title,pending:false,search:[title,purpose,personName,'pasta conjunto',p.accessMode,`${Number(p.fileCount||0)} arquivos`].filter(Boolean).join(' ')};
+}
+function hideLegacyRepositoryUi(){
+ const legacy=$('#repositoryLegacyFilters')||$('#pubCategoria')?.closest('.crono-filters');if(legacy){legacy.hidden=true;legacy.setAttribute('aria-hidden','true')}
+ const zone=$('#repoPackageList');if(zone)zone.style.display='none';
+}
+function unifyGeneralList(){
+ const list=$('#pubList');if(!list)return;
+ hideLegacyRepositoryUi();
+ const zone=$('#repoPackageList');if(zone){[...zone.querySelectorAll(':scope > .repo-package-card')].forEach(card=>list.append(card));zone.style.display='none'}
+ const pubs=new Map((app().state.publicacoes||[]).map(p=>[String(p.id),p])),packages=new Map((app().state.repositoryPackages||[]).map(p=>[String(p.id),p]));
+ [...list.children].forEach(el=>{
+  const pubId=String(el.dataset.fileId||el.dataset.publicationId||''),packageId=String(el.dataset.packageId||'');
+  if(pubId&&pubs.has(pubId)){setItemMeta(el,publicationMeta(pubs.get(pubId)));return}
+  if(packageId&&packages.has(packageId)){setItemMeta(el,packageMeta(packages.get(packageId)));return}
+  delete el.dataset.repoItem;
+ });
+}
 function repositoryItems(){
- const list=$('#pubList');if(!list)return[];
- const pubs=new Map((app().state.publicacoes||[]).map(p=>[String(p.id),p]));
- return [...list.querySelectorAll(':scope > [data-file-id]')].map(el=>({el,p:pubs.get(String(el.dataset.fileId))})).filter(x=>x.p);
+ const list=$('#pubList');if(!list)return[];unifyGeneralList();
+ return [...list.querySelectorAll(':scope > [data-repo-item="1"]')].map(el=>({el,kind:el.dataset.repoKind||'',personId:el.dataset.personId||'',personName:el.dataset.personName||'',categoryKey:el.dataset.categoryKey||'',categoryLabel:el.dataset.categoryLabel||'',dateMs:Number(el.dataset.dateMs||0),dateDay:el.dataset.dateDay||'',pending:el.dataset.pending==='1',title:el.dataset.title||'',search:el.dataset.repoSearch||''}));
 }
 function refreshFilterOptions(items){
  const people=new Map(),cats=new Map();
- for(const {p} of items){
-  const pid=String(p.memberId||'');if(pid)people.set(pid,p.memberNome||memberName(pid));
-  const ck=categoryKey(p);cats.set(ck,categoryLabel(p));
- }
+ for(const item of items){if(item.personId)people.set(item.personId,item.personName||memberName(item.personId));if(item.categoryKey)cats.set(item.categoryKey,item.categoryLabel||item.categoryKey)}
  refillSelect($('#repositoryPerson'),[...people].sort((a,b)=>String(a[1]).localeCompare(String(b[1]),'pt-BR')),'Todas as pessoas');
  refillSelect($('#repositoryCategory'),[...cats].sort((a,b)=>String(a[1]).localeCompare(String(b[1]),'pt-BR')),'Todas as categorias');
 }
 function organize(){
  const list=$('#pubList'),toolbar=$('#repositoryOrganizer');if(!list||!toolbar)return;
  const items=repositoryItems();refreshFilterOptions(items);
- const person=$('#repositoryPerson')?.value||'',category=$('#repositoryCategory')?.value||'',mode=$('#repositoryMode')?.value||'date',query=normalize($('#repositorySearch')?.value||'');
- for(const {el,p} of items){
-  const pending=turnId(p)===app().memberId;
-  const hay=normalize([p.titulo,files().publicationTitle(p),p.memberNome||memberName(p.memberId),categoryLabel(p),p.fileName].join(' '));
-  el.hidden=!!((person&&String(p.memberId)!==person)||(category&&categoryKey(p)!==category)||(mode==='pending'&&!pending)||(query&&!hay.includes(query)));
- }
- const title=p=>normalize(p.titulo||files().publicationTitle(p));
+ const person=$('#repositoryPerson')?.value||'',category=$('#repositoryCategory')?.value||'',date=$('#repositoryDate')?.value||'',mode=$('#repositoryMode')?.value||'date',query=normalize($('#repositorySearch')?.value||'');
+ for(const item of items){item.el.hidden=!!((person&&item.personId!==person)||(category&&item.categoryKey!==category)||(date&&item.dateDay!==date)||(mode==='pending'&&!item.pending)||(query&&!item.search.includes(query)))}
  items.sort((a,b)=>{
-  if(mode==='person')return normalize(a.p.memberNome||memberName(a.p.memberId)).localeCompare(normalize(b.p.memberNome||memberName(b.p.memberId)),'pt-BR')||title(a.p).localeCompare(title(b.p),'pt-BR');
-  if(mode==='pending'){const ap=turnId(a.p)===app().memberId?0:1,bp=turnId(b.p)===app().memberId?0:1;return ap-bp||(millis(b.p.editedAt||b.p.ts||b.p.createdAt)-millis(a.p.editedAt||a.p.ts||a.p.createdAt));}
-  return millis(b.p.editedAt||b.p.ts||b.p.createdAt)-millis(a.p.editedAt||a.p.ts||a.p.createdAt);
+  if(mode==='dateAsc')return (a.dateMs||0)-(b.dateMs||0)||normalize(a.title).localeCompare(normalize(b.title),'pt-BR');
+  if(mode==='person')return normalize(a.personName).localeCompare(normalize(b.personName),'pt-BR')||normalize(a.title).localeCompare(normalize(b.title),'pt-BR');
+  if(mode==='title')return normalize(a.title).localeCompare(normalize(b.title),'pt-BR');
+  if(mode==='pending')return Number(b.pending)-Number(a.pending)||(b.dateMs||0)-(a.dateMs||0);
+  return (b.dateMs||0)-(a.dateMs||0)||normalize(a.title).localeCompare(normalize(b.title),'pt-BR');
  });
- for(const {el}of items)list.append(el);
+ for(const item of items)list.append(item.el);
+ const empty=$('#repositoryFilteredEmpty');const visible=items.some(item=>!item.el.hidden);if(!visible&&items.length){if(!empty){const e=document.createElement('div');e.id='repositoryFilteredEmpty';e.className='crono-empty';e.textContent='Nenhum item encontrado com esses filtros.';list.append(e)}}else empty?.remove();
 }
 function refresh(){organize();if($('#repositoryDeck')?.open)showDeck()}
 function syncAdminPackages(render=true){
@@ -154,13 +178,12 @@ async function onAction(e){
  try{if(action==='download')await download(id);else if(action==='preview')await preview(id);else if(action==='message')await openMessage(id);else if(action==='return')await openReturn(id)}catch(err){console.error('Repository',err);root.toast(err.message||'Não foi possível concluir.')}finally{locks.delete(key);button.disabled=false}
 }
 function buildOrganizer(list){
- const old=$('#repositoryOrganizer');old?.remove();
+ const old=$('#repositoryOrganizer');old?.remove();hideLegacyRepositoryUi();
  const toolbar=document.createElement('div');toolbar.id='repositoryOrganizer';
- toolbar.innerHTML='<label>Pessoa<select id="repositoryPerson"><option value="">Todas as pessoas</option></select></label><label>Categoria<select id="repositoryCategory"><option value="">Todas as categorias</option></select></label><label>Organizar<select id="repositoryMode"><option value="date">Mais recentes</option><option value="person">A–Z · Pessoas</option><option value="pending">Pendentes para mim</option></select></label><label>Pesquisar<input id="repositorySearch" type="search" placeholder="Pessoa, categoria ou arquivo"></label>';
+ toolbar.innerHTML='<label>Pessoa<select id="repositoryPerson"><option value="">Todas as pessoas</option></select></label><label>Categoria<select id="repositoryCategory"><option value="">Todas as categorias</option></select></label><label>Data<input id="repositoryDate" type="date" aria-label="Filtrar por data"></label><label>Organizar<select id="repositoryMode"><option value="date">Mais recentes</option><option value="dateAsc">Mais antigos</option><option value="person">A–Z · Pessoas</option><option value="title">A–Z · Títulos</option><option value="pending">Pendentes para mim</option></select></label><label>Pesquisar<input id="repositorySearch" type="search" placeholder="Pessoa, categoria, pasta ou arquivo"></label>';
  list.before(toolbar);
  toolbar.addEventListener('change',organize);$('#repositorySearch').addEventListener('input',organize);
- const legacyCategory=$('#pubCategoria'),legacyPerson=$('#pubPessoa'),legacyMine=$('#pubMine');
- if(legacyCategory)legacyCategory.value='';if(legacyPerson)legacyPerson.value='';if(legacyMine)legacyMine.checked=false;
+ const legacyCategory=$('#pubCategoria'),legacyPerson=$('#pubPessoa'),legacyMine=$('#pubMine');if(legacyCategory)legacyCategory.value='';if(legacyPerson)legacyPerson.value='';if(legacyMine)legacyMine.checked=false;
  organize();
 }
 function boot(){
