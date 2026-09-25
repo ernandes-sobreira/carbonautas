@@ -11445,7 +11445,7 @@ function trimEntries(v,max=160){return Object.fromEntries(Object.entries(v||{}).
 function mergeEntries(a,b){const out={};for(const [k,v] of Object.entries(a||{}))out[k]=cleanEntry(v);for(const [k,v0] of Object.entries(b||{})){const v=cleanEntry(v0),old=out[k];if(!old||v.changedAt>=old.changedAt)out[k]=v}return trimEntries(out)}
 function localAsEntries(){const a=loadJSON(ackKey()),out={};for(const [k,v] of Object.entries(a||{}))out[k]={status:'done',changedAt:Number(v?.doneAt||0)||now(),meta:v||{}};return out}
 function applyEntriesToLocal(all){const local={};for(const [k,v0] of Object.entries(all||{})){const v=cleanEntry(v0);if(v.status==='done')local[k]={...(v.meta||{}),key:k,doneAt:v.changedAt}}const old=loadJSON(ackKey());if(!same(old,local)){saveJSON(ackKey(),local);try{window.renderPainel?.();window.p77Refresh?.()}catch(_e){}}}
-function canonicalize(){try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}}
+function canonicalize(){try{const u=new URL(location.href);const beforeUrl=u.href;u.searchParams.delete('build');u.searchParams.delete('apprefresh');u.searchParams.delete('pwa');if(u.href!==beforeUrl)history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(_e){}}
 function ensureStyle(){if(q('#p85MobileStyle'))return;const st=document.createElement('style');st.id='p85MobileStyle';st.textContent=`
 .tab[data-view="lab"],.app-nav-card[data-app-view="lab"]{display:none!important}#p78TodayCard{scroll-margin-top:16px}.p85-checkin-toggle{display:none}#p192AboutFooter{display:flex;justify-content:center;align-items:center;padding:22px 8px 28px}#p192AboutFooter button{border:0;background:transparent;color:#6f858d;border-radius:999px;padding:10px 14px;font-size:12px;font-weight:800;cursor:pointer}#p192AboutFooter button:hover{background:#eef7f5;color:#0d7479}
 @media(max-width:760px){
@@ -11468,7 +11468,7 @@ function reconcileLocal(){const local=localAsEntries();let next=entries;for(cons
 async function startSync(){if(started||!window.db||!F()||!window.auth?.currentUser)return;started=true;try{const p=await getProfile();if(!p?.memberId){started=false;return}memberRef=F().doc(window.db,'rede_members',p.memberId);const snap=await F().getDoc(memberRef);if(!snap.exists()){started=false;return}const remote=snap.data()?.[CLOUD_FIELD]?.entries||{};entries=mergeEntries(remote,localAsEntries());applyEntriesToLocal(entries);await writeCloud();unsub?.();unsub=F().onSnapshot(memberRef,s=>{if(!s.exists())return;const r=s.data()?.[CLOUD_FIELD]?.entries||{};const merged=mergeEntries(r,entries);entries=merged;applyEntriesToLocal(entries);if(!same(trimEntries(r),entries))setTimeout(writeCloud,100)},e=>console.warn('P85 painel cloud read',e));wrapActions()}catch(e){started=false;console.warn('P85 iniciar sync',e)}}
 function waitSync(){if(window.db&&F()&&window.auth?.currentUser)startSync();else setTimeout(waitSync,450)}
 async function checkUpdate(){if(!('serviceWorker' in navigator))return;try{const reg=await navigator.serviceWorker.getRegistration('./');if(!reg)return;await reg.update();if(reg.waiting)reg.waiting.postMessage('SKIP_WAITING')}catch(e){console.warn('P85 update check',e)}}
-if('serviceWorker' in navigator){let reloading=false;const hadController=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading||!hadController)return;reloading=true;const u=new URL(location.href);u.searchParams.set('build',BUILD);u.searchParams.set('apprefresh',Date.now().toString());location.replace(u.href)});window.addEventListener('focus',()=>{checkUpdate();startSync();polish()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkUpdate();startSync();polish()}});setTimeout(checkUpdate,1000)}
+if('serviceWorker' in navigator){let reloading=false;const hadController=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading||!hadController)return;reloading=true;console.info('Carbonautas: nova versão será usada na próxima abertura')});window.addEventListener('focus',()=>{checkUpdate();startSync();polish()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkUpdate();startSync();polish()}});setTimeout(checkUpdate,1000)}
 const target=q('#viewPainel')||document.body;new MutationObserver(m=>{if(m.some(x=>x.addedNodes?.length||x.removedNodes?.length))schedule()}).observe(target,{childList:true,subtree:true});
 canonicalize();ensureStyle();polish();waitSync();setInterval(()=>{wrapActions();reconcileLocal()},2600);
 window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P85 PC/app unificados e estáveis');
@@ -11520,7 +11520,7 @@ console.info('Carbonautas P85 composer mobile corrigido');
 const VERSION='P86';
 let ro=null;
 const q=(s,r=document)=>r.querySelector(s);
-function canonicalize(){try{const u=new URL(location.href);if(u.searchParams.get('build')!==VERSION){u.searchParams.set('build',VERSION);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}}
+function canonicalize(){try{const u=new URL(location.href);const beforeUrl=u.href;u.searchParams.delete('build');u.searchParams.delete('apprefresh');u.searchParams.delete('pwa');if(u.href!==beforeUrl)history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(_e){}}
 function ensureCss(){
   if(q('#p86ComposerStyle'))return;
   const s=document.createElement('style');s.id='p86ComposerStyle';s.textContent=`
@@ -11622,7 +11622,7 @@ function panelMissing(){
   return !a||!k||!a.children.length||!k.children.length;
 }
 function canonicalize(){
-  try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
+  try{const u=new URL(location.href);const beforeUrl=u.href;u.searchParams.delete('build');u.searchParams.delete('apprefresh');u.searchParams.delete('pwa');if(u.href!==beforeUrl)history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(_e){}
   window.CARBONAUTAS_RUNTIME_BUILD=BUILD;
 }
 
@@ -12184,7 +12184,7 @@ function boot(){
   const obs=new MutationObserver(()=>{relabel();useSoftMark();decorateEntry();ensureBottomNav();visualCleanup();updateBottomNav()});obs.observe(document.body,{attributes:true,attributeFilter:['data-view']});
   document.addEventListener('click',e=>{if(e.target?.closest?.('#p78AboutBtn'))setTimeout(decorateAbout,0);if(e.target?.closest?.('#viewMensagens,#appMenuDrawer,#subNav,#showRegisterBtn,#showLoginBtn'))setTimeout(()=>{relabel();decorateEntry();ensureBottomNav()},0)},true);
   window.addEventListener('resize',updateBottomNav,{passive:true});
-  try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
+  try{const u=new URL(location.href);const beforeUrl=u.href;u.searchParams.delete('build');u.searchParams.delete('apprefresh');u.searchParams.delete('pwa');if(u.href!==beforeUrl)history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(_e){}
   window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P96 nomes + identidade carregados')
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
@@ -12574,7 +12574,7 @@ function boot(){
   const bodyObs=new MutationObserver(ms=>{if(ms.some(m=>m.type==='attributes'&&m.attributeName==='data-view')){const v=document.body.dataset.view;if(v==='track')setTimeout(()=>{installTrackWrapper();renderFolders()},70);if(v==='rede')setTimeout(forceGraphOnce,70)}});
   bodyObs.observe(document.body,{attributes:true,attributeFilter:['data-view']});
   [250,700,1500].forEach(ms=>setTimeout(()=>{installTrackWrapper();installFocusWrapper();installGraphStability();if(document.body.dataset.view==='track'||$('#viewTrack')?.classList.contains('on'))renderFolders()},ms));
-  try{const u=new URL(location.href);if(u.searchParams.get('build')!==BUILD){u.searchParams.set('build',BUILD);u.searchParams.delete('pwa');history.replaceState(null,'',u.href)}}catch(_e){}
+  try{const u=new URL(location.href);const beforeUrl=u.href;u.searchParams.delete('build');u.searchParams.delete('apprefresh');u.searchParams.delete('pwa');if(u.href!==beforeUrl)history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(_e){}
   window.CARBONAUTAS_RUNTIME_BUILD=BUILD;
   console.info('Carbonautas P97 pastas + baralho + grafo estável');
 }
