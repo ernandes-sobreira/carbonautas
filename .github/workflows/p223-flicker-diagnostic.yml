@@ -1,0 +1,25 @@
+name: P223 Flicker diagnostic
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-flicker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect auth, legacy patches and navigation
+        shell: bash
+        run: |
+          echo '=== AUTH / LOGIN VISIBILITY ==='
+          grep -n -C 14 -E 'onAuthStateChanged|authOverlay|authScreen|auth-card|loginBtn|registerBtn|signInWithEmailAndPassword|signOut\(' index.html || true
+          echo '=== LEGACY P85 P86 P87 ==='
+          grep -n -C 16 -E 'P85|P86|P87|dashboard-panel-cleanup|pwa-mobile-fix|mobile-chat-composer|chat-composer-layout|dashboard-render-stability' index.html || true
+          echo '=== SERVICE WORKER / RELOAD / URL ==='
+          grep -n -C 16 -E 'serviceWorker|controllerchange|SKIP_WAITING|location\.reload|location\.replace|location\.href|history\.(replaceState|pushState)|apprefresh|build=|fresh=|pwa=' index.html || true
+          echo '=== BOOT / BODY / APP VISIBILITY ==='
+          grep -n -C 12 -E '<body|class="app|id="app|DOMContentLoaded|document\.readyState|visibility:[[:space:]]*hidden|opacity:[[:space:]]*0|display:[[:space:]]*none' index.html | head -n 900 || true
