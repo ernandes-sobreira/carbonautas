@@ -1699,6 +1699,16 @@
 </style>
 <link rel="stylesheet" href="./modules/repository.css?v=handoff-20260922b">
 </head>
+
+<style id="p223-critical-entry-stability">
+/* P223 · primeira pintura estável: splash acima do login e app oculto até o bootstrap terminar */
+.auth-gate{z-index:130!important;background:radial-gradient(circle at 12% 14%,rgba(98,185,138,.16),transparent 28%),radial-gradient(circle at 88% 18%,rgba(110,189,206,.14),transparent 26%),radial-gradient(circle at 78% 88%,rgba(240,235,250,.9),transparent 30%),linear-gradient(155deg,#f8fcfb 0%,#eef8f5 48%,#f5f8fb 100%)!important;padding:24px!important}
+.auth-card{position:relative!important;z-index:1!important;width:min(470px,100%)!important;padding:34px!important;border-radius:30px!important;border:1px solid rgba(201,220,218,.88)!important;background:rgba(255,255,255,.94)!important;backdrop-filter:blur(16px)!important;box-shadow:0 28px 80px rgba(20,65,76,.13)!important}
+.auth-brand{gap:14px!important;margin-bottom:26px!important;align-items:center!important}.auth-brand .mark{width:68px!important;height:68px!important;flex:0 0 68px!important;border-radius:21px!important;padding:6px!important;background:linear-gradient(145deg,#f3fbf8,#eaf6f7)!important;border:1px solid #d4e8e3!important;box-shadow:0 14px 34px rgba(24,116,105,.11)!important;overflow:hidden!important}.auth-brand h2{font-family:'Space Grotesk','Inter',sans-serif!important;font-size:30px!important;line-height:1!important;color:#14364a!important;font-weight:700!important;letter-spacing:-.045em!important}.auth-brand p{margin-top:6px!important;color:#66818a!important;font-size:12.5px!important;line-height:1.35!important;font-weight:600!important}
+.loading{z-index:140!important;background:linear-gradient(155deg,#f8fcfb 0%,#eef8f5 54%,#f5f8fb 100%)!important;color:#14364a!important;transition:none!important}.loading.off{opacity:0!important;visibility:hidden!important;pointer-events:none!important}.loading .mark{width:82px!important;height:82px!important;border-radius:24px!important;padding:7px!important;background:linear-gradient(145deg,#f3fbf8,#eaf6f7)!important;border:1px solid #d5e9e4!important;box-shadow:0 18px 46px rgba(25,96,91,.12)!important}html body .loading .mark{animation:none!important}
+body:not(.carbonautas-session-ready) .app{visibility:hidden!important}body.carbonautas-session-ready .app{visibility:visible!important}
+@media(max-width:620px){.auth-gate{padding:20px!important}.auth-card{padding:26px 24px!important;border-radius:26px!important;width:min(100%,430px)!important}.auth-brand .mark{width:62px!important;height:62px!important;flex-basis:62px!important}}
+</style>
 <body data-view="painel">
 
 <div class="auth-gate" id="authGate">
@@ -3396,9 +3406,11 @@ async function bootstrap(){
     ensurePersonalRepositoryRoot().catch(e=>console.warn('Repositório privado indisponível:',e));
     subscribeAll();
     bootstrapped=true;
-    $('#authGate').classList.add('off');
-    $('#loading').classList.add('off');
     refreshIdentityUI();
+    document.body.classList.add('carbonautas-session-ready');
+    $('#authGate').classList.add('off');
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    $('#loading').classList.add('off');
   }catch(e){
     console.error(e);
     $('#loading').classList.add('off');
@@ -3802,11 +3814,15 @@ function authErrorMessage(e){
   return e?.message||'Não foi possível concluir a operação.';
 }
 function showLogin(message=''){
+  document.body.classList.remove('carbonautas-session-ready');
   $('#authGate').classList.remove('off'); $('#authLoginPane').classList.remove('hidden'); $('#authRegisterPane').classList.add('hidden'); $('#authUnlinkedPane').classList.remove('on');
-  $('#authMsg').textContent=message; $('#loading').classList.add('off');
+  $('#authMsg').textContent=message;
+  const revealLogin=()=>requestAnimationFrame(()=>requestAnimationFrame(()=>$('#loading').classList.add('off')));
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',revealLogin,{once:true}); else revealLogin();
   if($('#loginBtn')) $('#loginBtn').disabled=false;
 }
 function showRegister(){
+  document.body.classList.remove('carbonautas-session-ready');
   $('#authGate').classList.remove('off'); $('#authLoginPane').classList.add('hidden'); $('#authRegisterPane').classList.remove('hidden'); $('#authUnlinkedPane').classList.remove('on');
   $('#registerMsg').textContent=''; $('#loading').classList.add('off');
 }
@@ -3833,6 +3849,7 @@ async function tryBootstrapCoordinator(user,existingProfile=null){
   }
 }
 async function showUnlinked(user){
+  document.body.classList.remove('carbonautas-session-ready');
   $('#authGate').classList.remove('off'); $('#authLoginPane').classList.add('hidden'); $('#authRegisterPane').classList.add('hidden'); $('#authUnlinkedPane').classList.add('on');
   $('#unlinkedEmail').textContent=user.email||''; $('#claimMsg').textContent=''; $('#loading').classList.add('off');
   const sel=$('#selfMemberSelect'); sel.innerHTML='<option value="">Carregando perfis…</option>';
@@ -3922,7 +3939,7 @@ async function handleAuthUser(user){
   authOpenUid=user.uid;
   authOpenPromise=(async()=>{
     clearSubscriptions(); bootstrapped=false; state.users=[];state.privateThreads=[];state.privateDirectory=[];state.privateSchedule=[];privateDirectorySeeded=false;privateChatAccessError='';
-    authUser=user; $('#loading').classList.remove('off'); $('#loadingMsg').textContent='Validando sua conta…';
+    authUser=user; document.body.classList.remove('carbonautas-session-ready'); $('#authGate').classList.add('off'); $('#loading').classList.remove('off'); $('#loadingMsg').textContent='Validando sua conta…';
     try{
       let snap=await withTimeout(
         FB().getDoc(FB().doc(window.db,'rede_users',user.uid)),
@@ -7486,17 +7503,8 @@ waitFirebase().then(startAuth);
 
 <script id="carbonautas-dynamic-favicon">
 (()=>{
-  const link=document.getElementById('dynamicFavicon'); if(!link)return;
-  const img=new Image(); img.src='./icon-192.png?v=P28';
-  img.onload=()=>{
-    const c=document.createElement('canvas'),ctx=c.getContext('2d'); c.width=c.height=64; let phase=0,last=0;
-    const draw=(ts)=>{
-      const cadence=document.hidden?1800:420; if(ts-last<cadence){requestAnimationFrame(draw);return} last=ts; phase=(phase+1)%240;
-      const a=Math.sin(phase/18)*0.055,scale=0.88+0.05*(1+Math.sin(phase/14))/2;
-      ctx.clearRect(0,0,64,64);ctx.save();ctx.translate(32,32);ctx.rotate(a);ctx.scale(scale,scale);ctx.shadowColor='rgba(40,225,255,.85)';ctx.shadowBlur=5+3*(1+Math.sin(phase/11))/2;ctx.drawImage(img,-32,-32,64,64);ctx.restore();
-      try{link.href=c.toDataURL('image/png')}catch{} requestAnimationFrame(draw);
-    }; requestAnimationFrame(draw);
-  };
+  const link=document.getElementById('dynamicFavicon');
+  if(link) link.href='./icon-192.png?v=P223';
 })();
 </script>
 
@@ -12114,9 +12122,8 @@ const BUILD='P96';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 function ensureCss(){
-  if(!$('#carbonautasSoftThemeP93')){const l=document.createElement('link');l.id='carbonautasSoftThemeP93';l.rel='stylesheet';l.href='./carbonautas-soft-theme-p93.css?v=P93-20260918';document.head.appendChild(l)}
-  if(!$('#carbonautasIdentityP94')){const l=document.createElement('link');l.id='carbonautasIdentityP94';l.rel='stylesheet';l.href='./carbonautas-identity-p94.css?v=P94-20260918';document.head.appendChild(l)}
-  if(!$('#carbonautasEntryP95')){const l=document.createElement('link');l.id='carbonautasEntryP95';l.rel='stylesheet';l.href='./carbonautas-entry-p95.css?v=P95-20260918';document.head.appendChild(l)}
+  // P223: P93, P94 e P95 já estão consolidados no próprio index.html.
+  // Não reinjetar CSS por rede: isso causava uma segunda pintura visual na entrada.
 }
 function useSoftMark(){$$('.brand .logo-img,.app-menu-logo,.loading .logo-img,.auth-brand .logo-img').forEach(img=>{if(img.dataset.softMark==='P96')return;img.dataset.softMark='P96';img.src='./carbonautas-soft-mark.svg?v=P96-20260918';img.alt='Carbonautas · carbono, regeneração, rede e navegação'})}
 function setText(el,text){if(el&&el.textContent!==text)el.textContent=text}
