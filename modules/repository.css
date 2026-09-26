@@ -25,6 +25,19 @@
 #repositoryOrganizer{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0}#repositoryOrganizer label{display:grid;gap:6px;min-width:0;font-size:12px;flex:1 1 160px}
 #repositoryOrganizer input,#repositoryOrganizer select,.repository-dialog select{box-sizing:border-box;width:100%;min-height:44px;padding:10px;border:1px solid #cbdde0;border-radius:10px;background:white;color:#173d4c;font:inherit}
 
+/* Mobile: o Repositório Geral tem uma única lista visual. Os blocos legados continuam no DOM/dados,
+   mas não ocupam o fluxo da página. A visualização em dialogs permanece disponível. */
+@media(max-width:760px){
+  #repoGeneralPanel #p170MacroRepo,
+  #repoGeneralPanel #repoPackageList,
+  #repoGeneralPanel .repo-filters-row,
+  #repoGeneralPanel #repoCatFilter,
+  #repoGeneralPanel #repoOwnerFilter,
+  #repoGeneralPanel #repoMineOnly,
+  #repoGeneralPanel .repository-file{display:none!important}
+  #repoGeneralPanel #pubList .repository-file{display:block!important}
+}
+
 /* Ícone estático: sem pulsar/piscar na entrada, carregamento ou dentro do app. */
 .loading .mark,
 .loading .logo-img,
