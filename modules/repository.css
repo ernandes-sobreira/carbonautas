@@ -21,22 +21,30 @@
 #repositoryPreview #filePreviewOverlay>.modal{width:100%;max-width:100%;height:100%;max-height:100%;margin:0;border-radius:16px}
 @media(max-width:600px){.repository-file{padding:14px}.repository-dialog{padding:12px}.repository-actions{display:grid;grid-template-columns:1fr 1fr}.repository-actions button{padding:10px 7px}.repository-history li{grid-template-columns:1fr auto;gap:5px}.repository-history time{grid-column:1/-1}.repository-file h3{font-size:16px}.repository-dialog footer{flex-wrap:wrap}}
 
-.repository-file[hidden]{display:none!important}
+.repository-file[hidden],.repository-list-card[hidden]{display:none!important}
 #repositoryOrganizer{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0}#repositoryOrganizer label{display:grid;gap:6px;min-width:0;font-size:12px;flex:1 1 160px}
 #repositoryOrganizer input,#repositoryOrganizer select,.repository-dialog select{box-sizing:border-box;width:100%;min-height:44px;padding:10px;border:1px solid #cbdde0;border-radius:10px;background:white;color:#173d4c;font:inherit}
 
-/* Mobile: o Repositório Geral tem uma única lista visual. Os blocos legados continuam no DOM/dados,
-   mas não ocupam o fluxo da página. A visualização em dialogs permanece disponível. */
+/* Uma única interface no PC e no celular: lista compacta; detalhes só ao abrir. */
+#repoGeneralPanel #repoPackageList,
+#repoGeneralPanel .repo-filters-row,
+#repoGeneralPanel #pubCategoria,
+#repoGeneralPanel #pubPessoa,
+#repoGeneralPanel #pubMine{display:none!important}
+.repository-list-card{cursor:pointer;min-width:0}
+.repository-list-card .repository-list-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:7px!important;margin:0!important;padding:0!important;border:0!important;align-self:center}
+.repository-list-card .repository-list-actions .btn{min-width:52px;min-height:44px;justify-content:center;border:1px solid #d8e5e5;border-radius:13px;background:#fff;font-size:18px;padding:7px 12px}
+.repository-list-card .repository-list-actions .mini-x{position:static!important;min-width:38px;min-height:38px;border:0;background:transparent;color:#6d7e84;font-size:18px;padding:5px}
+.repository-author-dot{background:#244753!important}
+.repository-list-version{font-size:11px;color:#6d8087;font-weight:700;white-space:nowrap}
+.repository-list-pending{display:inline-flex;margin-top:7px;border-radius:999px;background:#e9f6f3;color:#217366;padding:4px 8px;font-size:10px;font-weight:800}
 @media(max-width:760px){
-  #repoGeneralPanel #p170MacroRepo,
-  #repoGeneralPanel #repoPackageList,
-  #repoGeneralPanel .repo-filters-row,
-  #repoGeneralPanel #repoCatFilter,
-  #repoGeneralPanel #repoOwnerFilter,
-  #repoGeneralPanel #repoMineOnly,
-  #repoGeneralPanel .repository-file{display:none!important}
-  #repoGeneralPanel #pubList .repository-file{display:block!important}
+ #repositoryOrganizer{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ #repositoryOrganizer label{font-size:12px}
+ .repository-list-card .repository-list-actions{min-width:52px}
+ .repository-list-card .repository-list-actions .mini-x{min-width:32px}
 }
+@media(max-width:380px){#repositoryOrganizer{grid-template-columns:1fr}.repository-list-card .repository-list-version{display:none}}
 
 /* Ícone estático: sem pulsar/piscar na entrada, carregamento ou dentro do app. */
 .loading .mark,
