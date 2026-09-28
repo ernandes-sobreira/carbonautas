@@ -1,4 +1,4 @@
-/* Repository owns compact list cards and the full file carousel. No DOM cloning or polling. */
+/* Repository owns one compact list for every publication type and the full file carousel. */
 (function(root){
 'use strict';
 const files=()=>root.CarbonautasFiles;
@@ -10,7 +10,7 @@ const locks=new Set();
 let recipientRequest=null,previewHome=null,previewNext=null;
 let adminPackages=null,adminPackagesUnsub=null,adminSyncing=false;
 const normalize=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-const millis=v=>v?.toMillis?.()||(v?.seconds? v.seconds*1000 : Date.parse(v)||0);
+const millis=v=>{if(!v)return 0;try{return v?.toMillis?.()||(v?.toDate?.()?.getTime?.())||(v?.seconds?Number(v.seconds)*1000:Date.parse(v)||0)}catch(_e){return 0}};
 const CATEGORY_LABELS={
  apresentacao:'Apresentação',artigo:'Artigo científico',cronograma:'Cronograma',dados:'Dados / planilha',
  jogos_plataformas:'Jogos e plataformas',livros_capitulos:'Livros e capítulos',nota_tecnica:'Nota técnica',
@@ -24,69 +24,85 @@ const CATEGORY_COLORS={
 const CATEGORY_ALIASES={resumo_expandido:'resumos',resumo_simples:'resumos',resumo:'resumos',jogo:'jogos_plataformas',plataforma:'jogos_plataformas',projeto:'projetos_relatorios',relatorio:'projetos_relatorios',livro:'livros_capitulos',capitulo:'livros_capitulos'};
 function categoryKey(p){const raw=String(p?.categoria||'outro');return CATEGORY_ALIASES[raw]||raw||'outro'}
 function categoryLabel(p){const k=categoryKey(p);return k==='outro'&&p?.categoriaOutro?String(p.categoriaOutro):CATEGORY_LABELS[k]||String(p?.categoria||'Outro')}
-function turnId(p){return p.repositoryTurnMemberId||p.reviewNextRecipientId||files().nextRecipientId(p,p.memberId)}
-function memberName(id){return (app().state.members||[]).find(m=>m.id===id)?.nome||'Participante'}
+function turnId(p){return isFilePublication(p)?(p.repositoryTurnMemberId||p.reviewNextRecipientId||files().nextRecipientId(p,p.memberId)):''}
+function memberName(id){return (app().state.members||[]).find(m=>String(m.id)===String(id))?.nome||'Participante'}
 function actor(){return {memberId:app().memberId,coordinator:app().isAdmin}}
-function listDate(p){const n=millis(p?.ts||p?.createdAt||p?.editedAt);return n?new Date(n).toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'}):''}
-/* The list is deliberately compact on desktop and mobile. Full controls/history live only in the dialog. */
+function isFilePublication(p){return !!p&&(p.tipo==='arquivo'||!!p.fileName||!!p.storagePath||!!p.reviewFlow||!!p.macroDocument||!!p.sourcePersonalRepo||Array.isArray(p.onlineEditHistory));}
+function createdMillis(p){return millis(p?.ts||p?.createdAt||p?.created_at||p?.date)}
+function lastSendInfo(p){
+ let evt=null;
+ try{const events=files()?.historyEvents?.(p)||[];for(let i=events.length-1;i>=0;i--){if(['upload','initial','legacy'].includes(events[i]?.action)){evt=events[i];break}}}catch(_e){}
+ const id=String(evt?.byMemberId||p?.editedByMemberId||p?.reviewSenderMemberId||p?.reviewSenderId||p?.repositoryTurnFromId||p?.memberId||'');
+ const name=evt?.byName||p?.editedByName||p?.reviewSenderName||p?.repositoryTurnFromName||p?.memberNome||memberName(id)||'Participante';
+ const ms=millis(evt?.when||p?.editedAt||p?.repositoryTurnAt||p?.ts||p?.createdAt);
+ return {id,name,ms};
+}
+function formatActivity(ms){if(!ms)return'';const d=new Date(ms);return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
+function displayKey(p){return p?.reviewFlow?'review:'+(p.reviewThreadId||p.reviewBaseId||p.id):'id:'+p.id}
+function displayPublications(){
+ const map=new Map();
+ for(const p of app().state.publicacoes||[]){
+  if(!p?.id)continue;const key=displayKey(p),old=map.get(key);
+  if(!old){map.set(key,p);continue}
+  const pv=Number(files()?.currentVersion?.(p)||1),ov=Number(files()?.currentVersion?.(old)||1);
+  if(pv>ov||(pv===ov&&lastSendInfo(p).ms>lastSendInfo(old).ms))map.set(key,p);
+ }
+ return [...map.values()];
+}
 function cardHTML(p){
- const f=files(),key=categoryKey(p),color=CATEGORY_COLORS[key]||CATEGORY_COLORS.outro,date=listDate(p),version=f.currentVersion(p),turn=turnId(p);
+ const f=files(),key=categoryKey(p),color=CATEGORY_COLORS[key]||CATEGORY_COLORS.outro,version=Number(f?.currentVersion?.(p)||1),turn=turnId(p),last=lastSendInfo(p),when=formatActivity(last.ms),file=isFilePublication(p),owner=p.memberNome||memberName(p.memberId);
  const canDelete=app().isAdmin||String(p.memberId||'')===String(app().memberId||'');
- return `<article class="pub-row p59-card repository-list-card" data-file-id="${esc(p.id)}" style="--p59-accent:${color}"><div class="pub-cat" style="background:${color}"></div><div class="pub-body"><div class="pub-t">${esc(p.titulo||f.publicationTitle(p))}</div><div class="pub-meta"><span class="pub-cat-tag" style="background:${color}">${esc(categoryLabel(p))}</span><span class="pub-author"><span class="d repository-author-dot"></span>${esc(p.memberNome||memberName(p.memberId))}</span>${date?`<span class="pub-date">${esc(date)}</span>`:''}${version>1?`<span class="repository-list-version">v${version}</span>`:''}</div>${turn===app().memberId?'<span class="repository-list-pending">Sua vez</span>':''}</div><div class="pub-act repository-list-actions"><button type="button" class="btn ghost" data-file-action="open" title="Abrir arquivo" aria-label="Abrir arquivo">↗</button>${canDelete&&typeof root.deletePublicacao==='function'?'<button type="button" class="mini-x" data-file-action="delete" title="Excluir" aria-label="Excluir">×</button>':''}</div></article>`;
+ const action=p.labRun?'lab':file?'open':p.url?'link':'none';
+ const actionLabel=p.labRun?'Abrir resultados':file?'Abrir arquivo':p.url?'Abrir link':'';
+ const actionIcon=p.labRun?'📈':'↗';
+ return `<article class="pub-row p59-card repository-list-card" data-publication-id="${esc(p.id)}"${file?` data-file-id="${esc(p.id)}"`:''} data-publication-kind="${action}" style="--p59-accent:${color}"><div class="pub-cat" style="background:${color}"></div><div class="pub-body"><div class="pub-t">${esc(p.titulo||f.publicationTitle(p))}</div><div class="pub-meta"><span class="pub-cat-tag" style="background:${color}">${esc(categoryLabel(p))}</span><span class="repository-owner">Responsável: ${esc(owner)}</span>${file&&version>1?`<span class="repository-list-version">v${version}</span>`:''}</div><div class="repository-last-send"><b>Último envio:</b> <span class="repository-last-sender">${esc(last.name||owner)}</span>${when?`<span class="repository-last-time">${esc(when)}</span>`:''}</div>${turn===app().memberId?'<span class="repository-list-pending">Sua vez</span>':''}</div><div class="pub-act repository-list-actions">${action!=='none'?`<button type="button" class="btn ghost" data-file-action="${action}" title="${esc(actionLabel)}" aria-label="${esc(actionLabel)}">${actionIcon}</button>`:''}${canDelete&&typeof root.deletePublicacao==='function'?'<button type="button" class="mini-x" data-file-action="delete" title="Excluir" aria-label="Excluir">×</button>':''}</div></article>`;
 }
 function detailCardHTML(p){
- const f=files(),can=f.canExchange(p,actor()),turn=turnId(p),targets=can?f.recipientIds(p,app().memberId):[];
+ const f=files(),can=f.canExchange(p,actor()),turn=turnId(p),targets=can?f.recipientIds(p,app().memberId):[],last=lastSendInfo(p),when=formatActivity(last.ms),owner=p.memberNome||memberName(p.memberId);
  const history=f.historyEvents(p).map(e=>`<li><time>${esc(f.formatWhen(e.when))}</time><span><b>${esc(e.byName||memberName(e.byMemberId))}</b> ${esc(f.actionText(e))}</span><small>v${esc(e.version)}</small></li>`).join('');
- return `<article class="repository-file" data-file-id="${esc(p.id)}"><header><div><h3>${esc(p.titulo||f.publicationTitle(p))}</h3><p>${esc(p.memberNome||memberName(p.memberId))} · ${esc(categoryLabel(p))} · v${f.currentVersion(p)}</p></div></header><div class="repository-actions"><button type="button" data-file-action="preview">👁 Visualizar</button><button type="button" data-file-action="download">⬇ Baixar</button>${can&&targets.length?'<button type="button" data-file-action="return" class="primary">↩ Devolver arquivo</button>':''}${targets.length?'<button type="button" data-file-action="message">💬 Mensagem</button>':''}</div><details class="repository-history" open><summary>Histórico da troca</summary><ol>${history}</ol></details>${turn?`<p class="repository-turn">${turn===app().memberId?'Agora é sua vez':`Agora é a vez de ${esc(memberName(turn))}`}</p>`:''}</article>`;
+ return `<article class="repository-file" data-file-id="${esc(p.id)}"><header><div><h3>${esc(p.titulo||f.publicationTitle(p))}</h3><p>Responsável: ${esc(owner)} · ${esc(categoryLabel(p))} · v${f.currentVersion(p)}</p><p class="repository-detail-last"><b>Último envio:</b> ${esc(last.name||owner)}${when?' · '+esc(when):''}</p></div></header><div class="repository-actions"><button type="button" data-file-action="preview">👁 Visualizar</button><button type="button" data-file-action="download">⬇ Baixar</button>${can&&targets.length?'<button type="button" data-file-action="return" class="primary">↩ Devolver arquivo</button>':''}${targets.length?'<button type="button" data-file-action="message">💬 Mensagem</button>':''}</div><details class="repository-history" open><summary>Histórico da troca</summary><ol>${history}</ol></details>${turn?`<p class="repository-turn">${turn===app().memberId?'Agora é sua vez':`Agora é a vez de ${esc(memberName(turn))}`}</p>`:''}</article>`;
 }
 function dialog(id,html){const el=document.createElement('dialog');el.id=id;el.className='repository-dialog';el.innerHTML=html;document.body.append(el);return el}
 function closeDeck(){const d=$('#repositoryDeck');if(d?.open)d.close();deckIds=[];lastFocus?.focus?.()}
+function publicationById(id){return (app().state.publicacoes||[]).find(x=>String(x.id)===String(id))||null}
 function showDeck(){
- const p=(app().state.publicacoes||[]).find(x=>x.id===deckIds[deckIndex]);if(!p){closeDeck();return}
+ const p=publicationById(deckIds[deckIndex]);if(!p){closeDeck();return}
  const d=$('#repositoryDeck');$('#repositoryStage').innerHTML=detailCardHTML(p);$('#repositoryCount').textContent=`${deckIndex+1} de ${deckIds.length}`;
  d.querySelector('[data-deck-prev]').disabled=deckIndex===0;d.querySelector('[data-deck-next]').disabled=deckIndex===deckIds.length-1;
  if(!d.open)d.showModal();
 }
 function openDeck(id){deckIds=[...document.querySelectorAll('#pubList > [data-file-id]')].filter(x=>!x.hidden).map(x=>x.dataset.fileId);deckIndex=deckIds.indexOf(id);if(deckIndex<0){deckIds=[id];deckIndex=0}lastFocus=document.activeElement;showDeck()}
+function openPublication(id){const p=publicationById(id);if(!p)return;if(p.labRun&&typeof root.openLabRun==='function')return root.openLabRun(p.labRunId);if(isFilePublication(p))return openDeck(id);if(p.url){root.open(p.url,'_blank','noopener');return}root.toast?.('Esta publicação não tem arquivo ou link para abrir.');}
 function option(value,label){return `<option value="${esc(value)}">${esc(label)}</option>`}
-function refillSelect(select,rows,placeholder){
- if(!select)return;
- const selected=select.value;
- select.innerHTML=option('',placeholder)+rows.map(([v,l])=>option(v,l)).join('');
- select.value=rows.some(([v])=>String(v)===String(selected))?selected:'';
-}
-function repositoryItems(){
- const list=$('#pubList');if(!list)return[];
- const pubs=new Map((app().state.publicacoes||[]).map(p=>[String(p.id),p]));
- return [...list.querySelectorAll(':scope > [data-file-id]')].map(el=>({el,p:pubs.get(String(el.dataset.fileId))})).filter(x=>x.p);
-}
+function refillSelect(select,rows,placeholder){if(!select)return;const selected=select.value;select.innerHTML=option('',placeholder)+rows.map(([v,l])=>option(v,l)).join('');select.value=rows.some(([v])=>String(v)===String(selected))?selected:'';}
+function repositoryItems(){const list=$('#pubList');if(!list)return[];const pubs=new Map((app().state.publicacoes||[]).map(p=>[String(p.id),p]));return [...list.querySelectorAll(':scope > [data-publication-id]')].map(el=>({el,p:pubs.get(String(el.dataset.publicationId))})).filter(x=>x.p);}
 function refreshFilterOptions(items){
  const people=new Map(),cats=new Map();
- for(const {p} of items){
-  const pid=String(p.memberId||'');if(pid)people.set(pid,p.memberNome||memberName(pid));
-  const ck=categoryKey(p);cats.set(ck,categoryLabel(p));
- }
+ for(const {p} of items){const pid=String(p.memberId||'');if(pid)people.set(pid,p.memberNome||memberName(pid));const ck=categoryKey(p);cats.set(ck,categoryLabel(p));}
  refillSelect($('#repositoryPerson'),[...people].sort((a,b)=>String(a[1]).localeCompare(String(b[1]),'pt-BR')),'Todas as pessoas');
  refillSelect($('#repositoryCategory'),[...cats].sort((a,b)=>String(a[1]).localeCompare(String(b[1]),'pt-BR')),'Todas as categorias');
 }
 function organize(){
  const list=$('#pubList'),toolbar=$('#repositoryOrganizer');if(!list||!toolbar)return;
  const items=repositoryItems();refreshFilterOptions(items);
- const person=$('#repositoryPerson')?.value||'',category=$('#repositoryCategory')?.value||'',mode=$('#repositoryMode')?.value||'date',query=normalize($('#repositorySearch')?.value||'');
+ const person=$('#repositoryPerson')?.value||'',category=$('#repositoryCategory')?.value||'',mode=$('#repositoryMode')?.value||'recent',query=normalize($('#repositorySearch')?.value||'');
  for(const {el,p} of items){
-  const pending=turnId(p)===app().memberId;
-  const hay=normalize([p.titulo,files().publicationTitle(p),p.memberNome||memberName(p.memberId),categoryLabel(p),p.fileName].join(' '));
+  const pending=turnId(p)===app().memberId,last=lastSendInfo(p);
+  const hay=normalize([p.titulo,files().publicationTitle(p),p.memberNome||memberName(p.memberId),last.name,categoryLabel(p),p.fileName,p.url].join(' '));
   el.hidden=!!((person&&String(p.memberId)!==person)||(category&&categoryKey(p)!==category)||(mode==='pending'&&!pending)||(query&&!hay.includes(query)));
  }
  const title=p=>normalize(p.titulo||files().publicationTitle(p));
  items.sort((a,b)=>{
   if(mode==='person')return normalize(a.p.memberNome||memberName(a.p.memberId)).localeCompare(normalize(b.p.memberNome||memberName(b.p.memberId)),'pt-BR')||title(a.p).localeCompare(title(b.p),'pt-BR');
-  if(mode==='pending'){const ap=turnId(a.p)===app().memberId?0:1,bp=turnId(b.p)===app().memberId?0:1;return ap-bp||(millis(b.p.editedAt||b.p.ts||b.p.createdAt)-millis(a.p.editedAt||a.p.ts||a.p.createdAt));}
-  return millis(b.p.editedAt||b.p.ts||b.p.createdAt)-millis(a.p.editedAt||a.p.ts||a.p.createdAt);
+  if(mode==='created')return createdMillis(b.p)-createdMillis(a.p)||title(a.p).localeCompare(title(b.p),'pt-BR');
+  if(mode==='pending'){const ap=turnId(a.p)===app().memberId?0:1,bp=turnId(b.p)===app().memberId?0:1;return ap-bp||(lastSendInfo(b.p).ms-lastSendInfo(a.p).ms)||title(a.p).localeCompare(title(b.p),'pt-BR');}
+  return lastSendInfo(b.p).ms-lastSendInfo(a.p).ms||createdMillis(b.p)-createdMillis(a.p)||title(a.p).localeCompare(title(b.p),'pt-BR');
  });
  for(const {el}of items)list.append(el);
+ const count=$('#repositoryResultCount');if(count){const n=items.filter(x=>!x.el.hidden).length;count.textContent=`${n} resultado${n===1?'':'s'}`;}
 }
-function refresh(){organize();if($('#repositoryDeck')?.open)showDeck()}
+function renderUnifiedList(){const list=$('#pubList');if(!list)return;const pubs=displayPublications();list.innerHTML=pubs.length?pubs.map(cardHTML).join(''):'<div class="crono-empty">Nenhuma publicação encontrada.</div>';organize();}
+function refresh(){renderUnifiedList();if($('#repositoryDeck')?.open)showDeck()}
 function syncAdminPackages(render=true){
  if(!app().isAdmin||!adminPackages)return;
  const next=[...adminPackages.values()].sort((a,b)=>millis(b.updatedAt||b.ts)-millis(a.updatedAt||a.ts));
@@ -99,101 +115,50 @@ function syncAdminPackages(render=true){
 function installCoordinatorPackageAccess(){
  if(!app().isAdmin||adminPackagesUnsub||!root.fbFns||!root.db)return;
  const f=root.fbFns;
- try{
-  adminPackagesUnsub=f.onSnapshot(f.collection(root.db,'rede_repository_packages'),snap=>{
-   adminPackages=new Map(snap.docs.map(d=>[d.id,{...d.data(),id:d.id}]));
-   syncAdminPackages(true);
-  },err=>{
-   if(err?.code==='permission-denied')console.warn('Repositório do coordenador: publique a regra que permite leitura de todas as pastas ao coordenador.');
-   else console.warn('Repositório do coordenador',err);
-  });
- }catch(err){console.warn('Repositório do coordenador',err)}
+ try{adminPackagesUnsub=f.onSnapshot(f.collection(root.db,'rede_repository_packages'),snap=>{adminPackages=new Map(snap.docs.map(d=>[d.id,{...d.data(),id:d.id}]));syncAdminPackages(true);},err=>{if(err?.code==='permission-denied')console.warn('Repositório do coordenador: publique a regra que permite leitura de todas as pastas ao coordenador.');else console.warn('Repositório do coordenador',err);});}catch(err){console.warn('Repositório do coordenador',err)}
 }
-function chooseRecipient(p,actorId){
- const ids=files().recipientIds(p,actorId),preferred=files().nextRecipientId(p,actorId);
- if(ids.length===1)return Promise.resolve(ids[0]);
- if(!ids.length)return Promise.reject(Error('Não encontrei uma pessoa com acesso a este arquivo.'));
- const select=$('#messageRecipient');select.innerHTML=ids.map(id=>`<option value="${esc(id)}">${esc(memberName(id))}</option>`).join('');if(ids.includes(preferred))select.value=preferred;
- $('#repositoryRecipient').returnValue='';$('#repositoryRecipient').showModal();return new Promise(resolve=>{recipientRequest=resolve});
-}
+function chooseRecipient(p,actorId){const ids=files().recipientIds(p,actorId),preferred=files().nextRecipientId(p,actorId);if(ids.length===1)return Promise.resolve(ids[0]);if(!ids.length)return Promise.reject(Error('Não encontrei uma pessoa com acesso a este arquivo.'));const select=$('#messageRecipient');select.innerHTML=ids.map(id=>`<option value="${esc(id)}">${esc(memberName(id))}</option>`).join('');if(ids.includes(preferred))select.value=preferred;$('#repositoryRecipient').returnValue='';$('#repositoryRecipient').showModal();return new Promise(resolve=>{recipientRequest=resolve});}
 async function openMessage(id){
  const p=await files().getPublication(id,true),a=await files().actorProfile(true);if(!p||!a)throw Error('Arquivo ou perfil indisponível.');
  const target=await chooseRecipient(p,a.memberId);if(!target)return;
- closeDeck();$('#repositoryReturn')?.close();
- for(const key of ['repoOverlay','repoPackageOverlay','filePreviewOverlay'])root.closeOverlay?.(key);
- root.closePanelinhas?.();
- await root.startPrivateConversation(target);
- const tid=files().privateThreadId(a.memberId,target);
- if(!(app().state.privateThreads||[]).some(t=>t.id===tid))throw Error('Não foi possível abrir a conversa privada.');
- root.switchView('conversas');root.openPrivateThread(tid);
- root.repositoryMessageContext={id,threadId:tid,version:files().currentVersion(p),targetId:target};
+ closeDeck();$('#repositoryReturn')?.close();for(const key of ['repoOverlay','repoPackageOverlay','filePreviewOverlay'])root.closeOverlay?.(key);root.closePanelinhas?.();
+ await root.startPrivateConversation(target);const tid=files().privateThreadId(a.memberId,target);if(!(app().state.privateThreads||[]).some(t=>t.id===tid))throw Error('Não foi possível abrir a conversa privada.');
+ root.switchView('conversas');root.openPrivateThread(tid);root.repositoryMessageContext={id,threadId:tid,version:files().currentVersion(p),targetId:target};
  const input=$('#privateInput');if(input){const context=`Sobre o arquivo “${files().publicationTitle(p)}” que me enviou`;input.value=input.value?input.value+'\n'+context:context;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();}
 }
 async function download(id){
  await files().downloadPublication(id);
  if(!id.startsWith('package:'))return;
- try{
-  const p=await files().getPublication(id,true);if(!p)return;
-  for(const card of document.querySelectorAll('#pubList > [data-file-id]')){
-   if(card.dataset.fileId!==id)continue;
-   const template=document.createElement('template');template.innerHTML=cardHTML(p);card.replaceWith(template.content.firstElementChild);
-  }
-  if($('#repositoryDeck')?.open&&deckIds[deckIndex]===id)showDeck();
- }catch(err){console.warn('Atualização do histórico',err);root.toast('Arquivo baixado. Reabra a pasta para atualizar o histórico.')}
+ try{const p=await files().getPublication(id,true);if(!p)return;for(const card of document.querySelectorAll('#pubList > [data-file-id]')){if(card.dataset.fileId!==id)continue;const template=document.createElement('template');template.innerHTML=cardHTML(p);card.replaceWith(template.content.firstElementChild);}if($('#repositoryDeck')?.open&&deckIds[deckIndex]===id)showDeck();}catch(err){console.warn('Atualização do histórico',err);root.toast('Arquivo baixado. Reabra a pasta para atualizar o histórico.')}
 }
-async function preview(id){
- const p=await files().getPublication(id,true);if(!p?.url)throw Error('Arquivo indisponível.');
- const host=$('#repositoryPreview'),overlay=$('#filePreviewOverlay');if(!overlay)throw Error('Visualizador indisponível.');
- if(overlay.parentElement!==host){previewHome=overlay.parentNode;previewNext=overlay.nextSibling;host.append(overlay)}
- if(!host.open)host.showModal();
- const loading=root.openFilePreview(p.url,files().publicationTitle(p));
- const link=$('#filePreviewDownload');if(link){link.removeAttribute('href');link.onclick=async e=>{e.preventDefault();try{await download(id)}catch(err){root.toast(err.message)}}}
- await loading;
-}
-async function openReturn(id){
- const p=await files().getPublication(id,true),a=await files().actorProfile(true);if(!files().canExchange(p,a))throw Error('Você não tem permissão para devolver este arquivo.');
- returnId=id;returnVersion=files().currentVersion(p);$('#repositoryReturn form').reset();$('#returnTitle').textContent=files().publicationTitle(p);const ids=files().recipientIds(p,a.memberId),select=$('#returnRecipient');select.innerHTML=ids.map(id=>`<option value="${esc(id)}">${esc(memberName(id))}</option>`).join('');const preferred=files().nextRecipientId(p,a.memberId);if(ids.includes(preferred))select.value=preferred;select.disabled=ids.length===1;$('#repositoryReturn').showModal();
-}
-async function submitReturn(e){
- e.preventDefault();if(busy)return;const form=e.currentTarget,file=form.elements.file.files[0],message=form.elements.message.value.trim();if(!file||!message)return;
- busy=true;const button=form.querySelector('[type=submit]');button.disabled=true;button.textContent='Enviando…';
- try{const p=await files().getPublication(returnId,true);if(files().currentVersion(p)!==returnVersion)throw Error('Outra versão chegou. Feche e reabra o formulário.');const result=await files().commitUploadAndMessage(returnId,file,message,$('#returnRecipient').value);$('#repositoryReturn').close();if(p.packageId)await root.openRepositoryPackage(p.packageId);root.toast(`Versão ${result.nextVersion} enviada. Agora é a vez de ${memberName(result.targetId)}.`)}catch(err){root.toast(err.message||'Não foi possível enviar.')}finally{busy=false;button.disabled=false;button.textContent='Enviar arquivo + mensagem'}
-}
+async function preview(id){const p=await files().getPublication(id,true);if(!p?.url)throw Error('Arquivo indisponível.');const host=$('#repositoryPreview'),overlay=$('#filePreviewOverlay');if(!overlay)throw Error('Visualizador indisponível.');if(overlay.parentElement!==host){previewHome=overlay.parentNode;previewNext=overlay.nextSibling;host.append(overlay)}if(!host.open)host.showModal();const loading=root.openFilePreview(p.url,files().publicationTitle(p));const link=$('#filePreviewDownload');if(link){link.removeAttribute('href');link.onclick=async e=>{e.preventDefault();try{await download(id)}catch(err){root.toast(err.message)}}}await loading;}
+async function openReturn(id){const p=await files().getPublication(id,true),a=await files().actorProfile(true);if(!files().canExchange(p,a))throw Error('Você não tem permissão para devolver este arquivo.');returnId=id;returnVersion=files().currentVersion(p);$('#repositoryReturn form').reset();$('#returnTitle').textContent=files().publicationTitle(p);const ids=files().recipientIds(p,a.memberId),select=$('#returnRecipient');select.innerHTML=ids.map(id=>`<option value="${esc(id)}">${esc(memberName(id))}</option>`).join('');const preferred=files().nextRecipientId(p,a.memberId);if(ids.includes(preferred))select.value=preferred;select.disabled=ids.length===1;$('#repositoryReturn').showModal();}
+async function submitReturn(e){e.preventDefault();if(busy)return;const form=e.currentTarget,file=form.elements.file.files[0],message=form.elements.message.value.trim();if(!file||!message)return;busy=true;const button=form.querySelector('[type=submit]');button.disabled=true;button.textContent='Enviando…';try{const p=await files().getPublication(returnId,true);if(files().currentVersion(p)!==returnVersion)throw Error('Outra versão chegou. Feche e reabra o formulário.');const result=await files().commitUploadAndMessage(returnId,file,message,$('#returnRecipient').value);$('#repositoryReturn').close();if(p.packageId)await root.openRepositoryPackage(p.packageId);root.toast(`Versão ${result.nextVersion} enviada. Agora é a vez de ${memberName(result.targetId)}.`)}catch(err){root.toast(err.message||'Não foi possível enviar.')}finally{busy=false;button.disabled=false;button.textContent='Enviar arquivo + mensagem'}}
 async function onAction(e){
- const button=e.target.closest('[data-file-action]');if(!button)return;const id=button.closest('[data-file-id]')?.dataset.fileId,action=button.dataset.fileAction,key=id+':'+action;if(!id||locks.has(key))return;
- e.preventDefault();locks.add(key);button.disabled=true;
- try{if(action==='open')openDeck(id);else if(action==='download')await download(id);else if(action==='preview')await preview(id);else if(action==='message')await openMessage(id);else if(action==='return')await openReturn(id);else if(action==='delete'&&typeof root.deletePublicacao==='function')await root.deletePublicacao(id)}catch(err){console.error('Repository',err);root.toast(err.message||'Não foi possível concluir.')}finally{locks.delete(key);if(button.isConnected)button.disabled=false}
+ const button=e.target.closest('[data-file-action]');if(!button)return;const card=button.closest('[data-publication-id],[data-file-id]'),id=card?.dataset.publicationId||card?.dataset.fileId,action=button.dataset.fileAction,key=id+':'+action;if(!id||locks.has(key))return;
+ e.preventDefault();e.stopPropagation();locks.add(key);button.disabled=true;
+ try{if(action==='open')openDeck(id);else if(action==='link')openPublication(id);else if(action==='lab')openPublication(id);else if(action==='download')await download(id);else if(action==='preview')await preview(id);else if(action==='message')await openMessage(id);else if(action==='return')await openReturn(id);else if(action==='delete'&&typeof root.deletePublicacao==='function')await root.deletePublicacao(id)}catch(err){console.error('Repository',err);root.toast(err.message||'Não foi possível concluir.')}finally{locks.delete(key);if(button.isConnected)button.disabled=false}
 }
 function buildOrganizer(list){
- const old=$('#repositoryOrganizer');old?.remove();
- const toolbar=document.createElement('div');toolbar.id='repositoryOrganizer';
- toolbar.innerHTML='<label>Pessoa<select id="repositoryPerson"><option value="">Todas as pessoas</option></select></label><label>Categoria<select id="repositoryCategory"><option value="">Todas as categorias</option></select></label><label>Organizar<select id="repositoryMode"><option value="date">Mais recentes</option><option value="person">A–Z · Pessoas</option><option value="pending">Pendentes para mim</option></select></label><label>Pesquisar<input id="repositorySearch" type="search" placeholder="Pessoa, categoria ou arquivo"></label>';
- list.before(toolbar);
- toolbar.addEventListener('change',organize);$('#repositorySearch').addEventListener('input',organize);
- const legacyCategory=$('#pubCategoria'),legacyPerson=$('#pubPessoa'),legacyMine=$('#pubMine');
- if(legacyCategory)legacyCategory.value='';if(legacyPerson)legacyPerson.value='';if(legacyMine)legacyMine.checked=false;
- organize();
+ const old=$('#repositoryOrganizer');old?.remove();const toolbar=document.createElement('div');toolbar.id='repositoryOrganizer';
+ toolbar.innerHTML='<label>Pessoa<select id="repositoryPerson"><option value="">Todas as pessoas</option></select></label><label>Categoria<select id="repositoryCategory"><option value="">Todas as categorias</option></select></label><label>Organizar<select id="repositoryMode"><option value="recent">Últimos envios</option><option value="created">Mais novos cadastrados</option><option value="person">A–Z · Pessoas</option><option value="pending">Pendentes para mim</option></select></label><label>Pesquisar<input id="repositorySearch" type="search" placeholder="Pessoa, último remetente, categoria ou arquivo"></label><span id="repositoryResultCount" aria-live="polite"></span>';
+ list.before(toolbar);toolbar.addEventListener('change',organize);$('#repositorySearch').addEventListener('input',organize);
+ const legacyCategory=$('#pubCategoria'),legacyPerson=$('#pubPessoa'),legacyMine=$('#pubMine');if(legacyCategory)legacyCategory.value='';if(legacyPerson)legacyPerson.value='';if(legacyMine){legacyMine.checked=false;const label=legacyMine.closest('label');if(label)label.hidden=true}organize();
 }
 function boot(){
  dialog('repositoryDeck','<header><b>Arquivo Vivo</b><button type="button" data-deck-close aria-label="Fechar">×</button></header><div id="repositoryStage"></div><nav><button type="button" data-deck-prev>← Anterior</button><span id="repositoryCount"></span><button type="button" data-deck-next>Próximo →</button></nav>');
  dialog('repositoryReturn','<form><header><h2>Devolver arquivo</h2><button type="button" data-return-close aria-label="Fechar">×</button></header><p id="returnTitle"></p><label>Para<select id="returnRecipient" required></select></label><label>Nova versão<input type="file" name="file" required></label><label>Mensagem<textarea name="message" required maxlength="4400" rows="5" placeholder="Conte o que mudou e o que precisa ser feito."></textarea></label><footer><button type="button" data-return-close>Cancelar</button><button type="submit" class="primary">Enviar arquivo + mensagem</button></footer></form>');
- dialog('repositoryPreview','');
- dialog('repositoryRecipient','<form method="dialog"><h2>Conversar sobre o arquivo</h2><label>Com quem?<select id="messageRecipient"></select></label><footer><button value="cancel">Cancelar</button><button value="choose" class="primary">Abrir conversa</button></footer></form>');
+ dialog('repositoryPreview','');dialog('repositoryRecipient','<form method="dialog"><h2>Conversar sobre o arquivo</h2><label>Com quem?<select id="messageRecipient"></select></label><footer><button value="cancel">Cancelar</button><button value="choose" class="primary">Abrir conversa</button></footer></form>');
  $('#repositoryRecipient').addEventListener('close',()=>{const resolve=recipientRequest;recipientRequest=null;resolve?.($('#repositoryRecipient').returnValue==='choose'?$('#messageRecipient').value:null)});
  $('#repositoryPreview').addEventListener('close',()=>{if($('#repositoryPreview').open)return;const overlay=$('#filePreviewOverlay');if(overlay&&previewHome){previewHome.insertBefore(overlay,previewNext?.parentNode===previewHome?previewNext:null);previewHome=null;overlay.classList.remove('open');const download=$('#filePreviewDownload');if(download)download.onclick=null}});
  document.addEventListener('click',onAction);
- document.addEventListener('click',e=>{if(e.target.closest('button,a,input,summary,select,textarea,label'))return;const card=e.target.closest('#pubList > [data-file-id]');if(card)openDeck(card.dataset.fileId)});
+ document.addEventListener('click',e=>{if(e.target.closest('button,a,input,summary,select,textarea,label'))return;const card=e.target.closest('#pubList > [data-publication-id]');if(card)openPublication(card.dataset.publicationId)});
  const list=$('#pubList');if(list){buildOrganizer(list);const existing=[...document.querySelectorAll('button')].find(b=>b.textContent.trim()==='▣ Folhear arquivos');existing?.remove();const button=document.createElement('button');button.type='button';button.className='btn';button.textContent='▣ Folhear arquivos';button.onclick=()=>{const id=list.querySelector('[data-file-id]:not([hidden])')?.dataset.fileId;if(id)openDeck(id);else root.toast('Nenhum arquivo nestes filtros.')};list.before(button)}
  $('#repositoryDeck').addEventListener('click',e=>{if(e.target.closest('[data-deck-close]'))closeDeck();if(e.target.closest('[data-deck-prev]')&&deckIndex>0){deckIndex--;showDeck()}if(e.target.closest('[data-deck-next]')&&deckIndex<deckIds.length-1){deckIndex++;showDeck()}});
- $('#repositoryReturn form').addEventListener('submit',submitReturn);
- $('#repositoryReturn').addEventListener('click',e=>{if(e.target.closest('[data-return-close]')&&!busy)$('#repositoryReturn').close()});
- $('#repositoryReturn').addEventListener('cancel',e=>{if(busy)e.preventDefault()});
- $('#repositoryPreview').addEventListener('cancel',()=>root.closeOverlay?.('filePreviewOverlay'));
- document.addEventListener('carbonautas:repository-rendered',()=>{syncAdminPackages(false);refresh()});
- root.addEventListener?.('firebase-ready',installCoordinatorPackageAccess);
- installCoordinatorPackageAccess();
- root.renderPubs?.();
+ $('#repositoryReturn form').addEventListener('submit',submitReturn);$('#repositoryReturn').addEventListener('click',e=>{if(e.target.closest('[data-return-close]')&&!busy)$('#repositoryReturn').close()});$('#repositoryReturn').addEventListener('cancel',e=>{if(busy)e.preventDefault()});$('#repositoryPreview').addEventListener('cancel',()=>root.closeOverlay?.('filePreviewOverlay'));
+ document.addEventListener('carbonautas:repository-rendered',()=>{syncAdminPackages(false);renderUnifiedList();if($('#repositoryDeck')?.open)showDeck()});
+ root.addEventListener?.('firebase-ready',installCoordinatorPackageAccess);installCoordinatorPackageAccess();root.renderPubs?.();setTimeout(()=>{renderUnifiedList()},0);
 }
-root.CarbonautasRepository={cardHTML,detailCardHTML,openDeck,closeDeck,openMessage,preview,openReturn,refresh,organize,installCoordinatorPackageAccess};
+root.CarbonautasRepository={cardHTML,detailCardHTML,openDeck,closeDeck,openMessage,preview,openReturn,refresh,organize,renderUnifiedList,lastSendInfo,installCoordinatorPackageAccess};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })(globalThis);
