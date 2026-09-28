@@ -8,7 +8,7 @@
 .repository-dialog button:disabled,.repository-file button:disabled{opacity:.5;cursor:wait}
 .repository-dialog .primary,.repository-file .primary{background:#087f86;color:white;border-color:#087f86}
 .repository-file{padding:20px;background:#fff;border-radius:18px;min-width:0;box-shadow:0 4px 20px #143d4d0b}
-.repository-file h3{margin:0;font-size:18px;overflow-wrap:anywhere}.repository-file header p{font-size:12px;color:#5c767f;overflow-wrap:anywhere}
+.repository-file h3{margin:0;font-size:18px;overflow-wrap:anywhere}.repository-file header p{font-size:12px;color:#5c767f;overflow-wrap:anywhere}.repository-detail-last{margin-top:5px!important;color:#355e68!important}
 .repository-actions{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}
 .repository-history summary{font-size:12px;font-weight:700;cursor:pointer;padding:12px 0}
 .repository-history ol{list-style:none;padding:0;margin:0;max-height:340px;overflow:auto}
@@ -22,27 +22,35 @@
 @media(max-width:600px){.repository-file{padding:14px}.repository-dialog{padding:12px}.repository-actions{display:grid;grid-template-columns:1fr 1fr}.repository-actions button{padding:10px 7px}.repository-history li{grid-template-columns:1fr auto;gap:5px}.repository-history time{grid-column:1/-1}.repository-file h3{font-size:16px}.repository-dialog footer{flex-wrap:wrap}}
 
 .repository-file[hidden],.repository-list-card[hidden]{display:none!important}
-#repositoryOrganizer{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0}#repositoryOrganizer label{display:grid;gap:6px;min-width:0;font-size:12px;flex:1 1 160px}
+#repositoryOrganizer{display:flex;flex-wrap:wrap;gap:12px;margin:12px 0 8px;align-items:end}#repositoryOrganizer label{display:grid;gap:6px;min-width:0;font-size:12px;flex:1 1 170px}
 #repositoryOrganizer input,#repositoryOrganizer select,.repository-dialog select{box-sizing:border-box;width:100%;min-height:44px;padding:10px;border:1px solid #cbdde0;border-radius:10px;background:white;color:#173d4c;font:inherit}
+#repositoryResultCount{flex:0 0 auto;font-size:11px;font-weight:700;color:#71858c;padding:0 2px 11px;white-space:nowrap}
 
 /* Uma única interface no PC e no celular: lista compacta; detalhes só ao abrir. */
 #repoGeneralPanel #repoPackageList,
 #repoGeneralPanel .repo-filters-row,
 #repoGeneralPanel #pubCategoria,
 #repoGeneralPanel #pubPessoa,
-#repoGeneralPanel #pubMine{display:none!important}
+#repoGeneralPanel #pubMine,
+#repoGeneralPanel label:has(#pubMine){display:none!important}
 .repository-list-card{cursor:pointer;min-width:0}
 .repository-list-card .repository-list-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:7px!important;margin:0!important;padding:0!important;border:0!important;align-self:center}
 .repository-list-card .repository-list-actions .btn{min-width:52px;min-height:44px;justify-content:center;border:1px solid #d8e5e5;border-radius:13px;background:#fff;font-size:18px;padding:7px 12px}
 .repository-list-card .repository-list-actions .mini-x{position:static!important;min-width:38px;min-height:38px;border:0;background:transparent;color:#6d7e84;font-size:18px;padding:5px}
-.repository-author-dot{background:#244753!important}
+.repository-owner{font-size:11px;color:#526b73;font-weight:650;white-space:nowrap}
 .repository-list-version{font-size:11px;color:#6d8087;font-weight:700;white-space:nowrap}
+.repository-last-send{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:7px;font-size:11px;line-height:1.3;color:#637a82}
+.repository-last-send b{color:#355e68}.repository-last-sender{font-weight:800;color:#214c57}.repository-last-time{color:#7b8d93;white-space:nowrap}
 .repository-list-pending{display:inline-flex;margin-top:7px;border-radius:999px;background:#e9f6f3;color:#217366;padding:4px 8px;font-size:10px;font-weight:800}
 @media(max-width:760px){
  #repositoryOrganizer{display:grid;grid-template-columns:1fr 1fr;gap:10px}
  #repositoryOrganizer label{font-size:12px}
+ #repositoryResultCount{grid-column:1/-1;padding:0 2px 2px}
  .repository-list-card .repository-list-actions{min-width:52px}
  .repository-list-card .repository-list-actions .mini-x{min-width:32px}
+ .repository-last-send{display:grid;grid-template-columns:auto 1fr;column-gap:5px;row-gap:2px}
+ .repository-last-time{grid-column:1/-1;white-space:normal}
+ .repository-owner{white-space:normal}
 }
 @media(max-width:380px){#repositoryOrganizer{grid-template-columns:1fr}.repository-list-card .repository-list-version{display:none}}
 
