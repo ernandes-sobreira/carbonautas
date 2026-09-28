@@ -12,7 +12,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  const pubs=[
   {id:'f0',tipo:'arquivo',memberId:'dia',memberNome:'Daiana',categoria:'projetos_relatorios',fileName:'Projeto_Daiana.docx',titulo:'Projeto de doutorado interativo',url:'https://example.org/f0',ts:'2026-09-02T12:00:00Z',onlineEditVersion:2,repositoryTurnMemberId:'prof',onlineEditHistory:[{action:'upload',version:2,byMemberId:'prof',byName:'Ernandes Sobreira Oliveira Junior',savedAt:'2026-09-28T11:40:00Z'}]},
   {id:'l1',tipo:'link',memberId:'prof',memberNome:'Ernandes Sobreira Oliveira Junior',categoria:'jogos_plataformas',titulo:'Plataforma de justiça climática em MT',url:'https://example.org/plataforma',ts:'2026-09-27T12:00:00Z'},
-  {id:'f2',tipo:'arquivo',memberId:'bas',memberNome:'Basirat Abiodun Ariyibi',categoria:'projetos_relatorios',fileName:'Impactos_pesca.pdf',titulo:'Impactos socioeconômicos das mudanças climáticas na pesca em Cáceres',url:'https://example.org/f2',ts:'2026-09-26T12:00:00Z',onlineEditVersion:1,onlineEditHistory:[]},
+  {id:'f2',tipo:'arquivo',memberId:'bas',memberNome:'Basirat Abiodun Ariyibi',categoria:'projetos_relatorios',fileName:'Impactos_pesca.pdf',titulo:'Impactos socioeconômicos das mudanças climáticas na pesca em Cáceres',url:'https://example.org/f2',ts:'2026-09-26T12:00:00Z',onlineEditVersion:1,repositoryTurnMemberId:'dia',onlineEditHistory:[]},
   {id:'l3',tipo:'link',memberId:'prof',memberNome:'Ernandes Sobreira Oliveira Junior',categoria:'video',titulo:'Vídeo sobre a bibliometria',url:'https://example.org/video',ts:'2026-09-19T12:00:00Z'}
  ];
  window.testPubs=pubs;
