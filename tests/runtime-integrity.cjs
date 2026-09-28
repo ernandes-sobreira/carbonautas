@@ -20,6 +20,10 @@ function formHtml(){return `<body>
 
 function makeDom({admin=false,setDoc}={}){
  const dom=new JSDOM(formHtml(),{runScripts:'outside-only',pretendToBeVisual:true,url:'https://example.test'}),w=dom.window;
+ // The runtime intentionally retries late-loaded production modules for a few seconds.
+ // In unit tests those long retries are unnecessary and would outlive window.close().
+ const nativeTimeout=w.setTimeout.bind(w);w.setTimeout=(fn,ms,...args)=>Number(ms)>=250?0:nativeTimeout(fn,ms,...args);
+ w.requestAnimationFrame=fn=>{fn(w.performance.now());return 1};w.cancelAnimationFrame=()=>{};
  w.CarbonautasApp={state:{members:[{id:'m1',nome:'Aluno Teste',foto:'https://old/photo.jpg'},{id:'m2',nome:'Outra Pessoa',foto:'',status:'ativo'}],activities:[],publicacoes:[]},memberId:'m1',isAdmin:admin};
  const write=setDoc||function(){return Promise.resolve()};
  w.db={};w.fbFns={doc:(_db,col,id)=>({col,id}),setDoc:write,serverTimestamp:()=>({server:true})};
