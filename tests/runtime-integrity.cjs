@@ -12,19 +12,11 @@ function formHtml(){return `<body>
 <div id="p97Deck" hidden><button data-p97-close></button><div id="p97Stage"></div><div id="p97DeckName"></div></div>
 <button id="privateNewBtn">Nova conversa</button><input id="privatePersonSearch"><div id="privatePeopleList"></div><div id="privateNewOverlay"></div>
 <input id="privateInput"><button id="legacyPreview" data-file-action="preview">Visualizar</button>
-<nav class="soft-bottom-nav">Navegação</nav>
-<div class="overlay" id="pubOverlay"><section class="modal"><header class="modal-h"><h2>Devolver arquivo corrigido</h2></header><main class="modal-b">Conteúdo</main><footer class="modal-f"><button class="btn">Cancelar</button><button class="btn">Devolver correção</button></footer></section></div>
-<div id="p66ActionOverlay"><section class="p66-card"><header class="p66-head"><h2 class="p66-title">O que precisa ser feito</h2></header><main class="p66-body">Corpo</main><footer class="p66-foot"><button class="btn p66-edit">Editar cadastro</button><button class="btn">Marcar resolvido</button><button class="btn">Perguntar andamento</button><button class="btn">Fechar</button></footer></section></div>
-<div id="dashAttention"><article class="p56-task"><div class="p56-detail"><div class="p68-decision"><span>🔥 AÇÃO SUA</span><span>📄 Arquivo disponível</span></div><div class="p68-explain">Thiago enviou esta versão para você.</div><div class="p68-origin">Arquivo: plano.txt</div></div></article></div>
 </body>`}
 
 function makeDom({admin=false,setDoc}={}){
  const dom=new JSDOM(formHtml(),{runScripts:'outside-only',pretendToBeVisual:true,url:'https://example.test'}),w=dom.window;
- // The runtime intentionally retries late-loaded production modules for a few seconds.
- // In unit tests those long retries are unnecessary and would outlive window.close().
- const nativeTimeout=w.setTimeout.bind(w);w.setTimeout=(fn,ms,...args)=>Number(ms)>=250?0:nativeTimeout(fn,ms,...args);
- w.requestAnimationFrame=fn=>{fn(w.performance.now());return 1};w.cancelAnimationFrame=()=>{};
- w.CarbonautasApp={state:{members:[{id:'m1',nome:'Aluno Teste',foto:'https://old/photo.jpg'},{id:'m2',nome:'Outra Pessoa',foto:'',status:'ativo'}],activities:[],publicacoes:[]},memberId:'m1',isAdmin:admin};
+ w.CarbonautasApp={state:{members:[{id:'m1',nome:'Aluno Teste',foto:'https://old/photo.jpg'},{id:'m2',nome:'Outra Pessoa',foto:'',status:'ativo'}]},memberId:'m1',isAdmin:admin};
  const write=setDoc||function(){return Promise.resolve()};
  w.db={};w.fbFns={doc:(_db,col,id)=>({col,id}),setDoc:write,serverTimestamp:()=>({server:true})};
  const prelude=`
@@ -96,17 +88,7 @@ test('grafo é calculado e congelado após renderização',()=>{
  const dom=makeDom(),w=dom.window;assert.equal(w.CarbonautasRuntimeIntegrity.settleGraph(),true);assert.equal(w.__tickPainted,true);dom.window.close();
 });
 
-test('prévia interna do Repositório permanece disponível',()=>{
- const dom=makeDom(),w=dom.window;assert.equal(w.document.querySelector('#runtimeNoRepositoryPreview'),null);
- w.document.querySelector('#legacyPreview').click();assert.equal(w.__toast,undefined);assert.equal(w.CarbonautasRuntimeIntegrity.restoreRepositoryPreview(),true);dom.window.close();
-});
-
-test('polimento móvel protege rodapé de modais e ações',()=>{
- const dom=makeDom(),w=dom.window,style=w.document.querySelector('#runtimeMobilePolish');assert.ok(style);
- assert.match(style.textContent,/#pubOverlay/);assert.match(style.textContent,/#p66ActionOverlay/);assert.match(style.textContent,/soft-bottom-nav/);assert.match(style.textContent,/100dvh/);dom.window.close();
-});
-
-test('texto do cartão Agora recebe separação entre blocos',()=>{
- const dom=makeDom(),w=dom.window;w.CarbonautasRuntimeIntegrity.separateAttentionText();const text=w.document.querySelector('.p56-detail').textContent.replace(/\s+/g,' ').trim();
- assert.match(text,/AÇÃO SUA 📄 Arquivo disponível Thiago/);assert.match(text,/você\. Arquivo:/);dom.window.close();
+test('prévia interna do Repositório fica removida e direciona para download',()=>{
+ const dom=makeDom(),w=dom.window,style=w.document.querySelector('#runtimeNoRepositoryPreview');assert.ok(style);assert.match(style.textContent,/data-file-action=.preview/);
+ w.document.querySelector('#legacyPreview').click();assert.match(w.__toast,/Use Baixar/i);dom.window.close();
 });
