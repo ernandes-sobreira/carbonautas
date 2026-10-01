@@ -4,6 +4,7 @@
    - mantém apenas Ver agenda + Ver mural, do mesmo tamanho
    - adiciona fallback do botão MENU sem bloquear o handler original
    - atualiza o card “Ó nóis!” para representar Mural, agenda, fotos e vida da rede
+   - abre diretamente o Arquivo Vivo ao clicar “Abrir” em ação de arquivo
 */
 (function(){
 'use strict';
@@ -11,7 +12,7 @@ if(window.__CARBONAUTAS_P181_HOME_RAPIDAO)return;
 window.__CARBONAUTAS_P181_HOME_RAPIDAO=true;
 
 const $=(s,r=document)=>r.querySelector(s);
-let observer=null,menuObserver=null,menuBound=false;
+let observer=null,menuObserver=null,menuBound=false,directOpenBound=false;
 
 function openMural(){
  try{
@@ -106,8 +107,46 @@ function bindMenuFallback(){
  },true);
  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenuFallback()});
 }
+
+function normalize(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim()}
+function stateSafe(){try{return window.CarbonautasApp?.state||window.state||{}}catch(_e){return{}}}
+function extractFileName(card){
+ const text=String(card?.innerText||card?.textContent||'').replace(/\s+/g,' ').trim();
+ const m=text.match(/Arquivo:\s*([^|]+?)(?=\s+(?:1\s+de\s+\d+|deslize|Dispensar|Abrir|$))/i);
+ return m?m[1].trim():'';
+}
+function findPublicationForAction(card){
+ const pubs=stateSafe().publicacoes||[];
+ const fileName=extractFileName(card),nf=normalize(fileName);
+ if(nf){
+  const exact=pubs.filter(p=>normalize(p?.fileName)===nf||normalize(p?.titulo)===nf);
+  if(exact.length)return exact.sort((a,b)=>Number(b?.reviewVersion||b?.onlineEditVersion||1)-Number(a?.reviewVersion||a?.onlineEditVersion||1))[0];
+  const loose=pubs.filter(p=>normalize(p?.fileName).includes(nf)||nf.includes(normalize(p?.fileName)));
+  if(loose.length)return loose.sort((a,b)=>Number(b?.reviewVersion||b?.onlineEditVersion||1)-Number(a?.reviewVersion||a?.onlineEditVersion||1))[0];
+ }
+ const title=normalize(card?.querySelector?.('h1,h2,h3,h4,strong')?.textContent||'');
+ if(title){
+  const byTitle=pubs.filter(p=>normalize(p?.titulo)===title||normalize(p?.reviewBaseTitle)===title);
+  if(byTitle.length)return byTitle.sort((a,b)=>Number(b?.reviewVersion||b?.onlineEditVersion||1)-Number(a?.reviewVersion||a?.onlineEditVersion||1))[0];
+ }
+ return null
+}
+function bindDirectFileOpen(){
+ if(directOpenBound)return;directOpenBound=true;
+ document.addEventListener('click',e=>{
+  const btn=e.target?.closest?.('button,a,[role="button"]');
+  if(!btn||normalize(btn.textContent)!=='abrir')return;
+  const card=btn.closest('article,.card,[class*="card"],section,div');
+  if(!card||!/Arquivo\s*:/i.test(String(card.innerText||card.textContent||'')))return;
+  const pub=findPublicationForAction(card);
+  if(!pub?.id||!window.CarbonautasRepository?.openDeck)return;
+  e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+  try{window.CarbonautasRepository.openDeck(String(pub.id))}
+  catch(err){console.warn('Abertura direta do arquivo',err)}
+ },true)
+}
 function boot(){
- css();bindMenuFallback();
+ css();bindMenuFallback();bindDirectFileOpen();
  watch();watchMuralMenuCard();patchMuralMenuCard();
  let tries=0;const t=setInterval(()=>{
   tries++;
