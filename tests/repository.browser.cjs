@@ -18,7 +18,6 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  window.testPubs=pubs;
  window.CarbonautasApp={state:{publicacoes:pubs,members:[{id:'dia',nome:'Daiana'},{id:'prof',nome:'Ernandes Sobreira Oliveira Junior',nivel:'coord'},{id:'bas',nome:'Basirat Abiodun Ariyibi'}],privateThreads:[]},memberId:'prof',isAdmin:true};
  window.toast=m=>window.lastToast=m;
- // Reproduces the production regression: files used the new card, links/videos kept the legacy card.
  window.renderPubs=()=>{document.querySelector('#pubList').innerHTML=pubs.map(p=>p.tipo==='arquivo'?window.CarbonautasRepository.cardHTML(p):`<div class="pub-row legacy-row"><div class="pub-t">${p.titulo}</div><div class="pub-author">${p.memberNome}</div></div>`).join('');document.dispatchEvent(new CustomEvent('carbonautas:repository-rendered'))};
  window.startPrivateConversation=async id=>{window.calls.messages++;window.CarbonautasApp.state.privateThreads=[{id:['prof',id].sort().join('__')}]};window.switchView=v=>document.body.dataset.view=v;window.openPrivateThread=id=>window.openedThread=id;
  window.closeOverlay=id=>{if(id==='filePreviewOverlay'){document.querySelector('#repositoryPreview')?.close();document.querySelector('#filePreviewOverlay').style.display='none'}};
@@ -29,7 +28,6 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  await page.evaluate(()=>{window.CarbonautasFiles.getPublication=async id=>window.CarbonautasApp.state.publicacoes.find(p=>p.id===id);window.CarbonautasFiles.actorProfile=async()=>({uid:'prof',memberId:'prof',coordinator:true});window.CarbonautasFiles.downloadPublication=async()=>{window.calls.downloads++}});
  await page.addScriptTag({path:'modules/repository.js'});
  assert.equal(await page.locator('#repositoryPerson').count(),1);assert.equal(await page.locator('#repositoryCategory').count(),1);assert.equal(await page.locator('#repositoryMode').count(),1);assert.equal(await page.locator('#repositorySearch').count(),1);
- // Desktop/mobile use one unified list, including links and videos that previously escaped the filters.
  assert.equal(await page.locator('#repoPackageList').evaluate(e=>getComputedStyle(e).display),'none');
  assert.equal(await page.locator('.repo-filters-row').evaluate(e=>getComputedStyle(e).display),'none');
  assert.equal(await page.locator('#legacyMineLabel').evaluate(e=>getComputedStyle(e).display),'none');
@@ -37,28 +35,23 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  assert.equal(await page.locator('#pubList > .legacy-row').count(),0);
  assert.equal(await page.locator('#pubList .repository-file').count(),0);
  assert.equal(await page.locator('#pubList .repository-history').count(),0);
- // Default order is the actual last send, not the original creation date.
  assert.equal(await page.locator('#pubList > .repository-list-card').first().getAttribute('data-publication-id'),'f0');
  assert.match(await page.locator('[data-publication-id="f0"] .repository-last-send').textContent(),/Último envio:/);
  assert.match(await page.locator('[data-publication-id="f0"] .repository-last-send').textContent(),/Ernandes Sobreira Oliveira Junior/);
  assert.match(await page.locator('[data-publication-id="f0"] .repository-last-send').textContent(),/28\/09\/2026/);
- // Person filter must hide every publication from other people, regardless of type.
  await page.locator('#repositoryPerson').selectOption('dia');
  assert.equal(await page.locator('#pubList > [data-publication-id]:visible').count(),1);
  assert.equal(await page.locator('#pubList > [data-publication-id]:visible').getAttribute('data-publication-id'),'f0');
  assert.equal(await page.locator('#repositoryResultCount').textContent(),'1 resultado');
  await page.locator('#repositoryPerson').selectOption('');
- // Category/search also operate over files + links + videos and search includes the last sender.
  await page.locator('#repositoryCategory').selectOption('video');assert.equal(await page.locator('#pubList > [data-publication-id]:visible').count(),1);assert.equal(await page.locator('#pubList > [data-publication-id]:visible').getAttribute('data-publication-id'),'l3');
  await page.locator('#repositoryCategory').selectOption('');await page.locator('#repositorySearch').fill('Basirat');assert.equal(await page.locator('#pubList > [data-publication-id]:visible').count(),1);assert.equal(await page.locator('#pubList > [data-publication-id]:visible').getAttribute('data-publication-id'),'f2');
  await page.locator('#repositorySearch').fill('Ernandes');assert.equal(await page.locator('#pubList > [data-publication-id]:visible').count(),3);
  await page.locator('#repositorySearch').fill('');
- // User can explicitly switch between last-send order and original registration order.
  await page.locator('#repositoryMode').selectOption('created');assert.equal(await page.locator('#pubList > .repository-list-card').first().getAttribute('data-publication-id'),'l1');
  await page.locator('#repositoryMode').selectOption('recent');assert.equal(await page.locator('#pubList > .repository-list-card').first().getAttribute('data-publication-id'),'f0');
  await page.locator('#repositoryMode').selectOption('pending');assert.equal(await page.locator('#pubList > [data-publication-id]:visible').count(),1);assert.equal(await page.locator('#pubList > [data-publication-id]:visible').getAttribute('data-publication-id'),'f0');
  await page.locator('#repositoryMode').selectOption('recent');
- // Full controls/history appear only after opening a compact file card.
  await page.locator('[data-file-id="f0"] [data-file-action="open"]').click();
  assert.equal(await page.locator('#repositoryStage .repository-history').count(),1);
  assert.equal(await page.locator('#repositoryStage .repository-file').count(),1);
@@ -68,10 +61,9 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  const top=await page.locator('#closePreview').evaluate(e=>{const r=e.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===e});assert.equal(top,true);
  await page.locator('#closePreview').click();assert.equal(await page.locator('#repositoryDeck').evaluate(e=>e.open),true);
  await page.locator('#repositoryStage [data-file-action="return"]').click();assert.equal(await page.locator('#repositoryReturn').evaluate(e=>e.matches(':modal')),true);await page.locator('#repositoryReturn [data-return-close]').first().click();
- await page.locator('#repositoryStage [data-file-action="message"]').click();assert.equal(await page.locator('#repositoryDeck').evaluate(e=>e.open),false);assert.equal(await page.evaluate(()=>openedThread),'dia__prof');assert.match(await page.locator('#privateInput').inputValue(),/Sobre o arquivo/);assert.equal(await page.locator('#privateInput').evaluate(e=>document.activeElement===e),true);
+ await page.locator('#repositoryStage [data-file-action="message"]').click();assert.equal(await page.locator('#repositoryDeck').evaluate(e=>e.open),false);assert.equal(await page.evaluate(()=>openedThread),'dia__prof');await page.locator('#repositoryMessageContextCard').waitFor();assert.match(await page.locator('#repositoryMessageContextCard').textContent(),/Projeto_Daiana\.docx/);assert.equal(await page.locator('#privateInput').inputValue(),'');assert.equal(await page.locator('#privateInput').evaluate(e=>document.activeElement===e),true);await page.getByRole('button',{name:'Abrir arquivo'}).click();assert.equal(await page.locator('#repositoryPreview').evaluate(e=>e.matches(':modal')),true);await page.locator('#closePreview').click();
  for(let i=0;i<4;i++){await page.getByRole('button',{name:'▣ Folhear arquivos'}).click();await page.locator('[data-deck-close]').click()}
  assert.equal(await page.locator('#repositoryDeck').count(),1);assert.equal(await page.locator('#pubList .repository-actions button').count(),0);assert.equal(await page.locator('#pubList > .repository-list-card').count(),4);
- // Shared preview returns home so another screen can reopen it.
  assert.equal(await page.locator('#filePreviewOverlay').evaluate(e=>e.parentElement.tagName),'BODY');
  await page.evaluate(()=>openFilePreview('https://example.org/other','Outro.pdf'));assert.equal(await page.locator('#filePreviewOverlay').isVisible(),true);await page.locator('#closePreview').click();
  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);assert.deepEqual(errors,[]);

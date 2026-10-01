@@ -118,13 +118,34 @@ function installCoordinatorPackageAccess(){
  try{adminPackagesUnsub=f.onSnapshot(f.collection(root.db,'rede_repository_packages'),snap=>{adminPackages=new Map(snap.docs.map(d=>[d.id,{...d.data(),id:d.id}]));syncAdminPackages(true);},err=>{if(err?.code==='permission-denied')console.warn('Repositório do coordenador: publique a regra que permite leitura de todas as pastas ao coordenador.');else console.warn('Repositório do coordenador',err);});}catch(err){console.warn('Repositório do coordenador',err)}
 }
 function chooseRecipient(p,actorId){const ids=files().recipientIds(p,actorId),preferred=files().nextRecipientId(p,actorId);if(ids.length===1)return Promise.resolve(ids[0]);if(!ids.length)return Promise.reject(Error('Não encontrei uma pessoa com acesso a este arquivo.'));const select=$('#messageRecipient');select.innerHTML=ids.map(id=>`<option value="${esc(id)}">${esc(memberName(id))}</option>`).join('');if(ids.includes(preferred))select.value=preferred;$('#repositoryRecipient').returnValue='';$('#repositoryRecipient').showModal();return new Promise(resolve=>{recipientRequest=resolve});}
+function ensureMessageContextStyle(){
+ if($('#repositoryMessageContextStyle'))return;
+ const style=document.createElement('style');style.id='repositoryMessageContextStyle';style.textContent=`
+ #repositoryMessageContextCard{display:flex;align-items:center;gap:10px;margin:8px 10px;padding:10px 12px;border:1px solid #cfe0df;border-radius:14px;background:#f1f8f7;color:#173640;box-shadow:0 4px 14px rgba(17,55,64,.06);min-width:0}
+ #repositoryMessageContextCard .rmc-icon{width:38px;height:38px;border-radius:11px;background:#fff;display:grid;place-items:center;flex:0 0 auto;font-size:19px}
+ #repositoryMessageContextCard .rmc-main{min-width:0;flex:1}#repositoryMessageContextCard small{display:block;color:#648087;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}#repositoryMessageContextCard b{display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+ #repositoryMessageContextCard button{border:1px solid #168f94;background:#168f94;color:#fff;border-radius:11px;min-height:38px;padding:0 12px;font:inherit;font-size:11px;font-weight:900;white-space:nowrap}
+ @media(max-width:520px){#repositoryMessageContextCard{margin:6px 4px;padding:9px;gap:8px}#repositoryMessageContextCard .rmc-icon{width:34px;height:34px}#repositoryMessageContextCard button{padding:0 9px;font-size:10px}}
+ `;document.head.append(style);
+}
+function mountMessageContext(ctx,p){
+ const input=$('#privateInput');if(!input||!ctx?.id)return false;ensureMessageContextStyle();
+ let card=$('#repositoryMessageContextCard');if(!card){card=document.createElement('aside');card.id='repositoryMessageContextCard';card.setAttribute('aria-label','Arquivo desta conversa');}
+ const title=files().publicationTitle(p),version=Number(ctx.version||files().currentVersion(p)||1);
+ card.innerHTML=`<span class="rmc-icon">📄</span><span class="rmc-main"><small>Respondendo sobre este arquivo</small><b>${esc(title)}${version>1?` · v${version}`:''}</b></span><button type="button">Abrir arquivo</button>`;
+ card.querySelector('button').onclick=async()=>{try{await preview(ctx.id)}catch(err){root.toast?.(err.message||'Não foi possível abrir o arquivo.')}};
+ const composer=input.closest('.private-compose,.private-input-row,.private-composer')||input.parentElement;
+ if(composer?.parentElement)composer.parentElement.insertBefore(card,composer);else input.insertAdjacentElement('beforebegin',card);
+ input.value='';input.placeholder='Escreva sua resposta sobre este arquivo…';input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();
+ return true;
+}
+function showMessageContext(ctx,p){for(const delay of [0,40,120,260])setTimeout(()=>mountMessageContext(ctx,p),delay)}
 async function openMessage(id){
  const p=await files().getPublication(id,true),a=await files().actorProfile(true);if(!p||!a)throw Error('Arquivo ou perfil indisponível.');
  const target=await chooseRecipient(p,a.memberId);if(!target)return;
  closeDeck();$('#repositoryReturn')?.close();for(const key of ['repoOverlay','repoPackageOverlay','filePreviewOverlay'])root.closeOverlay?.(key);root.closePanelinhas?.();
  await root.startPrivateConversation(target);const tid=files().privateThreadId(a.memberId,target);if(!(app().state.privateThreads||[]).some(t=>t.id===tid))throw Error('Não foi possível abrir a conversa privada.');
- root.switchView('conversas');root.openPrivateThread(tid);root.repositoryMessageContext={id,threadId:tid,version:files().currentVersion(p),targetId:target};
- const input=$('#privateInput');if(input){const context=`Sobre o arquivo “${files().publicationTitle(p)}” que me enviou`;input.value=input.value?input.value+'\n'+context:context;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();}
+ root.switchView('conversas');root.openPrivateThread(tid);const ctx={id,threadId:tid,version:files().currentVersion(p),targetId:target,title:files().publicationTitle(p)};root.repositoryMessageContext=ctx;showMessageContext(ctx,p);
 }
 async function download(id){
  await files().downloadPublication(id);
