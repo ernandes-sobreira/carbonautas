@@ -9,14 +9,14 @@ test('P218 normaliza datas da Agenda',()=>{
   assert.equal(nav.normalize('24/09/2026'),'');
 });
 
-test('P218C atravessa corretamente a borda dos meses',()=>{
+test('P218 atravessa corretamente a borda dos meses',()=>{
   assert.equal(nav.shiftIso('2026-09-01',-1),'2026-08-31');
   assert.equal(nav.shiftIso('2026-08-31',1),'2026-09-01');
   assert.equal(nav.shiftIso('2026-12-31',1),'2027-01-01');
   assert.equal(nav.shiftIso('2027-01-01',-1),'2026-12-31');
 });
 
-test('P218C aceita roda vertical e gesto horizontal do trackpad',()=>{
+test('P218 aceita roda vertical e gesto horizontal do trackpad',()=>{
   assert.equal(nav.wheelDistance({deltaX:0,deltaY:10,deltaMode:0}),11.5);
   assert.equal(nav.wheelDistance({deltaX:-20,deltaY:2,deltaMode:0}),-23);
   assert.equal(nav.wheelDistance({deltaX:0,deltaY:2,deltaMode:1}),56);
@@ -32,7 +32,7 @@ test('P218 encontra o dia selecionado e limita anterior/proximo',()=>{
   assert.equal(nav.clampIndex(1,3),1);
 });
 
-test('P218B distingue clique de arraste no PC',()=>{
+test('P218 distingue clique de arraste no PC',()=>{
   assert.equal(nav.pointerClickIntent(0,0),true);
   assert.equal(nav.pointerClickIntent(5,4),true);
   assert.equal(nav.pointerClickIntent(9,9),true);
@@ -40,7 +40,7 @@ test('P218B distingue clique de arraste no PC',()=>{
   assert.equal(nav.pointerClickIntent(25,1),false);
 });
 
-test('P218B seleciona o dia no pointerup mesmo se o controlador antigo suprimir o click',async()=>{
+test('P218 seleciona o dia no pointerup mesmo se o controlador antigo suprimir o click',async()=>{
   const dom=new JSDOM('<!doctype html><html><body data-view="crono"><div id="viewCrono" data-p114-mode="day"><div id="agBody"><div class="ag-month"><div class="ag-day sel" data-iso="2026-09-24"><span>24</span></div><div class="ag-day" data-iso="2026-09-25"><span>25</span></div></div></div></div></body></html>',{pretendToBeVisual:true});
   const previous={document:global.document,MutationObserver:global.MutationObserver,innerWidth:global.innerWidth};
   global.document=dom.window.document;global.MutationObserver=dom.window.MutationObserver;global.innerWidth=1200;
@@ -60,6 +60,21 @@ test('P218B seleciona o dia no pointerup mesmo se o controlador antigo suprimir 
   d25.dispatchEvent(pointer('pointerdown',100));d25.dispatchEvent(pointer('pointermove',135));d25.dispatchEvent(pointer('pointerup',135));
   await new Promise(r=>setTimeout(r,20));
   assert.equal(selected,'2026-09-24');
+  dom.window.close();
+  global.document=previous.document;global.MutationObserver=previous.MutationObserver;global.innerWidth=previous.innerWidth;
+});
+
+test('P218D não fabrica cards na faixa nem entra em ciclo ao abrir a Agenda',async()=>{
+  const dom=new JSDOM('<!doctype html><html><body data-view="crono"><div id="viewCrono" data-p114-mode="day"><div id="agBody"><div class="ag-month"><div class="ag-day out" data-iso="2026-08-31"><span>31</span></div><div class="ag-day sel" data-iso="2026-09-01"><span>1</span></div><div class="ag-day" data-iso="2026-09-02"><span>2</span></div><div class="ag-day out" data-iso="2026-10-01"><span>1</span></div></div></div></div></body></html>',{pretendToBeVisual:true});
+  const previous={document:global.document,MutationObserver:global.MutationObserver,innerWidth:global.innerWidth};
+  global.document=dom.window.document;global.MutationObserver=dom.window.MutationObserver;global.innerWidth=1200;
+  const path=require.resolve('../modules/agenda-desktop-nav-p218.js');delete require.cache[path];
+  require('../modules/agenda-desktop-nav-p218.js');
+  document.dispatchEvent(new dom.window.Event('DOMContentLoaded'));
+  await new Promise(r=>setTimeout(r,90));
+  assert.equal(document.querySelectorAll('.ag-month .ag-day').length,4);
+  assert.equal(document.querySelectorAll('.p218-synthetic-edge').length,0);
+  assert.equal(document.querySelectorAll('#p218AgendaDesktopNav').length,1);
   dom.window.close();
   global.document=previous.document;global.MutationObserver=previous.MutationObserver;global.innerWidth=previous.innerWidth;
 });
