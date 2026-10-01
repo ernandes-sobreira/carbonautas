@@ -9,6 +9,20 @@ test('P218 normaliza datas da Agenda',()=>{
   assert.equal(nav.normalize('24/09/2026'),'');
 });
 
+test('P218C atravessa corretamente a borda dos meses',()=>{
+  assert.equal(nav.shiftIso('2026-09-01',-1),'2026-08-31');
+  assert.equal(nav.shiftIso('2026-08-31',1),'2026-09-01');
+  assert.equal(nav.shiftIso('2026-12-31',1),'2027-01-01');
+  assert.equal(nav.shiftIso('2027-01-01',-1),'2026-12-31');
+});
+
+test('P218C aceita roda vertical e gesto horizontal do trackpad',()=>{
+  assert.equal(nav.wheelDistance({deltaX:0,deltaY:10,deltaMode:0}),11.5);
+  assert.equal(nav.wheelDistance({deltaX:-20,deltaY:2,deltaMode:0}),-23);
+  assert.equal(nav.wheelDistance({deltaX:0,deltaY:2,deltaMode:1}),56);
+  assert.equal(nav.wheelDistance({deltaX:0,deltaY:0,deltaMode:0}),0);
+});
+
 test('P218 encontra o dia selecionado e limita anterior/proximo',()=>{
   const fake=(selected=false,today=false)=>({classList:{contains:c=>c==='sel'?selected:c==='today'?today:false}});
   assert.equal(nav.selectedIndex([fake(),fake(true),fake()]),1);
