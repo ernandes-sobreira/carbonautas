@@ -69,3 +69,40 @@
   transform:none!important;
   filter:none!important;
 }
+
+/* Privadas: nome, prévia e horário em áreas próprias. Mensagens longas não invadem a linha. */
+#viewConversas .private-thread{
+  grid-template-columns:46px minmax(0,1fr) 68px!important;
+  column-gap:11px!important;
+  padding:10px 12px!important;
+}
+#viewConversas .private-thread-main{
+  display:block!important;
+  min-width:0!important;
+  overflow:hidden!important;
+}
+#viewConversas .private-thread-name,
+#viewConversas .private-thread-last{
+  display:block!important;
+  min-width:0!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+#viewConversas .private-thread-name{line-height:1.25!important}
+#viewConversas .private-thread-last{margin-top:4px!important;line-height:1.35!important}
+#viewConversas .private-thread-side{
+  min-width:68px!important;
+  max-width:68px!important;
+  overflow:hidden!important;
+}
+#viewConversas .private-thread-time{
+  display:block!important;
+  white-space:nowrap!important;
+  font-variant-numeric:tabular-nums;
+}
+@media(max-width:760px){
+ #viewConversas .private-thread{grid-template-columns:46px minmax(0,1fr) 62px!important;padding:9px 10px!important}
+ #viewConversas .private-thread-side{min-width:62px!important;max-width:62px!important}
+}
