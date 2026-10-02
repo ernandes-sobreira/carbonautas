@@ -3404,7 +3404,7 @@ async function bootstrap(){
     // Inicializam em segundo plano depois que o núcleo da conta já foi validado.
     ensurePrivateDirectoryEntry().catch(e=>console.warn('Diretório privado indisponível:',e));
     ensurePersonalRepositoryRoot().catch(e=>console.warn('Repositório privado indisponível:',e));
-    subscribeAll();
+    await subscribeAll();
     bootstrapped=true;
     refreshIdentityUI();
     document.body.classList.add('carbonautas-session-ready');
@@ -3431,16 +3431,34 @@ async function ensurePersonalRepositoryRoot(){
 
 function clearSubscriptions(){subscriptions.forEach(fn=>{try{fn()}catch(e){}});subscriptions=[];if(privateMessageUnsub){try{privateMessageUnsub()}catch(e){}privateMessageUnsub=null;}privateMessagesState=[];privateActiveThreadId=null;}
 
-let painelRenderFrame=0;
+let painelRenderFrame=0,painelHydrating=false;
 function requestPainelRender(){
-  if(currentView!=='painel'||painelRenderFrame)return;
+  if(painelHydrating||currentView!=='painel'||painelRenderFrame)return;
   painelRenderFrame=requestAnimationFrame(()=>{
     painelRenderFrame=0;
-    if(currentView==='painel')renderPainel();
+    if(!painelHydrating&&currentView==='painel')renderPainel();
   });
 }
 function subscribeAll(){
   const f=FB();
+  painelHydrating=true;
+  const pendingInitial=new Set(['members','schedule','publicacoes','activities','notifications']);
+  let resolveInitial;
+  const initialReady=new Promise(resolve=>{resolveInitial=resolve});
+  let initialFinished=false;
+  const markInitial=key=>{
+    if(initialFinished||!pendingInitial.has(key))return;
+    pendingInitial.delete(key);
+    if(pendingInitial.size)return;
+    initialFinished=true;
+    painelHydrating=false;
+    if(currentView==='painel')renderPainel();
+    requestAnimationFrame(()=>requestAnimationFrame(()=>resolveInitial()));
+  };
+  const failInitial=(key,err,label)=>{
+    console.warn(label,err);
+    markInitial(key);
+  };
   // SETTINGS (linhas de pesquisa, pin, link do grupo)
   subscriptions.push(f.onSnapshot(f.doc(window.db,'rede_settings','app'),snap=>{
     if(!snap.exists())return;
@@ -3455,6 +3473,7 @@ function subscribeAll(){
   subscriptions.push(f.onSnapshot(f.collection(window.db,'rede_members'),snap=>{
     state.members=snap.docs.map(d=>({...d.data(),id:d.id}));
     state.members.forEach(m=>{m.linhas=m.linhas||[];m.resultados=m.resultados||[];m.prazos=m.prazos||[];m.vinculos=m.vinculos||[];m.hub=!!m.hub;m.bolsista=!!m.bolsista});
+    markInitial('members');
     if(currentView==='painel') requestPainelRender();
     if(currentView==='rede') renderAll();
     if(currentView==='crono') renderCrono();
@@ -3463,7 +3482,7 @@ function subscribeAll(){
     if(currentView==='conversas') renderPrivateThreads();
     if($('#privateNewOverlay')?.classList.contains('open')) renderPrivatePeople();
     if(selectedId && memberById(selectedId)) renderDetail(); if(isAdmin && $('#peopleOverlay')?.classList.contains('on')) renderPeopleManager();
-  }));
+  },err=>failInitial('members',err,'Membros indisponíveis:')));
   // CHAT
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_chat'),f.orderBy('ts','asc')),snap=>{
     state.chat=snap.docs.map(d=>({...d.data(),id:d.id}));
@@ -3475,10 +3494,11 @@ function subscribeAll(){
   // SCHEDULE (eventos do grupo)
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_schedule'),f.orderBy('data','asc')),snap=>{
     state.schedule=snap.docs.map(d=>({...d.data(),id:d.id}));
+    markInitial('schedule');
     if(currentView==='crono') renderCrono();
     if(currentView==='painel') requestPainelRender();
     updateCronoBadge();
-  }));
+  },err=>failInitial('schedule',err,'Agenda do grupo indisponível:')));
   // AGENDA PRIVADA — somente o próprio UID consulta seus compromissos
   if(authUser?.uid){
     try{
@@ -3506,8 +3526,9 @@ function subscribeAll(){
   // PUBLICAÇÕES
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_publicacoes'),f.orderBy('ts','desc')),snap=>{
     state.publicacoes=snap.docs.map(d=>({...d.data(),id:d.id}));
+    markInitial('publicacoes');
     if(currentView==='pubs') renderPubs(); if(currentView==='lab') renderLab(); if(currentView==='painel') requestPainelRender(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
-  }));
+  },err=>failInitial('publicacoes',err,'Publicações indisponíveis:')));
   // P13 · DOSSIÊS/CONJUNTOS: ACL explícita + "Toda a Rede" dinâmica.
   if(myId){
     try{
@@ -3547,12 +3568,13 @@ function subscribeAll(){
   // ACOMPANHAMENTO
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_activities'),f.orderBy('updatedAt','desc')),snap=>{
     state.activities=snap.docs.map(d=>({...d.data(),id:d.id}));
+    markInitial('activities');
     if(currentView==='track') renderTrack();
     if(currentView==='painel') requestPainelRender();
     updateAttentionBadge();
     if($('#dossierOverlay')?.classList.contains('open')) renderDossier();
     if(currentView==='feed') renderFeedSide(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
-  }));
+  },err=>failInitial('activities',err,'Acompanhamento indisponível:')));
   // FEED SOCIAL
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_feed'),f.orderBy('ts','desc')),snap=>{
     state.feed=snap.docs.map(d=>({...d.data(),id:d.id}));
@@ -3597,11 +3619,14 @@ function subscribeAll(){
     const nq=f.query(f.collection(window.db,'rede_notifications'),f.where('recipientId','==',myId));
     subscriptions.push(f.onSnapshot(nq,snap=>{
       state.notifications=snap.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>notifMillis(b)-notifMillis(a));
+      markInitial('notifications');
       renderNotificationUI();
       if(currentView==='painel') requestPainelRender(); updateAttentionBadge();
       if(!notifInitial){snap.docChanges().filter(ch=>ch.type==='added').forEach(ch=>{const n={...ch.doc.data(),id:ch.doc.id};if(n.senderId!==myId)showDeviceNotification(n)})}
       notifInitial=false;
-    },err=>console.warn('Notificações não disponíveis:',err)));
+    },err=>failInitial('notifications',err,'Notificações não disponíveis:')));
+  } else {
+    markInitial('notifications');
   }
 
   // DESLIGAMENTO EM TEMPO REAL — integrantes egressos perdem a sessão imediatamente.
@@ -3621,6 +3646,7 @@ function subscribeAll(){
       if(!privateDirectorySeeded){privateDirectorySeeded=true;seedPrivateDirectoryFromUsers().catch(e=>console.warn('Não foi possível preparar o diretório privado:',e));}
     }));
   } else { state.users=authProfile?[{...authProfile,uid:authUser.uid}]:[]; }
+  return initialReady;
 }
 
 async function fbSetMember(id,data){
