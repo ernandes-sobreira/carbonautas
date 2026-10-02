@@ -71,6 +71,15 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  assert.equal(await page.locator('#repositoryStage [data-file-action="later"]').count(),1);
  assert.match(await page.locator('#repositoryStage .repository-decision').textContent(),/Já fiz/);
  assert.match(await page.locator('#repositoryStage .repository-decision').textContent(),/Decido depois/);
+ // A renderização assíncrona do Repositório não pode fazer os botões piscarem e sumirem.
+ await page.evaluate(()=>document.dispatchEvent(new CustomEvent('carbonautas:repository-rendered')));
+ await page.waitForTimeout(120);
+ assert.equal(await page.locator('#repositoryStage [data-file-action="done"]:visible').count(),1);
+ assert.equal(await page.locator('#repositoryStage [data-file-action="later"]:visible').count(),1);
+ await page.evaluate(()=>document.dispatchEvent(new CustomEvent('carbonautas:repository-rendered')));
+ await page.waitForTimeout(120);
+ assert.equal(await page.locator('#repositoryStage [data-file-action="done"]:visible').count(),1);
+ assert.equal(await page.locator('#repositoryStage [data-file-action="later"]:visible').count(),1);
  await page.locator('#repositoryStage [data-file-action="done"]').click();
  assert.equal(await page.evaluate(()=>calls.done),1);
  assert.equal(await page.evaluate(()=>lastAck),'review:thread-f0');
