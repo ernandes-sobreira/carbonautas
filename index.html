@@ -14620,30 +14620,94 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 </style>
 <script id="p195MinimalHomeController">
 (()=>{'use strict';
-const q=(s,r=document)=>r.querySelector(s),qa=(s,r=document)=>[...r.querySelectorAll(s)],t=(s,r)=>String(q(s,r)?.textContent||'').replace(/\s+/g,' ').trim(),n=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
-let pos=0,obs=new WeakSet(),timer;
-const gone=()=>{try{return new Set(JSON.parse(sessionStorage.getItem('p195Gone')||'[]'))}catch(e){return new Set()}};
-const save=x=>{try{sessionStorage.setItem('p195Gone',JSON.stringify([...x]))}catch(e){}};
-function collect(){const a=[],seen=new Set(),g=gone(),add=o=>{o.key=n([o.title,o.meta,o.detail].join('|'));if(!o.key||g.has(o.key)||seen.has(o.key))return;seen.add(o.key);a.push(o)};
-qa('#dashAttention .p56-task').forEach(el=>add({title:t('.p56-what',el)||t('.p56-who',el)||'Item para resolver',meta:[t('.p56-source',el),t('.p56-who',el),t('.p56-date',el)].filter(Boolean).join(' · '),detail:t('.p56-detail',el),el}));
-qa('#p78TodayCard .p78-row').forEach(el=>add({title:t('.p78-main b',el)||'Novidade',meta:['Novidade',t('.p78-tag',el)].filter(Boolean).join(' · '),detail:t('.p78-main span',el),el}));
-return a}
+const q=(s,r=document)=>r.querySelector(s);
+let pos=0;
+const DEFER_KEY='carbonautas_p195_deferred_v2';
+function deferred(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(DEFER_KEY)||'{}'),now=Date.now(),clean={};
+    for(const [k,v] of Object.entries(raw||{}))if(Number(v)>now)clean[k]=Number(v);
+    if(JSON.stringify(clean)!==JSON.stringify(raw||{}))localStorage.setItem(DEFER_KEY,JSON.stringify(clean));
+    return clean;
+  }catch(_e){return{}}
+}
+function deferUntilTomorrow(key){
+  const d=new Date();d.setHours(24,0,0,0);
+  const map=deferred();map[key]=d.getTime();
+  try{localStorage.setItem(DEFER_KEY,JSON.stringify(map))}catch(_e){}
+}
+function collect(){
+  let open=[];
+  try{open=typeof p56BuildItems==='function'?(p56BuildItems().open||[]):[]}catch(e){console.warn('P195 itens',e)}
+  const wait=deferred();
+  return open.filter(it=>it?.key&&!wait[it.key]).map(it=>({
+    key:it.key,
+    title:it.what||'Item para resolver',
+    meta:[String(it.kind||'').split('·')[0].trim(),it.who].filter(Boolean).join(' · '),
+    detail:it.detail||'Abra para resolver.',
+    item:it
+  }));
+}
 function action(id){const x=q(id);if(x)x.click()}
-function ensure(){const home=q('#viewPainel .p142-home-grid');if(!home)return null;let d=q('#p195Deck');if(d)return d;d=document.createElement('section');d.id='p195Deck';d.innerHTML='<div class="p195-head"><span>AGORA</span><details><summary aria-label="Mais ações">⋯</summary><div class="p195-tools"><button data-a="task">＋ Nova pendência</button><button data-a="checkin">✓ Check-in</button><button data-a="product">🎯 Registrar produto</button><button data-a="dossier">📚 Dossiê</button><button data-a="backup">📦 Backup</button></div></details></div><div class="p195-card"></div>';home.prepend(d);d.onclick=e=>{const b=e.target.closest('[data-a]');if(!b)return;({task:()=>action('#dashNewTaskBtn'),checkin:()=>action('#dashCheckinBtn'),product:()=>action('#dashProductBtn'),dossier:()=>action('#dashDossierBtn'),backup:()=>action('#dashBackupBtn')})[b.dataset.a]?.();b.closest('details')?.removeAttribute('open')};return d}
-function open(it){if(it.el.matches('.p78-row'))return it.el.click();const bs=qa('.p56-task-actions button',it.el),b=bs.find(x=>!/concluir|já tratei|ja tratei/i.test(x.textContent||''))||bs[0];b?.click()}
+function ensure(){
+  const home=q('#viewPainel .p142-home-grid');if(!home)return null;
+  let d=q('#p195Deck');if(d)return d;
+  d=document.createElement('section');d.id='p195Deck';
+  d.innerHTML='<div class="p195-head"><span>AGORA</span><details><summary aria-label="Mais ações">⋯</summary><div class="p195-tools"><button data-a="task">＋ Nova pendência</button><button data-a="checkin">✓ Check-in</button><button data-a="product">🎯 Registrar produto</button><button data-a="dossier">📚 Dossiê</button><button data-a="backup">📦 Backup</button></div></details></div><div class="p195-card"></div>';
+  home.prepend(d);
+  d.onclick=e=>{const b=e.target.closest('[data-a]');if(!b)return;({task:()=>action('#dashNewTaskBtn'),checkin:()=>action('#dashCheckinBtn'),product:()=>action('#dashProductBtn'),dossier:()=>action('#dashDossierBtn'),backup:()=>action('#dashBackupBtn')})[b.dataset.a]?.();b.closest('details')?.removeAttribute('open')};
+  return d;
+}
+function openAndResolve(it){
+  try{
+    if(typeof window.p56OpenItem==='function')return window.p56OpenItem(it.key);
+    if(typeof p56OpenItem==='function')return p56OpenItem(it.key);
+  }catch(e){console.warn('P195 abrir origem',e)}
+}
+function alreadyDone(it){
+  const x=it.item||{};
+  try{
+    if(x.action==='activity'&&x.sourceId&&typeof window.p56CompleteActivity==='function'){
+      window.p56CompleteActivity(x.sourceId);return;
+    }
+    if(x.action==='checkin'){
+      if(typeof window.openCheckin==='function')window.openCheckin(x.memberId);
+      else openAndResolve(it);
+      window.toast?.('Para marcar como feito, conclua o check-in.');
+      return;
+    }
+    if(typeof window.p56AckItem==='function'){window.p56AckItem(it.key);return}
+    if(typeof p56AckItem==='function'){p56AckItem(it.key);return}
+  }catch(e){console.warn('P195 já feito',e)}
+}
+function decideLater(it){deferUntilTomorrow(it.key);pos=0;render();window.toast?.('⏰ Saiu da frente por hoje. Volta amanhã.')}
 function resetSwipe(card){if(!card)return;card.classList.remove('p196-dragging','p196-return','p196-fly','p196-left','p196-right');card.style.transform='';card.style.opacity='';card.style.removeProperty('--p196-glow')}
-function swipeEnter(card,dir=0){resetSwipe(card);card.classList.remove('p196-enter');card.style.setProperty('--p196-enter-x',(dir?(-dir*28):0)+'px');void card.offsetWidth;card.classList.add('p196-enter')}
-function bindSwipe(card,a,it){
-  if(!card||!a?.length)return;
-  let active=false,pid=null,sx=0,sy=0,px=0,pt=0,dx=0,dy=0,vx=0,horizontal=false;
-  const finish=(dir)=>{if(!dir||a.length<2){card.classList.remove('p196-dragging');card.classList.add('p196-return');card.style.transform='';card.style.opacity='';card.style.removeProperty('--p196-glow');setTimeout(()=>card.classList.remove('p196-return'),470);return}card.classList.remove('p196-dragging','p196-return');card.classList.add('p196-fly');const distance=Math.max(window.innerWidth,card.offsetWidth)*1.12;const lift=Math.min(54,Math.abs(dx)*.12);card.style.transform=`translate3d(${dir*distance}px,${lift}px,0) rotate(${dir*11}deg) scale(.985)`;card.style.opacity='0';try{navigator.vibrate?.(8)}catch(_e){};setTimeout(()=>{pos=(pos+(dir<0?1:-1)+a.length)%a.length;render();const next=q('.p195-card',q('#p195Deck'));if(next)swipeEnter(next,dir)},230)};
-  card.onpointerdown=e=>{if(e.pointerType==='mouse'&&e.button!==0)return;if(e.target.closest('button,a,details,summary,input,textarea,select'))return;active=true;horizontal=false;pid=e.pointerId;sx=px=e.clientX;sy=e.clientY;pt=performance.now();dx=dy=vx=0;card.setPointerCapture?.(pid);card.classList.remove('p196-enter','p196-return','p196-fly');card.classList.add('p196-dragging')};
-  card.onpointermove=e=>{if(!active||e.pointerId!==pid)return;dx=e.clientX-sx;dy=e.clientY-sy;if(!horizontal){if(Math.abs(dx)<4)return;if(Math.abs(dx)<=Math.abs(dy)*.85)return;horizontal=true;if(e.cancelable)e.preventDefault()}const now=performance.now(),dt=Math.max(1,now-pt);vx=(e.clientX-px)/dt;px=e.clientX;pt=now;const rot=Math.max(-8,Math.min(8,dx/27)),scale=1-Math.min(.018,Math.abs(dx)/5200),fade=1-Math.min(.14,Math.abs(dx)/900),glow=Math.min(.32,.08+Math.abs(dx)/520);card.style.setProperty('--p196-glow',String(glow));card.style.transform=`translate3d(${dx}px,${dy*.13}px,0) rotate(${rot}deg) scale(${scale})`;card.style.opacity=String(fade)};
-  const end=e=>{if(!active||e.pointerId!==pid)return;active=false;try{card.releasePointerCapture?.(pid)}catch(_e){};if(!horizontal){resetSwipe(card);return}const threshold=Math.min(58,Math.max(32,card.offsetWidth*.11)),fast=Math.abs(vx)>.22;if(Math.abs(dx)>=threshold||fast)finish(dx<0?-1:1);else finish(0)};
+function bindSwipe(card,a){
+  if(!card||a.length<2)return;
+  let active=false,pid=null,sx=0,sy=0,dx=0,dy=0,horizontal=false;
+  card.onpointerdown=e=>{if(e.pointerType==='mouse'&&e.button!==0)return;if(e.target.closest('button,a,details,summary,input,textarea,select'))return;active=true;horizontal=false;pid=e.pointerId;sx=e.clientX;sy=e.clientY;dx=dy=0;card.setPointerCapture?.(pid);card.classList.add('p196-dragging')};
+  card.onpointermove=e=>{if(!active||e.pointerId!==pid)return;dx=e.clientX-sx;dy=e.clientY-sy;if(!horizontal){if(Math.abs(dx)<6)return;if(Math.abs(dx)<=Math.abs(dy))return;horizontal=true;if(e.cancelable)e.preventDefault()}card.style.transform=`translate3d(${dx}px,${dy*.08}px,0)`};
+  const end=e=>{if(!active||e.pointerId!==pid)return;active=false;try{card.releasePointerCapture?.(pid)}catch(_e){};if(horizontal&&Math.abs(dx)>42){pos=(pos+(dx<0?1:-1)+a.length)%a.length;render()}else resetSwipe(card)};
   card.onpointerup=end;card.onpointercancel=end;
 }
-
-function render(){const d=ensure();if(!d)return;const a=collect(),card=q('.p195-card',d),backup=q('[data-a="backup"]',d),src=q('#dashBackupBtn');if(backup)backup.style.display=src&&getComputedStyle(src).display!=='none'?'block':'none';if(pos>=a.length)pos=0;if(!a.length){resetSwipe(card);card.innerHTML='<div class="p195-empty"><b>✓ Tudo certo.</b><span>Nada pedindo sua atenção agora.</span></div>';return}const it=a[pos];card.innerHTML='<div><div class="p195-k">AGORA</div><div class="p195-title"></div><div class="p195-meta"></div><div class="p195-detail"></div></div><div class="p195-foot"><span class="p195-count"></span><span class="p197-swipehint">deslize</span><button class="p195-btn ghost" data-g>Dispensar</button><button class="p195-btn p198-back" data-p hidden>←</button><button class="p195-btn" data-n>→</button><button class="p195-btn primary" data-o>Abrir</button></div>';q('.p195-title',card).textContent=it.title;q('.p195-meta',card).textContent=it.meta;q('.p195-detail',card).textContent=it.detail||'Abra para ver o contexto.';q('.p195-count',card).textContent=(pos+1)+' de '+a.length;const prev=q('[data-p]',card);prev.hidden=a.length<=1;prev.setAttribute('aria-label','Card anterior');prev.title='Voltar';prev.onclick=()=>{pos=(pos-1+a.length)%a.length;render()};q('[data-n]',card).style.display=a.length>1?'':'none';q('[data-n]',card).setAttribute('aria-label','Próximo card');q('[data-n]',card).title='Próximo';q('[data-o]',card).onclick=()=>open(it);q('[data-n]',card).onclick=()=>{pos=(pos+1)%a.length;render()};q('[data-g]',card).onclick=()=>{const g=gone();g.add(it.key);save(g);render()};bindSwipe(card,a,it)}
+function render(){
+  const d=ensure();if(!d)return;
+  const a=collect(),card=q('.p195-card',d),backup=q('[data-a="backup"]',d),src=q('#dashBackupBtn');
+  if(backup)backup.style.display=src&&getComputedStyle(src).display!=='none'?'block':'none';
+  if(pos>=a.length)pos=0;
+  if(!a.length){resetSwipe(card);card.innerHTML='<div class="p195-empty"><b>✓ Tudo certo.</b><span>Nada pedindo sua atenção agora.</span></div>';return}
+  const it=a[pos];
+  card.innerHTML='<div><div class="p195-k">AGORA</div><div class="p195-title"></div><div class="p195-meta"></div><div class="p195-detail"></div></div><div class="p195-foot"><span class="p195-count"></span><button class="p195-btn p195-done" data-done>✓ JÁ FEITO</button><button class="p195-btn ghost" data-later>⏰ DECIDO DEPOIS</button><button class="p195-btn primary" data-open>ABRIR E RESOLVER</button></div>';
+  q('.p195-title',card).textContent=it.title;
+  q('.p195-meta',card).textContent=it.meta;
+  q('.p195-detail',card).textContent=it.detail;
+  q('.p195-count',card).textContent=(pos+1)+' de '+a.length;
+  q('[data-done]',card).onclick=()=>alreadyDone(it);
+  q('[data-later]',card).onclick=()=>decideLater(it);
+  q('[data-open]',card).onclick=()=>openAndResolve(it);
+  bindSwipe(card,a);
+}
+window.CarbonautasHomeActions={render,deferUntilTomorrow};
 function boot(){
   window.addEventListener('carbonautas-panel-rendered',render);
   window.addEventListener('carbonautas-session-ready',render,{once:true});
