@@ -11400,7 +11400,13 @@ function bindActivityNotification(){const b=qs('#saveActivityBtn');if(!b||b.data
 function bindProductNotification(){const b=qs('#saveProductBtn');if(!b||b.dataset.p78Wrap)return;const original=b.onclick;if(typeof original!=='function')return;b.dataset.p78Wrap='1';b.onclick=async function(e){const owner=admin()?qs('#productOwner')?.value:myMember(),title=(qs('#productTitle')?.value||'').trim()||'Produto',due=qs('#productDue')?.value||'';const before=new Set((S()?.activities||[]).filter(a=>a.ownerId===owner&&a.type==='produto').map(a=>a.id));const result=await original.call(this,e);if(admin()&&owner&&owner!==myMember()){const saved=await waitActivity(a=>a.ownerId===owner&&a.type==='produto'&&a.title===title&&String(a.dueDate||'')===due&&!before.has(a.id));if(saved)await createOwnerNotification(owner,{kind:'acompanhamento',title:'🎯 Nova entrega / produto',message:`${title}${due?' · prazo '+new Date(due+'T12:00:00').toLocaleDateString('pt-BR'):''}`,sourceId:saved.id})}return result}}
 function applyAll(){ensureCss();simplifyMural();ensureAbout();renderBriefing();bindBolsistas();applyBolsistas();bindRepoReset();bindActivityNotification();bindProductNotification()}
 function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;applyAll()})}
-function boot(){applyAll();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});document.addEventListener('click',e=>{if(e.target?.closest?.('#notifyBtn,[data-p78-notif],#saveCheckinBtn'))setTimeout(renderBriefing,250)},true);[700,1800,3500].forEach(ms=>setTimeout(applyAll,ms));console.info('Carbonautas',VERSION,BUILD,'entrada clara, notificações e simplificação')}
+function boot(){
+  applyAll();
+  window.addEventListener('carbonautas-panel-rendered',schedule);
+  window.addEventListener('carbonautas-session-ready',schedule,{once:true});
+  document.addEventListener('click',e=>{if(e.target?.closest?.('#notifyBtn,[data-p78-notif],#saveCheckinBtn'))setTimeout(renderBriefing,250)},true);
+  console.info('Carbonautas',VERSION,BUILD,'Painel sem observer/timers de entrada');
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
@@ -12018,7 +12024,13 @@ async function openHighlightNotification(n){if(!n)return;try{if(F()&&n.id)await 
 function interceptNotifications(e){const b=e.target.closest?.('[data-p39nid]');if(!b)return;const n=(S()?.notifications||[]).find(x=>x.id===b.getAttribute('data-p39nid'));if(n?.sourceType!=='highlight')return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();const p=$('#notifyPanelP39');if(p)p.style.display='none';document.documentElement.style.overflow='';openHighlightNotification(n)}
 function scheduleRender(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;renderPanel();relocatePanel()})}
 async function subscribe(){const f=F();if(!f||!window.db)return;unsub?.();unsub=f.onSnapshot(f.doc(window.db,'rede_settings',SETTINGS_DOC),snap=>{const d=snap.exists()?snap.data():{};items=Array.isArray(d.items)?d.items.map(cleanItem).filter(x=>x.id):[];scheduleRender();installMedalPatch();try{if(typeof currentView!=='undefined'&&currentView==='medalhas'&&typeof renderMedals==='function')renderMedals()}catch(_e){}},e=>console.warn('P117 highlights',e))}
-async function boot(){ensureCss();ensureModal();installMedalPatch();document.addEventListener('click',interceptNotifications,true);let tries=0;while(tries++<80){if(window.fbFns&&window.db&&window.auth?.currentUser)break;await sleep(250)}if(!window.auth?.currentUser)return;subscribe();scheduleRender();new MutationObserver(()=>{relocatePanel();if(!$('#p117Highlights'))scheduleRender()}).observe(document.documentElement,{subtree:true,childList:true});setInterval(()=>{relocatePanel();installMedalPatch()},1800);console.info('Carbonautas',VERSION,'Destaques do mês carregado')}
+async function boot(){
+  ensureCss();ensureModal();installMedalPatch();document.addEventListener('click',interceptNotifications,true);
+  const start=()=>{if(!window.fbFns||!window.db||!window.auth?.currentUser)return;subscribe();scheduleRender()};
+  if(window.auth?.currentUser)start();else window.addEventListener('carbonautas-session-ready',start,{once:true});
+  window.addEventListener('carbonautas-panel-rendered',()=>{relocatePanel();if(!$('#p117Highlights'))scheduleRender()});
+  console.info('Carbonautas',VERSION,'Destaques sem observer/polling global');
+}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
