@@ -3405,12 +3405,14 @@ async function bootstrap(){
     ensurePrivateDirectoryEntry().catch(e=>console.warn('Diretório privado indisponível:',e));
     ensurePersonalRepositoryRoot().catch(e=>console.warn('Repositório privado indisponível:',e));
     await subscribeAll();
+    try{await window.CarbonautasPreparePanelState?.()}catch(e){console.warn('Estado inicial do Painel indisponível:',e)}
+    if(currentView==='painel')renderPainel();
     bootstrapped=true;
     refreshIdentityUI();
-    document.body.classList.add('carbonautas-session-ready');
     window.dispatchEvent(new Event('carbonautas-session-ready'));
-    $('#authGate').classList.add('off');
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    document.body.classList.add('carbonautas-session-ready');
+    $('#authGate').classList.add('off');
     $('#loading').classList.add('off');
   }catch(e){
     console.error(e);
@@ -3439,6 +3441,7 @@ function requestPainelRender(){
     if(!painelHydrating&&currentView==='painel')renderPainel();
   });
 }
+window.requestCarbonautasPanelRender=requestPainelRender;
 function subscribeAll(){
   const f=FB();
   painelHydrating=true;
@@ -10029,9 +10032,7 @@ function p56Boot(){
   try{renderScoreRules=p56ScoreRules;window.renderScoreRules=p56ScoreRules}catch(_e){}
   try{updateAttentionBadge=p56UpdateAttentionBadge;window.updateAttentionBadge=p56UpdateAttentionBadge}catch(_e){}
   window.p56OpenItem=p56OpenItem;window.p56CompleteActivity=p56CompleteActivity;window.p56AckItem=p56AckItem;window.p56UndoAck=p56UndoAck;
-  setTimeout(()=>{try{if(typeof currentView!=='undefined'&&currentView==='painel')p56RenderPanel();if(typeof currentView!=='undefined'&&currentView==='medalhas')renderMedals()}catch(_e){}},700);
-  setTimeout(()=>{try{if(typeof currentView!=='undefined'&&currentView==='medalhas')renderMedals()}catch(_e){}},2200);
-  console.info('Carbonautas painel + medalhas',VERSION,'carregado');
+  console.info('Carbonautas painel + medalhas',VERSION,'sem render tardio');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',p56Boot,{once:true});else p56Boot();
 })();
@@ -10812,7 +10813,7 @@ function install(){
   if(baseRender&&window.renderPainel!==p68Render){try{renderPainel=p68Render}catch(_e){}window.renderPainel=p68Render}
   schedule();
 }
-function p68Render(){const r=baseRender?baseRender.apply(this,arguments):undefined;setTimeout(transform,0);return r}
+function p68Render(){const r=baseRender?baseRender.apply(this,arguments):undefined;transform();return r}
 function boot(){install();console.info('Carbonautas',VERSION,BUILD,'painel sem observer contínuo')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
@@ -11488,7 +11489,8 @@ function cleanEntry(v={}){return {status:v.status==='open'?'open':'done',changed
 function trimEntries(v,max=160){return Object.fromEntries(Object.entries(v||{}).map(([k,x])=>[k,cleanEntry(x)]).sort((a,b)=>b[1].changedAt-a[1].changedAt).slice(0,max))}
 function mergeEntries(a,b){const out={};for(const [k,v] of Object.entries(a||{}))out[k]=cleanEntry(v);for(const [k,v0] of Object.entries(b||{})){const v=cleanEntry(v0),old=out[k];if(!old||v.changedAt>=old.changedAt)out[k]=v}return trimEntries(out)}
 function localAsEntries(){const a=loadJSON(ackKey()),out={};for(const [k,v] of Object.entries(a||{}))out[k]={status:'done',changedAt:Number(v?.doneAt||0)||now(),meta:v||{}};return out}
-function applyEntriesToLocal(all){const local={};for(const [k,v0] of Object.entries(all||{})){const v=cleanEntry(v0);if(v.status==='done')local[k]={...(v.meta||{}),key:k,doneAt:v.changedAt}}const old=loadJSON(ackKey());if(!same(old,local)){saveJSON(ackKey(),local);try{window.renderPainel?.();window.p77Refresh?.()}catch(_e){}}}
+let panelSyncPrimed=false;
+function applyEntriesToLocal(all){const local={};for(const [k,v0] of Object.entries(all||{})){const v=cleanEntry(v0);if(v.status==='done')local[k]={...(v.meta||{}),key:k,doneAt:v.changedAt}}const old=loadJSON(ackKey());if(!same(old,local)){saveJSON(ackKey(),local);if(panelSyncPrimed){try{window.requestCarbonautasPanelRender?.();window.p77Refresh?.()}catch(_e){}}}}
 function canonicalize(){try{const u=new URL(location.href);const beforeUrl=u.href;u.searchParams.delete('build');u.searchParams.delete('apprefresh');u.searchParams.delete('pwa');if(u.href!==beforeUrl)history.replaceState(null,'',u.pathname+u.search+u.hash)}catch(_e){}}
 function ensureStyle(){if(q('#p85MobileStyle'))return;const st=document.createElement('style');st.id='p85MobileStyle';st.textContent=`
 .tab[data-view="lab"],.app-nav-card[data-app-view="lab"]{display:none!important}#p78TodayCard{scroll-margin-top:16px}.p85-checkin-toggle{display:none}#p192AboutFooter{display:flex;justify-content:center;align-items:center;padding:22px 8px 28px}#p192AboutFooter button{border:0;background:transparent;color:#6f858d;border-radius:999px;padding:10px 14px;font-size:12px;font-weight:800;cursor:pointer}#p192AboutFooter button:hover{background:#eef7f5;color:#0d7479}
@@ -11509,15 +11511,11 @@ function applyCloud(remote){const merged=mergeEntries(remote||{},localAsEntries(
 function noteDone(key,meta){entries=mergeEntries(entries,{[key]:{status:'done',changedAt:Number(meta?.doneAt||0)||now(),meta:meta||{}}});applyEntriesToLocal(entries);setTimeout(writeCloud,40)} function noteOpen(key){entries=mergeEntries(entries,{[key]:{status:'open',changedAt:now(),meta:{key}}});applyEntriesToLocal(entries);setTimeout(writeCloud,40)}
 function wrapActions(){if(window.p56AckItem&&!window.p56AckItem.__p85){const old=window.p56AckItem,fn=function(key){const r=old.apply(this,arguments);setTimeout(()=>{const m=loadJSON(ackKey())[key]||{key,doneAt:now()};noteDone(key,m)},20);return r};fn.__p85=true;window.p56AckItem=fn}if(window.p56UndoAck&&!window.p56UndoAck.__p85){const old=window.p56UndoAck,fn=function(key){const r=old.apply(this,arguments);noteOpen(key);return r};fn.__p85=true;window.p56UndoAck=fn}}
 function reconcileLocal(){const local=localAsEntries();let next=entries;for(const [k,v] of Object.entries(local)){const cur=next[k];if(!cur||v.changedAt>cur.changedAt)next=mergeEntries(next,{[k]:v})}if(!same(next,entries)){entries=next;writeCloud()}applyEntriesToLocal(entries)}
-async function startSync(){if(started||!window.db||!F()||!window.auth?.currentUser)return;started=true;try{const p=await getProfile();if(!p?.memberId){started=false;return}memberRef=F().doc(window.db,'rede_members',p.memberId);const snap=await F().getDoc(memberRef);if(!snap.exists()){started=false;return}const remote=snap.data()?.[CLOUD_FIELD]?.entries||{};entries=mergeEntries(remote,localAsEntries());applyEntriesToLocal(entries);await writeCloud();unsub?.();unsub=F().onSnapshot(memberRef,s=>{if(!s.exists())return;const r=s.data()?.[CLOUD_FIELD]?.entries||{};const merged=mergeEntries(r,entries);entries=merged;applyEntriesToLocal(entries);if(!same(trimEntries(r),entries))setTimeout(writeCloud,100)},e=>console.warn('P85 painel cloud read',e));wrapActions()}catch(e){started=false;console.warn('P85 iniciar sync',e)}}
-function waitSync(){
-  if(window.db&&F()&&window.auth?.currentUser){startSync();return}
-  window.addEventListener('carbonautas-session-ready',()=>startSync(),{once:true});
-}
-/* P85 estabilidade: sem atualização ativa do service worker, sem observer do Painel e sem polling.
-   O núcleo do app é responsável pelo ciclo da sessão; P85 apenas aplica sua camada visual e sincroniza quando a sessão fica pronta. */
-canonicalize();ensureStyle();polish();waitSync();wrapActions();
-window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P85 estável: sem observer/polling/SW update concorrente');
+async function startSync(){if(started||!window.db||!F()||!window.auth?.currentUser)return;started=true;try{const p=await getProfile();if(!p?.memberId){started=false;return}memberRef=F().doc(window.db,'rede_members',p.memberId);const snap=await F().getDoc(memberRef);if(!snap.exists()){started=false;return}const remote=snap.data()?.[CLOUD_FIELD]?.entries||{};entries=mergeEntries(remote,localAsEntries());applyEntriesToLocal(entries);await writeCloud();panelSyncPrimed=true;unsub?.();unsub=F().onSnapshot(memberRef,s=>{if(!s.exists())return;const r=s.data()?.[CLOUD_FIELD]?.entries||{};const merged=mergeEntries(r,entries);entries=merged;applyEntriesToLocal(entries);if(!same(trimEntries(r),entries))setTimeout(writeCloud,100)},e=>console.warn('P85 painel cloud read',e));wrapActions()}catch(e){started=false;panelSyncPrimed=true;console.warn('P85 iniciar sync',e)}}
+window.CarbonautasPreparePanelState=startSync;
+/* P85 estabilidade: sincronização inicial é aguardada pelo bootstrap antes da Home aparecer. */
+canonicalize();ensureStyle();polish();wrapActions();
+window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P85 integrado à hidratação inicial');
 })();
 
 </script>
@@ -11733,9 +11731,7 @@ function install(){
   try{renderPainel=stable}catch(_e){}
   window.renderPainel=stable;
   installed=true;
-  try{stable()}catch(_e){}
-  setTimeout(()=>{try{if(typeof renderTrack==='function')renderTrack()}catch(_e){}},350);
-  console.info('Carbonautas P87 Painel estável + saúde exige evidência real');
+  console.info('Carbonautas P87 wrapper estável instalado sem render extra');
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
