@@ -3406,6 +3406,7 @@ async function bootstrap(){
     ensurePersonalRepositoryRoot().catch(e=>console.warn('Repositório privado indisponível:',e));
     await subscribeAll();
     try{await window.CarbonautasPreparePanelState?.()}catch(e){console.warn('Estado inicial do Painel indisponível:',e)}
+    try{await window.CarbonautasPrepareHighlights?.()}catch(e){console.warn('Destaques iniciais indisponíveis:',e)}
     if(currentView==='painel'){lastPainelDataSignature=painelDataSignature();renderPainel();}
     bootstrapped=true;
     refreshIdentityUI();
@@ -11448,11 +11449,10 @@ function bindProductNotification(){const b=qs('#saveProductBtn');if(!b||b.datase
 function applyAll(){ensureCss();simplifyMural();ensureAbout();renderBriefing();bindBolsistas();applyBolsistas();bindRepoReset();bindActivityNotification();bindProductNotification()}
 function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;applyAll()})}
 function boot(){
-  applyAll();
   window.addEventListener('carbonautas-panel-rendered',schedule);
   window.addEventListener('carbonautas-session-ready',schedule,{once:true});
   document.addEventListener('click',e=>{if(e.target?.closest?.('#notifyBtn,[data-p78-notif],#saveCheckinBtn'))setTimeout(renderBriefing,250)},true);
-  console.info('Carbonautas',VERSION,BUILD,'Painel sem observer/timers de entrada');
+  console.info('Carbonautas',VERSION,BUILD,'só monta após hidratação');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
@@ -12065,13 +12065,22 @@ async function openHighlightNotification(n){if(!n)return;try{if(F()&&n.id)await 
 }
 function interceptNotifications(e){const b=e.target.closest?.('[data-p39nid]');if(!b)return;const n=(S()?.notifications||[]).find(x=>x.id===b.getAttribute('data-p39nid'));if(n?.sourceType!=='highlight')return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();const p=$('#notifyPanelP39');if(p)p.style.display='none';document.documentElement.style.overflow='';openHighlightNotification(n)}
 function scheduleRender(){if(renderQueued)return;renderQueued=true;requestAnimationFrame(()=>{renderQueued=false;renderPanel();relocatePanel()})}
-async function subscribe(){const f=F();if(!f||!window.db)return;unsub?.();unsub=f.onSnapshot(f.doc(window.db,'rede_settings',SETTINGS_DOC),snap=>{const d=snap.exists()?snap.data():{};items=Array.isArray(d.items)?d.items.map(cleanItem).filter(x=>x.id):[];scheduleRender();installMedalPatch();try{if(typeof currentView!=='undefined'&&currentView==='medalhas'&&typeof renderMedals==='function')renderMedals()}catch(_e){}},e=>console.warn('P117 highlights',e))}
+async function prepareInitial(){
+  const f=F();if(!f||!window.db||!window.auth?.currentUser)return;
+  try{
+    const snap=await f.getDoc(f.doc(window.db,'rede_settings',SETTINGS_DOC));
+    const d=snap.exists()?snap.data():{};
+    items=Array.isArray(d.items)?d.items.map(cleanItem).filter(x=>x.id):[];
+    renderPanel();relocatePanel();installMedalPatch();
+  }catch(e){console.warn('P117 carga inicial',e)}
+}
+async function subscribe(){const f=F();if(!f||!window.db)return;unsub?.();unsub=f.onSnapshot(f.doc(window.db,'rede_settings',SETTINGS_DOC),snap=>{const d=snap.exists()?snap.data():{};const next=Array.isArray(d.items)?d.items.map(cleanItem).filter(x=>x.id):[];const before=JSON.stringify(items.map(x=>[x.id,x.updatedAtMs,x.title,x.imageUrl]));const after=JSON.stringify(next.map(x=>[x.id,x.updatedAtMs,x.title,x.imageUrl]));items=next;if(before!==after)scheduleRender();installMedalPatch();try{if(typeof currentView!=='undefined'&&currentView==='medalhas'&&typeof renderMedals==='function')renderMedals()}catch(_e){}},e=>console.warn('P117 highlights',e))}
+window.CarbonautasPrepareHighlights=prepareInitial;
 async function boot(){
   ensureCss();ensureModal();installMedalPatch();document.addEventListener('click',interceptNotifications,true);
-  const start=()=>{if(!window.fbFns||!window.db||!window.auth?.currentUser)return;subscribe();scheduleRender()};
-  if(window.auth?.currentUser)start();else window.addEventListener('carbonautas-session-ready',start,{once:true});
+  window.addEventListener('carbonautas-session-ready',()=>subscribe(),{once:true});
   window.addEventListener('carbonautas-panel-rendered',()=>{relocatePanel();if(!$('#p117Highlights'))scheduleRender()});
-  console.info('Carbonautas',VERSION,'Destaques sem observer/polling global');
+  console.info('Carbonautas',VERSION,'Destaques integrados à hidratação');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
@@ -14636,9 +14645,8 @@ function bindSwipe(card,a,it){
 
 function render(){const d=ensure();if(!d)return;const a=collect(),card=q('.p195-card',d),backup=q('[data-a="backup"]',d),src=q('#dashBackupBtn');if(backup)backup.style.display=src&&getComputedStyle(src).display!=='none'?'block':'none';if(pos>=a.length)pos=0;if(!a.length){resetSwipe(card);card.innerHTML='<div class="p195-empty"><b>✓ Tudo certo.</b><span>Nada pedindo sua atenção agora.</span></div>';return}const it=a[pos];card.innerHTML='<div><div class="p195-k">AGORA</div><div class="p195-title"></div><div class="p195-meta"></div><div class="p195-detail"></div></div><div class="p195-foot"><span class="p195-count"></span><span class="p197-swipehint">deslize</span><button class="p195-btn ghost" data-g>Dispensar</button><button class="p195-btn p198-back" data-p hidden>←</button><button class="p195-btn" data-n>→</button><button class="p195-btn primary" data-o>Abrir</button></div>';q('.p195-title',card).textContent=it.title;q('.p195-meta',card).textContent=it.meta;q('.p195-detail',card).textContent=it.detail||'Abra para ver o contexto.';q('.p195-count',card).textContent=(pos+1)+' de '+a.length;const prev=q('[data-p]',card);prev.hidden=a.length<=1;prev.setAttribute('aria-label','Card anterior');prev.title='Voltar';prev.onclick=()=>{pos=(pos-1+a.length)%a.length;render()};q('[data-n]',card).style.display=a.length>1?'':'none';q('[data-n]',card).setAttribute('aria-label','Próximo card');q('[data-n]',card).title='Próximo';q('[data-o]',card).onclick=()=>open(it);q('[data-n]',card).onclick=()=>{pos=(pos+1)%a.length;render()};q('[data-g]',card).onclick=()=>{const g=gone();g.add(it.key);save(g);render()};bindSwipe(card,a,it)}
 function boot(){
-  ensure();
-  render();
   window.addEventListener('carbonautas-panel-rendered',render);
+  window.addEventListener('carbonautas-session-ready',render,{once:true});
 }
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',boot,{once:true}):boot();
 })();
