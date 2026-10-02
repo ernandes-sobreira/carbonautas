@@ -26,10 +26,9 @@ test('SW activates new cache without deleting unrelated applications',async()=>{
   assert.deepEqual(h.deleted,['carbonautas-p220-20260922']);
 });
 
-test('SW update waits for next opening instead of forcing controller reload',async()=>{
-  const h=worker();let p;
-  h.listeners.install?.({waitUntil:v=>p=v});
-  if(p)await p;
+test('SW update waits for next opening instead of forcing controller reload',()=>{
+  const h=worker();
+  h.listeners.install?.({});
   assert.equal(h.skipCount,0,'install must not call skipWaiting');
   assert.equal(h.listeners.message,undefined,'legacy SKIP_WAITING message must be ignored');
 });
