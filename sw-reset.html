@@ -24,7 +24,11 @@ code{font-size:12px}
     let regs=0,cachesRemoved=0;
     if('serviceWorker' in navigator){
       const all=await navigator.serviceWorker.getRegistrations();
-      for(const reg of all){try{if(await reg.unregister())regs++}catch(_e){}}
+      const carbonautasScope=new URL('./',location.href).href;
+      for(const reg of all){
+        if(reg.scope!==carbonautasScope)continue;
+        try{if(await reg.unregister())regs++}catch(_e){}
+      }
     }
     if('caches' in window){
       const keys=await caches.keys();
