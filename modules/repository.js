@@ -131,7 +131,7 @@ async function openMessage(id){
  const target=await chooseRecipient(p,a.memberId);if(!target)return;
  closeDeck();$('#repositoryReturn')?.close();for(const key of ['repoOverlay','repoPackageOverlay','filePreviewOverlay'])root.closeOverlay?.(key);root.closePanelinhas?.();
  await root.startPrivateConversation(target);const tid=files().privateThreadId(a.memberId,target);if(!(app().state.privateThreads||[]).some(t=>t.id===tid))throw Error('Não foi possível abrir a conversa privada.');
- root.switchView('conversas');root.openPrivateThread(tid);root.repositoryMessageContext={id,threadId:tid,version:files().currentVersion(p),targetId:target};
+ root.switchView('conversas');root.openPrivateThread(tid);root.repositoryMessageContext={id,threadId:tid,version:files().currentVersion(p),targetId:target,title:p.titulo||files().publicationTitle(p),fileName:p.fileName||files().publicationTitle(p)};
  const input=$('#privateInput');if(input){const context=`Sobre o arquivo “${files().publicationTitle(p)}” que me enviou`;input.value=input.value?input.value+'\n'+context:context;input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();}
 }
 async function download(id){
