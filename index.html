@@ -3407,6 +3407,10 @@ async function bootstrap(){
     await subscribeAll();
     try{await window.CarbonautasPreparePanelState?.()}catch(e){console.warn('Estado inicial do Painel indisponível:',e)}
     try{await window.CarbonautasPrepareHighlights?.()}catch(e){console.warn('Destaques iniciais indisponíveis:',e)}
+    // A camada visual da Home (agenda em foco, capa "Olha rapidão", destaques) entra ANTES do
+    // primeiro render e da revelação. Antes ela chegava por carregamento sob demanda depois da
+    // Home já visível e reorganizava a tela na frente da pessoa.
+    try{await window.CarbonautasLoader?.ensureHome?.()}catch(e){console.warn('Camada visual da Home indisponível:',e)}
     if(currentView==='painel'){lastPainelDataSignature=painelDataSignature();renderPainel();}
     bootstrapped=true;
     refreshIdentityUI();
@@ -7571,7 +7575,7 @@ if(installPwaBtn){
   };
   window.addEventListener('appinstalled',()=>{installPwaBtn.style.display='none'});
 }
-window.CARBONAUTAS_BUILD='stability-20261002-no-sw';
+window.CARBONAUTAS_BUILD='stability-20261002-home-unica';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
@@ -10089,6 +10093,7 @@ function p56Boot(){
   try{renderScoreRules=p56ScoreRules;window.renderScoreRules=p56ScoreRules}catch(_e){}
   try{updateAttentionBadge=p56UpdateAttentionBadge;window.updateAttentionBadge=p56UpdateAttentionBadge}catch(_e){}
   window.p56OpenItem=p56OpenItem;window.p56CompleteActivity=p56CompleteActivity;window.p56AckItem=p56AckItem;window.p56UndoAck=p56UndoAck;
+  window.p56BuildItems=p56BuildItems;
   console.info('Carbonautas painel + medalhas',VERSION,'sem render tardio');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',p56Boot,{once:true});else p56Boot();
@@ -10215,7 +10220,7 @@ function p57InstallUsage(){
   const board=document.getElementById('medalBoard');if(!board||document.getElementById('p57Usage'))return false;const box=document.createElement('section');box.id='p57Usage';box.className='p57-usage';box.innerHTML=`<div class="p57-usage-head"><div><h3>⚡ Quem movimentou o Carbonautas?</h3><p>Atividade diária, semanal e mensal — quem usou mais e para quê.</p></div><span class="spacer"></span><div class="p57-periods"><button type="button" data-mode="day">Hoje</button><button type="button" data-mode="week">Semana</button><button type="button" data-mode="month">Mês</button></div></div><div class="p57-usage-body"><div class="p57-empty">Carregando…</div></div>`;board.parentNode.insertBefore(box,board);box.querySelectorAll('.p57-periods button').forEach(b=>b.onclick=()=>p57RenderUsage(b.dataset.mode));p57RenderUsage('day');return true
 }
 function p57WatchMedals(){let n=0;const t=setInterval(()=>{n++;if(p57InstallUsage()||n>120)clearInterval(t)},500)}
-function p57Boot(){p57Css();p57Arrival();p57WatchMedals();console.info('Carbonautas mobile + uso medalhas',VERSION,'carregado')}
+function p57Boot(){p57Css();/* p57Arrival() removido: o toast 'Tcheguei Hodje Xomano!' aparecia sobre a Home recém-revelada e sumia 4 s depois. */p57WatchMedals();console.info('Carbonautas mobile + uso medalhas',VERSION,'carregado')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',p57Boot,{once:true});else p57Boot();
 })();
 
@@ -10346,7 +10351,7 @@ function showCheckin(){
   },250);
 }
 
-function boot(){css59();showCheckin();console.info('Carbonautas',VERSION,'check-in e cards carregados');}
+function boot(){css59();/* showCheckin() removido: o card 'Check-in diário registrado' cobria a Home por 6 s na primeira entrada do dia. A presença é registrada em silêncio pelo P128. */console.info('Carbonautas',VERSION,'cards do Repositório carregados');}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 
@@ -11780,7 +11785,9 @@ function install(){
     if(!force&&sig===lastSig)return;
     lastSig=sig;lastRun=Date.now();
     const result=original.apply(this,arguments);
-    requestAnimationFrame(()=>window.dispatchEvent(new Event('carbonautas-panel-rendered')));
+    // Síncrono: quem compõe a Home a partir do Painel roda na mesma tarefa do render,
+    // antes de o navegador pintar. Antes era em requestAnimationFrame, um frame depois.
+    window.dispatchEvent(new Event('carbonautas-panel-rendered'));
     return result;
   };
   stable.__p87Stable=true;stable.__p87Original=original;

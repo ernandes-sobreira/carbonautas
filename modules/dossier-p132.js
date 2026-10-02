@@ -35,7 +35,7 @@ function appReady(){return authUser()||appShellVisible()}
 function currentView(){return document.body?.dataset?.view||''}
 
 function ensureIntegrity(){if(integrityPromise)return integrityPromise;integrityPromise=load('./modules/runtime-integrity.js?v=P221-20260922','carbonautas-runtime-integrity').catch(e=>{integrityPromise=null;console.error('Carbonautas integridade de runtime',e);throw e});return integrityPromise}
-function ensureCheckin(){if(checkinPromise)return checkinPromise;checkinPromise=load('./modules/checkin-mobile-p171.js?v=P171-20260920','carbonautas-checkin-mobile-p171').catch(e=>{checkinPromise=null;console.error('Carbonautas check-in móvel',e)});return checkinPromise}
+function ensureCheckin(){/* P171 só reposicionava o card diário 'Tcheguei Hodje Xomano!' no celular; o card foi retirado da entrada (presença já é registrada em silêncio pelo P128), então a camada não é mais carregada. */return checkinPromise||(checkinPromise=Promise.resolve())}
 function ensureDossier(){if(dossierPromise)return dossierPromise;dossierPromise=load('./modules/dossier-p133-original.js?v=P133-20260919','carbonautas-dossier-p133-original').catch(e=>{dossierPromise=null;console.error('Carbonautas dossiê',e);throw e});return dossierPromise}
 function ensureAgenda(){if(agendaPromise)return agendaPromise;agendaPromise=load('./modules/agenda-reunioes-p172.js?v=P203-20260921','carbonautas-agenda-reunioes-p172').catch(e=>{agendaPromise=null;console.error('Carbonautas agenda',e)});return agendaPromise}
 function ensureAgendaFocus(){if(agendaFocusPromise)return agendaFocusPromise;agendaFocusPromise=(async()=>{try{await load('./modules/agenda-foco-p174.js?v=P174-20260920','carbonautas-agenda-foco-p174');await load('./modules/agenda-atividade-anexos-p183.js?v=P183-20260920','carbonautas-agenda-atividade-anexos-p183');await load('./modules/agenda-save-bridge-p217.js?v=P217-20260924','carbonautas-agenda-save-bridge-p217');await load('./modules/agenda-desktop-nav-p218.js?v=P218B-20260924','carbonautas-agenda-desktop-nav-p218')}catch(e){agendaFocusPromise=null;console.error('Carbonautas foco/anexos agenda',e)}})();return agendaFocusPromise}
@@ -62,7 +62,9 @@ function ensurePeople(){
 }
 function ensureRede(){if(redePromise)return redePromise;redePromise=(async()=>{try{await load('./p135-rede-acompanhamento.js?v=P165-20260919','carbonautas-p135-rede-acompanhamento');await load('./modules/rede-orientacao-p150.js?v=P165B-20260919','carbonautas-rede-orientacao-p150');await load('./modules/rede-ui-p155.js?v=P157-20260919','carbonautas-rede-ui-p155');await load('./modules/rede-legenda-p158.js?v=P158-20260919','carbonautas-rede-legenda-p158');await load('./modules/rede-controles-p161.js?v=P165-20260919','carbonautas-rede-controles-p161');await load('./modules/rede-estabilidade-p163.js?v=P165-20260919','carbonautas-rede-estabilidade-p163');await ensurePeople()}catch(e){redePromise=null;console.error('Carbonautas Rede',e);throw e}})();return redePromise}
 async function whenTrackReady(){await ensureIntegrity();await ensureRede();await ensurePeople()}
-window.CarbonautasLoader={ensureIntegrity,ensureRede,ensurePeople,ensureDossier,ensureProjects,whenTrackReady};
+/* Camada visual da Home carregada de uma vez, antes da revelação (chamada pelo bootstrap do index.html). */
+function ensureHome(){return Promise.all([ensureIntegrity().catch(()=>{}),ensureAgendaFocus(),ensureHomePolish(),ensureHighlights()]).then(()=>{})}
+window.CarbonautasLoader={ensureIntegrity,ensureRede,ensurePeople,ensureDossier,ensureProjects,ensureHome,whenTrackReady};
 
 function route(){
  if(!appReady())return;ensureIntegrity();ensureCheckin();

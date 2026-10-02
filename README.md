@@ -8,7 +8,7 @@ O novo fluxo de troca está em `modules/file-handoff.js`, `modules/repository.js
 
 Leia [auditoria e limites da validação](docs/repository-audit.md) antes do merge. Esta branch exige publicação coordenada das regras Firestore e homologação com contas reais. Não altera Lab.as.
 
-Testes: `npm ci`, `npm test`, `npm run test:rules` (Java 21 recomendado), `npx playwright install chromium` e `npm run test:browser`.
+Testes: `npm ci`, `npm test`, `npm run test:rules` (Java 21 recomendado), `npx playwright install chromium`, `npm run test:browser` e `npm run test:home` (estabilidade da Home; ver [docs/home-cadeia-real.md](docs/home-cadeia-real.md)).
 
 ## Estrutura do repositorio
 
