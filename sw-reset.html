@@ -32,8 +32,10 @@ code{font-size:12px}
         if(key.startsWith('carbonautas-')){try{if(await caches.delete(key))cachesRemoved++}catch(_e){}}
       }
     }
+    let version='não verificada';
+    try{const vr=await fetch('./version.json?ts='+Date.now(),{cache:'no-store'});if(vr.ok){const v=await vr.json();version=v.stabilityBuild||version}}catch(_e){}
     box.className='ok';
-    box.innerHTML='✓ Versão antiga removida.<br><br>Feche todas as abas/janelas do Carbonautas e abra o site novamente.<br><br><small>Service workers removidos: '+regs+' · caches removidos: '+cachesRemoved+'</small>';
+    box.innerHTML='✓ Versão antiga removida.<br><br>Feche todas as abas/janelas do Carbonautas e abra o site novamente.<br><br><small>Versão publicada: '+version+' · service workers removidos: '+regs+' · caches removidos: '+cachesRemoved+'</small>';
   }catch(e){
     box.className='err';
     box.textContent='Não consegui limpar completamente: '+(e&&e.message?e.message:String(e));
