@@ -57,10 +57,18 @@ function cardHTML(p){
  const actionIcon=p.labRun?'📈':'↗';
  return `<article class="pub-row p59-card repository-list-card" data-publication-id="${esc(p.id)}"${file?` data-file-id="${esc(p.id)}"`:''} data-publication-kind="${action}" style="--p59-accent:${color}"><div class="pub-cat" style="background:${color}"></div><div class="pub-body"><div class="pub-t">${esc(p.titulo||f.publicationTitle(p))}</div><div class="pub-meta"><span class="pub-cat-tag" style="background:${color}">${esc(categoryLabel(p))}</span><span class="repository-owner">Responsável: ${esc(owner)}</span>${file&&version>1?`<span class="repository-list-version">v${version}</span>`:''}</div><div class="repository-last-send"><b>Último envio:</b> <span class="repository-last-sender">${esc(last.name||owner)}</span>${when?`<span class="repository-last-time">${esc(when)}</span>`:''}</div>${turn===app().memberId?'<span class="repository-list-pending">Sua vez</span>':''}</div><div class="pub-act repository-list-actions">${action!=='none'?`<button type="button" class="btn ghost" data-file-action="${action}" title="${esc(actionLabel)}" aria-label="${esc(actionLabel)}">${actionIcon}</button>`:''}${canDelete&&typeof root.deletePublicacao==='function'?'<button type="button" class="mini-x" data-file-action="delete" title="Excluir" aria-label="Excluir">×</button>':''}</div></article>`;
 }
+function pendingPanelItem(p){
+ try{
+  const open=typeof root.p56BuildItems==='function'?(root.p56BuildItems().open||[]):[];
+  const tid=typeof root.repoReviewThreadId==='function'?root.repoReviewThreadId(p):(p.reviewThreadId||p.id);
+  return open.find(x=>String(x.sourceId||'')===String(p.id)||x.key===`review:${tid}`)||null;
+ }catch(_e){return null}
+}
 function detailCardHTML(p){
- const f=files(),can=f.canExchange(p,actor()),turn=turnId(p),targets=can?f.recipientIds(p,app().memberId):[],last=lastSendInfo(p),when=formatActivity(last.ms),owner=p.memberNome||memberName(p.memberId);
+ const f=files(),can=f.canExchange(p,actor()),turn=turnId(p),targets=can?f.recipientIds(p,app().memberId):[],last=lastSendInfo(p),when=formatActivity(last.ms),owner=p.memberNome||memberName(p.memberId),pending=pendingPanelItem(p);
  const history=f.historyEvents(p).map(e=>`<li><time>${esc(f.formatWhen(e.when))}</time><span><b>${esc(e.byName||memberName(e.byMemberId))}</b> ${esc(f.actionText(e))}</span><small>v${esc(e.version)}</small></li>`).join('');
- return `<article class="repository-file" data-file-id="${esc(p.id)}"><header><div><h3>${esc(p.titulo||f.publicationTitle(p))}</h3><p>Responsável: ${esc(owner)} · ${esc(categoryLabel(p))} · v${f.currentVersion(p)}</p><p class="repository-detail-last"><b>Último envio:</b> ${esc(last.name||owner)}${when?' · '+esc(when):''}</p></div></header><div class="repository-actions"><button type="button" data-file-action="preview">👁 Visualizar</button><button type="button" data-file-action="download">⬇ Baixar</button>${can&&targets.length?'<button type="button" data-file-action="return" class="primary">↩ Devolver arquivo</button>':''}${targets.length?'<button type="button" data-file-action="message">💬 Mensagem</button>':''}</div><details class="repository-history" open><summary>Histórico da troca</summary><ol>${history}</ol></details>${turn?`<p class="repository-turn">${turn===app().memberId?'Agora é sua vez':`Agora é a vez de ${esc(memberName(turn))}`}</p>`:''}</article>`;
+ const resolve=pending?`<div class="repository-resolve-actions"><button type="button" data-file-action="done" class="repository-done">✓ Já feito</button><button type="button" data-file-action="later" class="repository-later">⏰ Decido depois</button></div>`:'';
+ return `<article class="repository-file" data-file-id="${esc(p.id)}"><header><div><h3>${esc(p.titulo||f.publicationTitle(p))}</h3><p>Responsável: ${esc(owner)} · ${esc(categoryLabel(p))} · v${f.currentVersion(p)}</p><p class="repository-detail-last"><b>Último envio:</b> ${esc(last.name||owner)}${when?' · '+esc(when):''}</p></div></header><div class="repository-actions"><button type="button" data-file-action="preview">👁 Visualizar</button><button type="button" data-file-action="download">⬇ Baixar</button>${can&&targets.length?'<button type="button" data-file-action="return" class="primary">↩ Devolver arquivo</button>':''}${targets.length?'<button type="button" data-file-action="message">💬 Mensagem</button>':''}</div>${resolve}<details class="repository-history" open><summary>Histórico da troca</summary><ol>${history}</ol></details>${turn?`<p class="repository-turn">${turn===app().memberId?'Agora é sua vez':`Agora é a vez de ${esc(memberName(turn))}`}</p>`:''}</article>`;
 }
 function dialog(id,html){const el=document.createElement('dialog');el.id=id;el.className='repository-dialog';el.innerHTML=html;document.body.append(el);return el}
 function closeDeck(){const d=$('#repositoryDeck');if(d?.open)d.close();deckIds=[];lastFocus?.focus?.()}
@@ -137,7 +145,26 @@ async function submitReturn(e){e.preventDefault();if(busy)return;const form=e.cu
 async function onAction(e){
  const button=e.target.closest('[data-file-action]');if(!button)return;const card=button.closest('[data-publication-id],[data-file-id]'),id=card?.dataset.publicationId||card?.dataset.fileId,action=button.dataset.fileAction,key=id+':'+action;if(!id||locks.has(key))return;
  e.preventDefault();e.stopPropagation();locks.add(key);button.disabled=true;
- try{if(action==='open')openDeck(id);else if(action==='link')openPublication(id);else if(action==='lab')openPublication(id);else if(action==='download')await download(id);else if(action==='preview')await preview(id);else if(action==='message')await openMessage(id);else if(action==='return')await openReturn(id);else if(action==='delete'&&typeof root.deletePublicacao==='function')await root.deletePublicacao(id)}catch(err){console.error('Repository',err);root.toast(err.message||'Não foi possível concluir.')}finally{locks.delete(key);if(button.isConnected)button.disabled=false}
+ try{
+  if(action==='open')openDeck(id);
+  else if(action==='link')openPublication(id);
+  else if(action==='lab')openPublication(id);
+  else if(action==='download')await download(id);
+  else if(action==='preview')await preview(id);
+  else if(action==='message')await openMessage(id);
+  else if(action==='return')await openReturn(id);
+  else if(action==='done'){
+   const p=publicationById(id),item=p&&pendingPanelItem(p);
+   if(!item)root.toast?.('Este arquivo já não está pendente na sua caixa.');
+   else if(typeof root.p56AckItem==='function'){root.p56AckItem(item.key);closeDeck();root.CarbonautasHomeActions?.render?.();root.toast?.('✓ Retirado da sua caixa. O arquivo foi preservado.')}
+  }
+  else if(action==='later'){
+   const p=publicationById(id),item=p&&pendingPanelItem(p);
+   if(!item)root.toast?.('Este arquivo já não está pendente na sua caixa.');
+   else {root.CarbonautasHomeActions?.deferUntilTomorrow?.(item.key);closeDeck();root.CarbonautasHomeActions?.render?.();root.toast?.('⏰ Saiu da frente por hoje. Volta amanhã.')}
+  }
+  else if(action==='delete'&&typeof root.deletePublicacao==='function')await root.deletePublicacao(id);
+ }catch(err){console.error('Repository',err);root.toast(err.message||'Não foi possível concluir.')}finally{locks.delete(key);if(button.isConnected)button.disabled=false}
 }
 function buildOrganizer(list){
  const old=$('#repositoryOrganizer');old?.remove();const toolbar=document.createElement('div');toolbar.id='repositoryOrganizer';
