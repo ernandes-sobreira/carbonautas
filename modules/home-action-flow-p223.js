@@ -13,7 +13,7 @@ const hasDocument=()=>typeof document!=='undefined';
 const $=(s,r)=>hasDocument()?(r||document).querySelector(s):null;
 const $$=(s,r)=>hasDocument()?Array.from((r||document).querySelectorAll(s)):[];
 const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
-let observer=null,actorTimer=0,snoozeTimer=0,lastActor='';
+let observer=null,actorTimer=0,snoozeTimer=0,lastActor='',managedGone=new Set();
 
 function actor(){
   try{return String(root.auth?.currentUser?.uid||root.CarbonautasApp?.memberId||root.myId||'anon')}catch(_e){return'anon'}
@@ -73,18 +73,16 @@ function stableTaskKey(item){
   const data=String(el.dataset?.p69Key||'');if(data)return data;
   const withKey=$$('button[onclick*="p56OpenItem"]',el)[0];
   const m=String(withKey?.getAttribute('onclick')||'').match(/p56OpenItem\('([^']+)'\)/);if(m?.[1])return m[1];
-  const src=norm($('.p56-source',el)?.textContent||''),title=norm($('.p56-what',el)?.textContent||'');
-  if(src.includes('correcao')&&src.includes('repositorio')){
-    try{
-      const pubs=(root.CarbonautasApp?.state?.publicacoes||[]).filter(p=>p?.reviewFlow);
-      const matches=pubs.filter(p=>[p.reviewBaseTitle,p.titulo,p.fileName].some(v=>norm(v)===title));
-      if(matches.length){
-        const p=matches.sort((a,b)=>Number(b.reviewVersion||1)-Number(a.reviewVersion||1))[0];
-        const tid=(typeof root.repoReviewThreadId==='function'&&root.repoReviewThreadId(p))||p.reviewThreadId||p.reviewBaseId||p.id;
-        if(tid)return `review:${tid}`
-      }
-    }catch(_e){}
-  }
+  const title=norm($('.p56-what',el)?.textContent||'');
+  try{
+    const pubs=(root.CarbonautasApp?.state?.publicacoes||[]).filter(p=>p?.reviewFlow);
+    const matches=pubs.filter(p=>[p.reviewBaseTitle,p.titulo,p.fileName].some(v=>norm(v)===title));
+    if(matches.length){
+      const p=matches.sort((a,b)=>Number(b.reviewVersion||1)-Number(a.reviewVersion||1))[0];
+      const tid=(typeof root.repoReviewThreadId==='function'&&root.repoReviewThreadId(p))||p.reviewThreadId||p.reviewBaseId||p.id;
+      if(tid)return `review:${tid}`
+    }
+  }catch(_e){}
   return''
 }
 function addGone(key){if(!key)return;const s=sessionGone();s.add(key);saveSessionGone(s)}
@@ -111,12 +109,14 @@ function nativeDoneAction(item){
     return async()=>{
       const id=key.slice(9);
       await root.p56CompleteActivity(id);
-      setTimeout(()=>{
+      const verify=()=>{
         try{
           const a=(root.CarbonautasApp?.state?.activities||[]).find(x=>String(x.id)===String(id));
-          const st=norm(a?.status);if(!a||/conclu|feito|done|complet/.test(st)){markLocalDone(item);toast('✓ Feito. Não volta para esta caixa.')}
+          const st=norm(a?.status);if(!a||/conclu|feito|done|complet/.test(st)){markLocalDone(item);toast('✓ Feito. Não volta para esta caixa.');return true}
         }catch(_e){}
-      },650)
+        return false
+      };
+      [550,1300,2600].forEach(ms=>setTimeout(()=>verify(),ms))
     }
   }
   if(key.startsWith('review:')&&typeof root.p56AckItem==='function')return()=>{root.p56AckItem(key);markLocalDone(item);toast('✓ Feito. Não volta para esta caixa.')};
@@ -138,18 +138,22 @@ function clickBestAction(item){
   return false
 }
 function syncPersistent(){
-  const id=actor();
-  if(id!==lastActor){lastActor=id}
-  const now=Date.now(),done=doneSet(),snooze=snoozeMap(),g=sessionGone();
-  let changed=false,storeChanged=false,next=0;
-  done.forEach(k=>{if(!g.has(k)){g.add(k);changed=true}});
+  const id=actor(),now=Date.now(),g=sessionGone();
+  let changed=false;
+  if(id!==lastActor){
+    managedGone.forEach(k=>{if(g.delete(k))changed=true});
+    managedGone=new Set();lastActor=id;
+  }
+  const done=doneSet(),snooze=snoozeMap();
+  let storeChanged=false,next=0;
+  done.forEach(k=>{managedGone.add(k);if(!g.has(k)){g.add(k);changed=true}});
   Object.keys(snooze).forEach(k=>{
     const until=Number(snooze[k])||0;
     if(until>now){
-      if(!g.has(k)){g.add(k);changed=true}
+      managedGone.add(k);if(!g.has(k)){g.add(k);changed=true}
       if(!next||until<next)next=until
     }else{
-      delete snooze[k];storeChanged=true;
+      delete snooze[k];storeChanged=true;managedGone.delete(k);
       if(!done.has(k)&&g.delete(k))changed=true
     }
   });
