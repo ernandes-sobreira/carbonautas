@@ -3431,6 +3431,14 @@ async function ensurePersonalRepositoryRoot(){
 
 function clearSubscriptions(){subscriptions.forEach(fn=>{try{fn()}catch(e){}});subscriptions=[];if(privateMessageUnsub){try{privateMessageUnsub()}catch(e){}privateMessageUnsub=null;}privateMessagesState=[];privateActiveThreadId=null;}
 
+let painelRenderFrame=0;
+function requestPainelRender(){
+  if(currentView!=='painel'||painelRenderFrame)return;
+  painelRenderFrame=requestAnimationFrame(()=>{
+    painelRenderFrame=0;
+    if(currentView==='painel')renderPainel();
+  });
+}
 function subscribeAll(){
   const f=FB();
   // SETTINGS (linhas de pesquisa, pin, link do grupo)
@@ -3447,7 +3455,7 @@ function subscribeAll(){
   subscriptions.push(f.onSnapshot(f.collection(window.db,'rede_members'),snap=>{
     state.members=snap.docs.map(d=>({...d.data(),id:d.id}));
     state.members.forEach(m=>{m.linhas=m.linhas||[];m.resultados=m.resultados||[];m.prazos=m.prazos||[];m.vinculos=m.vinculos||[];m.hub=!!m.hub;m.bolsista=!!m.bolsista});
-    if(currentView==='painel') renderPainel();
+    if(currentView==='painel') requestPainelRender();
     if(currentView==='rede') renderAll();
     if(currentView==='crono') renderCrono();
     updateAttentionBadge();
@@ -3468,7 +3476,7 @@ function subscribeAll(){
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_schedule'),f.orderBy('data','asc')),snap=>{
     state.schedule=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='crono') renderCrono();
-    if(currentView==='painel') renderPainel();
+    if(currentView==='painel') requestPainelRender();
     updateCronoBadge();
   }));
   // AGENDA PRIVADA — somente o próprio UID consulta seus compromissos
@@ -3498,7 +3506,7 @@ function subscribeAll(){
   // PUBLICAÇÕES
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_publicacoes'),f.orderBy('ts','desc')),snap=>{
     state.publicacoes=snap.docs.map(d=>({...d.data(),id:d.id}));
-    if(currentView==='pubs') renderPubs(); if(currentView==='lab') renderLab(); if(currentView==='painel') renderPainel(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
+    if(currentView==='pubs') renderPubs(); if(currentView==='lab') renderLab(); if(currentView==='painel') requestPainelRender(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
   }));
   // P13 · DOSSIÊS/CONJUNTOS: ACL explícita + "Toda a Rede" dinâmica.
   if(myId){
@@ -3540,7 +3548,7 @@ function subscribeAll(){
   subscriptions.push(f.onSnapshot(f.query(f.collection(window.db,'rede_activities'),f.orderBy('updatedAt','desc')),snap=>{
     state.activities=snap.docs.map(d=>({...d.data(),id:d.id}));
     if(currentView==='track') renderTrack();
-    if(currentView==='painel') renderPainel();
+    if(currentView==='painel') requestPainelRender();
     updateAttentionBadge();
     if($('#dossierOverlay')?.classList.contains('open')) renderDossier();
     if(currentView==='feed') renderFeedSide(); if($('#repoOverlay')?.classList.contains('open')) renderMemberRepository();
@@ -3590,7 +3598,7 @@ function subscribeAll(){
     subscriptions.push(f.onSnapshot(nq,snap=>{
       state.notifications=snap.docs.map(d=>({...d.data(),id:d.id})).sort((a,b)=>notifMillis(b)-notifMillis(a));
       renderNotificationUI();
-      if(currentView==='painel') renderPainel(); updateAttentionBadge();
+      if(currentView==='painel') requestPainelRender(); updateAttentionBadge();
       if(!notifInitial){snap.docChanges().filter(ch=>ch.type==='added').forEach(ch=>{const n={...ch.doc.data(),id:ch.doc.id};if(n.senderId!==myId)showDeviceNotification(n)})}
       notifInitial=false;
     },err=>console.warn('Notificações não disponíveis:',err)));
@@ -3929,6 +3937,7 @@ async function doLogout(){
   try{await FB().signOut(window.auth)}catch(e){console.error(e)}
 }
 async function handleAuthUser(user){
+  if(user && bootstrapped && authUser?.uid===user.uid && document.body.classList.contains('carbonautas-session-ready')) return;
   if(!user){
     authOpenPromise=null;authOpenUid='';
     clearSubscriptions();bootstrapped=false;authUser=null;authProfile=null;myId=null;myName='';isAdmin=false;
