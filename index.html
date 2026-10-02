@@ -14417,11 +14417,8 @@ window.CARBONAUTAS_ACCESS_COLLAPSE_BUILD='P137';
     return quick&&wrapToday()&&!!high&&!!home;
   }
   function boot(){
-    if(arrange())return;
-    const root=q('#viewPainel')||document.body;
-    const ob=new MutationObserver(()=>{if(arrange())ob.disconnect()});
-    ob.observe(root,{childList:true,subtree:true});
-    setTimeout(()=>{arrange();ob.disconnect()},6000);
+    arrange();
+    window.addEventListener('carbonautas-panel-rendered',arrange);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
@@ -14490,7 +14487,7 @@ function welcome(home){let x=q('#p194Welcome');if(!x){x=document.createElement('
 function shortcuts(cmd){let x=q('#p194Shortcuts');if(!x){x=document.createElement('section');x.id='p194Shortcuts';x.innerHTML='<button class="p194-nav" data-go="mural"><i>💬</i><span><b>Mural</b><small>Recados, pedidos e alertas.</small></span></button><button class="p194-nav" data-go="agenda"><i>🗓️</i><span><b>Agenda</b><small>Compromissos e reuniões.</small></span></button><button class="p194-nav" data-go="repo"><i>📁</i><span><b>Repositório</b><small>Arquivos e pastas da Rede.</small></span></button><button class="p194-nav" data-go="pessoas"><i>🧭</i><span><b>Pessoas</b><small>Rede e acompanhamento.</small></span></button>';x.onclick=e=>{const b=e.target.closest('[data-go]');if(!b)return;const k=b.dataset.go;if(k==='mural')nav(['mural']);else if(k==='agenda')nav(['agenda']);else if(k==='repo')nav(['repositorio','repositório']);else nav(['pessoas','rede','acompanhamento'])}}if(x.parentElement!==cmd)cmd.appendChild(x)}
 function footer(){const wrap=q('#viewPainel .dash-wrap');if(!wrap)return;let x=q('#p194FooterLinks');if(!x){x=document.createElement('div');x.id='p194FooterLinks';x.innerHTML='<button data-f="about">ⓘ Sobre o Carbonautas</button><button data-f="lab">🧪 Lab</button>';x.onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;if(b.dataset.f==='about'){if(typeof window.openCarbonautasAbout==='function')window.openCarbonautasAbout();else click('#p78AboutBtn')}else nav(['lab','laboratorio','laboratório'])}}if(x.parentElement!==wrap||wrap.lastElementChild!==x)wrap.appendChild(x)}
 function arrange(){const home=q('#viewPainel .p142-home-grid'),cmd=q('#viewPainel .p142-command-card');if(!home||!cmd)return false;welcome(home);const direct=qa(':scope > details.p142-accordion',cmd),quick=q('#p145QuickActions'),today=q('#p144TodayDetails');const attention=direct.find(x=>x!==quick&&x!==today&&/atencao agora|precisa de voce/.test(norm(x.textContent)))||direct.find(x=>x!==quick&&x!==today);if(attention){attention.classList.add('p194-action');relabel(attention,'Precisa de você','Prazos, correções e pendências que pedem ação.','⚡')}if(today){today.classList.add('p194-watch');relabel(today,'Só acompanhar','Novidades e mudanças que vale observar.','👀')}if(quick){quick.classList.add('p194-short');relabel(quick,'Atalhos','Check-in, produto, dossiê e backup.','⚙️')}const intro=q('.p142-command-intro',cmd);if(intro&&attention)intro.insertAdjacentElement('afterend',attention);if(attention&&today)attention.insertAdjacentElement('afterend',today);if(today&&quick)today.insertAdjacentElement('afterend',quick);let more=q('#p194MorePanel');if(!more){more=document.createElement('details');more.id='p194MorePanel';more.className='p142-accordion';more.innerHTML='<summary><span class="p142-icon">＋</span><span class="p142-label"><b>Mais do painel</b><small>Saúde dos projetos, produtos e fechamento mensal.</small></span><span class="p142-toggle"><span class="p142-show">Ver</span><span class="p142-hide">Fechar</span></span></summary><div class="p142-body" id="p194MoreBody"></div>'}const body=q('#p194MoreBody',more);qa(':scope > details.p142-accordion',cmd).filter(x=>x!==attention&&x!==today&&x!==quick&&x!==more).forEach(x=>body.appendChild(x));if(more.parentElement!==cmd)cmd.appendChild(more);shortcuts(cmd);footer();return true}
-function boot(){if(arrange())return;const root=q('#viewPainel')||document.body,ob=new MutationObserver(()=>{if(arrange())ob.disconnect()});ob.observe(root,{childList:true,subtree:true});setTimeout(()=>{arrange();ob.disconnect()},7000)}
+function boot(){arrange();window.addEventListener('carbonautas-panel-rendered',arrange)}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
