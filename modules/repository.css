@@ -106,24 +106,3 @@
  #viewConversas .private-thread{grid-template-columns:46px minmax(0,1fr) 62px!important;padding:9px 10px!important}
  #viewConversas .private-thread-side{min-width:62px!important;max-width:62px!important}
 }
-
-
-/* Arquivo Vivo: decisão simples sobre a pendência, sem observadores nem timers. */
-.repository-decision{
-  display:flex;align-items:center;justify-content:space-between;gap:14px;
-  margin:14px 0;padding:13px 14px;border:1px solid #d8e8e4;border-radius:14px;
-  background:linear-gradient(135deg,#f7fbfa,#eef8f5)
-}
-.repository-decision-label{font-size:12px;font-weight:800;color:#315c66;line-height:1.35}
-.repository-decision-actions{display:flex;gap:8px;flex:0 0 auto}
-.repository-file .repository-decision-done{
-  background:#e9f8f0;border-color:#bfe7d2;color:#176b47;font-weight:850
-}
-.repository-file .repository-decision-later{
-  background:#fff8e9;border-color:#f0ddae;color:#7a5918;font-weight:850
-}
-@media(max-width:600px){
-  .repository-decision{display:grid;gap:10px}
-  .repository-decision-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}
-  .repository-decision-actions button{width:100%;min-width:0}
-}
