@@ -3,7 +3,7 @@
    - injeta abertura direta do Arquivo Vivo no card inicial
    - mantém cache/offline
 */
-const CACHE='carbonautas-url-stable-20261001b';
+const CACHE='carbonautas-url-stable-20261002a';
 const OFFLINE_HTML='<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Carbonautas</title><body style="font-family:system-ui;padding:32px;background:#f6faf9;color:#183844"><h1>Carbonautas</h1><p>Sem conexao agora. Reconecte-se para carregar a versao mais recente.</p></body>';
 
 const URL_STABILITY_BOOT=`<script id="carbonautas-url-stability">(function(){
