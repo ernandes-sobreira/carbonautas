@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Carbonautas · limpar versão antiga</title>
+<style>
+body{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f6faf9;color:#163743;margin:0;min-height:100vh;display:grid;place-items:center;padding:24px}
+main{max-width:560px;background:#fff;border:1px solid #d9e7e4;border-radius:24px;padding:28px;box-shadow:0 18px 60px rgba(18,56,64,.12)}
+h1{margin:0 0 10px;font-size:26px}p{line-height:1.5;color:#5d747c}.ok{padding:14px;border-radius:14px;background:#edf9f4;color:#176b4a;font-weight:750}.err{padding:14px;border-radius:14px;background:#fff1f1;color:#9b2c2c;font-weight:750}
+code{font-size:12px}
+</style>
+</head>
+<body>
+<main>
+<h1>Carbonautas · manutenção</h1>
+<p>Esta página remove somente o service worker e caches do Carbonautas. Não apaga login, arquivos, dados do Firebase, preferências ou documentos.</p>
+<div id="status">Limpando a versão antiga…</div>
+</main>
+<script>
+(async()=>{
+  const box=document.getElementById('status');
+  try{
+    let regs=0,cachesRemoved=0;
+    if('serviceWorker' in navigator){
+      const all=await navigator.serviceWorker.getRegistrations();
+      for(const reg of all){try{if(await reg.unregister())regs++}catch(_e){}}
+    }
+    if('caches' in window){
+      const keys=await caches.keys();
+      for(const key of keys){
+        if(key.startsWith('carbonautas-')){try{if(await caches.delete(key))cachesRemoved++}catch(_e){}}
+      }
+    }
+    box.className='ok';
+    box.innerHTML='✓ Versão antiga removida.<br><br>Feche todas as abas/janelas do Carbonautas e abra o site novamente.<br><br><small>Service workers removidos: '+regs+' · caches removidos: '+cachesRemoved+'</small>';
+  }catch(e){
+    box.className='err';
+    box.textContent='Não consegui limpar completamente: '+(e&&e.message?e.message:String(e));
+  }
+})();
+</script>
+</body>
+</html>
