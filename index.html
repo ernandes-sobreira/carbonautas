@@ -7476,8 +7476,6 @@ function sparkleLogo(mode='wow'){
     setTimeout(()=>m.classList.remove('is-awakening','is-wow'),1700);
   });
 }
-setTimeout(()=>sparkleLogo('wake'),650);
-setInterval(()=>{if(document.visibilityState==='visible') sparkleLogo('wow')},28000);
 document.addEventListener('click',e=>{
   if(e.target.closest('.tab,.btn.primary,#sendBtn,#muralRecadoBtn,#addPubBtn,#addPhotoBtn,#newEventBtn,#myPrazoBtn,#privatePrazoBtn,#addActivityBtn')){
     sparkleLogo('wow');
@@ -7502,8 +7500,7 @@ window.CARBONAUTAS_BUILD='handoff-20260922b';
 if('serviceWorker' in navigator){
   window.addEventListener('load',async()=>{
     try{
-      const reg=await navigator.serviceWorker.register('./sw.js?v=handoff-20260922b',{updateViaCache:'none'});
-      await reg.update();
+      await navigator.serviceWorker.register('./sw.js?v=handoff-20260922b',{updateViaCache:'none'});
     }catch(e){console.warn('SW update',e)}
   });
 }
@@ -9016,8 +9013,6 @@ function intercept(e){const t=e.target?.closest?.('#notifyBtn');if(!t)return;e.p
 document.addEventListener('pointerdown',intercept,true);
 document.addEventListener('click',intercept,true);
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
-new MutationObserver(bind).observe(document.documentElement,{subtree:true,childList:true});
-setInterval(()=>{const p=document.getElementById('notifyPanelP39');if(p&&p.style.display==='flex')renderPanel()},1200);
 window.openNotificationsP39=openPanel;
 console.info('Carbonautas notifications',VERSION,'carregado');
 })();
@@ -9700,7 +9695,6 @@ function boot(){
     vm.dataset.p127Observed='1';
     new MutationObserver(scheduleSync).observe(vm,{childList:true,subtree:false});
   }
-  setInterval(syncTabs,1200);
   window.CARBONAUTAS_TABS_BUILD=BUILD;
   console.info('Carbonautas P127 · abas Geral / Panelinha / Privadas sincronizadas');
 }
