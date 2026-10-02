@@ -8,9 +8,9 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  await page.setContent('<main id="repoGeneralPanel"><div id="repoPackageList">LEGACY PACKAGES</div><div class="repo-filters-row"><select id="pubCategoria"><option value="">Todas</option></select><select id="pubPessoa"><option value="">Todas</option></select></div><label id="legacyMineLabel"><input id="pubMine" type="checkbox">Só as minhas</label><div id="pubList"></div></main><textarea id="privateInput"></textarea><div id="filePreviewOverlay" style="display:none"><div class="modal"><button id="closePreview">Fechar</button><a id="filePreviewDownload">Baixar</a><div id="filePreviewBody"></div></div></div>');
  await page.addStyleTag({path:'modules/repository.css'});
  await page.evaluate(()=>{
- window.calls={downloads:0,previews:0,messages:0};
+ window.calls={downloads:0,previews:0,messages:0,done:0,painel:0};
  const pubs=[
-  {id:'f0',tipo:'arquivo',memberId:'dia',memberNome:'Daiana',categoria:'projetos_relatorios',fileName:'Projeto_Daiana.docx',titulo:'Projeto de doutorado interativo',url:'https://example.org/f0',ts:'2026-09-02T12:00:00Z',onlineEditVersion:2,repositoryTurnMemberId:'prof',onlineEditHistory:[{action:'upload',version:2,byMemberId:'prof',byName:'Ernandes Sobreira Oliveira Junior',savedAt:'2026-09-28T11:40:00Z'}]},
+  {id:'f0',tipo:'arquivo',memberId:'dia',memberNome:'Daiana',categoria:'projetos_relatorios',fileName:'Projeto_Daiana.docx',titulo:'Projeto de doutorado interativo',url:'https://example.org/f0',ts:'2026-09-02T12:00:00Z',onlineEditVersion:2,repositoryTurnMemberId:'prof',reviewFlow:true,reviewThreadId:'thread-f0',reviewBaseTitle:'Projeto de doutorado interativo',reviewVersion:2,onlineEditHistory:[{action:'upload',version:2,byMemberId:'prof',byName:'Ernandes Sobreira Oliveira Junior',savedAt:'2026-09-28T11:40:00Z'}]},
   {id:'l1',tipo:'link',memberId:'prof',memberNome:'Ernandes Sobreira Oliveira Junior',categoria:'jogos_plataformas',titulo:'Plataforma de justiça climática em MT',url:'https://example.org/plataforma',ts:'2026-09-27T12:00:00Z'},
   {id:'f2',tipo:'arquivo',memberId:'bas',memberNome:'Basirat Abiodun Ariyibi',categoria:'projetos_relatorios',fileName:'Impactos_pesca.pdf',titulo:'Impactos socioeconômicos das mudanças climáticas na pesca em Cáceres',url:'https://example.org/f2',ts:'2026-09-26T12:00:00Z',onlineEditVersion:1,repositoryTurnMemberId:'dia',onlineEditHistory:[]},
   {id:'l3',tipo:'link',memberId:'prof',memberNome:'Ernandes Sobreira Oliveira Junior',categoria:'video',titulo:'Vídeo sobre a bibliometria',url:'https://example.org/video',ts:'2026-09-19T12:00:00Z'}
@@ -18,6 +18,9 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  window.testPubs=pubs;
  window.CarbonautasApp={state:{publicacoes:pubs,members:[{id:'dia',nome:'Daiana'},{id:'prof',nome:'Ernandes Sobreira Oliveira Junior',nivel:'coord'},{id:'bas',nome:'Basirat Abiodun Ariyibi'}],privateThreads:[]},memberId:'prof',isAdmin:true};
  window.toast=m=>window.lastToast=m;
+ window.p56BuildItems=()=>({open:[{key:'review:thread-f0',kind:'CORREÇÃO · REPOSITÓRIO',who:'Daiana',what:'Projeto de doutorado interativo',detail:'Devolver correção · versão 2.',date:''}],done:[]});
+ window.p56AckItem=key=>{window.calls.done++;window.lastAck=key};
+ window.renderPainel=()=>{window.calls.painel++};
  // Reproduces the production regression: files used the new card, links/videos kept the legacy card.
  window.renderPubs=()=>{document.querySelector('#pubList').innerHTML=pubs.map(p=>p.tipo==='arquivo'?window.CarbonautasRepository.cardHTML(p):`<div class="pub-row legacy-row"><div class="pub-t">${p.titulo}</div><div class="pub-author">${p.memberNome}</div></div>`).join('');document.dispatchEvent(new CustomEvent('carbonautas:repository-rendered'))};
  window.startPrivateConversation=async id=>{window.calls.messages++;window.CarbonautasApp.state.privateThreads=[{id:['prof',id].sort().join('__')}]};window.switchView=v=>document.body.dataset.view=v;window.openPrivateThread=id=>window.openedThread=id;
@@ -63,6 +66,31 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
  assert.equal(await page.locator('#repositoryStage .repository-history').count(),1);
  assert.equal(await page.locator('#repositoryStage .repository-file').count(),1);
  assert.match(await page.locator('#repositoryStage .repository-detail-last').textContent(),/Ernandes Sobreira Oliveira Junior/);
+ // Pending review offers simple decisions inside Arquivo Vivo itself.
+ assert.equal(await page.locator('#repositoryStage [data-file-action="done"]').count(),1);
+ assert.equal(await page.locator('#repositoryStage [data-file-action="later"]').count(),1);
+ assert.match(await page.locator('#repositoryStage .repository-decision').textContent(),/Já fiz/);
+ assert.match(await page.locator('#repositoryStage .repository-decision').textContent(),/Decido depois/);
+ // A renderização assíncrona do Repositório não pode fazer os botões piscarem e sumirem.
+ await page.evaluate(()=>document.dispatchEvent(new CustomEvent('carbonautas:repository-rendered')));
+ await page.waitForTimeout(120);
+ assert.equal(await page.locator('#repositoryStage [data-file-action="done"]:visible').count(),1);
+ assert.equal(await page.locator('#repositoryStage [data-file-action="later"]:visible').count(),1);
+ await page.evaluate(()=>document.dispatchEvent(new CustomEvent('carbonautas:repository-rendered')));
+ await page.waitForTimeout(120);
+ assert.equal(await page.locator('#repositoryStage [data-file-action="done"]:visible').count(),1);
+ assert.equal(await page.locator('#repositoryStage [data-file-action="later"]:visible').count(),1);
+ await page.locator('#repositoryStage [data-file-action="done"]').click();
+ assert.equal(await page.evaluate(()=>calls.done),1);
+ assert.equal(await page.evaluate(()=>lastAck),'review:thread-f0');
+ assert.equal(await page.locator('#repositoryDeck').evaluate(e=>e.open),false);
+ await page.locator('[data-file-id="f0"] [data-file-action="open"]').click();
+ await page.locator('#repositoryStage [data-file-action="later"]').click();
+ assert.equal(await page.locator('#repositoryDeck').evaluate(e=>e.open),false);
+ assert.match(await page.evaluate(()=>lastToast||''),/continua pendente|fica para depois/i);
+ assert.equal(await page.evaluate(()=>calls.painel),1);
+ assert.notEqual(await page.evaluate(()=>CarbonautasRepository.homeGoneKeyForReview(testPubs[0])), '');
+ await page.locator('[data-file-id="f0"] [data-file-action="open"]').click();
  await page.locator('#repositoryStage [data-file-action="download"]').click();assert.equal(await page.evaluate(()=>calls.downloads),1);
  await page.locator('#repositoryStage [data-file-action="preview"]').click();assert.equal(await page.locator('#repositoryPreview').evaluate(e=>e.matches(':modal')),true);
  const top=await page.locator('#closePreview').evaluate(e=>{const r=e.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===e});assert.equal(top,true);
