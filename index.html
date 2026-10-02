@@ -3408,6 +3408,7 @@ async function bootstrap(){
     bootstrapped=true;
     refreshIdentityUI();
     document.body.classList.add('carbonautas-session-ready');
+    window.dispatchEvent(new Event('carbonautas-session-ready'));
     $('#authGate').classList.add('off');
     await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
     $('#loading').classList.add('off');
@@ -11474,12 +11475,14 @@ function noteDone(key,meta){entries=mergeEntries(entries,{[key]:{status:'done',c
 function wrapActions(){if(window.p56AckItem&&!window.p56AckItem.__p85){const old=window.p56AckItem,fn=function(key){const r=old.apply(this,arguments);setTimeout(()=>{const m=loadJSON(ackKey())[key]||{key,doneAt:now()};noteDone(key,m)},20);return r};fn.__p85=true;window.p56AckItem=fn}if(window.p56UndoAck&&!window.p56UndoAck.__p85){const old=window.p56UndoAck,fn=function(key){const r=old.apply(this,arguments);noteOpen(key);return r};fn.__p85=true;window.p56UndoAck=fn}}
 function reconcileLocal(){const local=localAsEntries();let next=entries;for(const [k,v] of Object.entries(local)){const cur=next[k];if(!cur||v.changedAt>cur.changedAt)next=mergeEntries(next,{[k]:v})}if(!same(next,entries)){entries=next;writeCloud()}applyEntriesToLocal(entries)}
 async function startSync(){if(started||!window.db||!F()||!window.auth?.currentUser)return;started=true;try{const p=await getProfile();if(!p?.memberId){started=false;return}memberRef=F().doc(window.db,'rede_members',p.memberId);const snap=await F().getDoc(memberRef);if(!snap.exists()){started=false;return}const remote=snap.data()?.[CLOUD_FIELD]?.entries||{};entries=mergeEntries(remote,localAsEntries());applyEntriesToLocal(entries);await writeCloud();unsub?.();unsub=F().onSnapshot(memberRef,s=>{if(!s.exists())return;const r=s.data()?.[CLOUD_FIELD]?.entries||{};const merged=mergeEntries(r,entries);entries=merged;applyEntriesToLocal(entries);if(!same(trimEntries(r),entries))setTimeout(writeCloud,100)},e=>console.warn('P85 painel cloud read',e));wrapActions()}catch(e){started=false;console.warn('P85 iniciar sync',e)}}
-function waitSync(){if(window.db&&F()&&window.auth?.currentUser)startSync();else setTimeout(waitSync,450)}
-async function checkUpdate(){if(!('serviceWorker' in navigator))return;try{const reg=await navigator.serviceWorker.getRegistration('./');if(!reg)return;await reg.update();if(reg.waiting)reg.waiting.postMessage('SKIP_WAITING')}catch(e){console.warn('P85 update check',e)}}
-if('serviceWorker' in navigator){let reloading=false;const hadController=!!navigator.serviceWorker.controller;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading||!hadController)return;reloading=true;console.info('Carbonautas: nova versão será usada na próxima abertura')});window.addEventListener('focus',()=>{checkUpdate();startSync();polish()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){checkUpdate();startSync();polish()}});setTimeout(checkUpdate,1000)}
-const target=q('#viewPainel')||document.body;new MutationObserver(m=>{if(m.some(x=>x.addedNodes?.length||x.removedNodes?.length))schedule()}).observe(target,{childList:true,subtree:true});
-canonicalize();ensureStyle();polish();waitSync();setInterval(()=>{wrapActions();reconcileLocal()},2600);
-window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P85 PC/app unificados e estáveis');
+function waitSync(){
+  if(window.db&&F()&&window.auth?.currentUser){startSync();return}
+  window.addEventListener('carbonautas-session-ready',()=>startSync(),{once:true});
+}
+/* P85 estabilidade: sem atualização ativa do service worker, sem observer do Painel e sem polling.
+   O núcleo do app é responsável pelo ciclo da sessão; P85 apenas aplica sua camada visual e sincroniza quando a sessão fica pronta. */
+canonicalize();ensureStyle();polish();waitSync();wrapActions();
+window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P85 estável: sem observer/polling/SW update concorrente');
 })();
 
 </script>
