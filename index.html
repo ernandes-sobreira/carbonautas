@@ -3406,7 +3406,7 @@ async function bootstrap(){
     ensurePersonalRepositoryRoot().catch(e=>console.warn('Repositório privado indisponível:',e));
     await subscribeAll();
     try{await window.CarbonautasPreparePanelState?.()}catch(e){console.warn('Estado inicial do Painel indisponível:',e)}
-    if(currentView==='painel')renderPainel();
+    if(currentView==='painel'){lastPainelDataSignature=painelDataSignature();renderPainel();}
     bootstrapped=true;
     refreshIdentityUI();
     window.dispatchEvent(new Event('carbonautas-session-ready'));
@@ -3433,12 +3433,32 @@ async function ensurePersonalRepositoryRoot(){
 
 function clearSubscriptions(){subscriptions.forEach(fn=>{try{fn()}catch(e){}});subscriptions=[];if(privateMessageUnsub){try{privateMessageUnsub()}catch(e){}privateMessageUnsub=null;}privateMessagesState=[];privateActiveThreadId=null;}
 
-let painelRenderFrame=0,painelHydrating=false;
-function requestPainelRender(){
+let painelRenderFrame=0,painelHydrating=false,lastPainelDataSignature='';
+function painelDataSignature(){
+  const ms=(state.members||[]).map(m=>[
+    m.id||'',m.nome||'',m.status||'',m.nivel||'',!!m.bolsista,m.bolsaInicio||'',m.bolsaFim||'',m.perguntaCientifica||m.pergunta||'',m.intervencao||''
+  ]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+  const sc=(state.schedule||[]).map(x=>[x.id||'',x.data||'',x.titulo||x.title||'',x.feito||false]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+  const ps=(state.publicacoes||[]).map(p=>[
+    p.id||'',p.memberId||'',p.titulo||'',p.fileName||'',p.reviewFlow||false,p.reviewStatus||'',p.reviewVersion||0,p.reviewNextRecipientId||'',p.url||''
+  ]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+  const ac=(state.activities||[]).map(a=>[
+    a.id||'',a.ownerId||'',a.title||'',a.type||'',a.status||'',Number(a.progress||0),a.dueDate||'',a.linkedPublicationId||a.publicationId||''
+  ]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+  const ns=(state.notifications||[]).map(n=>[n.id||'',!!n.read,n.kind||'',n.sourceType||'',n.sourceId||'',n.title||'',n.message||'']).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
+  return JSON.stringify([ms,sc,ps,ac,ns]);
+}
+function requestPainelRender(force=false){
   if(painelHydrating||currentView!=='painel'||painelRenderFrame)return;
+  const sig=painelDataSignature();
+  if(!force&&sig===lastPainelDataSignature)return;
   painelRenderFrame=requestAnimationFrame(()=>{
     painelRenderFrame=0;
-    if(!painelHydrating&&currentView==='painel')renderPainel();
+    if(painelHydrating||currentView!=='painel')return;
+    const next=painelDataSignature();
+    if(!force&&next===lastPainelDataSignature)return;
+    lastPainelDataSignature=next;
+    renderPainel();
   });
 }
 window.requestCarbonautasPanelRender=requestPainelRender;
@@ -3455,7 +3475,7 @@ function subscribeAll(){
     if(pendingInitial.size)return;
     initialFinished=true;
     painelHydrating=false;
-    if(currentView==='painel')renderPainel();
+    if(currentView==='painel'){lastPainelDataSignature=painelDataSignature();renderPainel();}
     requestAnimationFrame(()=>requestAnimationFrame(()=>resolveInitial()));
   };
   const failInitial=(key,err,label)=>{
@@ -4015,7 +4035,19 @@ async function handleAuthUser(user){
   try{return await authOpenPromise}
   finally{if(authOpenUid===user.uid){authOpenPromise=null;authOpenUid=''}}
 }
-function startAuth(){FB().onAuthStateChanged(window.auth,user=>{handleAuthUser(user).catch(e=>{console.error('Auth observer:',e);showLogin('Não foi possível abrir a sessão. Tente novamente.')})})}
+async function startAuth(){
+  if(window.__CARBONAUTAS_AUTH_OBSERVER_STARTED)return;
+  window.__CARBONAUTAS_AUTH_OBSERVER_STARTED=true;
+  try{if(typeof window.auth?.authStateReady==='function')await window.auth.authStateReady()}catch(e){console.warn('Auth state ready:',e)}
+  let lastUid=window.auth?.currentUser?.uid||'';
+  await handleAuthUser(window.auth?.currentUser||null);
+  FB().onAuthStateChanged(window.auth,user=>{
+    const uid=user?.uid||'';
+    if(uid===lastUid)return;
+    lastUid=uid;
+    handleAuthUser(user).catch(e=>{console.error('Auth observer:',e);showLogin('Não foi possível abrir a sessão. Tente novamente.')});
+  });
+}
 
 function refreshIdentityUI(){
   const chip=$('#idChip'),av=$('#idAv'),nm=$('#idName'),me=resolveCurrentMember();
@@ -11671,7 +11703,7 @@ function signature(){
   ]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
   const members=(s.members||[]).map(m=>[
     String(m.id||''),String(m.nome||''),String(m.status||''),String(m.nivel||''),!!m.bolsista,String(m.bolsaFim||''),String(m.bolsaInicio||''),
-    String(m.perguntaCientifica||m.pergunta||''),String(m.intervencao||''),ms(m.updatedAt)
+    String(m.perguntaCientifica||m.pergunta||''),String(m.intervencao||'')
   ]).sort((a,b)=>String(a[0]).localeCompare(String(b[0])));
   return JSON.stringify([acts,pubs,members,ackRaw(),followRaw(),new Date().toISOString().slice(0,10)]);
 }
@@ -13371,7 +13403,7 @@ function loadGameIfOpen(v){
 /* ---------- ganchos ---------- */
 let basePainel=null,baseDetail=null,baseSwitch=null;
 function hook(){
-  if(!basePainel&&typeof window.renderPainel==='function'){basePainel=window.renderPainel;const w=function(){const r=basePainel.apply(this,arguments);setTimeout(renderPresence,0);return r};try{renderPainel=w}catch(_e){}window.renderPainel=w}
+  if(!basePainel&&typeof window.renderPainel==='function'){basePainel=window.renderPainel}
   if(!baseDetail&&typeof window.renderDetail==='function'){baseDetail=window.renderDetail;const w=function(){const r=baseDetail.apply(this,arguments);setTimeout(()=>renderTimeline(false),0);return r};try{renderDetail=w}catch(_e){}window.renderDetail=w}
   if(!baseSwitch&&typeof window.switchView==='function'){baseSwitch=window.switchView;const w=function(v){const r=baseSwitch.apply(this,arguments);loadGameIfOpen(v);return r};try{switchView=w}catch(_e){}window.switchView=w}
 }
