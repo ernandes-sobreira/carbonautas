@@ -39,35 +39,6 @@ function lastSendInfo(p){
 }
 function formatActivity(ms){if(!ms)return'';const d=new Date(ms);return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})+' · '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});}
 function displayKey(p){return p?.reviewFlow?'review:'+(p.reviewThreadId||p.reviewBaseId||p.id):'id:'+p.id}
-function reviewAttentionKey(p){
- if(!p?.reviewFlow)return'';
- let tid='';
- try{tid=(typeof root.repoReviewThreadId==='function'&&root.repoReviewThreadId(p))||p.reviewThreadId||p.reviewBaseId||p.id}catch(_e){tid=p.reviewThreadId||p.reviewBaseId||p.id}
- return tid?`review:${tid}`:'';
-}
-function reviewAttentionItem(p){
- const key=reviewAttentionKey(p);if(!key||typeof root.p56BuildItems!=='function')return null;
- try{return root.p56BuildItems()?.open?.find?.(x=>String(x.key)===String(key))||null}catch(_e){return null}
-}
-function homeNorm(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim()}
-function homeGoneKeyForReview(p){
- const it=reviewAttentionItem(p);if(!it)return'';
- const tag=String(it.kind||'').split('·')[0].trim();
- let date='';try{date=it.date&&typeof root.fmtDate==='function'?root.fmtDate(it.date):String(it.date||'')}catch(_e){date=String(it.date||'')}
- const meta=[tag,it.who,date].filter(Boolean).join(' · ');
- return homeNorm([it.what,meta,it.detail].join('|'));
-}
-function markReviewDone(p){
- const key=reviewAttentionKey(p);if(!key)return false;
- if(typeof root.p56AckItem!=='function'){root.toast?.('Não foi possível marcar esta pendência agora.');return false}
- root.p56AckItem(key);closeDeck();root.toast?.('✓ Já feito. Esta pendência saiu da sua caixa.');return true
-}
-function postponeReview(p){
- const key=homeGoneKeyForReview(p);if(!key){root.toast?.('Não consegui guardar esta pendência para depois.');return false}
- try{const gone=new Set(JSON.parse(sessionStorage.getItem('p195Gone')||'[]'));gone.add(key);sessionStorage.setItem('p195Gone',JSON.stringify([...gone]))}catch(_e){}
- closeDeck();try{root.renderPainel?.()}catch(_e){}
- root.toast?.('⏰ Tudo bem. Ela continua pendente e fica para depois.');return true
-}
 function displayPublications(){
  const map=new Map();
  for(const p of app().state.publicacoes||[]){
@@ -89,9 +60,7 @@ function cardHTML(p){
 function detailCardHTML(p){
  const f=files(),can=f.canExchange(p,actor()),turn=turnId(p),targets=can?f.recipientIds(p,app().memberId):[],last=lastSendInfo(p),when=formatActivity(last.ms),owner=p.memberNome||memberName(p.memberId);
  const history=f.historyEvents(p).map(e=>`<li><time>${esc(f.formatWhen(e.when))}</time><span><b>${esc(e.byName||memberName(e.byMemberId))}</b> ${esc(f.actionText(e))}</span><small>v${esc(e.version)}</small></li>`).join('');
- const canDecide=!!reviewAttentionItem(p);
- const decision=canDecide?'<div class="repository-decision"><span class="repository-decision-label">O que você quer fazer com esta pendência?</span><div class="repository-decision-actions"><button type="button" class="repository-decision-done" data-file-action="done">✓ Já fiz</button><button type="button" class="repository-decision-later" data-file-action="later">⏰ Decido depois</button></div></div>':'';
- return `<article class="repository-file" data-file-id="${esc(p.id)}"><header><div><h3>${esc(p.titulo||f.publicationTitle(p))}</h3><p>Responsável: ${esc(owner)} · ${esc(categoryLabel(p))} · v${f.currentVersion(p)}</p><p class="repository-detail-last"><b>Último envio:</b> ${esc(last.name||owner)}${when?' · '+esc(when):''}</p></div></header><div class="repository-actions"><button type="button" data-file-action="preview">👁 Visualizar</button><button type="button" data-file-action="download">⬇ Baixar</button>${can&&targets.length?'<button type="button" data-file-action="return" class="primary">↩ Devolver arquivo</button>':''}${targets.length?'<button type="button" data-file-action="message">💬 Mensagem</button>':''}</div>${decision}<details class="repository-history" open><summary>Histórico da troca</summary><ol>${history}</ol></details>${turn?`<p class="repository-turn">${turn===app().memberId?'Agora é sua vez':`Agora é a vez de ${esc(memberName(turn))}`}</p>`:''}</article>`;
+ return `<article class="repository-file" data-file-id="${esc(p.id)}"><header><div><h3>${esc(p.titulo||f.publicationTitle(p))}</h3><p>Responsável: ${esc(owner)} · ${esc(categoryLabel(p))} · v${f.currentVersion(p)}</p><p class="repository-detail-last"><b>Último envio:</b> ${esc(last.name||owner)}${when?' · '+esc(when):''}</p></div></header><div class="repository-actions"><button type="button" data-file-action="preview">👁 Visualizar</button><button type="button" data-file-action="download">⬇ Baixar</button>${can&&targets.length?'<button type="button" data-file-action="return" class="primary">↩ Devolver arquivo</button>':''}${targets.length?'<button type="button" data-file-action="message">💬 Mensagem</button>':''}</div><details class="repository-history" open><summary>Histórico da troca</summary><ol>${history}</ol></details>${turn?`<p class="repository-turn">${turn===app().memberId?'Agora é sua vez':`Agora é a vez de ${esc(memberName(turn))}`}</p>`:''}</article>`;
 }
 function dialog(id,html){const el=document.createElement('dialog');el.id=id;el.className='repository-dialog';el.innerHTML=html;document.body.append(el);return el}
 function closeDeck(){const d=$('#repositoryDeck');if(d?.open)d.close();deckIds=[];lastFocus?.focus?.()}
@@ -168,7 +137,7 @@ async function submitReturn(e){e.preventDefault();if(busy)return;const form=e.cu
 async function onAction(e){
  const button=e.target.closest('[data-file-action]');if(!button)return;const card=button.closest('[data-publication-id],[data-file-id]'),id=card?.dataset.publicationId||card?.dataset.fileId,action=button.dataset.fileAction,key=id+':'+action;if(!id||locks.has(key))return;
  e.preventDefault();e.stopPropagation();locks.add(key);button.disabled=true;
- try{if(action==='open')openDeck(id);else if(action==='link')openPublication(id);else if(action==='lab')openPublication(id);else if(action==='download')await download(id);else if(action==='preview')await preview(id);else if(action==='message')await openMessage(id);else if(action==='return')await openReturn(id);else if(action==='done')markReviewDone(publicationById(id));else if(action==='later')postponeReview(publicationById(id));else if(action==='delete'&&typeof root.deletePublicacao==='function')await root.deletePublicacao(id)}catch(err){console.error('Repository',err);root.toast(err.message||'Não foi possível concluir.')}finally{locks.delete(key);if(button.isConnected)button.disabled=false}
+ try{if(action==='open')openDeck(id);else if(action==='link')openPublication(id);else if(action==='lab')openPublication(id);else if(action==='download')await download(id);else if(action==='preview')await preview(id);else if(action==='message')await openMessage(id);else if(action==='return')await openReturn(id);else if(action==='delete'&&typeof root.deletePublicacao==='function')await root.deletePublicacao(id)}catch(err){console.error('Repository',err);root.toast(err.message||'Não foi possível concluir.')}finally{locks.delete(key);if(button.isConnected)button.disabled=false}
 }
 function buildOrganizer(list){
  const old=$('#repositoryOrganizer');old?.remove();const toolbar=document.createElement('div');toolbar.id='repositoryOrganizer';
@@ -190,6 +159,6 @@ function boot(){
  document.addEventListener('carbonautas:repository-rendered',()=>{syncAdminPackages(false);renderUnifiedList();if($('#repositoryDeck')?.open)showDeck()});
  root.addEventListener?.('firebase-ready',installCoordinatorPackageAccess);installCoordinatorPackageAccess();root.renderPubs?.();setTimeout(()=>{renderUnifiedList()},0);
 }
-root.CarbonautasRepository={cardHTML,detailCardHTML,openDeck,closeDeck,openMessage,preview,openReturn,refresh,organize,renderUnifiedList,lastSendInfo,installCoordinatorPackageAccess,reviewAttentionKey,homeGoneKeyForReview,markReviewDone,postponeReview};
+root.CarbonautasRepository={cardHTML,detailCardHTML,openDeck,closeDeck,openMessage,preview,openReturn,refresh,organize,renderUnifiedList,lastSendInfo,installCoordinatorPackageAccess};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })(globalThis);
