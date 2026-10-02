@@ -1,60 +1,58 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
 
 function worker(){
-  const listeners={},deleted=[],stores=new Map();let skipCount=0;
+  const listeners={},deleted=[];let skipCount=0,claimCount=0;
   const context={
     self:{
       location:{origin:'https://example.org'},
       addEventListener:(n,fn)=>listeners[n]=fn,
       skipWaiting:()=>{skipCount++},
-      clients:{claim:async()=>{}}
+      clients:{claim:async()=>{claimCount++}}
     },
     URL,Response,
     caches:{
-      keys:async()=>['carbonautas-p220-20260922','unrelated'],
-      delete:async k=>deleted.push(k),
-      open:async()=>({put:async(k,v)=>stores.set(k,v),match:async k=>stores.get(k)})
-    },
-    fetch:async()=>new Response('fresh')
+      keys:async()=>['carbonautas-p220-20260922','carbonautas-url-stable-20261001b','unrelated'],
+      delete:async k=>{deleted.push(k);return true}
+    }
   };
   vm.runInNewContext(fs.readFileSync('sw.js','utf8'),context);
-  return{listeners,deleted,stores,context,get skipCount(){return skipCount}}
+  return{listeners,deleted,get skipCount(){return skipCount},get claimCount(){return claimCount}}
 }
 
-test('SW activates new cache without deleting unrelated applications',async()=>{
+test('SW removes only Carbonautas caches on activation',async()=>{
   const h=worker();let p;h.listeners.activate({waitUntil:v=>p=v});await p;
-  assert.deepEqual(h.deleted,['carbonautas-p220-20260922']);
+  assert.deepEqual(h.deleted,['carbonautas-p220-20260922','carbonautas-url-stable-20261001b']);
 });
 
-test('SW update waits for next opening instead of forcing controller reload',()=>{
+test('SW update waits for next opening and never claims current clients',async()=>{
   const h=worker();
   h.listeners.install?.({});
   assert.equal(h.skipCount,0,'install must not call skipWaiting');
-  assert.equal(h.listeners.message,undefined,'legacy SKIP_WAITING message must be ignored');
+  assert.equal(h.claimCount,0,'activate must not claim the current page');
+  assert.equal(h.listeners.message,undefined,'legacy SKIP_WAITING message must be absent');
 });
 
-test('SW injects URL stability guard before legacy P85/P86/P87 scripts',async()=>{
+test('SW is passive and never intercepts navigation or assets',()=>{
   const h=worker();
-  h.context.fetch=async()=>new Response('<!doctype html><html><head><title>x</title></head><body>ok</body></html>',{headers:{'Content-Type':'text/html'}});
-  const request={method:'GET',url:'https://example.org/carbonautas/?build=P87&apprefresh=123',mode:'navigate'};
-  let p;h.listeners.fetch({request,respondWith:v=>p=v});
-  const html=await(await p).text();
-  assert.match(html,/id="carbonautas-url-stability"/);
-  assert.match(html,/searchParams\.delete\(k\)/);
-  assert.match(html,/history\.replaceState=function/);
+  assert.equal(typeof h.listeners.fetch,'function');
+  let intercepted=0;
+  for(const request of [
+    {method:'GET',url:'https://example.org/carbonautas/',mode:'navigate'},
+    {method:'GET',url:'https://example.org/modules/file-handoff.js',mode:'cors'},
+    {method:'GET',url:'https://firebasestorage.googleapis.com/file',mode:'cors'}
+  ]){
+    h.listeners.fetch({request,respondWith:()=>{intercepted++}});
+  }
+  assert.equal(intercepted,0,'passive worker must let the browser use the network directly');
 });
 
-test('SW network-first JS update falls back only during network failure',async()=>{
-  const h=worker(),request={method:'GET',url:'https://example.org/modules/file-handoff.js',mode:'cors'};let p;
-  h.listeners.fetch({request,respondWith:v=>p=v});assert.equal(await(await p).text(),'fresh');
-  h.context.fetch=async()=>{throw Error('offline')};
-  h.listeners.fetch({request,respondWith:v=>p=v});assert.equal(await(await p).text(),'fresh');
-});
-
-test('SW does not cache Firebase or private API requests',()=>{
-  const h=worker();
-  for(const request of [{method:'GET',url:'https://firebasestorage.googleapis.com/file'},{method:'POST',url:'https://example.org/api'}])
-    h.listeners.fetch({request,respondWith:()=>assert.fail('must bypass cache')});
+test('SW contains no HTML injection, cache serving or forced lifecycle code',()=>{
+  const src=fs.readFileSync('sw.js','utf8');
+  assert.doesNotMatch(src,/respondWith\s*\(/);
+  assert.doesNotMatch(src,/caches\.open\s*\(/);
+  assert.doesNotMatch(src,/clients\.claim\s*\(/);
+  assert.doesNotMatch(src,/skipWaiting\s*\(/);
+  assert.doesNotMatch(src,/injectBoot|networkFirstHtml|DIRECT_FILE_BOOT|URL_STABILITY_BOOT/);
 });
 
 test('index never writes legacy build or apprefresh parameters into the browser URL',()=>{
