@@ -67,7 +67,7 @@ async function stableHtmlResponse(res){
   return new Response(injectBoot(text),{status:res.status,statusText:res.statusText,headers});
 }
 
-self.addEventListener('install',event=>{event.waitUntil(Promise.resolve())});
+self.addEventListener('install',event=>{event.waitUntil(self.skipWaiting())});
 self.addEventListener('activate',event=>{event.waitUntil((async()=>{const keys=await caches.keys();await Promise.all(keys.filter(k=>k.startsWith('carbonautas-')&&k!==CACHE).map(k=>caches.delete(k)));await self.clients.claim();})())});
 
 async function networkFirstHtml(req){
