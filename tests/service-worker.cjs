@@ -62,3 +62,12 @@ test('index never writes legacy build or apprefresh parameters into the browser 
   assert.match(html,/searchParams\.delete\('build'\)/,
     'legacy cleanup should remove stale build values if an old bookmarked URL contains one');
 });
+
+
+test('index migrates only the Carbonautas SW and never forces reload',()=>{
+  const html=fs.readFileSync('index.html','utf8');
+  assert.match(html,/carbonautas_sw_passive_20261002/);
+  assert.match(html,/reg\.scope!==carbonautasScope/);
+  assert.match(html,/startsWith\('carbonautas-'\)/);
+  assert.doesNotMatch(html,/controllerchange[^\n]*reload|location\.reload\s*\(|location\.replace\s*\(/);
+});
