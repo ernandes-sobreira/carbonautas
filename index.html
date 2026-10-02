@@ -10894,7 +10894,7 @@ function install(){
   ensureCss();if(!baseOpenActivity&&typeof window.p67OpenActivity==='function'&&window.p67OpenActivity!==p69OpenActivity)baseOpenActivity=window.p67OpenActivity;if(!baseOpenItem&&typeof window.p56OpenItem==='function'&&window.p56OpenItem!==p69OpenItem)baseOpenItem=window.p56OpenItem;
   window.p69OpenActivity=p69OpenActivity;window.p67OpenActivity=p69OpenActivity;window.p56OpenItem=p69OpenItem;scheduleCards()
 }
-function boot(){install();const root=document.getElementById('dashAttention')||document.body;new MutationObserver(scheduleCards).observe(root,{childList:true,subtree:true});setTimeout(install,1200);setTimeout(install,3200);setTimeout(install,5200);console.info('Carbonautas',VERSION,BUILD,'Painel agora oferece uma próxima ação real')}
+function boot(){install();window.addEventListener('carbonautas-panel-rendered',scheduleCards);window.addEventListener('carbonautas-session-ready',install,{once:true});console.info('Carbonautas',VERSION,BUILD,'Painel por evento único')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 
@@ -10975,7 +10975,7 @@ function install(){
   if(!baseOpenActivity&&typeof window.p69OpenActivity==='function'&&window.p69OpenActivity!==p70OpenActivity)baseOpenActivity=window.p69OpenActivity;
   window.p70OpenActivity=p70OpenActivity;window.p69OpenActivity=p70OpenActivity;window.p67OpenActivity=p70OpenActivity;fixCards();fixModal();
 }
-function boot(){install();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});[1000,2500,5000].forEach(ms=>setTimeout(install,ms));console.info('Carbonautas',VERSION,BUILD,'pedidos inteligentes e sem duplicação')}
+function boot(){install();window.addEventListener('carbonautas-panel-rendered',schedule);window.addEventListener('carbonautas-session-ready',install,{once:true});console.info('Carbonautas',VERSION,BUILD,'pedidos inteligentes por evento')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
@@ -11067,7 +11067,7 @@ function decorateCheckins(){
 }
 function scan(){decorateCheckins()}
 function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;scan()})}
-function boot(){scan();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true});[900,2200,4500].forEach(ms=>setTimeout(scan,ms));console.info('Carbonautas',VERSION,'check-in UI sem criacao direta de thread')}
+function boot(){scan();window.addEventListener('carbonautas-panel-rendered',schedule);console.info('Carbonautas',VERSION,'check-in UI por evento')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
@@ -11134,7 +11134,7 @@ function tagModal(){const ov=document.getElementById('p66ActionOverlay');if(!ov?
 function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;tagModal();decorate()})}
 window.openPrivateChatWithContext=async function(memberId,ctx={}){const name=ctx.personName||'Carbonauta',source=String(ctx.sourceId||''),key=source.startsWith('activity_')?`activity:${source.slice(9)}`:(source||`chat:${memberId}:${norm(ctx.title||'')}`),fake={title:ctx.title||'esta demanda',type:ctx.type==='correction'?'correcao':'',description:ctx.eventLabel||''};return openNativePrivate(memberId,draftFor(fake,name),name,{key,kind:ctx.type||'request',sourceId:source,title:ctx.title||''})};
 window.addEventListener('click',e=>{const card=cardOf(e.target);if(card){const id=activityIdFromCard(card);if(id)lastActivityId=id}const chk=e.target?.closest?.('.p72-checkin-remind');if(chk){e.preventDefault();e.stopImmediatePropagation();checkinFromButton(chk);return}const req=e.target?.closest?.('.p70-smart-request,.p69-wait');if(req){e.preventDefault();e.stopImmediatePropagation();requestFromButton(req);return}},true);
-function boot(){watchSend();decorate();new MutationObserver(schedule).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']});[700,1600,3200].forEach(ms=>setTimeout(()=>{tagModal();decorate()},ms));console.info('Carbonautas',VERSION,BUILD,'chat visível + lembrete tratado sai da atenção')}
+function boot(){watchSend();decorate();window.addEventListener('carbonautas-panel-rendered',schedule);console.info('Carbonautas',VERSION,BUILD,'chat do Painel por evento')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
@@ -11304,7 +11304,7 @@ function recalc(){
 function refresh(){ensureCss();migrateOldReminders();hideHandled();ensureExitButtons();recalc()}
 function schedule(){if(scheduled)return;scheduled=true;requestAnimationFrame(()=>{scheduled=false;refresh()})}
 window.p77Refresh=refresh;window.p85Refresh=refresh;
-function boot(){refresh();const root=document.getElementById('dashAttention')||document.body;new MutationObserver(muts=>{if(muts.some(m=>m.addedNodes?.length||m.removedNodes?.length))schedule()}).observe(root,{childList:true,subtree:true});[700,1800].forEach(ms=>setTimeout(refresh,ms));console.info('Carbonautas',VERSION,'Painel sem loop de redesenho')}
+function boot(){refresh();window.addEventListener('carbonautas-panel-rendered',schedule);console.info('Carbonautas',VERSION,'Painel sem observer contínuo')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 
@@ -13335,10 +13335,9 @@ function hook(){
 }
 function boot(){
   ensureCss();hook();
-  setTimeout(hook,900);setTimeout(hook,2500);
-  const tick=setInterval(()=>{hook();if(me()){markPresence();renderPresence();}if(presenceDone&&basePainel&&baseDetail)clearInterval(tick)},1500);
+  window.addEventListener('carbonautas-session-ready',()=>{hook();if(me()){markPresence();renderPresence()}},{once:true});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden){presenceDone=false;markPresence()}});
-  console.info('Carbonautas',BUILD,'presença silenciosa, linha do tempo, sem medalhas, jogo sob demanda');
+  console.info('Carbonautas',BUILD,'presença sem polling');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
