@@ -9578,11 +9578,11 @@ function showRulesWarning(){$('#p48RulesWarn')?.classList.add('show')}
 function subscribeMessages(id){if(unsubMessages){unsubMessages();unsubMessages=null}messages=[];renderMessages();if(!id)return;try{const q=f().query(f().collection(window.db,'rede_group_threads',id,'messages'),f().orderBy('createdAt','asc'));unsubMessages=f().onSnapshot(q,s=>{messages=s.docs.map(d=>({...d.data(),id:d.id}));renderMessages()},e=>{console.error('P48 messages',e);if(e?.code==='permission-denied')showRulesWarning()})}catch(e){console.error(e)}}
 async function identity(){if(!window.auth?.currentUser||!window.db||!window.fbFns)return false;try{const s=await f().getDoc(f().doc(window.db,'rede_users',window.auth.currentUser.uid));if(s.exists()){me=s.data();myMemberId=me.memberId||''}}catch(e){console.warn('P48 profile',e)}return !!myMemberId}
 async function subscribe(){if(!await identity())return false;try{if(unsubMembers)unsubMembers();unsubMembers=f().onSnapshot(f().collection(window.db,'rede_members'),s=>{members=s.docs.map(d=>({...d.data(),id:d.id}));if($('#p48GroupOverlay')?.style.display==='flex')renderPeople()})}catch(e){console.warn(e)}try{if(unsubThreads)unsubThreads();const q=f().query(f().collection(window.db,'rede_group_threads'),f().where('memberIds','array-contains',myMemberId));unsubThreads=f().onSnapshot(q,s=>{threads=s.docs.map(d=>({...d.data(),id:d.id})).filter(x=>x.active!==false).sort((a,b)=>millis(b.updatedAt||b.createdAt)-millis(a.updatedAt||a.createdAt));if(activeThreadId&&!threads.some(x=>x.id===activeThreadId)){activeThreadId='';subscribeMessages('')}if(active){mount();renderList();renderHead();renderMessages()}},e=>{console.error('P48 threads',e);if(e?.code==='permission-denied')showRulesWarning()})}catch(e){console.warn(e)}return true}
-function activatePanelView(){document.body.dataset.view='mensagens';document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));document.querySelector('#viewMensagens')?.classList.add('on');document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('on',(el.dataset.group||el.dataset.view)==='conversas'));const nav=document.querySelector('#subNav');nav?.querySelector('[data-sub-view="mensagens"]')?.classList.remove('on');nav?.querySelector('[data-sub-view="conversas"]')?.classList.remove('on');nav?.querySelector('.p46-panel-btn')?.classList.add('on')}function openPanelinhas(){active=true;document.body.setAttribute('data-p48-groups','1');document.body.classList.add('p98-panel-active');activatePanelView();mount();if(!activeThreadId&&threads.length)activeThreadId=threads[0].id;renderList();renderHead();renderMessages();if(activeThreadId)subscribeMessages(activeThreadId);setTimeout(()=>{activatePanelView();mount();if(activeThreadId)subscribeMessages(activeThreadId)},80)}
+function activatePanelView(){document.body.dataset.view='mensagens';document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));document.querySelector('#viewMensagens')?.classList.add('on');document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('on',(el.dataset.group||el.dataset.view)==='conversas'));const nav=document.querySelector('#subNav');nav?.querySelector('[data-sub-view="mensagens"]')?.classList.remove('on');nav?.querySelector('[data-sub-view="conversas"]')?.classList.remove('on');nav?.querySelector('.p46-panel-btn')?.classList.add('on')}function openPanelinhas(){active=true;document.body.setAttribute('data-p48-groups','1');document.body.classList.add('p98-panel-active');activatePanelView();mount();if(!unsubThreads)subscribe().catch(e=>console.warn('P48 lazy subscribe',e));if(!activeThreadId&&threads.length)activeThreadId=threads[0].id;renderList();renderHead();renderMessages();if(activeThreadId)subscribeMessages(activeThreadId)}
 function leave(){active=false;if(unsubMessages){unsubMessages();unsubMessages=null}document.body.removeAttribute('data-p48-groups');document.body.classList.remove('p98-panel-active');document.querySelectorAll('[data-p98-general-sentinel]').forEach(n=>n.remove());$('#p48GroupsRoot')?.remove()}
 document.addEventListener('click',e=>{const th=e.target.closest?.('#p48GroupsRoot .p48-thread[data-g]');if(th){e.preventDefault();e.stopImmediatePropagation();selectThread(th.dataset.g);return}const pan=e.target.closest?.('.p46-panel-btn');if(pan){e.preventDefault();e.stopImmediatePropagation();openPanelinhas();return}const oldNew=e.target.closest?.('#p46NewGroup');if(oldNew){e.preventDefault();e.stopImmediatePropagation();openPanelinhas();setTimeout(openModal,50);return}const general=e.target.closest?.('#subNav [data-sub-view="mensagens"],#subNav [data-sub-view="conversas"]');if(general&&!general.classList.contains('p46-panel-btn'))leave()},true);
 window.openPanelinhas=openPanelinhas; window.closePanelinhas=leave; window.openNewPanelinha=()=>{openPanelinhas();setTimeout(openModal,80)};
-async function boot(){injectCss();let tries=0;while(tries++<80){if(await subscribe())break;await new Promise(r=>setTimeout(r,250))}setInterval(()=>{if(active){if(!$('#p48GroupsRoot'))mount();markTabs()}},700);console.info('Carbonautas panelinhas',VERSION,'carregado')}
+function boot(){injectCss();console.info('Carbonautas panelinhas',VERSION,'lazy: só conecta ao abrir')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
@@ -11843,17 +11843,26 @@ function privateReadGuard(){if(document.body.dataset.view==='conversas')return;$
 function polish(){ensureCss();decorateReactions();ensurePhoneButton();privateReadGuard()}
 function schedulePolish(){if(polishQueued)return;polishQueued=true;requestAnimationFrame(()=>{polishQueued=false;polish()})}
 
-async function boot(){
-  ensureCss();document.addEventListener('click',interceptNotification,true);
-  let tries=0;while(tries++<80){if(window.fbFns&&window.db&&window.auth?.currentUser)break;await sleep(250)}
+let p124Started=false;
+async function startP124(){
+  if(p124Started)return;
+  if(!window.fbFns||!window.db||!window.auth?.currentUser)return;
   if(!await identity())return;
-  subscribeMembers();subscribeGeneralChat();subscribeGroups();polish();
-  const observer=new MutationObserver(muts=>{if(muts.some(m=>m.addedNodes?.length||m.removedNodes?.length))schedulePolish()});
-  observer.observe(document.documentElement,{subtree:true,childList:true});
-  new MutationObserver(()=>privateReadGuard()).observe(document.body,{attributes:true,attributeFilter:['data-view']});
-  setInterval(polish,1500);
+  p124Started=true;
+  subscribeMembers();
+  subscribeGeneralChat();
+  polish();
   window.CARBONAUTAS_CHAT_NOTIFY_BUILD=VERSION;
-  console.info('Carbonautas',VERSION,'notificações sem loop de MutationObserver');
+  console.info('Carbonautas',VERSION,'lazy: notificações iniciadas sob demanda');
+}
+function boot(){
+  ensureCss();
+  document.addEventListener('click',e=>{
+    interceptNotification(e);
+    const wantsChat=e.target.closest?.('#notifyBtn,#subNav,[data-view="mensagens"],[data-view="conversas"],.p46-panel-btn');
+    if(wantsChat)startP124().then(polish).catch(err=>console.warn('P124 lazy start',err));
+  },true);
+  console.info('Carbonautas',VERSION,'pronto sem observer/polling global');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
@@ -12767,8 +12776,14 @@ function grow(id,min=52,max=148){
 function boot(){
   injectCss();
   panelActive=false;document.body.classList.remove('p98-panel-active');document.querySelectorAll('[data-p98-general-sentinel]').forEach(n=>n.remove());
-  setInterval(()=>{grow('#privateInput');grow('#p46Input');grow('#p48Input')},650);
-  console.info('Carbonautas',VERSION,'P208: controlador concorrente de panelinhas desativado');
+  grow('#privateInput');grow('#p46Input');grow('#p48Input');
+  document.addEventListener('focusin',e=>{
+    const id=e.target?.id;
+    if(id==='privateInput')grow('#privateInput');
+    else if(id==='p46Input')grow('#p46Input');
+    else if(id==='p48Input')grow('#p48Input');
+  });
+  console.info('Carbonautas',VERSION,'sem polling de composer');
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
