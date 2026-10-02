@@ -10793,7 +10793,7 @@ function install(){
   schedule();
 }
 function p68Render(){const r=baseRender?baseRender.apply(this,arguments):undefined;setTimeout(transform,0);return r}
-function boot(){install();const root=document.getElementById('dashAttention')||document.body;new MutationObserver(schedule).observe(root,{childList:true,subtree:true});setTimeout(install,900);setTimeout(install,2200);console.info('Carbonautas',VERSION,BUILD,'painel separa ação real de acompanhamento')}
+function boot(){install();console.info('Carbonautas',VERSION,BUILD,'painel sem observer contínuo')}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 
@@ -11699,7 +11699,9 @@ function install(){
     const sig=signature(),force=panelMissing();
     if(!force&&sig===lastSig)return;
     lastSig=sig;lastRun=Date.now();
-    return original.apply(this,arguments);
+    const result=original.apply(this,arguments);
+    requestAnimationFrame(()=>window.dispatchEvent(new Event('carbonautas-panel-rendered')));
+    return result;
   };
   stable.__p87Stable=true;stable.__p87Original=original;
   try{renderPainel=stable}catch(_e){}
@@ -11710,14 +11712,8 @@ function install(){
   console.info('Carbonautas P87 Painel estável + saúde exige evidência real');
 }
 
-setInterval(()=>{
-  canonicalize();
-  installEvidenceHealth();
-  const r=window.renderPainel;
-  if(typeof r==='function'&&!r.__p87Stable){installed=false;lastSig='';install()}
-},1800);
-
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install,{once:true});else install();
+window.addEventListener('carbonautas-session-ready',()=>{installEvidenceHealth();install()},{once:true});
 })();
 
 </script>
@@ -14554,8 +14550,11 @@ function bindSwipe(card,a,it){
 }
 
 function render(){const d=ensure();if(!d)return;const a=collect(),card=q('.p195-card',d),backup=q('[data-a="backup"]',d),src=q('#dashBackupBtn');if(backup)backup.style.display=src&&getComputedStyle(src).display!=='none'?'block':'none';if(pos>=a.length)pos=0;if(!a.length){resetSwipe(card);card.innerHTML='<div class="p195-empty"><b>✓ Tudo certo.</b><span>Nada pedindo sua atenção agora.</span></div>';return}const it=a[pos];card.innerHTML='<div><div class="p195-k">AGORA</div><div class="p195-title"></div><div class="p195-meta"></div><div class="p195-detail"></div></div><div class="p195-foot"><span class="p195-count"></span><span class="p197-swipehint">deslize</span><button class="p195-btn ghost" data-g>Dispensar</button><button class="p195-btn p198-back" data-p hidden>←</button><button class="p195-btn" data-n>→</button><button class="p195-btn primary" data-o>Abrir</button></div>';q('.p195-title',card).textContent=it.title;q('.p195-meta',card).textContent=it.meta;q('.p195-detail',card).textContent=it.detail||'Abra para ver o contexto.';q('.p195-count',card).textContent=(pos+1)+' de '+a.length;const prev=q('[data-p]',card);prev.hidden=a.length<=1;prev.setAttribute('aria-label','Card anterior');prev.title='Voltar';prev.onclick=()=>{pos=(pos-1+a.length)%a.length;render()};q('[data-n]',card).style.display=a.length>1?'':'none';q('[data-n]',card).setAttribute('aria-label','Próximo card');q('[data-n]',card).title='Próximo';q('[data-o]',card).onclick=()=>open(it);q('[data-n]',card).onclick=()=>{pos=(pos+1)%a.length;render()};q('[data-g]',card).onclick=()=>{const g=gone();g.add(it.key);save(g);render()};bindSwipe(card,a,it)}
-function watch(){['#dashAttention','#p78TodayCard'].forEach(s=>{const el=q(s);if(el&&!obs.has(el)){obs.add(el);new MutationObserver(render).observe(el,{childList:true,subtree:true,characterData:true})}})}
-function boot(){ensure();watch();render();let k=0;timer=setInterval(()=>{watch();render();if(++k>14||(q('#dashAttention')&&q('#p78TodayCard')))clearInterval(timer)},350)}
+function boot(){
+  ensure();
+  render();
+  window.addEventListener('carbonautas-panel-rendered',render);
+}
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',boot,{once:true}):boot();
 })();
 </script>
