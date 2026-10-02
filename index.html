@@ -14600,19 +14600,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #p195Deck .p195-tools{position:absolute;right:0;top:44px;z-index:30;width:230px;padding:6px;border:1px solid #d8e5e3;border-radius:16px;background:#fff;box-shadow:0 20px 50px rgba(18,56,64,.16)}
 #p195Deck .p195-tools button{display:block;width:100%;border:0;background:transparent;padding:10px 11px;border-radius:10px;text-align:left;font-size:12px;font-weight:800;color:#294a55}
 #p195Deck .p195-tools button:hover{background:#f0f7f5}
-#p195Deck .p195-card{min-height:280px;padding:clamp(22px,5vw,34px);border:1px solid #d9e7e4;border-radius:30px;background:#fff;box-shadow:0 26px 80px rgba(17,55,64,.13);display:flex;flex-direction:column;justify-content:space-between}
-<style id="p196SwipeCardsStyle">
-#p195Deck .p195-card{position:relative;touch-action:pan-y;cursor:grab;will-change:transform,opacity;transform-origin:50% 86%;transition:transform .34s cubic-bezier(.2,.82,.2,1),opacity .24s ease,box-shadow .24s ease;overflow:hidden}
-#p195Deck .p195-card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(135deg,rgba(14,111,120,.12),transparent 42%,rgba(36,161,143,.08));opacity:0;transition:opacity .16s ease}
+#p195Deck .p195-card{min-height:280px;padding:clamp(22px,5vw,34px);border:1px solid #d9e7e4;border-radius:30px;background:#fff;box-shadow:0 26px 80px rgba(17,55,64,.13);display:flex;flex-direction:column;justify-content:space-between;position:relative;touch-action:pan-y;overflow:hidden;transform:none;opacity:1;transition:none;will-change:auto}
+#p195Deck .p195-card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(135deg,rgba(14,111,120,.12),transparent 42%,rgba(36,161,143,.08));opacity:0;transition:none}
 #p195Deck .p195-card.p196-dragging{cursor:grabbing;transition:none;box-shadow:0 34px 92px rgba(17,55,64,.22)}
 #p195Deck .p195-card.p196-dragging::before{opacity:var(--p196-glow,.12)}
-#p195Deck .p195-card.p196-return{transition:transform .46s cubic-bezier(.18,1.52,.35,1),opacity .24s ease,box-shadow .28s ease}
-#p195Deck .p195-card.p196-fly{pointer-events:none;transition:transform .28s cubic-bezier(.34,.72,.24,1),opacity .22s ease,box-shadow .22s ease}
-#p195Deck .p195-card.p196-enter{animation:p196Enter .28s cubic-bezier(.18,.9,.25,1) both}
-@keyframes p196Enter{from{opacity:.58;transform:translate3d(var(--p196-enter-x,0),10px,0) scale(.975)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
 @media(max-width:700px){#p195Deck .p195-card{cursor:default}}
-@media(prefers-reduced-motion:reduce){#p195Deck .p195-card,#p195Deck .p195-card.p196-return,#p195Deck .p195-card.p196-fly{transition-duration:.01ms!important}#p195Deck .p195-card.p196-enter{animation:none!important}}
-</style>
 
 #p195Deck .p195-k{font-size:10px;font-weight:950;letter-spacing:.12em;color:#148087}
 #p195Deck .p195-title{font:700 clamp(24px,4vw,34px)/1.07 'Space Grotesk','Inter',sans-serif;letter-spacing:-.04em;color:#153a49;margin:14px 0 8px}
@@ -14631,7 +14623,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 <script id="p195MinimalHomeController">
 (()=>{'use strict';
 const q=(s,r=document)=>r.querySelector(s);
-let pos=0;
+let pos=0,lastRenderSignature='';
 const DEFER_KEY='carbonautas_p195_deferred_v2';
 function deferred(){
   try{
@@ -14690,7 +14682,7 @@ function alreadyDone(it){
     if(typeof p56AckItem==='function'){p56AckItem(it.key);return}
   }catch(e){console.warn('P195 já feito',e)}
 }
-function decideLater(it){deferUntilTomorrow(it.key);pos=0;render();window.toast?.('⏰ Saiu da frente por hoje. Volta amanhã.')}
+function decideLater(it){deferUntilTomorrow(it.key);pos=0;lastRenderSignature='';render();window.toast?.('⏰ Saiu da frente por hoje. Volta amanhã.')}
 function resetSwipe(card){if(!card)return;card.classList.remove('p196-dragging','p196-return','p196-fly','p196-left','p196-right');card.style.transform='';card.style.opacity='';card.style.removeProperty('--p196-glow')}
 function bindSwipe(card,a){
   if(!card||a.length<2)return;
@@ -14705,8 +14697,19 @@ function render(){
   const a=collect(),card=q('.p195-card',d),backup=q('[data-a="backup"]',d),src=q('#dashBackupBtn');
   if(backup)backup.style.display=src&&getComputedStyle(src).display!=='none'?'block':'none';
   if(pos>=a.length)pos=0;
-  if(!a.length){resetSwipe(card);card.innerHTML='<div class="p195-empty"><b>✓ Tudo certo.</b><span>Nada pedindo sua atenção agora.</span></div>';return}
+  if(!a.length){
+    const sig='empty';
+    if(lastRenderSignature===sig)return;
+    lastRenderSignature=sig;
+    resetSwipe(card);
+    card.innerHTML='<div class="p195-empty"><b>✓ Tudo certo.</b><span>Nada pedindo sua atenção agora.</span></div>';
+    return;
+  }
   const it=a[pos];
+  const sig=JSON.stringify([it.key,it.title,it.meta,it.detail,pos,a.length]);
+  if(lastRenderSignature===sig)return;
+  lastRenderSignature=sig;
+  resetSwipe(card);
   card.innerHTML='<div><div class="p195-k">AGORA</div><div class="p195-title"></div><div class="p195-meta"></div><div class="p195-detail"></div></div><div class="p195-foot"><span class="p195-count"></span><button class="p195-btn p195-done" data-done>✓ JÁ FEITO</button><button class="p195-btn ghost" data-later>⏰ DECIDO DEPOIS</button><button class="p195-btn primary" data-open>ABRIR E RESOLVER</button></div>';
   q('.p195-title',card).textContent=it.title;
   q('.p195-meta',card).textContent=it.meta;
