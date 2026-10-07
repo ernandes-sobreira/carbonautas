@@ -7,6 +7,7 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const $=s=>document.querySelector(s);
 let deckIds=[],deckIndex=0,returnId='',returnVersion=0,busy=false,lastFocus=null;
 const locks=new Set();
+const packageFileCache=new Map();
 let recipientRequest=null,previewHome=null,previewNext=null;
 let adminPackages=null,adminPackagesUnsub=null,adminSyncing=false;
 const normalize=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -50,6 +51,7 @@ function displayPublications(){
  return [...map.values()];
 }
 function cardHTML(p){
+ if(p?.packageId&&p?.id)packageFileCache.set(String(p.id),p);
  const f=files(),key=categoryKey(p),color=CATEGORY_COLORS[key]||CATEGORY_COLORS.outro,version=Number(f?.currentVersion?.(p)||1),turn=turnId(p),last=lastSendInfo(p),when=formatActivity(last.ms),file=isFilePublication(p),owner=p.memberNome||memberName(p.memberId);
  const canDelete=app().isAdmin||String(p.memberId||'')===String(app().memberId||'');
  const action=p.labRun?'lab':file?'open':p.url?'link':'none';
@@ -72,7 +74,7 @@ function detailCardHTML(p){
 }
 function dialog(id,html){const el=document.createElement('dialog');el.id=id;el.className='repository-dialog';el.innerHTML=html;document.body.append(el);return el}
 function closeDeck(){const d=$('#repositoryDeck');if(d?.open)d.close();deckIds=[];lastFocus?.focus?.()}
-function publicationById(id){return (app().state.publicacoes||[]).find(x=>String(x.id)===String(id))||null}
+function publicationById(id){return (app().state.publicacoes||[]).find(x=>String(x.id)===String(id))||packageFileCache.get(String(id))||null}
 function showDeck(){
  const p=publicationById(deckIds[deckIndex]);if(!p){closeDeck();return}
  const d=$('#repositoryDeck');$('#repositoryStage').innerHTML=detailCardHTML(p);$('#repositoryCount').textContent=`${deckIndex+1} de ${deckIds.length}`;
