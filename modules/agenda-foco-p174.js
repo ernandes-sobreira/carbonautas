@@ -55,7 +55,7 @@ function focusItems(){
  (m?.prazos||[]).forEach((p,i)=>{if(!p?.data||p.feito)return;out.push({source:'prazo',id:id+'::'+i,title:p.titulo||'Prazo',date:p.data,time:p.hora||'',desc:p.descricao||'',kind:'Meu prazo',participants:[id]})});
  (s.privateSchedule||[]).forEach(p=>{if(!p?.data||p.feito)return;out.push({source:'privado',id:p.id,title:p.titulo||'Compromisso',date:p.data,time:p.hora||'',desc:p.descricao||'',kind:'Só eu',participants:[id]})});
  (s.activities||[]).filter(a=>a?.agendaShared===true||a?.type==='agenda').forEach(a=>{if(done(a)||!a.dueDate)return;const ids=Array.isArray(a.participantIds)?a.participantIds:[];if(a.ownerId!==id&&!ids.includes(id)&&!admin())return;out.push({source:'atividade',id:a.id,title:a.title||'Atividade',date:a.dueDate,time:a.dueTime||'',desc:a.description||'',kind:'Atividade',participants:ids,ownerId:a.ownerId})});
- return out.sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')))
+ return out.filter(x=>!(['grupo','privado'].includes(x.source)&&dayDiff(x.date)<0)).sort((a,b)=>(a.date+(a.time||'')).localeCompare(b.date+(b.time||'')))
 }
 function homeStats(items){
  let overdue=0,todayN=0,week=0,month=0;items.forEach(x=>{const d=dayDiff(x.date);if(d<0)overdue++;if(d===0)todayN++;if(d>=0&&d<=7)week++;if(d>=0&&d<=30)month++});return{overdue,todayN,week,month}
