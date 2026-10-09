@@ -2274,19 +2274,7 @@ body:not(.carbonautas-session-ready) .app{visibility:hidden!important}body.carbo
         </div>
 
         <section id="repoGeneralPanel">
-        <section class="science-dock" id="scienceDock">
-          <div class="science-dock-head">
-            <div><div class="science-dock-title">⚡ Science Dock</div><div class="science-dock-sub">Crie, edite e analise sem sair do Carbonautas.</div></div>
-            <div class="spacer"></div>
-            <span class="engine-pill" id="scienceEngineStatus"><span class="engine-dot"></span><span>checando motor…</span></span>
-          </div>
-          <div class="science-dock-grid">
-            <button class="science-action" type="button" onclick="openNewOfficeType('docx')"><span class="sa-icon">📄</span><b>Novo Word</b><small>Artigo, relatório, tese ou capítulo.</small></button>
-            <button class="science-action" type="button" onclick="openNewOfficeType('xlsx')"><span class="sa-icon">📊</span><b>Novo Excel</b><small>Planilha editável no navegador.</small></button>
-            <button class="science-action" type="button" onclick="openNewOfficeType('pptx')"><span class="sa-icon">📽️</span><b>Novo PowerPoint</b><small>Apresentação criada no Repositório.</small></button>
-            <button class="science-action lab" type="button" onclick="switchView('lab')"><span class="sa-icon">🧪</span><b>Laboratório</b><small>Python científico · figuras publicáveis.</small></button>
-          </div>
-        </section>
+        <!-- Science Dock removido em 09/10/2026 (motor no VPS fora do ar) -->
 
         <div class="crono-filters">
           <select class="mini" id="pubCategoria" style="width:auto"><option value="">Todas as categorias</option></select>
@@ -13513,13 +13501,7 @@ function injectRepo(){
     dock.parentNode.insertBefore(t,dock);
     if(window.innerWidth>760)t.style.display='none';
   }
-  const tabs=$('#repoModeTabs');
-  if(tabs&&!$('#p129Shortcuts')){
-    const sc=document.createElement('div');sc.id='p129Shortcuts';
-    sc.innerHTML=`<button type="button" data-go="lab"><span>🧪</span><span><b>Laboratório de Dados</b><small>Análises e planilhas</small></span></button>`;
-    sc.querySelectorAll('button').forEach(b=>b.onclick=()=>go(b.dataset.go));
-    tabs.parentNode.insertBefore(sc,tabs.nextSibling);
-  }
+  /* atalho do Laboratório de Dados removido em 09/10/2026 */
 }
 
 function boot(){
