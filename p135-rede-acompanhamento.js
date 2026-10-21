@@ -1,8 +1,8 @@
-/* Carbonautas P165 · Rede + Acompanhamento auditados e leves
+/* Carbonautas P167 · Rede estável e flexível
    - mantém as correções visuais e acadêmicas existentes
-   - evita redesenhar a Rede ao clicar em botões de outras telas
-   - reduz timers e observadores globais
-   - só atualiza Rede/Acompanhamento quando a tela correspondente está ativa
+   - não reinicia a simulação ao clicar em uma pessoa
+   - permite arrastar somente o nó escolhido, sem movimentar toda a rede
+   - ajustar/enquadrar não reaquece a simulação
    - nao grava, migra ou apaga dados do Firebase
 */
 (function(){
@@ -10,7 +10,7 @@
 if(window.__CARBONAUTAS_P135_REDE_ACOMP)return;
 window.__CARBONAUTAS_P135_REDE_ACOMP=true;
 
-const BUILD='P165-PERF-20260919';
+const BUILD='P167-GRAPH-STABLE-20260925';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
 const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
@@ -63,13 +63,53 @@ function decorateTrack(){
 }
 function scheduleTrack(){clearTimeout(trackTimer);trackTimer=setTimeout(decorateTrack,30)}
 
+function paintDraggedNode(d){
+  if(!window.d3||!d)return;
+  try{
+    const root=window.d3.select('#graph');
+    root.selectAll('g.node').filter(n=>n?.id===d.id).attr('transform',`translate(${d.x},${d.y})`);
+    root.selectAll('line.link').filter(l=>l?.source?.id===d.id||l?.target?.id===d.id)
+      .attr('x1',l=>l.source?.x??0).attr('y1',l=>l.source?.y??0)
+      .attr('x2',l=>l.target?.x??0).attr('y2',l=>l.target?.y??0);
+  }catch(_e){}
+}
+function installStableGraphInteraction(){
+  let currentDrag=null;try{currentDrag=drag}catch(_e){}
+  if(typeof currentDrag==='function'&&!currentDrag.__p135Stable){
+    const stable=function(sim){
+      return window.d3.drag()
+        .on('start',(e,d)=>{try{sim?.alphaTarget?.(0);sim?.stop?.()}catch(_e){}d.fx=d.x;d.fy=d.y})
+        .on('drag',(e,d)=>{d.x=e.x;d.y=e.y;d.fx=e.x;d.fy=e.y;paintDraggedNode(d)})
+        .on('end',(e,d)=>{d.fx=null;d.fy=null;try{sim?.alphaTarget?.(0);sim?.stop?.()}catch(_e){}paintDraggedNode(d)});
+    };
+    stable.__p135Stable=true;stable.__p135Original=currentDrag;try{drag=stable}catch(_e){}window.drag=stable;
+  }
+  let currentFit=null;try{currentFit=fitView}catch(_e){}
+  if(typeof currentFit==='function'&&!currentFit.__p135Stable){
+    const stableFit=function(){
+      try{
+        if(!svg||!zoomBehavior)return;
+        if(simulation){simulation.alphaTarget(0);simulation.stop()}
+        svg.transition().duration(220).call(zoomBehavior.transform,window.d3.zoomIdentity);
+      }catch(_e){}
+    };
+    stableFit.__p135Stable=true;stableFit.__p135Original=currentFit;try{fitView=stableFit}catch(_e){}window.fitView=stableFit;
+  }
+  return true;
+}
+function bindStableDrag(){
+  try{
+    if(!window.d3||typeof drag!=='function'||!simulation)return;
+    window.d3.select('#graph').selectAll('g.node').on('.drag',null).call(drag(simulation));
+  }catch(_e){}
+}
 function installGraphFix(){
   let current=null;try{current=window.renderGraph||renderGraph}catch(_e){}
   if(typeof current!=='function')return false;
   if(current.__p135Fixed)return true;
   let original=current,guard=0;
   while(guard++<6){const next=original.__p97Original||original.__p135Original;if(typeof next!=='function'||next===original)break;original=next}
-  const fixed=function(){const r=original.apply(this,arguments);setTimeout(()=>{try{if(simulation){simulation.alphaTarget(0);simulation.stop()}}catch(_e){}},650);return r};
+  const fixed=function(){const r=original.apply(this,arguments);bindStableDrag();setTimeout(()=>{try{if(simulation){simulation.alphaTarget(0);simulation.stop()}bindStableDrag()}catch(_e){}},650);return r};
   fixed.__p135Fixed=true;fixed.__p135Original=original;try{renderGraph=fixed}catch(_e){}window.renderGraph=fixed;return true;
 }
 function relationKinds(link){const txt=norm((link.reasons||[]).map(r=>r.label||'').join(' ')),types=new Set((link.reasons||[]).map(r=>r.type));const kinds=new Set();if(/orient|orientador|orientand/.test(txt))kinds.add('orientation');if(/projeto|pesquisa em conjunto|campo em conjunto|experimento em conjunto/.test(txt))kinds.add('projects');if(types.has('producao')||/artigo|publica|produc|resumo|manuscrito|capitulo|coautor|dados em conjunto|escrev/.test(txt))kinds.add('production');return kinds}
@@ -81,7 +121,7 @@ function setMode(mode){relationMode=mode;window.__p135NetworkMode=mode||'all';$$
 
 function setupRede(force=false){
   const view=$('#viewRede'),main=view?.querySelector('.main');if(!view||!main)return false;
-  installGraphFix();installBuildLinks();let changed=false;
+  installStableGraphInteraction();installGraphFix();installBuildLinks();let changed=false;
   if(!$('#p135RedeToolbar')){const bar=document.createElement('div');bar.id='p135RedeToolbar';bar.className='p135-rede-toolbar';bar.innerHTML=`<div class="p135-rede-title"><b>Rede</b><small>Pessoas e relações</small></div><button type="button" id="p135RedeSettingsBtn" class="p135-settings-btn">⚙ Ajustes</button><label class="p135-search"><span>⌕</span><input id="p135RedeSearch" type="search" placeholder="Buscar pessoa"></label><div class="p135-modes"><button class="on" data-p135-mode="all">Todos</button><button data-p135-mode="orientation">Orientação</button><button data-p135-mode="projects">Projetos</button><button data-p135-mode="production">Produção</button></div><div class="p135-insight" id="p135RedeInsight">Carregando rede…</div>`;view.insertBefore(bar,main);const inp=$('#p135RedeSearch'),real=$('#search');if(inp&&real){inp.value=real.value||'';inp.addEventListener('input',()=>{real.value=inp.value;real.dispatchEvent(new Event('input',{bubbles:true}))})}$$('[data-p135-mode]',bar).forEach(b=>b.onclick=()=>setMode(b.dataset.p135Mode));changed=true}
   if(!$('#p135RedeSettings')){const overlay=document.createElement('div');overlay.id='p135RedeSettings';overlay.hidden=true;overlay.innerHTML='<div class="p135-sheet"><div class="p135-sheet-head"><b>Ajustes da Rede</b><button type="button" aria-label="Fechar">×</button></div><div class="p135-sheet-body"></div></div>';document.body.appendChild(overlay);const body=$('.p135-sheet-body',overlay),side=view.querySelector('.side'),controls=view.querySelector('.graph-controls');if(side)body.appendChild(side);if(controls)body.appendChild(controls);const close=()=>overlay.hidden=true;$('#p135RedeSettingsBtn').onclick=()=>overlay.hidden=false;$('.p135-sheet-head button',overlay).onclick=close;overlay.onclick=e=>{if(e.target===overlay)close()};changed=true}
   if((!redeReady||changed||force)&&(activeView()==='rede'||view.classList.contains('on'))){redeReady=true;requestAnimationFrame(redraw)}
@@ -100,13 +140,13 @@ function handleView(){
   if(v==='track'){installHealthFix();bindTrackObservers();scheduleTrack()}
 }
 function boot(){
-  injectCss();installHealthFix();installGraphFix();installBuildLinks();
+  injectCss();installHealthFix();installStableGraphInteraction();installGraphFix();installBuildLinks();
   if(activeView()==='rede'||$('#viewRede')?.classList.contains('on'))setupRede(true);
   if(activeView()==='track'||$('#viewTrack')?.classList.contains('on')){bindTrackObservers();decorateTrack()}
   const viewObserver=new MutationObserver(handleView);viewObserver.observe(document.body,{attributes:true,attributeFilter:['data-view']});
   document.addEventListener('click',e=>{if(activeView()==='track'&&e.target.closest?.('[data-p97-member],#p97Deck button'))scheduleTrack()},true);
-  setTimeout(()=>{installHealthFix();installGraphFix();installBuildLinks();handleView()},220);
-  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P165 · desempenho Rede/Acompanhamento')
+  setTimeout(()=>{installHealthFix();installStableGraphInteraction();installGraphFix();installBuildLinks();handleView()},220);
+  window.CARBONAUTAS_RUNTIME_BUILD=BUILD;console.info('Carbonautas P167 · grafo estável e flexível')
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
