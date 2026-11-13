@@ -12327,6 +12327,8 @@ const palette=[
 let deckMemberId='',deckCardIndex=0,deckCards=[],deckTouch=null,deckAnimating=false;
 let trackWrapped=false,focusWrapped=false,graphWrapped=false,lastGraphSig='',graphStopTimer=null;
 let folderState={q:'',type:'',status:'',sort:'az'};
+const folderMarkup=new WeakMap();
+let trackRefreshPending=false;
 
 function appState(){try{return state}catch(_e){return null}}
 function isCoord(){try{return !!isAdmin}catch(_e){return false}}
@@ -12451,7 +12453,7 @@ function fillTypeOptions(){
   if(vals.includes(keep))sel.value=keep;
 }
 function folderHtml(m){
-  const [soft,border,accent]=colorsFor(m.nome),h=healthFor(m),details=p135HealthDetails(m),c=statusCounts(m);
+  const [soft,border,accent]=colorsFor(m.nome),h=healthFor(m),details=p135HealthDetails(m);
   const av=m.foto?`<img src="${esc97(m.foto)}" alt="">`:esc97(initials97(m.nome));
   return `<button type="button" class="p97-folder" data-p97-member="${esc97(m.id)}" style="--soft:${soft};--border:${border};--accent:${accent}">
     <div class="p97-folder-head"><div class="p97-folder-av">${av}</div><div class="p97-folder-main"><b>${esc97(m.nome)}</b><small>${esc97(memberLevel(m))}${m.programa?' · '+esc97(m.programa):''}</small></div><span class="p97-health ${healthClass(h)}">● ${healthLabel(h)}</span></div>
@@ -12489,7 +12491,12 @@ function renderFolders(){
   if($('#p97Status')&&$('#p97Status').value!==folderState.status)$('#p97Status').value=folderState.status;
   $$('#p97Folders [data-p97-sort]').forEach(b=>b.classList.toggle('on',b.dataset.p97Sort===folderState.sort));
   const list=folderMembers(),grid=$('#p97FolderGrid'),empty=$('#p97Empty');if(!grid)return;
-  grid.innerHTML=list.map(folderHtml).join('');empty.hidden=!!list.length;$('#p97FolderCount').textContent=`${list.length} pasta${list.length===1?'':'s'}`;
+  // Realtime snapshots can repeat unchanged data. Preserve existing buttons and focus.
+  const markup=list.map(folderHtml).join('');
+  if(folderMarkup.get(grid)!==markup){grid.innerHTML=markup;folderMarkup.set(grid,markup)}
+  if(empty.hidden!==!!list.length)empty.hidden=!!list.length;
+  const count=$('#p97FolderCount'),label=`${list.length} pasta${list.length===1?'':'s'}`;
+  if(count.textContent!==label)count.textContent=label;
 }
 
 function periodInfo(start,end,progress=0){
@@ -12623,12 +12630,17 @@ function refreshOpenDeck(){
 window.p202RefreshAcademicDeck=refreshOpenDeck;
 
 function renderAfterTrack(){renderFolders();refreshOpenDeck()}
+function scheduleTrackRefresh(){
+  if(trackRefreshPending)return;
+  trackRefreshPending=true;
+  requestAnimationFrame(()=>{trackRefreshPending=false;renderAfterTrack()});
+}
 function installTrackWrapper(){
   if(trackWrapped)return;
   let original=null;try{original=window.renderTrack||renderTrack}catch(_e){}
   if(typeof original!=='function'){setTimeout(installTrackWrapper,120);return}
   if(original.__p97Wrapped){trackWrapped=true;return}
-  const wrapped=function(){const r=original.apply(this,arguments);requestAnimationFrame(renderAfterTrack);return r};
+  const wrapped=function(){const r=original.apply(this,arguments);scheduleTrackRefresh();return r};
   wrapped.__p97Wrapped=true;wrapped.__p97Original=original;
   try{renderTrack=wrapped}catch(_e){}window.renderTrack=wrapped;trackWrapped=true;
   try{if(document.body.dataset.view==='track'||$('#viewTrack')?.classList.contains('on'))wrapped()}catch(_e){}
