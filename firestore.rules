@@ -996,6 +996,41 @@ service cloud.firestore {
 
 
     // ============================================================
+    // CARBONAUTAS — TEIA DE PESQUISA (teia/index.html)
+    // Um documento por elemento e por ligação, para que várias
+    // pessoas editem ao mesmo tempo sem sobrescrever a teia inteira.
+    // Todo integrante ativo lê e edita; quem grava assina com o próprio uid.
+    // ============================================================
+
+    match /rede_teia/{teiaId} {
+
+      function validTeiaItem() {
+        return request.resource.data.size() <= 24
+          && request.resource.data.get('_by', '') == request.auth.uid
+          && request.resource.data.get('name', '') is string
+          && request.resource.data.get('name', '').size() <= 600
+          && request.resource.data.get('note', '') is string
+          && request.resource.data.get('note', '').size() <= 3000;
+      }
+
+      allow read: if hasProfile();
+      allow write: if isCoordinator();
+
+      match /nodes/{nodeId} {
+        allow read: if hasProfile();
+        allow create, update: if hasProfile() && validTeiaItem();
+        allow delete: if hasProfile();
+      }
+
+      match /edges/{edgeId} {
+        allow read: if hasProfile();
+        allow create, update: if hasProfile() && validTeiaItem();
+        allow delete: if hasProfile();
+      }
+    }
+
+
+    // ============================================================
     // CARBONAUTAS — NOTIFICAÇÕES
     // Privacidade reforçada para chat privado.
     // ============================================================
