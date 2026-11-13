@@ -8,6 +8,26 @@ const f=require('firebase/firestore'),fs=require('node:fs'),vm=require('node:vm'
  const make=id=>{const db=env.authenticatedContext(id).firestore(),context={module:{exports:{}},console,db,FB:()=>f,auth:{currentUser:{uid:id}},CarbonautasApp:{state:{members:[{id:'prof',nivel:'coord',nome:'Professor'},{id:'alu',nome:'Aluno'}]}},fbUploadFile:async()=>({url:'https://storage/v2',path:'v2'}),fileToDataUrl:async()=>''};new Function('module','globalThis',fs.readFileSync('modules/file-handoff.js','utf8'))(context.module,context);return{api:context.module.exports,db}};
  const prof=make('prof'),alu=make('alu'),third=make('third');
 
+ // Teia de pesquisa: todo integrante ativo lê e edita elementos e ligações,
+ // a assinatura _by precisa ser de quem grava, e quem não tem perfil fica de fora.
+ {
+  const node=(db,id)=>f.doc(db,'rede_teia','principal','nodes',id),edge=(db,id)=>f.doc(db,'rede_teia','principal','edges',id);
+  const outsider=env.authenticatedContext('semperfil').firestore(),anon=env.unauthenticatedContext().firestore();
+  await assertSucceeds(f.setDoc(node(alu.db,'solo'),{name:'Solo',type:'area',note:'',x:0,y:0,_by:'alu',_byName:'Aluno',_at:f.serverTimestamp()}));
+  await assertSucceeds(f.setDoc(node(third.db,'solo'),{name:'Solo e sedimento',type:'area',note:'',x:10,y:0,_by:'third',_byName:'Terceiro',_at:f.serverTimestamp()}));
+  await assertSucceeds(f.setDoc(edge(prof.db,'e1'),{a:'solo',b:'agua',dir:'forward',weight:2,_by:'prof',_byName:'Prof',_at:f.serverTimestamp()}));
+  await assertSucceeds(f.getDocs(f.collection(alu.db,'rede_teia','principal','nodes')));
+  await assertFails(f.setDoc(node(alu.db,'forjado'),{name:'x',note:'',_by:'prof'}));
+  await assertFails(f.setDoc(node(alu.db,'grande'),{name:'x'.repeat(601),note:'',_by:'alu'}));
+  await assertFails(f.setDoc(node(outsider,'x'),{name:'x',note:'',_by:'semperfil'}));
+  await assertFails(f.getDocs(f.collection(outsider,'rede_teia','principal','nodes')));
+  await assertFails(f.getDocs(f.collection(anon,'rede_teia','principal','edges')));
+  await assertSucceeds(f.deleteDoc(edge(alu.db,'e1')));
+  await assertFails(f.setDoc(f.doc(alu.db,'rede_teia','principal'),{titulo:'x'}));
+  await assertSucceeds(f.setDoc(f.doc(prof.db,'rede_teia','principal'),{titulo:'Teia de pesquisa'}));
+  console.log('PASS: teia de pesquisa aceita edição de todo integrante ativo, exige assinatura própria e bloqueia quem não tem perfil.');
+ }
+
  // Activity persistence contract: the same transaction shape used by saveActivity
  // creates the activity, survives a fresh read, can be edited by its owner,
  // and cannot be hijacked by another student.

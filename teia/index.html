@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teia de Pesquisa | Carbonautas</title>
+<link rel="icon" href="../favicon-32.png">
+<style>
+:root{--bg:#ffffff;--border:#e5e7eb;--text:#111827;--muted:#6b7280;--accent:#0f766e;--soft:#f8fafc}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:1px solid var(--border);background:#fff;border-radius:10px;padding:8px 12px;line-height:1.2}
+button:hover{background:var(--soft)}
+button:disabled{opacity:.4;cursor:default}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.primary:hover{background:#0d655e}
+button.on{background:#ccfbf1;border-color:var(--accent);color:#134e4a}
+button.danger{color:#b91c1c;border-color:#fecaca}
+button.danger:hover{background:#fef2f2}
+a.back{color:var(--accent);text-decoration:none;font-size:14px;white-space:nowrap}
+header{border-bottom:1px solid var(--border);padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+header h1{font-size:17px;margin:0 6px 0 0;white-space:nowrap}
+header h1 span{color:var(--accent)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tools select{border:1px solid var(--border);border-radius:10px;padding:8px;background:#fff;max-width:170px}
+.sep{width:1px;height:26px;background:var(--border)}
+#sync{font-size:13px;padding:8px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+#sync .dot{width:10px;height:10px;border-radius:50%;background:#9ca3af;flex:none}
+#sync.ok .dot{background:#16a34a}#sync.warn .dot{background:#d97706}#sync.err .dot{background:#dc2626}
+#sync button{padding:5px 10px;font-size:13px}
+main{flex:1;display:flex;min-height:0;position:relative}
+#stage{flex:1;position:relative;min-width:0;background:#fff;background-image:radial-gradient(#e5e7eb 1px,transparent 1px);background-size:22px 22px}
+#svg{width:100%;height:100%;display:block;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+#svg.panning{cursor:grabbing}
+#hint{position:absolute;left:50%;top:12px;transform:translateX(-50%);background:#134e4a;color:#fff;padding:8px 14px;border-radius:999px;font-size:14px;max-width:90%;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.15);display:flex;gap:10px;align-items:center}
+#hint button{padding:3px 10px;font-size:13px;color:#134e4a}
+#zoom{position:absolute;left:12px;bottom:12px;display:flex;gap:6px}
+#zoom button{min-width:40px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+#empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;color:var(--muted);text-align:center;padding:24px}
+#panel{width:340px;border-left:1px solid var(--border);background:#fff;overflow:auto;padding:16px 18px 24px}
+#panel h2{font-size:15px;margin:0 0 10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+#panel label{display:block;font-size:13px;color:var(--muted);margin:12px 0 4px}
+#panel input[type=text],#panel textarea,#panel select{width:100%;border:1px solid var(--border);border-radius:10px;padding:8px 10px;background:#fff}
+#panel textarea{resize:vertical;min-height:60px}
+#panel input[type=range]{width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.swatches button{width:30px;height:30px;padding:0;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--border)}
+.swatches input{width:40px;height:32px;padding:0;border:1px solid var(--border);border-radius:8px;background:#fff}
+.x{border:none;font-size:20px;padding:2px 8px;color:var(--muted)}
+.legend{display:grid;gap:6px;margin-top:6px}
+.legend label{display:flex!important;align-items:center;gap:8px;margin:0!important;color:var(--text)!important;font-size:14px!important;cursor:pointer}
+.chip{display:inline-block;width:14px;height:14px;border-radius:4px;border:2px solid;flex:none}
+.small{font-size:13px;color:var(--muted)}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;background:#f1f5f9;color:#334155;margin:0 4px 4px 0}
+#modal{position:fixed;inset:0;background:rgba(17,24,39,.35);display:flex;align-items:center;justify-content:center;padding:16px;z-index:20}
+#modalBox{background:#fff;border-radius:16px;max-width:760px;width:100%;max-height:88vh;overflow:auto;padding:22px 24px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+#modalBox h2{margin:0 0 12px;font-size:18px;display:flex;justify-content:space-between;align-items:center}
+#modalBox h3{font-size:14px;margin:18px 0 6px;color:#334155}
+#modalBox textarea{width:100%;min-height:110px;border:1px solid var(--border);border-radius:10px;padding:10px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace}
+#modalBox input[type=search]{width:100%;border:1px solid var(--border);border-radius:10px;padding:9px 12px;margin-bottom:10px}
+.q{border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.q b{display:block;margin-bottom:4px}
+.q .meta{font-size:13px;color:var(--muted)}
+.q.central{border-color:#f59e0b;background:#fffbeb}
+.badge{display:inline-block;font-size:12px;padding:2px 8px;border-radius:999px;color:#fff;margin-right:6px}
+.li{display:flex;gap:8px;align-items:center;padding:6px 4px;border-bottom:1px solid #f1f5f9;font-size:14px}
+.li button{padding:4px 9px;font-size:13px;margin-left:auto;flex:none}
+.li label{display:flex;gap:8px;align-items:center;cursor:pointer;flex:1}
+.novo{font-size:11px;color:#b45309;border:1px dashed #f59e0b;border-radius:6px;padding:0 5px;flex:none}
+.gap{border-left:4px solid #f59e0b;padding:6px 12px;margin:10px 0;background:#fffbeb;border-radius:0 10px 10px 0}
+.gap.ok{border-color:#16a34a;background:#f0fdf4}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#111827;color:#fff;padding:8px 14px;border-radius:10px;font-size:14px;z-index:30;max-width:90%}
+@media(max-width:760px){
+ header{padding:8px 10px;gap:6px}
+ header h1{font-size:15px}
+ .tools{gap:6px}
+ button{padding:7px 9px;font-size:14px}
+ .tools select{max-width:150px;padding:7px 6px;font-size:14px}
+ .sep{display:none}
+ #sync{padding:6px 10px}
+ #panel{position:absolute;left:0;right:0;bottom:0;width:auto;max-height:55%;border-left:none;border-top:1px solid var(--border);border-radius:16px 16px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.12);z-index:5}
+ #zoom{bottom:auto;top:12px;left:auto;right:12px;flex-direction:column}
+ #hint{left:10px;transform:none;max-width:68%;border-radius:14px;text-align:left;font-size:13px}
+}
+</style>
+</head>
+<body>
+<header>
+ <a class="back" href="../" title="Voltar ao Carbonautas">&lt; Carbonautas</a>
+ <h1><span>Teia</span> de Pesquisa</h1>
+ <div class="tools">
+  <select id="newType" aria-label="Tipo do novo elemento"></select>
+  <button id="add" class="primary">+ Adicionar</button>
+  <button id="connect">Ligar</button>
+  <span class="sep"></span>
+  <button id="undo" title="Ctrl+Z">Desfazer</button>
+  <button id="redo" title="Ctrl+Y">Refazer</button>
+  <span class="sep"></span>
+  <button id="questions">Perguntas</button>
+  <button id="catalog">Variáveis</button>
+  <button id="gaps">Lacunas</button>
+  <button id="layers">Camadas</button>
+  <button id="file">Arquivo</button>
+ </div>
+</header>
+<div id="sync"><span class="dot"></span><span id="syncText">Abrindo.</span><span id="syncActions"></span></div>
+<main>
+ <div id="stage">
+  <svg id="svg" xmlns="http://www.w3.org/2000/svg"><g id="world"></g></svg>
+  <div id="hint" hidden></div>
+  <div id="empty" hidden>Teia vazia. Use "+ Adicionar" para criar o primeiro elemento.</div>
+  <div id="zoom"><button id="zin" title="Aproximar">+</button><button id="zout" title="Afastar">-</button><button id="fit" title="Ver tudo">Ver tudo</button></div>
+ </div>
+ <aside id="panel" hidden></aside>
+</main>
+<div id="modal" hidden><div id="modalBox"></div></div>
+<div id="toast" hidden></div>
+<script>
+/* Catálogo inicial da Teia Carbonautas.
+   origem q = transcrito do quadro branco do laboratório (nov/2026)
+   origem c = cadastro de integrantes do Carbonautas (lista SEED do index.html)
+   origem n = acrescentado como proposta para responder a pergunta central
+   Nenhum valor numérico, unidade ou método foi preenchido: esses campos ficam vazios até o grupo informar. */
+const CENTRAL='Como o pulso de inundação, o fogo e o uso da terra alteram os estoques e os fluxos de carbono no Pantanal, e quais são as consequências para o clima, a saúde e os modos de vida?';
+const PARENTS=[
+ /* id, nome, tipo, x, y, origem */
+ ['solo','Solo','area',-760,-380,'q'],['agua','Água','area',-250,-380,'q'],['atm','Atmosfera','area',260,-380,'q'],['saude','Saúde','area',770,-380,'q'],
+ ['sed','Sedimento','area',-760,380,'n'],['planta','Planta','area',-250,380,'q'],['etno','Etno e modos de vida','area',770,380,'q'],
+ ['est','Estoque','processo',-190,-110,'q'],['flu','Fluxo','processo',190,-110,'q'],['con','Concentração','processo',190,110,'q'],['lat','Transporte lateral','processo',-190,110,'n'],
+ ['bal','Balanço e escala','processo',260,380,'n'],
+ ['pulso','Pulso de inundação','forcante',-1240,-380,'n'],['fogo','Fogo','forcante',-1240,-130,'q'],['uso','Uso da terra','forcante',-1240,130,'n'],['clima','Clima e mudanças climáticas','forcante',-1240,380,'q']
+];
+const TEMAS=[
+ ['attz','ATTZ','tema',-560,-250,'q'],['turfa','Turfa','tema',-560,-190,'q'],
+ ['cest','C estocado','tema',-240,270,'q'],['co2','CO2','tema',-110,270,'q'],['ch4','CH4','tema',-20,270,'q'],['co2e','CO2eq','tema',80,270,'q'],['h2o','H2O (covariável)','tema',210,270,'q'],
+ ['edu','Educação e extensão','tema',1480,640,'c'],['bi','Boletim Informativo','produto',1180,640,'q']
+];
+/* variáveis: pai -> subgrupo -> [lista do quadro, lista acrescentada] */
+const VARS={
+ solo:{
+  'Física e química':[['Matéria orgânica','pH','Condutividade','Temperatura','Umidade','Textura','Carbono inorgânico','Granulometria'],['Densidade aparente','Profundidade por camada','Potencial redox','Nível do lençol freático']],
+  'Carbono e gases':[['CO2','CH4','Carbono estocado','HCO3 (a confirmar)'],['Carbono orgânico total','Respiração do solo','Carbono pirogênico','Relação C:N']],
+  'Nutrientes e biologia':[['H','N','P','Bactérias','Hg'],['Biomassa microbiana']]
+ },
+ sed:{
+  'Sedimento':[[],['Carbono no sedimento','Matéria orgânica do sedimento','Taxa de sedimentação','Ebulição de CH4','Granulometria do sedimento','Potencial redox do sedimento']]
+ },
+ agua:{
+  'Física e química':[['pH','Condutividade','Temperatura','TDS','ORP','Turbidez','Transparência','Profundidade','Velocidade','Salinidade','Pressão','OD','DBO','DQO'],['Vazão','Área alagada','Tempo de residência']],
+  'Gases':[['CO2','CH4','Pressão parcial','Concentração','k (velocidade de transferência gasosa)'],['Fluxo difusivo','Fluxo ebulitivo','N2O dissolvido']],
+  'Biologia e nutrientes':[['Bactérias','Clorofila','P','N','NH3'],['Metabolismo aquático']],
+  'Metais e íons':[['Zn','Mg','Mn','Al','Fe','Cd','Pb','Ca','CaCO3','Dureza','Alcalinidade'],[]],
+  'Carbono':[['DOC','POC','TOC','TIC','DIC','PIC'],['Exportação lateral de carbono']]
+ },
+ planta:{
+  'Produção e biomassa':[['PPB','PPL','Respiração do ecossistema','Biomassa seca','Biomassa úmida','Serrapilheira','Carbono estocado','Biomassa de raiz'],['Troca líquida do ecossistema','Teor de carbono da biomassa','Necromassa']],
+  'Estrutura':[['DAP','Densidade de madeira','Alometria','Clorofila','Densidade','Volume','Sílica'],['Altura','Área foliar','Forma de vida (lenhosa ou macrófita)','Cobertura vegetal por satélite']],
+  'Gases e processos':[['CO2','CH4','Metilação (rever: processo do Hg)','Decomposição','Mediação de gases pela planta'],[]],
+  'Comunidade':[['Riqueza','Abundância','Diversidade','Similaridade','Identificação específica'],[]]
+ },
+ atm:{
+  'Meteorologia':[['Temperatura','Radiação','Umidade','Sensação térmica','Vento','Pressão','Luminosidade','Precipitação','Ponto de orvalho','Altitude'],['Direção do vento']],
+  'Gases e partículas':[['CO2','CH4','PM2,5','PM10','Microplástico','H2O (vapor)'],['CO','Carbono negro','Profundidade óptica de aerossóis','Coluna de CO2 e CH4','N2O']],
+  'Biologia e índices':[['Bactéria','Índices bioclimáticos'],[]]
+ },
+ saude:{
+  'Exposição':[['Bioclimáticos (T, UR, PM2,5, radiação)','Exposição'],['População exposta','Janela de exposição','Fatores de confusão']],
+  'Desfechos':[['DDA','Vetores','Cardiorrespiratórias (DPOC)','TEA'],['Internações','Mortalidade','Frequência escolar','Fonte do dado de desfecho']],
+  'Ética':[[],['Aprovação no CEP']]
+ },
+ etno:{
+  'Dimensões':[['Social','Econômico','Político','Ambiental','Cultura'],[]],
+  'Demografia':[['População','Idade','Sexo','Nível de educação','Raça ou cor','Local de residência','Saúde','Naturalidade'],[]],
+  'Economia':[['Renda','Gini','IDH','PIB','Tendência de mercado','Poder de compra','IPS','Patrimônio','Gastos com material de trabalho','Turismo'],[]],
+  'Pesca e cultura':[['Tempo de prática de pesca','Fabricação artesanal','Tipo de pescador','Influência da família'],['Percepção ambiental','Conhecimento ecológico local','Calendário de pesca','Captura por esforço','Dependência do recurso','Estratégias de adaptação']],
+  'Ética':[[],['Aprovação no CEP']]
+ },
+ pulso:{'Hidrologia':[[],['Cota do rio','Área inundada','Duração da inundação','Conectividade rio e planície']]},
+ fogo:{'Fogo':[[],['Focos de calor','Área queimada','Severidade do fogo','Tempo desde o fogo','Cinzas']]},
+ uso:{'Uso e cobertura':[[],['Classe de uso e cobertura','Supressão de vegetação','Pastagem','Drenos','Hidrovia','Índice de hemerobia']]},
+ clima:{'Clima':[[],['Chuva acumulada','Índice de seca','Ondas de calor','El Niño e La Niña']]},
+ bal:{'Integração':[[],['Mapa de habitats','Extrapolação por sensoriamento remoto','CO2eq com N2O','Incerteza','Balanço de carbono']]}
+};
+/* ligações entre pais. o = origem */
+const LINKS=[
+ ['solo','atm',{o:'q',color:'#15803d'}],['agua','atm',{o:'q',color:'#1d4ed8'}],['solo','est',{o:'q',color:'#15803d'}],['solo','flu',{o:'q',color:'#15803d'}],
+ ['agua','flu',{o:'q',color:'#1d4ed8'}],['agua','est',{o:'q',color:'#1d4ed8'}],['planta','est',{o:'q',color:'#15803d'}],['planta','flu',{o:'q',color:'#15803d'}],
+ ['planta','atm',{o:'q',dir:'both',color:'#1d4ed8'}],['flu','atm',{o:'q'}],['atm','con',{o:'q'}],['agua','con',{o:'q',color:'#1d4ed8'}],
+ ['solo','planta',{o:'q',dir:'none',color:'#15803d'}],['agua','planta',{o:'q',dir:'none',color:'#1d4ed8'}],
+ ['solo','attz',{o:'q',kind:'indireta'}],['solo','turfa',{o:'q',kind:'indireta'}],['fogo','solo',{o:'q',color:'#b91c1c'}],
+ ['pulso','agua',{o:'n',color:'#b91c1c'}],['pulso','solo',{o:'n',color:'#b91c1c'}],['pulso','sed',{o:'n',color:'#b91c1c'}],['fogo','atm',{o:'n',color:'#b91c1c',label:'fumaça'}],
+ ['fogo','planta',{o:'n',color:'#b91c1c'}],['fogo','agua',{o:'n',color:'#b91c1c',label:'cinzas'}],['uso','solo',{o:'n',color:'#b91c1c'}],['uso','planta',{o:'n',color:'#b91c1c'}],['clima','pulso',{o:'n',color:'#b91c1c'}],['clima','fogo',{o:'n',color:'#b91c1c'}],
+ ['sed','flu',{o:'n',color:'#15803d'}],['sed','est',{o:'n',color:'#15803d'}],['agua','lat',{o:'n',color:'#1d4ed8'}],['est','bal',{o:'n',kind:'indireta'}],['flu','bal',{o:'n',kind:'indireta'}],['lat','bal',{o:'n',kind:'indireta'}],
+ ['atm','saude',{o:'n',color:'#7e22ce',label:'PM2,5 e calor'}],['agua','saude',{o:'n',color:'#7e22ce',label:'DDA'}],['etno','saude',{o:'n',color:'#7e22ce',label:'exposição'}],['agua','etno',{o:'n',color:'#7e22ce',label:'pesca'}],['clima','etno',{o:'n',color:'#b91c1c'}],
+ ['est','c',{o:'n',kind:'indireta',weight:1}],['flu','c',{o:'n',kind:'indireta',weight:1}],['con','c',{o:'n',kind:'indireta',weight:1}],['lat','c',{o:'n',kind:'indireta',weight:1}],['saude','c',{o:'n',kind:'indireta',weight:1}],['etno','c',{o:'n',kind:'indireta',weight:1}]
+];
+/* pessoas do cadastro e do quadro. quadro = ligações escritas no quadro. alvo = para onde o tema cadastrado aponta */
+const PROJETOS=[
+ {p:[['anap','Ana Paula','Pós-doc. Tema cadastrado: Carbono estocado em solo e plantas, fluxo de carbono e correlação com a qualidade ambiental no Centro-Oeste de Mato Grosso.']],q:'Quanto carbono está estocado em solo e plantas, e como o fluxo se relaciona com a qualidade ambiental?',alvo:['solo','planta','est','flu'],quadro:['solo','attz','turfa','bi']},
+ {p:[['daiana','Daiana','Doutorado. Tema cadastrado: Turfeiras e a relação recíproca entre o fogo e as turfeiras.']],q:'Como fogo e turfeiras se afetam mutuamente, e quanto carbono a turfa perde quando queima?',alvo:['turfa','fogo','solo','est'],quadro:['solo','attz','turfa']},
+ {p:[['gustavoz','Gustavo Zaninelo','Doutorado. Tema cadastrado: Efeito das cinzas na qualidade da água, gases de efeito estufa, fluxo de carbono, CH4 e CO2. No quadro aparece só como Gustavo.']],q:'Como as cinzas alteram a qualidade da água e os fluxos de CO2 e CH4?',alvo:['fogo','agua','flu'],quadro:['solo']},
+ {p:[['niels','Niels van Hof','Estágio (Holanda). Tema cadastrado: Efeito das cinzas na decoada e na qualidade da água, com gases de efeito estufa.']],q:'As cinzas intensificam a decoada e as emissões de gases de efeito estufa?',alvo:['fogo','agua','flu'],quadro:[]},
+ {p:[['lisa','Lisa Mijnheer','Estágio (Holanda). Tema cadastrado: Efeito das cinzas na cadeia trófica e no metilmercúrio, em mesocosmos do Pantanal.']],q:'As cinzas alteram a cadeia trófica e a formação de metilmercúrio?',alvo:['fogo','agua'],quadro:[]},
+ {p:[['josy','Josy','Doutorado. Tema cadastrado: Qualidade dos córregos urbanos da bacia do rio Paraguai.']],q:'A qualidade dos córregos urbanos muda o carbono que eles transportam e emitem?',alvo:['agua','lat','uso'],quadro:['solo']},
+ {p:[['thiago','Thiago','Doutorado. Tema cadastrado: Impacto da hidrovia no Pantanal.']],q:'A hidrovia altera o pulso de inundação e, com ele, os estoques e fluxos de carbono?',alvo:['pulso','agua','uso'],quadro:['solo','bi']},
+ {p:[['matheus','Matheus','IC. Tema cadastrado: Espécies com maior acúmulo de CO2 para estoque, aplicadas à restauração.'],['vanessa','Vanessa','IC. Tema cadastrado: Espécies com maior acúmulo de CO2 para estoque, aplicadas à restauração.']],q:'Quais espécies acumulam mais carbono e servem à restauração?',alvo:['planta','est'],quadro:['bi',null]},
+ {p:[['cleverson','Cleverson','Doutorado. Tema cadastrado: Qualidade do ar e PM2.5, com foco em variáveis microclimáticas de temperatura, precipitação e umidade.']],q:'Como temperatura, chuva e umidade modulam o PM2,5?',alvo:['atm','clima','con'],quadro:[]},
+ {p:[['maisa','Maísa','Doutorado. Tema cadastrado: PM2.5 e saúde humana de povos vulnerabilizados, principalmente crianças e idosos da região pantaneira.']],q:'O PM2,5 das queimadas pesa mais sobre crianças e idosos da região pantaneira?',alvo:['fogo','atm','saude'],quadro:[]},
+ {p:[['leticia','Letícia','IC. Tema cadastrado: Aumento de temperatura e doenças cardíacas.']],q:'O aumento de temperatura eleva as doenças cardíacas?',alvo:['clima','atm','saude'],quadro:[]},
+ {p:[['antonio','Antonio','IC. Tema cadastrado: Análise bioclimática em quatro escolas de Cáceres, medindo temperatura, umidade e PM2.5.']],q:'As escolas diferem em temperatura, umidade e PM2,5, e isso muda a exposição dos alunos?',alvo:['atm','saude'],quadro:[]},
+ {p:[['danidias','Danielle Dias','IC. Tema cadastrado: Estações meteorológicas e análise dos seus dados.']],q:'O que as estações meteorológicas mostram sobre o microclima local?',alvo:['atm','clima'],quadro:[]},
+ {p:[['francien','Francien','Estágio (Holanda). Tema cadastrado: Análise da qualidade ambiental via satélite, usando o índice de hemerobia.']],q:'O índice de hemerobia por satélite indica onde o uso da terra mais altera o ambiente?',alvo:['uso','bal'],quadro:[]},
+ {p:[['ivanka','Ivanka','Estágio (Holanda). Tema cadastrado: Diversidade de peixes no Pantanal e qualidade ambiental.']],q:'A diversidade de peixes acompanha a qualidade ambiental?',alvo:['agua','uso','etno'],quadro:[]},
+ {p:[['edilaina','Edilaina','Mestrado. Tema cadastrado: Impactos das mudanças climáticas em assentamentos de Rondônia.'],['mariag','Maria Gonçalves','Mestrado ProfÁgua. Tema cadastrado: Efeitos das mudanças climáticas em assentados de Nossa Senhora do Livramento.']],q:'Como as mudanças climáticas afetam a vida e a água dos assentados?',alvo:['clima','etno'],quadro:[]}
+];
+/* pessoas cujo tema cadastrado não mede carbono: ficam ligadas a Educação e extensão */
+const EXTENSAO=[
+ ['vitoria','Vitória','Aparece no quadro ligada ao Boletim Informativo. Sem tema no cadastro consultado.',['bi']],
+ ['danitav','Danielle Tavares','Pós-doc. Tema cadastrado: Plano de visibilidade da pós-graduação, abrangendo os 27 programas da UNEMAT.',['edu']],
+ ['elaine','Elaine','Mestrado ProfÁgua. Tema cadastrado: Protocolo de aulas de campo em recursos hídricos para crianças atípicas, principalmente autistas.',['edu']],
+ ['silvia','Silvia','Mestrado ProfÁgua (coorientação). Tema cadastrado: Diário das águas para alunos do ensino fundamental.',['edu']],
+ ['luan','Luan','IC. Tema cadastrado: Análise dos jogos educativos desenvolvidos no grupo.',['edu']],
+ ['cintya','Cintya','IE. Tema cadastrado: Legados da COP Pantanal e da Carta do Pantanal.',['edu']],
+ ['keitty','Keitty','IE. Tema cadastrado: Extensão da pós-graduação, produção de vídeos e cartilha sobre os programas.',['edu']]
+];
+function catalogo(){
+ const N=[],E=[];const O={q:'quadro',c:'cadastro',n:'novo'};
+ const n=(id,name,type,x,y,o,extra)=>N.push(Object.assign({id,name,type,group:'',sub:'',x,y,note:'',status:'indef',unit:'',method:'',equip:'',freq:'',origin:O[o]||'novo',memberId:''},extra||{}));
+ const e=(a,b,x)=>{x=x||{};E.push({id:'e'+E.length,a,b,dir:x.dir||'forward',kind:x.kind||'direta',color:x.color||'#334155',weight:x.weight||2,label:x.label||'',origin:O[x.o]||'novo'})};
+ n('c',CENTRAL,'central',0,0,'n');
+ for(const p of PARENTS.concat(TEMAS))n(p[0],p[1],p[2],p[3],p[4],p[5]);
+ for(const pid in VARS){
+  const par=N.find(z=>z.id===pid),up=par.y<0;let i=0;
+  for(const sub in VARS[pid]){
+   const[q,nv]=VARS[pid][sub];
+   for(const[list,o]of[[q,'q'],[nv,'n']])for(const name of list){
+    const col=i%3,row=Math.floor(i/3);
+    n(pid+'_v'+i,name,'variavel',par.x+(col-1)*165,up?par.y-85-row*40:par.y+85+row*40,o,{group:pid,sub});i++;
+   }
+  }
+ }
+ for(const l of LINKS)e(l[0],l[1],l[2]);
+ let y=-560;
+ for(const pr of PROJETOS){
+  const qid='q_'+pr.p[0][0];
+  n(qid,pr.q,'pergunta',1560,y,'n',{note:'Sugestão a validar, derivada do tema cadastrado.'});
+  pr.p.forEach((pp,i)=>{
+   n(pp[0],pp[1],'pessoa',1270-i*140,y,'c',{note:pp[2]});
+   e(pp[0],qid,{o:'n',dir:'none',color:'#7e22ce',weight:1});
+  });
+  for(const a of pr.alvo)e(qid,a,{o:'n',dir:'none',kind:'indireta',color:'#c2410c',weight:1});
+  pr.p.forEach((pp,i)=>{const qd=pr.p.length>1?(i===0?pr.quadro.filter(Boolean):[]):pr.quadro;for(const a of qd)e(pp[0],a,{o:'q',color:a==='bi'?'#be185d':'#7e22ce',weight:1})});
+  y+=70;
+ }
+ EXTENSAO.forEach((x,i)=>{n(x[0],x[1],'pessoa',1040+(i%4)*130,720+Math.floor(i/4)*60,x[0]==='vitoria'?'q':'c',{note:x[2]});for(const a of x[3])e(x[0],a,{o:x[0]==='vitoria'?'q':'c',color:'#be185d',weight:1})});
+ return{nodes:N,edges:E};
+}
+
+</script>
+<script>
+(()=>{'use strict';
+const TYPES={
+ central:{n:'Pergunta central',c:'#b45309',f:'#fef3c7'},
+ forcante:{n:'Forçante',c:'#b91c1c',f:'#fee2e2'},
+ area:{n:'Compartimento',c:'#15803d',f:'#dcfce7'},
+ processo:{n:'Processo',c:'#1d4ed8',f:'#dbeafe'},
+ variavel:{n:'Variável',c:'#0e7490',f:'#ecfeff'},
+ tema:{n:'Tema',c:'#475569',f:'#f1f5f9'},
+ pessoa:{n:'Pessoa',c:'#7e22ce',f:'#f3e8ff'},
+ projeto:{n:'Projeto',c:'#4338ca',f:'#e0e7ff'},
+ pergunta:{n:'Pergunta acessória',c:'#c2410c',f:'#ffedd5'},
+ produto:{n:'Produto',c:'#be185d',f:'#fce7f3'}
+};
+const SOFT=['pergunta','pessoa'];
+const PARENT_TYPES=['area','forcante','processo','tema'];
+const STATUS={indef:['A definir','#9ca3af'],faz:['O laboratório faz','#16a34a'],parte:['Faz em parte','#d97706'],parceiro:['Depende de parceiro','#2563eb'],nao:['Não faz hoje','#dc2626']};
+const ORIGIN={quadro:'Quadro do laboratório',cadastro:'Cadastro do Carbonautas',novo:'Acrescentado como proposta',grupo:'Criado pelo grupo'};
+const COLORS=['#334155','#15803d','#1d4ed8','#b91c1c','#c2410c','#7e22ce','#0891b2','#be185d'];
+const KEY='carbonautas-teia-v2',UIKEY='carbonautas-teia-ui-v2';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const str=(v,max)=>String(v??'').slice(0,max||4000);
+
+/* ---------- estado ---------- */
+let data={nodes:[],edges:[]},sel=null,connect=null,focus=null,undo=[],redo=[],cur=null;
+let view={x:0,y:0,k:1},hidden=new Set(),open=new Set(),panelOpen=false,boxes={},kids={};
+let mode='local',synced=new Map(),meta=new Map(),backend=null,flushT=null,rafR=0,me=null;
+function normNode(n){return{id:str(n.id,80),name:str(n.name,600),type:TYPES[n.type]?n.type:(n.type==='medida'?'processo':'tema'),group:str(n.group,80),sub:str(n.sub,80),x:Math.round(Number(n.x)||0),y:Math.round(Number(n.y)||0),note:str(n.note,3000),status:STATUS[n.status]?n.status:'indef',unit:str(n.unit,120),method:str(n.method,600),equip:str(n.equip,300),freq:str(n.freq,200),origin:ORIGIN[n.origin]?n.origin:'grupo',memberId:str(n.memberId,80)}}
+function normEdge(e){return{id:str(e.id||uid('e'),80),a:str(e.a,80),b:str(e.b,80),dir:['forward','reverse','both','none'].includes(e.dir)?e.dir:'forward',kind:e.kind==='indireta'?'indireta':'direta',color:/^#[0-9a-fA-F]{6}$/.test(e.color||'')?e.color:'#334155',weight:Math.max(1,Math.min(5,Math.round(Number(e.weight)||2))),label:str(e.label,120),origin:ORIGIN[e.origin]?e.origin:'grupo'}}
+function valid(d){return d&&Array.isArray(d.nodes)&&Array.isArray(d.edges)}
+function normalize(d){
+ const nodes=d.nodes.filter(n=>n&&n.id).map(normNode),ids=new Set(nodes.map(n=>n.id));
+ return{nodes,edges:d.edges.filter(e=>e&&ids.has(e.a)&&ids.has(e.b)&&e.a!==e.b).map(normEdge)};
+}
+const node=id=>data.nodes.find(n=>n.id===id);
+const edge=id=>data.edges.find(e=>e.id===id);
+function index(){const m=new Map();for(const n of data.nodes)m.set('n:'+n.id,JSON.stringify(n));for(const e of data.edges)m.set('e:'+e.id,JSON.stringify(e));return m}
+function localJson(k){const o=k[0]==='n'?node(k.slice(2)):edge(k.slice(2));return o?JSON.stringify(o):undefined}
+function setLocal(k,obj){const arr=k[0]==='n'?data.nodes:data.edges,i=arr.findIndex(o=>o.id===obj.id);if(i<0)arr.push(obj);else arr[i]=obj}
+function removeLocal(k){const id=k.slice(2);if(k[0]==='n')data.nodes=data.nodes.filter(o=>o.id!==id);else data.edges=data.edges.filter(o=>o.id!==id)}
+
+/* ---------- desfazer por item: não reverte edição de outra pessoa ---------- */
+function closeEntry(){
+ if(!cur)return;const now=index(),before={},after={};let n=0;
+ for(const[k,j]of now)if(cur.base.get(k)!==j){before[k]=cur.base.get(k)??null;after[k]=j;n++}
+ for(const[k,j]of cur.base)if(!now.has(k)){before[k]=j;after[k]=null;n++}
+ if(n){undo.push({before,after});if(undo.length>150)undo.shift()}
+ cur=null;
+}
+function touch(key){
+ const t=Date.now();
+ if(cur&&key&&cur.key===key&&t-cur.t<1500){cur.t=t;return}
+ closeEntry();cur={base:index(),key:key||'',t};redo=[];
+}
+function applyMap(m){for(const k in m){if(m[k]===null)removeLocal(k);else setLocal(k,JSON.parse(m[k]))}}
+function afterHistory(){if(sel&&!(sel.kind==='node'?node(sel.id):edge(sel.id)))sel=null;if(focus&&!node(focus))focus=null;persist();render();panel()}
+function doUndo(){closeEntry();const e=undo.pop();if(!e)return;applyMap(e.before);redo.push(e);afterHistory()}
+function doRedo(){closeEntry();const e=redo.pop();if(!e)return;applyMap(e.after);undo.push(e);afterHistory()}
+
+/* ---------- gravação: local ou compartilhada ---------- */
+function persist(){
+ if(mode==='online'){clearTimeout(flushT);flushT=setTimeout(flush,500)}
+ else{try{localStorage.setItem(KEY,JSON.stringify(data))}catch(_){}}
+}
+const save=persist;
+function flush(){
+ if(mode!=='online'||!backend)return;
+ const now=index(),ops=[];
+ for(const[k,j]of now)if(synced.get(k)!==j){ops.push({k,data:JSON.parse(j)});synced.set(k,j)}
+ for(const k of[...synced.keys()])if(!now.has(k)){ops.push({k,data:null});synced.delete(k)}
+ if(!ops.length)return;
+ backend.commit(ops).catch(err=>{console.error(err);setSync('err','Não foi possível gravar no servidor. Suas últimas edições podem não ter sido salvas.')});
+}
+function remote(k,obj,m){
+ const j=obj?JSON.stringify(k[0]==='n'?normNode(obj):normEdge(obj)):null,prev=synced.get(k),loc=localJson(k);
+ if(j===null){synced.delete(k);meta.delete(k);if(loc===prev){removeLocal(k);if(cur)cur.base.delete(k)}}
+ else{synced.set(k,j);if(m)meta.set(k,m);if(loc===prev){setLocal(k,JSON.parse(j));if(cur)cur.base.set(k,j)}}
+ if(!rafR)rafR=requestAnimationFrame(()=>{rafR=0;if(sel&&!(sel.kind==='node'?node(sel.id):edge(sel.id))){sel=null;panel()}render()});
+}
+function setSync(cls,text,actions){const s=$('sync');s.className=cls||'';$('syncText').textContent=text;$('syncActions').innerHTML=actions||''}
+function saveUi(){try{localStorage.setItem(UIKEY,JSON.stringify({hidden:[...hidden],open:[...open]}))}catch(_){}}
+function loadLocal(){
+ try{const u=JSON.parse(localStorage.getItem(UIKEY));if(u){hidden=new Set(u.hidden||[]);open=new Set(u.open||[])}}catch(_){}
+ try{const d=JSON.parse(localStorage.getItem(KEY));if(valid(d)){data=normalize(d);return}}catch(_){}
+ data=normalize(catalogo());
+}
+
+/* ---------- geometria ---------- */
+function box(n){
+ const big=n.type==='central',q=n.type==='pergunta',v=n.type==='variavel',fs=big?16:v?12:13,max=big?34:q?30:v?22:18;
+ const words=String(n.name||'').trim().split(/\s+/).filter(Boolean);let lines=[],c='';
+ for(const w of words){if(c&&(c+' '+w).length>max){lines.push(c);c=w}else c=c?c+' '+w:w}
+ if(c)lines.push(c);if(!lines.length)lines=['(sem nome)'];
+ const nk=(kids[n.id]||[]).length,extra=nk?15:0;
+ const w=Math.max(60,Math.max(...lines.map(l=>l.length),nk?13:0)*fs*.6+30),lh=fs+5,h=lines.length*lh+(big?28:v?12:18)+extra;
+ return{lines,w,h,fs,lh,nk,extra};
+}
+function clip(n,b,tx,ty){
+ const dx=tx-n.x,dy=ty-n.y;if(!dx&&!dy)return[n.x,n.y];
+ const s=Math.min((b.w/2+5)/Math.abs(dx||1e-9),(b.h/2+5)/Math.abs(dy||1e-9));
+ return[n.x+dx*s,n.y+dy*s];
+}
+function edgeGeom(e,a,b){
+ const mx=(a.x+b.x)/2,my=(a.y+b.y)/2,dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1;
+ const bend=Math.min(26,len*.08),cx=mx-dy/len*bend,cy=my+dx/len*bend;
+ let[ax,ay]=clip(a,boxes[a.id],cx,cy),[bx,by]=clip(b,boxes[b.id],cx,cy);
+ if(Math.hypot(bx-ax,by-ay)<6)return null;
+ const w=1+e.weight*1.3,hs=7+e.weight*1.8;
+ const head=(px,py)=>{const vx=px-cx,vy=py-cy,l=Math.hypot(vx,vy)||1,tx=vx/l,ty=vy/l,qx=px-tx*hs,qy=py-ty*hs,hw=hs*.5;
+  return{poly:px+','+py+' '+(qx-ty*hw)+','+(qy+tx*hw)+' '+(qx+ty*hw)+','+(qy-tx*hw),bx:px-tx*hs*.8,by:py-ty*hs*.8}};
+ let heads=[];
+ if(e.dir==='forward'||e.dir==='both'){const h=head(bx,by);heads.push(h.poly);bx=h.bx;by=h.by}
+ if(e.dir==='reverse'||e.dir==='both'){const h=head(ax,ay);heads.push(h.poly);ax=h.bx;ay=h.by}
+ const r=v=>Math.round(v*10)/10;
+ return{d:'M'+r(ax)+' '+r(ay)+'Q'+r(cx)+' '+r(cy)+' '+r(bx)+' '+r(by),heads,w,lx:(ax+2*cx+bx)/4,ly:(ay+2*cy+by)/4};
+}
+function neighbors(id){const out=[];for(const e of data.edges){if(e.a===id){const o=node(e.b);if(o)out.push(o)}else if(e.b===id){const o=node(e.a);if(o)out.push(o)}}return out}
+function focusSet(){
+ if(!focus||!node(focus))return null;
+ const s=new Set([focus]);
+ const grow=id=>{for(const n of neighbors(id))s.add(n.id)};
+ grow(focus);
+ for(const id of[...s]){const n=node(id);if(!n)continue;
+  if(n.type==='variavel'){if(n.group)s.add(n.group);for(const p of neighbors(id))if(p.type==='pessoa'||p.type==='pergunta')s.add(p.id)}
+  if(n.type==='pergunta'&&id!==focus)for(const p of neighbors(id))if(p.type==='pessoa')s.add(p.id)}
+ return s;
+}
+
+/* ---------- desenho ---------- */
+function visible(n,fs,all){
+ if(all)return true;
+ if(fs&&fs.has(n.id))return true;
+ if(hidden.has(n.type))return false;
+ if(n.type==='variavel'&&n.group&&node(n.group)&&!open.has(n.group))return false;
+ return true;
+}
+function markup(all){
+ kids={};for(const n of data.nodes)if(n.group&&n.group!==n.id)(kids[n.group]=kids[n.group]||[]).push(n);
+ boxes={};for(const n of data.nodes)boxes[n.id]=box(n);
+ const fs=all?null:focusSet(),vis={};for(const n of data.nodes)vis[n.id]=visible(n,fs,all);
+ const dim=id=>fs&&!fs.has(id);
+ let out='';
+ for(const n of data.nodes){
+  if(!n.group||!vis[n.id])continue;const p=node(n.group);if(!p||!vis[p.id])continue;
+  out+='<line x1="'+p.x+'" y1="'+p.y+'" x2="'+n.x+'" y2="'+n.y+'" stroke="#cbd5e1" stroke-width="1"'+(dim(n.id)?' opacity=".15"':'')+'/>';
+ }
+ for(const e of data.edges){
+  const a=node(e.a),b=node(e.b);if(!a||!b||!vis[a.id]||!vis[b.id])continue;
+  const g=edgeGeom(e,a,b);if(!g)continue;
+  const s=!all&&sel&&sel.kind==='edge'&&sel.id===e.id,dash=e.kind==='indireta'?' stroke-dasharray="8 6"':'',faded=dim(a.id)||dim(b.id);
+  const soft=!all&&!fs&&!s&&(SOFT.includes(a.type)||SOFT.includes(b.type))&&!(sel&&sel.kind==='node'&&(sel.id===a.id||sel.id===b.id));
+  out+='<g data-edge="'+esc(e.id)+'"'+(faded?' opacity=".08"':soft?' opacity=".2"':'')+'>';
+  if(s)out+='<path d="'+g.d+'" fill="none" stroke="#fde68a" stroke-width="'+(g.w+9)+'" stroke-linecap="round"/>';
+  out+='<path d="'+g.d+'" fill="none" stroke="'+e.color+'" stroke-width="'+g.w+'" stroke-linecap="round"'+dash+'/>';
+  for(const h of g.heads)out+='<polygon points="'+h+'" fill="'+e.color+'"/>';
+  if(e.label)out+='<text x="'+g.lx+'" y="'+(g.ly+4)+'" text-anchor="middle" font-size="12" fill="'+e.color+'" stroke="#fff" stroke-width="4" paint-order="stroke" font-weight="600">'+esc(e.label)+'</text>';
+  if(!all)out+='<path d="'+g.d+'" fill="none" stroke="transparent" stroke-width="20" style="cursor:pointer"/>';
+  out+='</g>';
+ }
+ for(const n of data.nodes){
+  if(!vis[n.id])continue;
+  const b=boxes[n.id],t=TYPES[n.type],s=!all&&sel&&sel.kind==='node'&&sel.id===n.id,src=!all&&connect&&connect.from===n.id;
+  const big=n.type==='central',rx=n.type==='pessoa'?b.h/2:big?18:n.type==='variavel'?7:10,novo=n.origin==='novo'&&!big;
+  out+='<g data-node="'+esc(n.id)+'" transform="translate('+n.x+','+n.y+')" style="cursor:pointer"'+(dim(n.id)?' opacity=".12"':'')+'>';
+  if(s||src)out+='<rect x="'+(-b.w/2-5)+'" y="'+(-b.h/2-5)+'" width="'+(b.w+10)+'" height="'+(b.h+10)+'" rx="'+(rx+5)+'" fill="'+(src?'#99f6e4':'#fde68a')+'"/>';
+  out+='<rect x="'+(-b.w/2)+'" y="'+(-b.h/2)+'" width="'+b.w+'" height="'+b.h+'" rx="'+rx+'" fill="'+t.f+'" stroke="'+t.c+'" stroke-width="'+(big?3:n.type==='variavel'?1.2:1.8)+'"'+(novo?' stroke-dasharray="5 3"':'')+'/>';
+  const y0=-(b.lines.length-1)*b.lh/2+b.fs*.35-b.extra/2;
+  b.lines.forEach((l,i)=>{out+='<text x="0" y="'+(y0+i*b.lh)+'" text-anchor="middle" font-size="'+b.fs+'" font-weight="'+(big||PARENT_TYPES.includes(n.type)&&n.type!=='tema'?700:500)+'" fill="#111827">'+esc(l)+'</text>'});
+  if(b.nk)out+='<text x="0" y="'+(b.h/2-7)+'" text-anchor="middle" font-size="11" fill="'+t.c+'">'+(open.has(n.id)?'fechar ':'abrir ')+b.nk+' var.</text>';
+  if(n.status!=='indef')out+='<circle cx="'+(b.w/2-4)+'" cy="'+(-b.h/2+4)+'" r="6" fill="'+STATUS[n.status][1]+'" stroke="#fff" stroke-width="2"/>';
+  out+='</g>';
+ }
+ return{out,vis};
+}
+let lastVis={};
+function render(){
+ const m=markup(false);lastVis=m.vis;$('world').innerHTML=m.out;setView();
+ $('svg').setAttribute('font-family','system-ui,-apple-system,Segoe UI,Roboto,sans-serif');
+ $('empty').hidden=data.nodes.length>0;
+ $('undo').disabled=!undo.length&&!cur;$('redo').disabled=!redo.length;
+ $('connect').classList.toggle('on',!!connect);
+ const h=$('hint');
+ if(connect){h.hidden=false;h.textContent=connect.from?'Agora toque no segundo elemento.':'Toque no primeiro elemento da ligação.'}
+ else if(focus&&node(focus)){h.hidden=false;h.innerHTML='Cadeia de: '+esc(short(node(focus).name))+' <button id="unfocus">Sair</button>';$('unfocus').onclick=()=>{focus=null;render()}}
+ else h.hidden=true;
+}
+function setView(){$('world').setAttribute('transform','translate('+view.x+','+view.y+') scale('+view.k+')')}
+function bounds(all,only){
+ let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+ for(const n of data.nodes){if(only&&!only.has(n.id))continue;if(!all&&lastVis[n.id]===false)continue;const b=boxes[n.id]||box(n);x0=Math.min(x0,n.x-b.w/2);x1=Math.max(x1,n.x+b.w/2);y0=Math.min(y0,n.y-b.h/2);y1=Math.max(y1,n.y+b.h/2)}
+ return isFinite(x0)?{x0,y0,x1,y1}:{x0:0,y0:0,x1:800,y1:500};
+}
+function fit(){
+ const r=$('svg').getBoundingClientRect(),b=bounds(false,focusSet()),pad=40,w=b.x1-b.x0+pad*2,h=b.y1-b.y0+pad*2;
+ view.k=Math.max(.12,Math.min(1.3,Math.min(r.width/w,r.height/h)));
+ view.x=(r.width-(b.x0+b.x1)*view.k)/2;view.y=(r.height-(b.y0+b.y1)*view.k)/2;setView();
+}
+function zoomAt(f,sx,sy){const k=Math.max(.12,Math.min(3,view.k*f));view.x=sx-(sx-view.x)*k/view.k;view.y=sy-(sy-view.y)*k/view.k;view.k=k;setView()}
+function center(n,k){const r=$('svg').getBoundingClientRect();if(k)view.k=k;view.x=r.width/2-n.x*view.k;view.y=r.height/2-n.y*view.k;setView()}
+function go(id){const n=node(id);if(!n)return;hidden.delete(n.type);if(n.group)open.add(n.group);saveUi();sel={kind:'node',id};closeModal();render();center(n,Math.max(view.k,.8));panel()}
+
+/* ---------- painel ---------- */
+const short=s=>{s=String(s||'(sem nome)');return s.length>30?s.slice(0,28)+'...':s};
+function typeOptions(v){return Object.entries(TYPES).map(([k,t])=>'<option value="'+k+'"'+(k===v?' selected':'')+'>'+t.n+'</option>').join('')}
+function who(k){const m=meta.get(k);return m&&m.name?'<p class="small">Última edição: '+esc(m.name)+'</p>':''}
+function panel(){
+ const p=$('panel');
+ if(sel&&sel.kind==='node'){
+  const n=node(sel.id);if(!n){sel=null;return panel()}
+  const isVar=n.type==='variavel',canParent=PARENT_TYPES.includes(n.type),nk=(kids[n.id]||[]).length;
+  const parents=data.nodes.filter(x=>PARENT_TYPES.includes(x.type)&&x.id!==n.id);
+  p.hidden=false;
+  let h='<h2>'+TYPES[n.type].n+'<button class="x" data-act="close" aria-label="Fechar">x</button></h2>'
+  +'<label for="fName">'+(n.type==='pergunta'||n.type==='central'?'Texto da pergunta':'Nome')+'</label><textarea id="fName">'+esc(n.name)+'</textarea>'
+  +'<div class="two"><div><label for="fType">Tipo</label><select id="fType">'+typeOptions(n.type)+'</select></div>'
+  +'<div><label for="fStatus">O laboratório faz?</label><select id="fStatus">'+Object.entries(STATUS).map(([k,s])=>'<option value="'+k+'"'+(k===n.status?' selected':'')+'>'+s[0]+'</option>').join('')+'</select></div></div>';
+  if(isVar){
+   h+='<div class="two"><div><label for="fGroup">Pertence a</label><select id="fGroup"><option value="">Nenhum</option>'+parents.map(x=>'<option value="'+esc(x.id)+'"'+(x.id===n.group?' selected':'')+'>'+esc(short(x.name))+'</option>').join('')+'</select></div>'
+   +'<div><label for="fSub">Subgrupo</label><input type="text" id="fSub" value="'+esc(n.sub)+'"></div></div>'
+   +'<div class="two"><div><label for="fUnit">Unidade</label><input type="text" id="fUnit" value="'+esc(n.unit)+'"></div>'
+   +'<div><label for="fFreq">Frequência</label><input type="text" id="fFreq" value="'+esc(n.freq)+'"></div></div>'
+   +'<label for="fMethod">Método</label><input type="text" id="fMethod" value="'+esc(n.method)+'">'
+   +'<label for="fEquip">Equipamento</label><input type="text" id="fEquip" value="'+esc(n.equip)+'">';
+  }
+  h+='<label for="fNote">Observação</label><textarea id="fNote" placeholder="Projeto, o que falta, dúvidas">'+esc(n.note)+'</textarea>'
+  +'<p class="small" id="fLinks"></p><p class="small">Origem: '+ORIGIN[n.origin]+'</p>'+who('n:'+n.id)
+  +'<div class="row"><button data-act="linkmany" class="primary">Ligações em lista</button><button data-act="linkfrom">Ligar tocando</button><button data-act="chain"'+(focus===n.id?' class="on"':'')+'>Ver cadeia</button></div><div class="row">'
+  +(canParent?'<button data-act="addvar">+ Variável aqui</button>':'')+(nk?'<button data-act="toggle">'+(open.has(n.id)?'Fechar':'Abrir')+' '+nk+' variáveis</button>':'')
+  +'<button data-act="dup">Duplicar</button><button data-act="delnode" class="danger">Excluir</button></div>';
+  p.innerHTML=h;
+  const nb=neighbors(n.id);$('fLinks').textContent=nb.length?'Ligado a: '+nb.map(x=>short(x.name)).join(', '):'Sem ligações ainda.';
+  const bind=(id,field,rerender)=>{const el=$(id);if(el)el.oninput=ev=>{touch(field+n.id);n[field]=ev.target.value;save();if(rerender)render()}};
+  bind('fName','name',true);bind('fNote','note');bind('fSub','sub');bind('fUnit','unit');bind('fFreq','freq');bind('fMethod','method');bind('fEquip','equip');
+  $('fType').onchange=ev=>{touch();n.type=ev.target.value;if(n.type!=='variavel')n.group='';save();render();panel()};
+  $('fStatus').onchange=ev=>{touch();n.status=ev.target.value;save();render()};
+  if($('fGroup'))$('fGroup').onchange=ev=>{touch();n.group=ev.target.value;if(n.group){open.add(n.group);saveUi()}save();render()};
+  return;
+ }
+ if(sel&&sel.kind==='edge'){
+  const e=edge(sel.id);if(!e){sel=null;return panel()}
+  const a=node(e.a),b=node(e.b),A=esc(short(a?.name)),B=esc(short(b?.name));
+  p.hidden=false;
+  p.innerHTML='<h2>Ligação<button class="x" data-act="close" aria-label="Fechar">x</button></h2>'
+  +'<p class="small">'+A+' e '+B+'</p>'
+  +'<label for="eDir">Sentido da seta</label><select id="eDir"><option value="forward">'+A+' para '+B+'</option><option value="reverse">'+B+' para '+A+'</option><option value="both">Nos dois sentidos</option><option value="none">Sem seta</option></select>'
+  +'<label for="eKind">Tipo de ligação</label><select id="eKind"><option value="direta">Direta (linha cheia)</option><option value="indireta">Indireta (tracejada)</option></select>'
+  +'<label>Cor da seta</label><div class="swatches">'+COLORS.map(c=>'<button data-color="'+c+'" style="background:'+c+'" aria-label="Cor '+c+'"></button>').join('')+'<input type="color" id="eColor" value="'+e.color+'" aria-label="Outra cor"></div>'
+  +'<label for="eW">Força da ligação: <b id="eWv">'+e.weight+'</b> de 5</label><input type="range" id="eW" min="1" max="5" step="1" value="'+e.weight+'">'
+  +'<label for="eLabel">Rótulo na seta</label><input type="text" id="eLabel" value="'+esc(e.label)+'" placeholder="Ex.: CO2, CH4">'
+  +'<p class="small">Origem: '+ORIGIN[e.origin]+'</p>'+who('e:'+e.id)
+  +'<div class="row"><button data-act="swap">Inverter</button><button data-act="deledge" class="danger">Excluir ligação</button></div>';
+  $('eDir').value=e.dir;$('eKind').value=e.kind;
+  $('eDir').onchange=ev=>{touch();e.dir=ev.target.value;save();render()};
+  $('eKind').onchange=ev=>{touch();e.kind=ev.target.value;save();render()};
+  $('eColor').oninput=ev=>{touch('color'+e.id);e.color=ev.target.value;save();render()};
+  $('eW').oninput=ev=>{touch('w'+e.id);e.weight=Number(ev.target.value);$('eWv').textContent=e.weight;save();render()};
+  $('eLabel').oninput=ev=>{touch('label'+e.id);e.label=ev.target.value;save();render()};
+  p.querySelectorAll('[data-color]').forEach(b2=>b2.onclick=()=>{touch();e.color=b2.dataset.color;$('eColor').value=e.color;save();render()});
+  return;
+ }
+ if(!panelOpen){p.hidden=true;return}
+ p.hidden=false;
+ const count=k=>data.nodes.filter(n=>n.type===k).length,withKids=Object.keys(kids).filter(id=>node(id));
+ p.innerHTML='<h2>Camadas<button class="x" data-act="close" aria-label="Fechar">x</button></h2>'
+ +'<p class="small">Marque o que deve aparecer na teia.</p><div class="legend">'
+ +Object.entries(TYPES).map(([k,t])=>'<label><input type="checkbox" data-layer="'+k+'"'+(hidden.has(k)?'':' checked')+'><span class="chip" style="background:'+t.f+';border-color:'+t.c+'"></span>'+t.n+' ('+count(k)+')</label>').join('')
+ +'</div><div class="row"><button data-act="openall">Abrir todas as variáveis</button><button data-act="closeall">Fechar todas</button></div>'
+ +'<p class="small" style="margin-top:16px">As variáveis ficam guardadas dentro de cada compartimento, forçante ou processo. Toque duas vezes no elemento para abrir ou fechar.</p>'
+ +'<p class="small">Borda tracejada: item acrescentado como proposta, fora do quadro.</p>'
+ +'<p class="small">Ponto colorido: '+Object.values(STATUS).slice(1).map(s=>'<span class="badge" style="background:'+s[1]+'">'+s[0]+'</span>').join(' ')+'</p>'
+ +'<p class="small">'+data.nodes.length+' elementos, '+data.edges.length+' ligações, '+withKids.length+' grupos com variáveis.</p>';
+ p.querySelectorAll('[data-layer]').forEach(c=>c.onchange=()=>{c.checked?hidden.delete(c.dataset.layer):hidden.add(c.dataset.layer);saveUi();render()});
+}
+function slot(par){
+ const up=par.y<0,i=(kids[par.id]||[]).length,col=i%3,row=Math.floor(i/3);
+ return[par.x+(col-1)*165,up?par.y-85-row*40:par.y+85+row*40];
+}
+function newNode(type,name,x,y,extra){
+ const r=$('svg').getBoundingClientRect();
+ const n=normNode(Object.assign({id:uid('n'),name:name??(type==='pergunta'||type==='central'?'Nova pergunta':type==='variavel'?'Nova variável':'Novo elemento'),type,x:x??(r.width/2-view.x)/view.k,y:y??(r.height/2-view.y)/view.k,origin:'grupo'},extra||{}));
+ data.nodes.push(n);return n;
+}
+function toggleOpen(id){open.has(id)?open.delete(id):open.add(id);saveUi();render();panel()}
+function delNode(id){
+ touch();data.nodes=data.nodes.filter(n=>n.id!==id);data.edges=data.edges.filter(e=>e.a!==id&&e.b!==id);
+ for(const n of data.nodes)if(n.group===id)n.group='';
+ if(focus===id)focus=null;sel=null;save();render();panel();
+}
+$('panel').addEventListener('click',ev=>{
+ const act=ev.target.closest('[data-act]')?.dataset.act;if(!act)return;
+ const n=sel&&sel.kind==='node'?node(sel.id):null;
+ if(act==='close'){sel=null;panelOpen=false;render();panel()}
+ else if(act==='delnode'&&n)delNode(n.id);
+ else if(act==='deledge'&&sel){touch();data.edges=data.edges.filter(e=>e.id!==sel.id);sel=null;save();render();panel()}
+ else if(act==='swap'&&sel){touch();const e=edge(sel.id);[e.a,e.b]=[e.b,e.a];if(e.dir==='reverse')e.dir='forward';save();render();panel()}
+ else if(act==='linkfrom'&&n){connect={from:n.id};render();if(matchMedia('(max-width:760px)').matches)$('panel').hidden=true}
+ else if(act==='linkmany'&&n)openLinks(n.id);
+ else if(act==='chain'&&n){focus=focus===n.id?null:n.id;render();panel();if(focus){fit();if(matchMedia('(max-width:760px)').matches)$('panel').hidden=true}}
+ else if(act==='toggle'&&n)toggleOpen(n.id);
+ else if(act==='addvar'&&n){touch();const[x,y]=slot(n),v=newNode('variavel',null,x,y,{group:n.id});open.add(n.id);hidden.delete('variavel');saveUi();sel={kind:'node',id:v.id};save();render();panel();const f=$('fName');if(f){f.focus();f.select()}}
+ else if(act==='dup'&&n){touch();const c=normNode(Object.assign({},n,{id:uid('n'),x:n.x+30,y:n.y+30,origin:'grupo'}));data.nodes.push(c);sel={kind:'node',id:c.id};save();render();panel()}
+ else if(act==='openall'){for(const id in kids)open.add(id);hidden.delete('variavel');saveUi();render();panel();fit()}
+ else if(act==='closeall'){open.clear();saveUi();render();panel();fit()}
+});
+
+/* ---------- ações da barra ---------- */
+function linkPair(a,b){
+ let e=data.edges.find(x=>(x.a===a&&x.b===b)||(x.a===b&&x.b===a));
+ if(!e){e=normEdge({id:uid('e'),a,b,origin:'grupo'});data.edges.push(e)}
+ return e;
+}
+function clickNode(id){
+ if(connect){
+  if(!connect.from){connect.from=id;render();return}
+  if(connect.from===id){connect.from=null;render();return}
+  touch();const e=linkPair(connect.from,id);save();connect=null;sel={kind:'edge',id:e.id};render();panel();return;
+ }
+ sel={kind:'node',id};render();panel();
+}
+$('add').onclick=()=>{
+ touch();const type=$('newType').value,par=sel&&sel.kind==='node'?node(sel.id):null;let n;
+ if(type==='variavel'&&par&&PARENT_TYPES.includes(par.type)){const[x,y]=slot(par);n=newNode(type,null,x,y,{group:par.id});open.add(par.id)}
+ else n=newNode(type);
+ hidden.delete(n.type);saveUi();sel={kind:'node',id:n.id};connect=null;save();render();panel();const f=$('fName');if(f){f.focus();f.select()}
+};
+$('connect').onclick=()=>{connect=connect?null:{from:null};if(connect){sel=null;panel()}render()};
+$('undo').onclick=doUndo;$('redo').onclick=doRedo;
+$('layers').onclick=()=>{const showing=!$('panel').hidden&&!sel;sel=null;panelOpen=!showing;render();panel()};
+$('zin').onclick=()=>{const r=$('svg').getBoundingClientRect();zoomAt(1.25,r.width/2,r.height/2)};
+$('zout').onclick=()=>{const r=$('svg').getBoundingClientRect();zoomAt(1/1.25,r.width/2,r.height/2)};
+$('fit').onclick=fit;
+document.addEventListener('keydown',ev=>{
+ const typing=/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName||'');
+ if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==='z'&&!typing){ev.preventDefault();ev.shiftKey?doRedo():doUndo()}
+ else if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==='y'&&!typing){ev.preventDefault();doRedo()}
+ else if(ev.key==='Escape'){if(!$('modal').hidden)closeModal();else{connect=null;sel=null;focus=null;render();panel()}}
+ else if((ev.key==='Delete'||ev.key==='Backspace')&&!typing&&sel&&$('modal').hidden){$('panel').querySelector('[data-act="delnode"],[data-act="deledge"]')?.click()}
+});
+
+/* ---------- ponteiro ---------- */
+const svg=$('svg'),ptrs=new Map();let g=null,pinch=null,lastTap={id:null,t:0};
+const local=ev=>{const r=svg.getBoundingClientRect();return[ev.clientX-r.left,ev.clientY-r.top]};
+svg.addEventListener('pointerdown',ev=>{
+ if(ev.button>0)return;
+ svg.setPointerCapture(ev.pointerId);const[x,y]=local(ev);ptrs.set(ev.pointerId,[x,y]);
+ if(ptrs.size===2){const[p,q]=[...ptrs.values()];pinch={d:Math.hypot(p[0]-q[0],p[1]-q[1])||1};g=null;return}
+ const nEl=ev.target.closest('[data-node]'),eEl=ev.target.closest('[data-edge]');
+ g={x,y,moved:false,node:nEl?.dataset.node||null,edge:eEl?.dataset.edge||null,vx:view.x,vy:view.y,start:null};
+});
+svg.addEventListener('pointermove',ev=>{
+ if(!ptrs.has(ev.pointerId))return;const[x,y]=local(ev);ptrs.set(ev.pointerId,[x,y]);
+ if(pinch&&ptrs.size===2){const[p,q]=[...ptrs.values()],d=Math.hypot(p[0]-q[0],p[1]-q[1])||1;zoomAt(d/pinch.d,(p[0]+q[0])/2,(p[1]+q[1])/2);pinch.d=d;return}
+ if(!g)return;const dx=x-g.x,dy=y-g.y;
+ if(!g.moved&&Math.hypot(dx,dy)<5)return;
+ if(!g.moved){g.moved=true;
+  if(g.node&&!connect&&node(g.node)){touch();const n=node(g.node);g.start=[n].concat(kids[n.id]||[]).map(o=>[o,o.x,o.y])}
+  else svg.classList.add('panning')}
+ if(g.start){for(const[o,ox,oy]of g.start){o.x=Math.round(ox+dx/view.k);o.y=Math.round(oy+dy/view.k)}render()}
+ else{view.x=g.vx+dx;view.y=g.vy+dy;setView()}
+});
+function up(ev){
+ if(!ptrs.has(ev.pointerId))return;ptrs.delete(ev.pointerId);if(ptrs.size<2)pinch=null;
+ svg.classList.remove('panning');const h=g;g=null;if(!h)return;
+ if(h.moved){if(h.start)save();return}
+ if(h.node){
+  const t=Date.now();
+  if(!connect&&lastTap.id===h.node&&t-lastTap.t<420&&(kids[h.node]||[]).length){lastTap={id:null,t:0};sel={kind:'node',id:h.node};toggleOpen(h.node);return}
+  lastTap={id:h.node,t};clickNode(h.node);
+ }
+ else if(h.edge&&!connect){sel={kind:'edge',id:h.edge};render();panel()}
+ else if(!connect&&sel){sel=null;render();panel()}
+}
+svg.addEventListener('pointerup',up);svg.addEventListener('pointercancel',up);
+svg.addEventListener('wheel',ev=>{ev.preventDefault();const[x,y]=local(ev);zoomAt(ev.deltaY<0?1.1:1/1.1,x,y)},{passive:false});
+
+/* ---------- janelas ---------- */
+function openModal(html){$('modalBox').innerHTML=html;$('modal').hidden=false;$('modalBox').scrollTop=0}
+function closeModal(){$('modal').hidden=true;$('modalBox').innerHTML=''}
+$('modal').addEventListener('click',ev=>{if(ev.target===$('modal')||ev.target.closest('[data-close]'))closeModal()});
+let toastT=null;
+function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true},3000)}
+function copy(text,ok){
+ const done=()=>toast(ok||'Copiado.');
+ const fallback=()=>{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();let good=false;try{good=document.execCommand('copy')}catch(_){}ta.remove();good?done():toast('Não foi possível copiar.')};
+ try{navigator.clipboard.writeText(text).then(done,fallback)}catch(_){fallback()}
+}
+function download(name,blob){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000)}
+const head=t=>'<h2>'+t+'<button class="x" data-close aria-label="Fechar">x</button></h2>';
+const pname=n=>{const p=n.group&&node(n.group);return p?p.name:''};
+const tagNovo=n=>n.origin==='novo'?'<span class="novo">proposta</span>':'';
+
+/* perguntas */
+function qNodes(){return data.nodes.filter(n=>n.type==='central').concat(data.nodes.filter(n=>n.type==='pergunta'))}
+function questionText(){
+ return qNodes().map(n=>{const nb=neighbors(n.id),by=(...t)=>nb.filter(x=>t.includes(x.type)).map(x=>x.name+(x.type==='variavel'&&pname(x)?' ('+pname(x)+')':'')).join(', ')||'sem ligação';
+  return(n.type==='central'?'PERGUNTA CENTRAL: ':'Pergunta acessória: ')+n.name+'\n  Situação: '+STATUS[n.status][0]+'\n  Pessoas: '+by('pessoa')+'\n  Eixos: '+by('area','forcante','processo','tema')+'\n  Variáveis: '+by('variavel')+(n.note?'\n  Observação: '+n.note:'')}).join('\n\n');
+}
+function openQuestions(){
+ let h=head('Perguntas científicas')+'<div class="row" style="margin:0 0 14px"><button class="primary" data-q="new">+ Nova pergunta acessória</button><button data-q="copy">Copiar lista</button></div>';
+ const qs=qNodes();if(!qs.length)h+='<p class="small">Nenhuma pergunta cadastrada.</p>';
+ for(const n of qs){
+  const nb=neighbors(n.id),names=(...t)=>nb.filter(x=>t.includes(x.type)).map(x=>esc(short(x.name))).join(', ');
+  h+='<div class="q'+(n.type==='central'?' central':'')+'"><b>'+esc(n.name||'(sem texto)')+'</b><div class="meta"><span class="badge" style="background:'+STATUS[n.status][1]+'">'+STATUS[n.status][0]+'</span>'+(n.type==='central'?'Pergunta central':'Pergunta acessória')+' '+tagNovo(n)+'</div>'
+  +'<div class="meta">Pessoas: '+(names('pessoa')||'ninguém ainda')+'</div><div class="meta">Eixos: '+(names('area','forcante','processo','tema')||'nenhum')+'</div><div class="meta">Variáveis: '+(names('variavel')||'nenhuma ligada')+'</div>'
+  +'<div class="row" style="margin-top:8px"><button data-go="'+esc(n.id)+'">Ver na teia</button><button data-chain="'+esc(n.id)+'">Ver cadeia</button><button data-links="'+esc(n.id)+'">Ligar variáveis e pessoas</button></div></div>';
+ }
+ openModal(h);
+}
+/* ligações em lista */
+function openLinks(id,filter){
+ const n=node(id);if(!n)return;
+ const linked=new Set(neighbors(id).map(x=>x.id));
+ const groups=[['Pessoas',x=>x.type==='pessoa'],['Perguntas',x=>x.type==='pergunta'||x.type==='central'],['Eixos, processos e temas',x=>['area','forcante','processo','tema','produto','projeto'].includes(x.type)]];
+ const pars=data.nodes.filter(x=>(kids[x.id]||[]).length);
+ for(const p of pars)groups.push(['Variáveis de '+p.name,x=>x.type==='variavel'&&x.group===p.id]);
+ groups.push(['Variáveis sem grupo',x=>x.type==='variavel'&&!node(x.group)]);
+ let h=head('Ligações de: '+esc(short(n.name)))+'<input type="search" id="lkSearch" placeholder="Buscar por nome" value="'+esc(filter||'')+'"><p class="small">Marque para ligar, desmarque para desligar. Depois ajuste sentido, cor e força tocando na seta.</p><div id="lkList">';
+ for(const[title,fn]of groups){
+  const items=data.nodes.filter(x=>x.id!==id&&fn(x)).sort((a,b)=>(a.sub||'').localeCompare(b.sub||'')||a.name.localeCompare(b.name));if(!items.length)continue;
+  h+='<h3>'+esc(title)+'</h3>';
+  for(const x of items)h+='<div class="li" data-name="'+esc(x.name.toLowerCase())+'"><label><input type="checkbox" data-link="'+esc(x.id)+'"'+(linked.has(x.id)?' checked':'')+'>'+esc(short(x.name))+(x.sub?' <span class="small">'+esc(x.sub)+'</span>':'')+'</label>'+tagNovo(x)+'</div>';
+ }
+ openModal(h+'</div>');
+ const apply=()=>{const q=$('lkSearch').value.trim().toLowerCase();$('lkList').querySelectorAll('.li').forEach(li=>{li.hidden=!!q&&!li.dataset.name.includes(q)})};
+ $('lkSearch').oninput=apply;apply();
+ $('lkList').onchange=ev=>{const c=ev.target.closest('[data-link]');if(!c)return;const o=c.dataset.link;touch();
+  if(c.checked){const e=linkPair(id,o),on=node(o),qp=[n.type,on.type];if(qp.includes('pessoa')||qp.includes('pergunta')){e.dir='none';e.weight=1;e.color=qp.includes('pessoa')?'#7e22ce':'#c2410c';if(!qp.includes('pessoa'))e.kind='indireta'}}
+  else data.edges=data.edges.filter(e=>!((e.a===id&&e.b===o)||(e.a===o&&e.b===id)));
+  save();render()};
+}
+/* catálogo de variáveis */
+function openCatalog(){
+ const vars=data.nodes.filter(n=>n.type==='variavel');
+ const pars=data.nodes.filter(x=>(kids[x.id]||[]).length);
+ let h=head('Variáveis ('+vars.length+')')+'<input type="search" id="ctSearch" placeholder="Buscar variável"><div class="row" style="margin:0 0 6px"><button data-ct="csv">Copiar tabela (CSV)</button></div><div id="ctList">';
+ const line=x=>{const ppl=neighbors(x.id).filter(o=>o.type==='pessoa').map(o=>o.name).join(', ');
+  return'<div class="li" data-name="'+esc(x.name.toLowerCase())+'"><span><b>'+esc(x.name)+'</b> '+tagNovo(x)+'<br><span class="small">'+esc(x.sub||'sem subgrupo')+' | '+(ppl?esc(ppl):'sem responsável')+' | '+STATUS[x.status][0]+(x.unit?' | '+esc(x.unit):'')+'</span></span><button data-go="'+esc(x.id)+'">Abrir</button></div>'};
+ for(const p of pars){const items=vars.filter(x=>x.group===p.id).sort((a,b)=>(a.sub||'').localeCompare(b.sub||'')||a.name.localeCompare(b.name));h+='<h3>'+esc(p.name)+' ('+items.length+')</h3>'+items.map(line).join('')}
+ const loose=vars.filter(x=>!node(x.group));if(loose.length)h+='<h3>Sem grupo ('+loose.length+')</h3>'+loose.map(line).join('');
+ openModal(h+'</div>');
+ $('ctSearch').oninput=()=>{const q=$('ctSearch').value.trim().toLowerCase();$('ctList').querySelectorAll('.li').forEach(li=>{li.hidden=!!q&&!li.dataset.name.includes(q)})};
+}
+function csv(){
+ const c=v=>'"'+String(v??'').replace(/"/g,'""')+'"',rows=[['grupo','subgrupo','variavel','unidade','metodo','equipamento','frequencia','responsaveis','perguntas','situacao','origem','observacao']];
+ for(const x of data.nodes.filter(n=>n.type==='variavel')){const nb=neighbors(x.id);rows.push([pname(x),x.sub,x.name,x.unit,x.method,x.equip,x.freq,nb.filter(o=>o.type==='pessoa').map(o=>o.name).join('; '),nb.filter(o=>o.type==='pergunta').map(o=>o.name).join('; '),STATUS[x.status][0],ORIGIN[x.origin],x.note])}
+ return rows.map(r=>r.map(c).join(',')).join('\n');
+}
+/* lacunas */
+function openGaps(){
+ const nb={};for(const n of data.nodes)nb[n.id]=neighbors(n.id);
+ const has=(n,...t)=>nb[n.id].some(x=>t.includes(x.type));
+ const vars=data.nodes.filter(n=>n.type==='variavel'),qs=data.nodes.filter(n=>n.type==='pergunta'),ppl=data.nodes.filter(n=>n.type==='pessoa'),axes=data.nodes.filter(n=>['area','forcante','processo'].includes(n.type));
+ const sec=(title,items,explain)=>{
+  let s='<div class="gap'+(items.length?'':' ok')+'"><b>'+esc(title)+': '+items.length+'</b><div class="small">'+esc(explain)+'</div></div>';
+  if(items.length)s+='<details><summary class="small" style="cursor:pointer">Mostrar</summary>'+items.map(x=>'<div class="li"><span>'+esc(short(x.name))+(pname(x)?' <span class="small">'+esc(short(pname(x)))+'</span>':'')+'</span>'+tagNovo(x)+'<button data-go="'+esc(x.id)+'">Abrir</button></div>').join('')+'</details>';
+  return s};
+ const qVarless=qs.filter(q=>!has(q,'variavel')),qNoPerson=qs.filter(q=>!has(q,'pessoa'));
+ const axNoQ=axes.filter(a=>!has(a,'pergunta')&&!(kids[a.id]||[]).some(v=>has(v,'pergunta')));
+ const viaQ=n=>nb[n.id].some(x=>x.type==='pergunta'&&has(x,'pessoa'));
+ const axNoP=axes.filter(a=>!has(a,'pessoa')&&!viaQ(a)&&!(kids[a.id]||[]).some(v=>has(v,'pessoa')||viaQ(v)));
+ let h=head('Lacunas da teia')+'<p class="small">Calculado a partir das ligações atuais. Cada item some daqui quando a ligação for feita.</p>'
+ +sec('Perguntas sem variável ligada',qVarless,'A pergunta ainda não diz o que precisa ser medido.')
+ +sec('Perguntas sem pessoa',qNoPerson,'Ninguém responde por essa pergunta.')
+ +sec('Eixos sem nenhuma pergunta',axNoQ,'Compartimento, forçante ou processo que nenhuma pergunta acessória alcança.')
+ +sec('Eixos sem nenhuma pessoa',axNoP,'Ninguém trabalha nesse eixo, nem direto, nem por uma pergunta, nem por uma variável.')
+ +sec('Pessoas sem pergunta',ppl.filter(p=>!has(p,'pergunta','central')),'Integrante cujo trabalho ainda não responde a uma pergunta da teia.')
+ +sec('Pessoas sem variável',ppl.filter(p=>!has(p,'variavel')),'Integrante sem variável sob sua responsabilidade.')
+ +sec('Variáveis sem responsável',vars.filter(v=>!has(v,'pessoa')),'Ninguém mede ou analisa essa variável.')
+ +sec('Variáveis sem pergunta',vars.filter(v=>!has(v,'pergunta','central')),'Variável medida que não alimenta nenhuma pergunta, ou pergunta ainda não ligada.')
+ +sec('Variáveis sem situação definida',vars.filter(v=>v.status==='indef'),'Falta dizer se o laboratório mede, mede em parte ou depende de parceiro.')
+ +sec('Variáveis que o laboratório não faz ou depende de parceiro',vars.filter(v=>v.status==='nao'||v.status==='parceiro'),'Pontos em que a resposta depende de fora.')
+ +sec('Variáveis sem método',vars.filter(v=>!v.method.trim()),'Ficha sem método descrito.');
+ openModal(h);
+}
+$('questions').onclick=openQuestions;$('catalog').onclick=openCatalog;$('gaps').onclick=openGaps;
+$('modalBox').addEventListener('click',ev=>{
+ const b=ev.target.closest('button');if(!b)return;const d=b.dataset;
+ if(d.go)go(d.go);
+ else if(d.chain){const id=d.chain;focus=id;sel={kind:'node',id};closeModal();render();fit();panel();if(matchMedia('(max-width:760px)').matches)$('panel').hidden=true}
+ else if(d.links)openLinks(d.links);
+ else if(d.q==='new'){touch();const n=newNode('pergunta');hidden.delete('pergunta');sel={kind:'node',id:n.id};save();closeModal();render();panel();const t=$('fName');if(t){t.focus();t.select()}}
+ else if(d.q==='copy')copy(questionText()||'Nenhuma pergunta cadastrada.','Lista de perguntas copiada.');
+ else if(d.ct==='csv')copy(csv(),'Tabela de variáveis copiada.');
+ else if(d.f==='json')download('teia-carbonautas.json',new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+ else if(d.f==='copyjson')copy(JSON.stringify(data),'Teia copiada como texto.');
+ else if(d.f==='csv')download('variaveis-carbonautas.csv',new Blob(['﻿'+csv()],{type:'text/csv'}));
+ else if(d.f==='png')exportPng();
+ else if(d.f==='members')importMembers();
+ else if(d.f==='paste')importText($('importText').value);
+ else if(d.f==='board'||d.f==='clear'){
+  if(d.armed!=='1'){b.dataset.armed='1';b.textContent='Confirmar: '+(d.f==='board'?'recarregar o catálogo inicial':'apagar tudo')+(mode==='online'?' para todo o grupo':'');return}
+  touch();data=d.f==='board'?normalize(catalogo()):{nodes:[],edges:[]};sel=null;focus=null;save();closeModal();render();panel();fit();toast('Feito. Use Desfazer se precisar voltar.');
+ }
+});
+function importText(txt){
+ try{const d=JSON.parse(txt);if(!valid(d))throw 0;touch();data=normalize(d);sel=null;focus=null;save();closeModal();render();panel();fit();toast('Teia carregada.')}
+ catch(_){toast('Arquivo inválido. Use um JSON exportado por esta teia.')}
+}
+$('file').onclick=()=>{
+ openModal(head('Arquivo')
+ +'<p class="small">'+(mode==='online'?'A teia está salva no Carbonautas e é a mesma para todo o grupo.':'A teia está salva só neste navegador.')+' Exporte para guardar uma cópia.</p>'
+ +'<div class="row" style="margin-top:0"><button class="primary" data-f="json">Baixar JSON</button><button data-f="copyjson">Copiar como texto</button><button data-f="csv">Baixar variáveis (CSV)</button><button data-f="png">Baixar imagem PNG</button></div>'
+ +'<h3>Pessoas</h3><div class="row" style="margin-top:0"><button data-f="members">Atualizar pessoas pelo cadastro do Carbonautas</button></div><p class="small">Acrescenta quem está no cadastro e ainda não está na teia. Não apaga ninguém.</p>'
+ +'<h3>Importar</h3><input type="file" id="importFile" accept=".json,application/json"><p class="small">Ou cole abaixo o texto copiado de outra teia. A importação substitui a teia atual.</p><textarea id="importText"></textarea><div class="row"><button data-f="paste">Carregar texto colado</button></div>'
+ +'<h3>Recomeçar</h3><div class="row" style="margin-top:0"><button data-f="board">Recarregar o catálogo inicial</button><button class="danger" data-f="clear">Apagar tudo</button></div>');
+ $('importFile').onchange=ev=>{const fl=ev.target.files[0];if(!fl)return;const rd=new FileReader();rd.onload=()=>importText(String(rd.result));rd.onerror=()=>toast('Não foi possível ler o arquivo.');rd.readAsText(fl)};
+};
+function exportPng(){
+ if(!data.nodes.length){toast('Teia vazia.');return}
+ const b=bounds(false),pad=40,w=b.x1-b.x0+pad*2,h=b.y1-b.y0+pad*2,inner=$('world').innerHTML;
+ const s='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'" viewBox="'+(b.x0-pad)+' '+(b.y0-pad)+' '+w+' '+h+'" font-family="Arial,Helvetica,sans-serif"><rect x="'+(b.x0-pad)+'" y="'+(b.y0-pad)+'" width="'+w+'" height="'+h+'" fill="#ffffff"/>'+inner+'</svg>';
+ const img=new Image(),url=URL.createObjectURL(new Blob([s],{type:'image/svg+xml'}));
+ img.onload=()=>{const c=document.createElement('canvas'),k=Math.min(2,6000/Math.max(w,h));c.width=w*k;c.height=h*k;const x=c.getContext('2d');x.scale(k,k);x.drawImage(img,0,0);URL.revokeObjectURL(url);c.toBlob(bl=>{bl?download('teia-carbonautas.png',bl):toast('Não foi possível gerar a imagem.')},'image/png')};
+ img.onerror=()=>{URL.revokeObjectURL(url);toast('Não foi possível gerar a imagem.')};img.src=url;
+}
+async function importMembers(){
+ if(!backend||!backend.members){toast('Disponível só com a teia conectada ao Carbonautas.');return}
+ let list;try{list=await backend.members()}catch(err){console.error(err);toast('Não foi possível ler o cadastro.');return}
+ const norm=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+ const have=data.nodes.filter(n=>n.type==='pessoa');let added=0,linked=0;const b=bounds(true);
+ touch();
+ for(const m of list){
+  if(!m.nome||m.status==='egresso'||m.nivel==='coord')continue;
+  const ex=have.find(n=>n.memberId===m.id)||have.find(n=>!n.memberId&&(norm(n.name)===norm(m.nome)||norm(m.nome).startsWith(norm(n.name)+' ')));
+  if(ex){if(!ex.memberId){ex.memberId=m.id;linked++}continue}
+  const titles=(Array.isArray(m.projetosAluno)?m.projetosAluno:[]).map(p=>p&&p.titulo).filter(Boolean),tema=m.tema||m.perguntaCientifica||'';
+  const n=newNode('pessoa',m.nome,b.x1+160,b.y0+40+added*56,{memberId:m.id,origin:'cadastro',note:[titles.length?'Projetos: '+titles.join('; '):'',tema?'Tema cadastrado: '+tema:''].filter(Boolean).join(' ')});
+  have.push(n);added++;
+ }
+ save();closeModal();render();panel();toast(added+' pessoas acrescentadas, '+linked+' vinculadas ao cadastro.');
+}
+
+/* ---------- conexão com o Firebase do Carbonautas ---------- */
+const FB_CONFIG={apiKey:'AIzaSyBWcGAa3CWurSiDs5udEtESGwCGGnYTX5Y',authDomain:'brasa-pantanal.firebaseapp.com',projectId:'brasa-pantanal',storageBucket:'brasa-pantanal.firebasestorage.app',messagingSenderId:'876718329822',appId:'1:876718329822:web:e0e0254ee909a933dad74f'};
+const V='https://www.gstatic.com/firebasejs/10.12.0/';
+function goOnline(b,empty){
+ backend=b;me=b.user;
+ if(empty){setSync('warn','Conectado como '+me.name+'. O grupo ainda não tem uma teia compartilhada. Você está vendo a versão deste aparelho.','<button id="publish" class="primary">Publicar esta teia para o grupo</button>');
+  $('publish').onclick=()=>{mode='online';synced=new Map();undo=[];redo=[];cur=null;flush();setSync('ok','Conectado como '+me.name+'. Edição compartilhada: o que você muda aparece para todos.');toast('Teia publicada para o grupo.')};return}
+ mode='online';undo=[];redo=[];cur=null;
+ setSync('ok','Conectado como '+me.name+'. Edição compartilhada: o que você muda aparece para todos.');
+}
+async function connectFirebase(){
+ if(location.protocol==='file:'||window.__TEIA_NO_FB){setSync('warn','Modo local: as edições ficam só neste navegador.');return}
+ setSync('','Conectando ao Carbonautas.');
+ let app,au,fs;
+ try{[app,au,fs]=await Promise.all([import(V+'firebase-app.js'),import(V+'firebase-auth.js'),import(V+'firebase-firestore.js')])}
+ catch(err){console.error(err);setSync('warn','Sem conexão com o servidor. Modo local: as edições ficam só neste navegador.');return}
+ const fapp=app.initializeApp(FB_CONFIG),auth=au.getAuth(fapp),db=fs.getFirestore(fapp);
+ au.onAuthStateChanged(auth,async user=>{
+  if(!user){setSync('warn','Você não está conectado. Entre no Carbonautas e volte para editar com o grupo. Por enquanto, modo local.','<a class="back" href="../">Entrar no Carbonautas</a>');return}
+  let name=user.email||'integrante';
+  try{const s=await fs.getDoc(fs.doc(db,'rede_users',user.uid));if(s.exists()&&s.data().nome)name=s.data().nome}catch(_){}
+  const col=c=>fs.collection(db,'rede_teia','principal',c);
+  const b={user:{uid:user.uid,name},
+   commit:async ops=>{for(let i=0;i<ops.length;i+=400){const w=fs.writeBatch(db);for(const o of ops.slice(i,i+400)){const ref=fs.doc(col(o.k[0]==='n'?'nodes':'edges'),o.k.slice(2));if(o.data)w.set(ref,Object.assign({},o.data,{_by:user.uid,_byName:name,_at:fs.serverTimestamp()}));else w.delete(ref)}await w.commit()}},
+   members:async()=>{const s=await fs.getDocs(fs.collection(db,'rede_members'));return s.docs.map(d=>Object.assign({id:d.id},d.data()))}};
+  let first={n:false,e:false},started=false,total=0;
+  const boot=()=>{if(started||!first.n||!first.e)return;started=true;
+   if(total===0)goOnline(b,true);
+   else{data={nodes:[],edges:[]};for(const[k,j]of synced)setLocal(k,JSON.parse(j));data=normalize(data);goOnline(b,false);sel=null;render();panel();fit()}};
+  const fail=err=>{console.error(err);if(mode==='online')setSync('err','A conexão com o servidor falhou. Recarregue a página para voltar a editar com o grupo.');
+   else setSync('warn',err&&err.code==='permission-denied'?'Conectado como '+name+', mas a edição compartilhada ainda não foi liberada no Firebase. Modo local: as edições ficam só neste navegador.':'Não foi possível abrir a teia compartilhada. Modo local.')};
+  const listen=(c,p)=>fs.onSnapshot(col(c),snap=>{
+   total+=snap.size;
+   for(const ch of snap.docChanges()){const k=p+':'+ch.doc.id;
+    if(ch.type==='removed'){if(started)remote(k,null);else synced.delete(k)}
+    else{const d=ch.doc.data(),m={name:d._byName||''},o=Object.assign({},d,{id:ch.doc.id});
+     if(started)remote(k,o,m);else{synced.set(k,JSON.stringify(p==='n'?normNode(o):normEdge(o)));meta.set(k,m)}}}
+   first[p]=true;boot();
+  },fail);
+  listen('nodes','n');listen('edges','e');
+ });
+}
+
+/* ---------- início ---------- */
+$('newType').innerHTML=typeOptions('variavel');
+loadLocal();panelOpen=!matchMedia('(max-width:760px)').matches;
+render();panel();fit();
+window.addEventListener('resize',setView);
+window.__teia={get data(){return data},get mode(){return mode},fit,goOnline,remote,flush,get synced(){return synced}};
+connectFirebase();
+})();
+</script>
+</body>
+</html>

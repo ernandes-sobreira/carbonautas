@@ -10,6 +10,14 @@ Leia [auditoria e limites da validação](docs/repository-audit.md) antes do mer
 
 Testes: `npm ci`, `npm test`, `npm run test:rules` (Java 21 recomendado), `npx playwright install chromium`, `npm run test:browser` e `npm run test:home` (estabilidade da Home; ver [docs/home-cadeia-real.md](docs/home-cadeia-real.md)).
 
+## Teia de pesquisa (`teia/index.html`)
+
+Pagina propria, aberta pelo menu do app e pelo cabecalho do Repositorio. Mostra a pergunta central, forcantes, compartimentos, processos, variaveis (com ficha de unidade, metodo, equipamento e frequencia), pessoas e perguntas acessorias. O catalogo inicial vem do quadro do laboratorio e da lista `SEED`; itens acrescentados como proposta aparecem com borda tracejada.
+
+- Edicao compartilhada: um documento por elemento em `rede_teia/principal/nodes` e por ligacao em `rede_teia/principal/edges`. So funciona depois de publicar o `firestore.rules` deste repositorio no Console do Firebase. Antes disso a pagina avisa e trabalha em modo local (navegador).
+- A primeira pessoa conectada ve o botao "Publicar esta teia para o grupo", que grava o catalogo inicial no Firestore.
+- A pagina usa a mesma sessao de login do app (mesma origem). Nao altera nenhuma colecao existente; so le `rede_users` (o proprio perfil) e `rede_members`.
+
 ## Estrutura do repositorio
 
 | Caminho | Uso |
