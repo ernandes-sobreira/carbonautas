@@ -840,6 +840,7 @@ async function connectFirebase(){
 }
 
 /* ---------- início ---------- */
+if(window.self!==window.top){const bk=document.querySelector('header a.back');if(bk){bk.textContent='Tela cheia';bk.href='./';bk.target='_blank';bk.rel='noopener';bk.title='Abrir a teia em uma aba só dela'}}
 $('newType').innerHTML=typeOptions('variavel');
 loadLocal();panelOpen=!matchMedia('(max-width:760px)').matches;
 render();panel();fit();

@@ -1778,6 +1778,10 @@ body:not(.carbonautas-session-ready) .app{visibility:hidden!important}body.carbo
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
         <span class="tl">Repositório</span>
       </button>
+      <button class="tab" data-view="teia" data-group="teia" title="Teia de pesquisa: pergunta central, variáveis e quem faz o quê">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="5" cy="5" r="2"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3"/></svg>
+        <span class="tl">Teia</span>
+      </button>
       <button class="tab" data-view="rede" data-group="pessoas" title="Pessoas e acompanhamento">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17.5" cy="9.5" r="2.4"/><path d="M15.5 20a5 5 0 0 1 5.5-5"/></svg>
         <span class="tl">Pessoas</span>
@@ -1841,7 +1845,7 @@ body:not(.carbonautas-session-ready) .app{visibility:hidden!important}body.carbo
         <button type="button" class="app-nav-card c-yellow" data-app-view="crono"><span class="app-nav-icon">📅</span><b>Agenda</b><small>Prazos e eventos</small></button>
         <button type="button" class="app-nav-card c-cyan" data-app-view="medalhas"><span class="app-nav-icon">🏅</span><b>Medalhas</b><small>Ranking mensal dos Carbonautas</small></button>
         <button type="button" class="app-nav-card c-pink" data-app-view="jogo"><span class="app-nav-icon">🎮</span><b>Jogo</b><small>Uma pausa no ciclo do carbono</small></button>
-        <a class="app-nav-card c-cyan" href="./teia/" style="text-decoration:none;display:block" id="teiaNavLink"><span class="app-nav-icon">🧭</span><b>Teia de pesquisa</b><small>Pergunta central, variáveis e quem faz o quê</small></a>
+        <button type="button" class="app-nav-card c-cyan" data-app-view="teia" id="teiaNavLink"><span class="app-nav-icon">🧭</span><b>Teia de pesquisa</b><small>Pergunta central, variáveis e quem faz o quê</small></button>
         <button type="button" class="app-nav-card c-violet" data-app-view="mensagens"><span class="app-nav-icon">💬</span><b>Conversas</b><small>Equipe e privadas</small></button>
         <button type="button" class="app-nav-card c-pink" data-app-view="mural"><span class="app-nav-icon">📸</span><b>Mural</b><small>Avisos e fotos</small></button>
         <button type="button" class="app-nav-card c-cyan" data-app-view="lab"><span class="app-nav-icon">🧪</span><b>Lab</b><small>Análises e figuras</small></button>
@@ -2008,6 +2012,11 @@ body:not(.carbonautas-session-ready) .app{visibility:hidden!important}body.carbo
       <div class="game-head"><div><h2>🎮 Carbonauta</h2><p>Sete mundos do ciclo do carbono. Completar o ciclo vale pontos no ranking, no máximo uma vez por dia.</p></div><div class="spacer"></div><button class="btn" type="button" id="reloadGameBtn">↻ Reiniciar jogo</button></div>
       <div class="game-frame-shell"><iframe id="carbonautaGameFrame" data-src="./game.html?v=P128" title="Jogo Carbonauta" allow="autoplay; fullscreen"></iframe></div>
     </div></div>
+  </div>
+
+  <!-- ============ VIEW: TEIA DE PESQUISA ============ -->
+  <div class="view" id="viewTeia">
+    <iframe id="teiaFrame" data-src="./teia/" title="Teia de pesquisa" style="flex:1;min-height:0;width:100%;border:0;display:block;background:#fff"></iframe>
   </div>
 
   <!-- ============ VIEW: ACOMPANHAMENTO ============ -->
@@ -2263,7 +2272,7 @@ body:not(.carbonautas-session-ready) .app{visibility:hidden!important}body.carbo
           </div>
           <div class="spacer"></div>
 
-          <a class="btn" href="./teia/" id="teiaRepoLink" style="text-decoration:none">🧭 Teia de pesquisa</a>
+          <button class="btn" type="button" id="teiaRepoLink" onclick="switchView('teia')">🧭 Teia de pesquisa</button>
           <button class="btn" type="button" id="addRepoPackageBtn">📦 Nova pasta</button>
           <button class="btn repo-dedupe-btn clean" type="button" id="repoDedupeBtn" title="Remove somente duplicações exatas, sem apagar versões diferentes">🧹 Sem duplicados</button>
           <button class="btn primary" type="button" id="addPubBtn">＋ Adicionar publicação</button>
@@ -7207,7 +7216,8 @@ const VIEW_GROUPS={
   mural:{views:['mural','fotos','destaques'],labels:{mural:'Mural',fotos:'Fotos',destaques:'Destaques'},badges:{mural:'muralBadge'}},
   lab:{views:['lab']},
   medalhas:{views:['medalhas']},
-  jogo:{views:['jogo']}
+  jogo:{views:['jogo']},
+  teia:{views:['teia']}
 };
 function groupOfView(v){return Object.keys(VIEW_GROUPS).find(g=>VIEW_GROUPS[g].views.includes(v))||v}
 function renderSubNav(v){
@@ -7240,8 +7250,9 @@ function switchView(v){
   $$('.view').forEach(el=>el.classList.remove('on'));
   $$('.tab').forEach(el=>el.classList.toggle('on',(el.dataset.group||el.dataset.view)===grp));
   renderSubNav(v);
-  const map={painel:'viewPainel',rede:'viewRede',crono:'viewCrono',track:'viewTrack',lab:'viewLab',feed:'viewFeed',mensagens:'viewMensagens',conversas:'viewConversas',mural:'viewMural',fotos:'viewFotos',destaques:'viewDestaques',pubs:'viewPubs',medalhas:'viewMedalhas',jogo:'viewJogo'};
+  const map={painel:'viewPainel',rede:'viewRede',crono:'viewCrono',track:'viewTrack',lab:'viewLab',feed:'viewFeed',mensagens:'viewMensagens',conversas:'viewConversas',mural:'viewMural',fotos:'viewFotos',destaques:'viewDestaques',pubs:'viewPubs',medalhas:'viewMedalhas',jogo:'viewJogo',teia:'viewTeia'};
   map[v] && $('#'+map[v]).classList.add('on');
+  if(v==='teia'){const tf=$('#teiaFrame');if(tf&&!tf.getAttribute('src'))tf.src=tf.dataset.src}
   if(v==='painel') renderPainel();
   if(v==='rede') renderAll();
   if(v==='crono') renderCrono();
