@@ -11,7 +11,7 @@ if(window.__CARBONAUTAS_P135_LOADER)return;
 window.__CARBONAUTAS_P135_LOADER=true;
 
 const $=(s,r=document)=>r.querySelector(s);
-let integrityPromise=null,redePromise=null,peoplePromise=null,dossierPromise=null,projectsPromise=null,agendaPromise=null,agendaFocusPromise=null,agendaDetailPromise=null,homePolishPromise=null,muralVisualPromise=null,muralPolishPromise=null,muralSavePromise=null,muralUnifiedPromise=null,muralCardsPromise=null,muralImagePromise=null,highlightsPromise=null,checkinPromise=null,postAuthStarted=false;
+let integrityPromise=null,redePromise=null,peoplePromise=null,dossierPromise=null,projectsPromise=null,agendaPromise=null,agendaFocusPromise=null,agendaDetailPromise=null,homePolishPromise=null,muralVisualPromise=null,muralPolishPromise=null,muralSavePromise=null,muralUnifiedPromise=null,muralCardsPromise=null,muralImagePromise=null,highlightsPromise=null,checkinPromise=null,assistantPromise=null,postAuthStarted=false;
 
 const scriptLoads=new Map();
 function load(src,id){
@@ -35,6 +35,7 @@ function appReady(){return authUser()||appShellVisible()}
 function currentView(){return document.body?.dataset?.view||''}
 
 function ensureIntegrity(){if(integrityPromise)return integrityPromise;integrityPromise=load('./modules/runtime-integrity.js?v=P221-20260922','carbonautas-runtime-integrity').catch(e=>{integrityPromise=null;console.error('Carbonautas integridade de runtime',e);throw e});return integrityPromise}
+function ensureAssistant(){if(assistantPromise)return assistantPromise;assistantPromise=load('./modules/carbonautas-assistant-p224.js?v=P224-20261115','carbonautas-assistant-p224').catch(e=>{assistantPromise=null;console.error('Carbonautas assistente',e);throw e});return assistantPromise}
 function ensureCheckin(){/* P171 só reposicionava o card diário 'Tcheguei Hodje Xomano!' no celular; o card foi retirado da entrada (presença já é registrada em silêncio pelo P128), então a camada não é mais carregada. */return checkinPromise||(checkinPromise=Promise.resolve())}
 function ensureDossier(){if(dossierPromise)return dossierPromise;dossierPromise=load('./modules/dossier-p133-original.js?v=P133-20260919','carbonautas-dossier-p133-original').catch(e=>{dossierPromise=null;console.error('Carbonautas dossiê',e);throw e});return dossierPromise}
 function ensureAgenda(){if(agendaPromise)return agendaPromise;agendaPromise=load('./modules/agenda-reunioes-p172.js?v=P203-20260921','carbonautas-agenda-reunioes-p172').catch(e=>{agendaPromise=null;console.error('Carbonautas agenda',e)});return agendaPromise}
@@ -75,7 +76,7 @@ function route(){
  if(home){ensureAgendaFocus();ensureHomePolish().then(()=>{window.refreshHomeAgendaMural?.()});ensureHighlights()}
  if(v==='mural'||v==='feed'){ensureHomePolish();ensureMuralVisual();ensureMuralPolish();ensureMuralSave();ensureMuralUnified();ensureMuralCards();ensureMuralImage()}
 }
-function startPostAuth(){if(!appReady())return false;if(!postAuthStarted){postAuthStarted=true;ensureIntegrity();ensureCheckin()}route();return true}
+function startPostAuth(){if(!appReady())return false;if(!postAuthStarted){postAuthStarted=true;ensureIntegrity();ensureCheckin();ensureAssistant()}route();return true}
 function boot(){
  load('./modules/mona-p216.js?v=P216-20260923','carbonautas-mona-p216').catch(e=>console.error('Carbonautas Mona',e));
  const mo=new MutationObserver(ms=>{if(appReady())startPostAuth();if(ms.some(m=>m.attributeName==='data-view')){route();if(currentView()==='track')setTimeout(wireMacroShortcut,900)}});mo.observe(document.body,{attributes:true,attributeFilter:['data-view','class','style']});
